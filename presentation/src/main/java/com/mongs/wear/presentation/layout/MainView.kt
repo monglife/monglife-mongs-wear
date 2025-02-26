@@ -46,9 +46,11 @@ import com.mongs.wear.presentation.pages.inventory.InventoryView
 import com.mongs.wear.presentation.pages.login.LoginView
 import com.mongs.wear.presentation.pages.luckyDraw.LuckyDrawView
 import com.mongs.wear.presentation.pages.main.layout.MainPagerView
+import com.mongs.wear.presentation.pages.notice.NoticeView
 import com.mongs.wear.presentation.pages.searchMap.SearchMapView
 import com.mongs.wear.presentation.pages.setting.SettingView
 import com.mongs.wear.presentation.pages.slotPick.SlotPickView
+import com.mongs.wear.presentation.pages.training.basketball.TrainingBasketballView
 import com.mongs.wear.presentation.pages.training.menu.TrainingMenuView
 import com.mongs.wear.presentation.pages.training.runner.TrainingRunnerView
 
@@ -242,7 +244,7 @@ fun NavContent(
                 ExchangeMenuView(navController = navController)
             }
             composable(route = NavItem.ExchangeWalking.route) {
-                ExchangeWalkingView(navController = navController)
+                ExchangeWalkingView()
             }
             composable(route = NavItem.ExchangeStarPoint.route) {
                 DisposableEffect(Unit) {
@@ -275,7 +277,7 @@ fun NavContent(
             composable(route = NavItem.TrainingMenu.route) {
                 TrainingMenuView(navController = navController)
             }
-            composable(route = NavItem.TrainingJumping.route) {
+            composable(route = NavItem.TrainingRunner.route) {
 
                 DisposableEffect(Unit) {
                     val window = (context as ComponentActivity).window
@@ -287,6 +289,19 @@ fun NavContent(
                 }
 
                 TrainingRunnerView(navController = navController)
+            }
+            composable(route = NavItem.TrainingBasketball.route) {
+
+                DisposableEffect(Unit) {
+                    val window = (context as ComponentActivity).window
+                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+                    onDispose {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                }
+
+                TrainingBasketballView(navController = navController)
             }
         }
 
@@ -363,6 +378,13 @@ fun NavContent(
          */
         composable(route = NavItem.LuckyDraw.route) {
             LuckyDrawView()
+        }
+
+        /**
+         * 공지 사항
+         */
+        composable(route = NavItem.Notice.route) {
+            NoticeView()
         }
     }
 }

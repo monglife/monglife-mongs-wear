@@ -47,12 +47,13 @@ fun ConfirmAndCancelDialog(
             )
     ) {
         Column {
+            Spacer(modifier = Modifier.height(15.dp))
             Row(
-                verticalAlignment = Alignment.Bottom,
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.5f)
+                    .weight(0.6f)
             ) {
                 Text(
                     text = text,
@@ -65,21 +66,19 @@ fun ConfirmAndCancelDialog(
                 )
             }
 
-            Spacer(modifier = Modifier.height(25.dp))
-
             Row(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.5f)
+                    .weight(0.4f)
             ) {
                 BlueButton(
                     text = "닫기",
                     onClick = cancel,
                 )
 
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 BlueButton(
                     text = "확인",

@@ -38,7 +38,8 @@ sealed class NavItem(val route: String) {
     /* Training */
     data object TrainingNested: NavItem("TrainingNested")
     data object TrainingMenu: NavItem("TrainingMenu")
-    data object TrainingJumping: NavItem("TrainingJumping")
+    data object TrainingRunner: NavItem("TrainingRunner")
+    data object TrainingBasketball: NavItem("TrainingBasketball")
 
     /* Battle */
     data object BattleNested: NavItem("BattleNested")

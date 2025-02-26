@@ -59,12 +59,16 @@ class AuthorizationInterceptor (
 
         if (response.isSuccessful) {
             response.body()?.let { body ->
-
                 tokenDataStore.setAccessToken(accessToken = body.result.accessToken)
                 tokenDataStore.setRefreshToken(refreshToken = body.result.refreshToken)
 
                 return body.result.accessToken
             }
+        } else if (response.code() == CONNECTION_FORBIDDEN_CODE) {
+            tokenDataStore.setAccessToken(accessToken = "")
+            tokenDataStore.setRefreshToken(refreshToken = "")
+
+            return ""
         }
 
         throw ReissueException()

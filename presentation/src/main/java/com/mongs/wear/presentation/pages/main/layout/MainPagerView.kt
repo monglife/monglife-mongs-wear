@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
@@ -23,10 +24,12 @@ import com.mongs.wear.presentation.component.background.MainPagerBackground
 import com.mongs.wear.presentation.component.background.NormalMainPagerBackground
 import com.mongs.wear.presentation.component.common.bar.LoadingBar
 import com.mongs.wear.presentation.component.common.pagenation.PageIndicator
+import com.mongs.wear.presentation.global.view.OnLeavePage
 import com.mongs.wear.presentation.pages.main.condition.MainConditionView
 import com.mongs.wear.presentation.pages.main.configure.MainConfigureView
 import com.mongs.wear.presentation.pages.main.interaction.MainInteractionView
 import com.mongs.wear.presentation.pages.main.slot.MainSlotView
+import com.mongs.wear.presentation.pages.main.walking.MainWalkingView
 
 @Composable
 fun MainPagerView(
@@ -34,6 +37,7 @@ fun MainPagerView(
     emptyPagerState: PagerState,
     pagerState: PagerState,
     mainPagerViewModel: MainPagerViewModel = hiltViewModel(),
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
 ) {
     val mongVo = mainPagerViewModel.mongVo.observeAsState()
     val backgroundMapCodeState = mainPagerViewModel.backgroundMapCode.observeAsState(MapResourceCode.MP000.name)
@@ -78,6 +82,16 @@ fun MainPagerView(
             )
         }
     }
+
+    LaunchedEffect(Unit) {
+        mainPagerViewModel.connectSensor()
+    }
+
+    OnLeavePage(
+        navController = navController,
+        lifecycleOwner = lifecycleOwner,
+        onLeavePage = mainPagerViewModel::disconnectSensor
+    )
 }
 
 @Composable
@@ -106,25 +120,31 @@ private fun NormalMainPagerContent(
     ) {
         HorizontalPager(state = pagerState) { page ->
             when (page) {
-                0 -> mongVo?.let {
+                0 -> {
+                    MainWalkingView(
+                        navController = navController,
+                    )
+                }
+
+                1 -> mongVo?.let {
                     MainConditionView(
                         mongVo = mongVo,
                         isPageChanging = isPageChanging,
                     )
                 }
 
-                1 -> MainSlotView(
+                2 -> MainSlotView(
                     navController = navController,
                     mongVo = mongVo,
                     isPageChanging = isPageChanging,
                 )
 
-                2 -> MainInteractionView(
+                3 -> MainInteractionView(
                     navController = navController,
                     mongVo = mongVo,
                 )
 
-                3 -> MainConfigureView(
+                4 -> MainConfigureView(
                     navController = navController,
                 )
             }
@@ -160,18 +180,24 @@ private fun EmptyMainPagerContent(
     ) {
         HorizontalPager(state = pagerState) { page ->
             when (page) {
-                0 -> MainSlotView(
+                0 -> {
+                    MainWalkingView(
+                        navController = navController,
+                    )
+                }
+
+                1 -> MainSlotView(
                     navController = navController,
                     mongVo = mongVo,
                     isPageChanging = isPageChanging,
                 )
 
-                1 -> MainInteractionView(
+                2 -> MainInteractionView(
                     navController = navController,
                     mongVo = mongVo,
                 )
 
-                2 -> MainConfigureView(
+                3 -> MainConfigureView(
                     navController = navController,
                 )
             }

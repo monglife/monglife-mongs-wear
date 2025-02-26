@@ -55,7 +55,6 @@ fun ExchangeMenuView(
             ExchangeMenuLoadingBar()
         } else {
             val mongVo = exchangeMenuViewModel.mongVo.observeAsState()
-            val isBillingDevice = exchangeMenuViewModel.isBillingDevice.observeAsState(false)
 
             ExchangeMenuContent(
                 starPoint = {
@@ -74,9 +73,9 @@ fun ExchangeMenuView(
                     }
                 },
                 walking = {
-                    if (isBillingDevice.value) {
+                    mongVo.value?.let {
                         navController.navigate(NavItem.ExchangeWalking.route)
-                    } else {
+                    } ?: run {
                         PresentationErrorCode.PRESENTATION_MANAGEMENT_NOT_PICK_SLOT.let { errorCode ->
                             if (errorCode.isMessageShow()) {
                                 Toast.makeText(
@@ -159,7 +158,7 @@ private fun ExchangeMenuContent(
                     textAlign = TextAlign.Center,
                     fontFamily = DAL_MU_RI,
                     fontWeight = FontWeight.Light,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = MongsWhite,
                     maxLines = 1,
                 )

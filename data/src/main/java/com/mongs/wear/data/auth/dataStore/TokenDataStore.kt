@@ -7,11 +7,9 @@ import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,9 +31,16 @@ class TokenDataStore @Inject constructor(
         CoroutineScope(Dispatchers.IO).launch {
             context.store.edit { preferences ->
 
+                if (!preferences.contains(ACCESS_TOKEN)) {
+                    preferences[ACCESS_TOKEN] = ""
+                }
+
                 if (!preferences.contains(REFRESH_TOKEN)) {
                     preferences[REFRESH_TOKEN] = ""
                 }
+
+//                preferences[ACCESS_TOKEN] = "eyJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50SWQiOjcsImRldmljZUlkIjoiYmQwYjAxMzkyY2IxZjc1NSIsImFwcFBhY2thZ2VOYW1lIjoiY29tLm1vbmdzLndlYXIiLCJidWlsZFZlcnNpb24iOiIyLjAuMCIsImlhdCI6MTczOTg5MDI4NywiZXhwIjoxNzQyNDgyMjg3fQ.UhQu3HRSk3BonevcMWZfmfmA3t9P2I7Fj9fgbVw4GsQ"
+//                preferences[REFRESH_TOKEN] = "eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3Mzk4OTAyODcsImV4cCI6MTc0MjQ4MjI4N30.EYDKWt5YGHp64BWIeh7baP2MZInTEcKaKy1SjCs24Hg"
             }
         }
     }

@@ -38,7 +38,7 @@ fun MainConfigureView(
                     "공지 ${PresentationErrorCode.PRESENTATION_UPDATE_SOON.getMessage()}",
                     Toast.LENGTH_SHORT
                 ).show()
-                //navController.navigate(NavItem.Notice.route)
+                // navController.navigate(NavItem.Notice.route)
             },
             chargeStarPoint = {
                 navController.navigate(NavItem.ChargeStarPoint.route)

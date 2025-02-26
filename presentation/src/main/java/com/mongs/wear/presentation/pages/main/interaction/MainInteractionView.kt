@@ -152,11 +152,11 @@ private fun MainInteractionContent(
                     icon = R.drawable.btn_icon_activity,
                     border = R.drawable.btn_border_green,
                     iconSize = 34f,
-                    disable = mongVo?.let {
-                        MongResourceCode.valueOf(mongVo.mongTypeCode).isEgg ||
-                        mongVo.stateCode == MongStateCode.DEAD ||
-                        mongVo.isSleeping
-                    } ?: true,
+//                    disable = mongVo?.let {
+//                        MongResourceCode.valueOf(mongVo.mongTypeCode).isEgg ||
+//                        mongVo.stateCode == MongStateCode.DEAD ||
+//                        mongVo.isSleeping
+//                    } ?: true,
                     onClick = training,
                 )
 

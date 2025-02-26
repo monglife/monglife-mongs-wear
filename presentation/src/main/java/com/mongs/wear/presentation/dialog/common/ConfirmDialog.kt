@@ -37,12 +37,14 @@ fun ConfirmDialog(
             .fillMaxSize()
     ) {
         Column {
+            Spacer(modifier = Modifier.height(20.dp))
+
             Row(
-                verticalAlignment = Alignment.Bottom,
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.6f)
+                    .weight(0.7f)
             ) {
                 Text(
                     text = text,
@@ -55,14 +57,12 @@ fun ConfirmDialog(
                 )
             }
 
-            Spacer(modifier = Modifier.height(25.dp))
-
             Row(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.4f)
+                    .weight(0.3f)
             ) {
                 BlueButton(
                     text = "확인",

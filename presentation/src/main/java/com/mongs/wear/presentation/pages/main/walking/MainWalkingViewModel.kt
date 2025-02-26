@@ -1,4 +1,4 @@
-package com.mongs.wear.presentation.pages.exchange.walking
+package com.mongs.wear.presentation.pages.main.walking
 
 import android.Manifest
 import android.content.Context
@@ -9,11 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import com.mongs.wear.core.exception.usecase.ExchangeWalkingCountUseCaseException
-import com.mongs.wear.core.exception.usecase.GetCurrentSlotUseCaseException
 import com.mongs.wear.core.exception.usecase.GetStepsUseCaseException
-import com.mongs.wear.core.utils.TimeUtil
-import com.mongs.wear.domain.device.usecase.ExchangeWalkingCountUseCase
 import com.mongs.wear.domain.device.usecase.GetStepsUseCase
 import com.mongs.wear.domain.management.usecase.GetCurrentSlotUseCase
 import com.mongs.wear.domain.management.vo.MongVo
@@ -26,11 +22,10 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class ExchangeWalkingViewModel @Inject constructor(
+class MainWalkingViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val getCurrentSlotUseCase: GetCurrentSlotUseCase,
     private val getStepsUseCase: GetStepsUseCase,
-    private val exchangeWalkingCountUseCase: ExchangeWalkingCountUseCase,
 ): BaseViewModel() {
 
     private val _mongVo = MediatorLiveData<MongVo?>()
@@ -71,36 +66,23 @@ class ExchangeWalkingViewModel @Inject constructor(
     }
 
     /**
+     * 걸음 수 초기화
+     */
+    fun resetSteps() {
+        viewModelScopeWithHandler.launch (Dispatchers.IO) {
+
+            // TODO: 걸음 수 초기화
+
+            uiState.resetStepsDialog = false
+        }
+    }
+
+    /**
      * 활동 권한 부여 여부 갱신
      */
     fun refreshActivityPermission() {
         viewModelScopeWithHandler.launch (Dispatchers.IO) {
             _activityPermission.postValue(verifyActivityPermission().isEmpty())
-        }
-    }
-
-    /**
-     * 걸음 수 환전
-     */
-    fun exchangeWalkingCount(mongId: Long, walkingCount: Int) {
-        viewModelScopeWithHandler.launch (Dispatchers.IO) {
-
-            uiState.loadingBar = true
-            uiState.chargePayPointDialog = false
-
-            val deviceBootedDt = TimeUtil.getBootedDt()
-
-            exchangeWalkingCountUseCase(
-                ExchangeWalkingCountUseCase.Param(
-                    mongId = mongId,
-                    walkingCount = walkingCount,
-                    deviceBootedDt = deviceBootedDt,
-                )
-            )
-
-            toastEvent("환전 성공")
-
-            uiState.loadingBar = false
         }
     }
 
@@ -118,22 +100,13 @@ class ExchangeWalkingViewModel @Inject constructor(
     val uiState: UiState = UiState()
 
     class UiState : BaseUiState() {
-        var chargePayPointDialog by mutableStateOf(false)
+        var resetStepsDialog by mutableStateOf(false)
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
         when(exception) {
-            is GetCurrentSlotUseCaseException -> {
-                uiState.loadingBar = false
-            }
-
             is GetStepsUseCaseException -> {
                 uiState.loadingBar = false
-            }
-
-            is ExchangeWalkingCountUseCaseException -> {
-                uiState.loadingBar = false
-                uiState.chargePayPointDialog = false
             }
 
             else -> {

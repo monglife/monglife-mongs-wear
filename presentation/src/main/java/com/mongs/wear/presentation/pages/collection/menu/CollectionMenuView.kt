@@ -79,7 +79,7 @@ private fun CollectionMenuContent(
                         textAlign = TextAlign.Center,
                         fontFamily = DAL_MU_RI,
                         fontWeight = FontWeight.Light,
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         color = MongsWhite,
                         maxLines = 1,
                     )
@@ -114,7 +114,7 @@ private fun CollectionMenuContent(
                         textAlign = TextAlign.Center,
                         fontFamily = DAL_MU_RI,
                         fontWeight = FontWeight.Light,
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         color = MongsWhite,
                         maxLines = 1,
                     )

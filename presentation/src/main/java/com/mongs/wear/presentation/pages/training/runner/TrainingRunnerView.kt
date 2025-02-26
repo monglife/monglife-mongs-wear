@@ -104,7 +104,7 @@ fun TrainingRunnerView(
 
     LaunchedEffect(trainingRunnerViewModel.uiState.navMainEvent) {
         trainingRunnerViewModel.uiState.navMainEvent.collect {
-            navController.popBackStack(route = NavItem.TrainingJumping.route, inclusive = true)
+            navController.popBackStack(route = NavItem.TrainingRunner.route, inclusive = true)
         }
     }
 

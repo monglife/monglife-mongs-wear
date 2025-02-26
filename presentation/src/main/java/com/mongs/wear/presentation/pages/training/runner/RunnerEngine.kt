@@ -118,6 +118,13 @@ class RunnerEngine(
     }
 
     /**
+     * 종료
+     */
+    fun end() {
+        isStartGame.value = false
+    }
+
+    /**
      * 플레이어 이동
      */
     private fun movePlayer() {
@@ -171,13 +178,6 @@ class RunnerEngine(
                 ss = hurdleSpeed,
             )
         )
-    }
-
-    /**
-     * 종료
-     */
-    fun end() {
-        isStartGame.value = false
     }
 
     /**
@@ -246,6 +246,9 @@ class RunnerEngine(
         return (hurdleMinX in playerMinX..playerMaxX) || (hurdleMaxX in playerMinX..playerMaxX)
     }
 
+    /**
+     * 플레이어 클래스
+     */
     class Player(
         private val sy: Float,
         private val sx: Float,
@@ -294,6 +297,9 @@ class RunnerEngine(
         }
     }
 
+    /**
+     * 장애물 클래스
+     */
     class Hurdle(
         private val sy: Float,
         private val sx: Float,

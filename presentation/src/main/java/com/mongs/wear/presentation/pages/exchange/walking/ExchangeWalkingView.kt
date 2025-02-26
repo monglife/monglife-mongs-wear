@@ -49,9 +49,7 @@ import kotlin.math.min
 
 @Composable
 fun ExchangeWalkingView(
-    navController: NavController,
     exchangeWalkingViewModel: ExchangeWalkingViewModel = hiltViewModel(),
-    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
 ) {
     val mongVo = exchangeWalkingViewModel.mongVo.observeAsState()
     val payPoint = exchangeWalkingViewModel.payPoint.observeAsState(0)
@@ -106,16 +104,6 @@ fun ExchangeWalkingView(
                 }
             }
         }
-
-        LaunchedEffect(Unit) {
-            exchangeWalkingViewModel.connectSensor()
-        }
-
-        OnLeavePage(
-            navController = navController,
-            lifecycleOwner = lifecycleOwner,
-            onLeavePage = exchangeWalkingViewModel::disconnectSensor
-        )
     }
 }
 

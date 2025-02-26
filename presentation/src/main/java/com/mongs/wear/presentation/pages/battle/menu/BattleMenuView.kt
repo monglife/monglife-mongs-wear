@@ -115,7 +115,13 @@ fun BattleMenuView(
     OnLeavePage(
         navController = navController,
         lifecycleOwner = lifecycleOwner,
-        onLeavePage = battleMenuViewModel::matchExit
+        onLeavePage = {
+            matchVo.value?.let {
+                if (it.stateCode == MatchStateCode.NONE) {
+                    battleMenuViewModel.matchExit()
+                }
+            }
+        }
     )
 }
 
