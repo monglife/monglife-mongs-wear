@@ -1,4 +1,4 @@
-package com.mongs.wear.presentation.dialog.training
+package com.mongs.wear.presentation.dialog.slot
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,42 +16,38 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.wear.compose.material.Text
+import com.mongs.wear.domain.management.vo.MongVo
 import com.mongs.wear.presentation.R
 import com.mongs.wear.presentation.assets.DAL_MU_RI
 import com.mongs.wear.presentation.assets.MongsWhite
 import com.mongs.wear.presentation.component.common.button.BlueButton
 
 @Composable
-fun TrainingStartDialog(
-    firstText: String,
-    secondText: String,
-    timeout: Int,
-    trainingScore: Int,
-    rewardPayPoint: Int,
-    trainingStart: () -> Unit,
-    modifier: Modifier = Modifier
+fun MongInteractionHelpDialog(
+    mongVo: MongVo,
+    close: () -> Unit,
+    closeEver: () -> Unit,
+    modifier: Modifier = Modifier.zIndex(0f),
 ) {
     Box(
-        contentAlignment = Alignment.Center,
         modifier = modifier
+            .fillMaxWidth()
             .background(color = Color.Black.copy(alpha = 0.85f))
             .fillMaxSize()
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = {},
+                onClick = close,
             )
     ) {
         Column(
@@ -62,80 +58,25 @@ fun TrainingStartDialog(
 
             Row(
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.2f)
+                modifier = Modifier.fillMaxWidth()
+                    .weight(0.35f)
             ) {
-                Text(
-                    text = firstText,
-                    textAlign = TextAlign.Center,
-                    fontFamily = DAL_MU_RI,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 14.sp,
-                    color = MongsWhite,
-                    maxLines = 1,
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.2f)
-            ) {
-                Text(
-                    text = secondText,
-                    textAlign = TextAlign.Center,
-                    fontFamily = DAL_MU_RI,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 14.sp,
-                    color = MongsWhite,
-                    maxLines = 1,
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.2f)
-            ) {
-                Text(
-                    text = "${timeout}초 간, ${trainingScore}점 달성시",
-                    textAlign = TextAlign.Center,
-                    fontFamily = DAL_MU_RI,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 14.sp,
-                    color = MongsWhite,
-                    maxLines = 1,
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.2f)
-            ) {
-                Spacer(modifier = Modifier.width(7.dp))
-
                 Image(
-                    painter = painterResource(R.drawable.point_icon_pay),
+                    painter = painterResource(R.drawable.btn_icon_notice),
                     contentDescription = null,
                     modifier = Modifier
-                        .height(20.dp)
-                        .width(20.dp),
+                        .height(35.dp)
+                        .width(35.dp),
                     contentScale = ContentScale.FillBounds,
                 )
-
-                Spacer(modifier = Modifier.width(10.dp))
-
+            }
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+                    .weight(0.2f)
+            ) {
                 Text(
-                    text = "${rewardPayPoint}개 획득",
+                    text = "몽을 클릭하면",
                     textAlign = TextAlign.Center,
                     fontFamily = DAL_MU_RI,
                     fontWeight = FontWeight.Light,
@@ -144,34 +85,41 @@ fun TrainingStartDialog(
                     maxLines = 1,
                 )
             }
-
             Row(
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
+                    .weight(0.2f)
+            ) {
+                Text(
+                    text = "상호작용 메뉴가 열려요",
+                    textAlign = TextAlign.Center,
+                    fontFamily = DAL_MU_RI,
+                    fontWeight = FontWeight.Light,
+                    fontSize = 14.sp,
+                    color = MongsWhite,
+                    maxLines = 1,
+                )
+            }
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
                     .weight(0.25f)
             ) {
                 BlueButton(
-                    text = "시작",
-                    onClick = trainingStart,
+                    text = "닫기",
+                    onClick = close,
+                )
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                BlueButton(
+                    text = "그만보기",
+                    width = 78,
+                    onClick = closeEver
                 )
             }
 
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(28.dp))
         }
     }
-}
-
-@Preview(showSystemUi = true, device = Devices.WEAR_OS_SMALL_ROUND)
-@Composable
-private fun PreView() {
-    TrainingStartDialog(
-        firstText = "클릭하여",
-        secondText = "~하기",
-        timeout = 60,
-        trainingScore = 10,
-        rewardPayPoint = 5,
-        trainingStart = {},
-    )
 }

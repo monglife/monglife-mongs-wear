@@ -38,6 +38,7 @@ import com.mongs.wear.presentation.component.common.button.BlueButton
 fun TrainingEndDialog(
     trainingEnd: () -> Unit,
     trainingCode: TrainingCode,
+    isSuccess: Boolean,
     rewardPayPoint: Int,
     modifier: Modifier = Modifier
 ) {
@@ -60,24 +61,6 @@ fun TrainingEndDialog(
 
             Row(
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.35f)
-            ) {
-                Text(
-                    text = "Game Over",
-                    textAlign = TextAlign.Center,
-                    fontFamily = DAL_MU_RI,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 25.sp,
-                    color = MongsWhite,
-                    maxLines = 1,
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,6 +75,34 @@ fun TrainingEndDialog(
                     color = MongsWhite,
                     maxLines = 1,
                 )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.35f)
+            ) {
+                if (isSuccess) {
+                    Image(
+                        painter = painterResource(R.drawable.txt_success),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .height(35.dp)
+                            .width(120.dp),
+                        contentScale = ContentScale.FillBounds,
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(R.drawable.txt_fail),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .height(35.dp)
+                            .width(95.dp),
+                        contentScale = ContentScale.FillBounds,
+                    )
+                }
             }
 
             Row(
@@ -125,7 +136,7 @@ fun TrainingEndDialog(
                 Spacer(modifier = Modifier.width(7.dp))
 
                 Text(
-                    text = "$rewardPayPoint",
+                    text = "${if (isSuccess) rewardPayPoint else 0}",
                     textAlign = TextAlign.Center,
                     fontFamily = DAL_MU_RI,
                     fontWeight = FontWeight.Light,
@@ -158,7 +169,8 @@ fun TrainingEndDialog(
 private fun PreView() {
     TrainingEndDialog(
         trainingEnd = {},
-        rewardPayPoint = 5,
+        isSuccess = false,
+        rewardPayPoint = 100,
         trainingCode = TrainingCode.RUNNER,
     )
 }

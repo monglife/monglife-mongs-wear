@@ -8,6 +8,8 @@ import com.mongs.wear.core.exception.usecase.GraduateCheckUseCaseException
 import com.mongs.wear.core.exception.usecase.PoopCleanMongUseCaseException
 import com.mongs.wear.core.exception.usecase.SleepingMongUseCaseException
 import com.mongs.wear.core.exception.usecase.StrokeMongUseCaseException
+import com.mongs.wear.domain.device.usecase.GetMongInteractionDialogOpenFlagUseCase
+import com.mongs.wear.domain.device.usecase.SetMongInteractionDialogOpenFlagUseCase
 import com.mongs.wear.domain.management.usecase.EvolutionMongUseCase
 import com.mongs.wear.domain.management.usecase.GraduateCheckMongUseCase
 import com.mongs.wear.domain.management.usecase.PoopCleanMongUseCase
@@ -26,11 +28,31 @@ class MainSlotViewModel @Inject constructor(
     private val graduateCheckMongUseCase: GraduateCheckMongUseCase,
     private val sleepingMongUseCase: SleepingMongUseCase,
     private val poopCleanMongUseCase: PoopCleanMongUseCase,
+    private val getMongInteractionDialogOpenFlagUseCase: GetMongInteractionDialogOpenFlagUseCase,
+    private val setMongInteractionDialogOpenFlagUseCase: SetMongInteractionDialogOpenFlagUseCase,
 ): BaseViewModel() {
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
+
+            uiState.mongInteractionHelpDialog = getMongInteractionDialogOpenFlagUseCase()
+
             uiState.loadingBar = false
+        }
+    }
+
+    /**
+     * 몽 상호 작용 다이얼로그 그만보기 처리
+     */
+    fun helpDialogCloseEver() {
+        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+            setMongInteractionDialogOpenFlagUseCase(
+                param = SetMongInteractionDialogOpenFlagUseCase.Param(
+                    isOpen = false,
+                )
+            )
+
+            uiState.mongInteractionHelpDialog = false
         }
     }
 
@@ -122,6 +144,7 @@ class MainSlotViewModel @Inject constructor(
 
     class UiState : BaseUiState() {
         var isEvolution by mutableStateOf(false)
+        var mongInteractionHelpDialog by mutableStateOf(false)
         var slotInteractionDialog by mutableStateOf(false)
     }
 

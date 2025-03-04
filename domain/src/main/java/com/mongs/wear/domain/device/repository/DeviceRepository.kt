@@ -85,4 +85,14 @@ interface DeviceRepository {
      * 음량 조회
      */
     suspend fun getSoundVolume() : Float
+
+    /**
+     * 몽 상호작용 다이얼로그 오픈 여부 설정
+     */
+    suspend fun setMongInteractionDialogOpenFlag(mongInteractionDialogOpenFlag: Boolean)
+
+    /**
+     * 몽 상호작용 다이얼로그 오픈 여부 조회
+     */
+    suspend fun getMongInteractionDialogOpenFlag(): Boolean
 }

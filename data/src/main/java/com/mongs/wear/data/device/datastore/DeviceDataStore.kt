@@ -55,6 +55,8 @@ class DeviceDataStore @Inject constructor(
         private val NOTIFICATION = booleanPreferencesKey("NOTIFICATION")
         // 음량
         private val SOUND_VOLUME = floatPreferencesKey("SOUND_VOLUME")
+        // 몽 상호작용 다이얼로그 오픈 여부
+        private val MONG_INTERACTION_DIALOG_OPEN_FLAG = booleanPreferencesKey("MONG_INTERACTION_DIALOG_OPEN_FLAG")
     }
 
     private val Context.store by preferencesDataStore(name = DEVICE_DATA_STORE_NAME)
@@ -101,6 +103,10 @@ class DeviceDataStore @Inject constructor(
 
                 if (!preferences.contains(SOUND_VOLUME)) {
                     preferences[SOUND_VOLUME] = 0.5f
+                }
+
+                if (!preferences.contains(MONG_INTERACTION_DIALOG_OPEN_FLAG)) {
+                    preferences[MONG_INTERACTION_DIALOG_OPEN_FLAG] = true
                 }
             }
         }
@@ -235,6 +241,20 @@ class DeviceDataStore @Inject constructor(
         return runBlocking {
             context.store.data.map { preferences ->
                 preferences[SOUND_VOLUME]!!
+            }.first()
+        }
+    }
+
+    suspend fun setMongInteractionDialogOpenFlag(mongInteractionDialogOpenFlag: Boolean) {
+        context.store.edit { preferences ->
+            preferences[MONG_INTERACTION_DIALOG_OPEN_FLAG] = mongInteractionDialogOpenFlag
+        }
+    }
+
+    fun getMongInteractionDialogOpenFlag() : Boolean {
+        return runBlocking {
+            context.store.data.map { preferences ->
+                preferences[MONG_INTERACTION_DIALOG_OPEN_FLAG]!!
             }.first()
         }
     }

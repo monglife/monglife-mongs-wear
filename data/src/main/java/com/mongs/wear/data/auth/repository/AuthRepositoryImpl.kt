@@ -1,6 +1,8 @@
 package com.mongs.wear.data.auth.repository
 
 import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.map
 import com.mongs.wear.data.auth.api.AuthApi
 import com.mongs.wear.data.auth.dataStore.TokenDataStore
 import com.mongs.wear.data.auth.dto.request.CreateDeviceRequestDto
@@ -33,6 +35,13 @@ class AuthRepositoryImpl @Inject constructor(
      */
     override suspend fun isLogin() : Boolean {
         return tokenDataStore.getAccessToken().isNotBlank()
+    }
+
+    /**
+     * 로그인 여부 옵저버 객체 조회
+     */
+    override suspend fun isLoginLive() : LiveData<Boolean> {
+        return tokenDataStore.getAccessTokenLive().map { it.isNotBlank() }
     }
 
     /**

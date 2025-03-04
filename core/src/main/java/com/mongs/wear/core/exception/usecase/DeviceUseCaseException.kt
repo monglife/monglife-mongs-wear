@@ -29,6 +29,11 @@ class GetSoundVolumeUseCaseException(
     override val message: String = code.getMessage()
 ) : UseCaseException(code = code, message = message)
 
+class GetMongInteractionDialogOpenFlagException(
+    override val code: ErrorCode = UseCaseErrorCode.USE_CASE_DEVICE_GET_MONG_INTERACTION_DIALOG_OPEN_FLAG_FAILED,
+    override val message: String = code.getMessage()
+) : UseCaseException(code = code, message = message)
+
 class GetStepsUseCaseException(
     override val code: ErrorCode = UseCaseErrorCode.USE_CASE_PLAYER_GET_STEPS_FAILED,
     override val message: String = code.getMessage()
@@ -66,5 +71,10 @@ class SetServerTotalWalkingCountUseCaseException(
 
 class SetSoundVolumeUseCaseException(
     override val code: ErrorCode = UseCaseErrorCode.USE_CASE_DEVICE_SET_SOUND_VOLUME_FAILED,
+    override val message: String = code.getMessage()
+) : UseCaseException(code = code, message = message)
+
+class SetMongInteractionDialogOpenFlagException(
+    override val code: ErrorCode = UseCaseErrorCode.USE_CASE_DEVICE_SET_MONG_INTERACTION_DIALOG_OPEN_FLAG_FAILED,
     override val message: String = code.getMessage()
 ) : UseCaseException(code = code, message = message)

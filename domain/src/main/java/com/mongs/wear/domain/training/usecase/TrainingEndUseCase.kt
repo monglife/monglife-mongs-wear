@@ -1,26 +1,28 @@
 package com.mongs.wear.domain.training.usecase
 
 import com.mongs.wear.core.enums.TrainingCode
+import com.mongs.wear.core.exception.data.TrainingBasketballException
 import com.mongs.wear.core.exception.data.TrainingRunnerException
 import com.mongs.wear.core.exception.global.DataException
-import com.mongs.wear.core.exception.usecase.TrainingMongUseCaseException
+import com.mongs.wear.core.exception.usecase.TrainingEndUseCaseException
 import com.mongs.wear.core.usecase.BaseParamUseCase
 import com.mongs.wear.domain.training.repository.TrainingRepository
+import com.mongs.wear.domain.training.vo.TrainingEndVo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class TrainingMongUseCase @Inject constructor(
+class TrainingEndUseCase @Inject constructor(
     private val trainingRepository: TrainingRepository,
-) : BaseParamUseCase<TrainingMongUseCase.Param, Unit>() {
+) : BaseParamUseCase<TrainingEndUseCase.Param, TrainingEndVo>() {
 
     /**
      * 훈련 완료 UseCase
      * @throws TrainingRunnerException
      */
-    override suspend fun execute(param: Param) {
-        withContext(Dispatchers.IO) {
-            when(param.trainingCode) {
+    override suspend fun execute(param: Param): TrainingEndVo {
+        return withContext(Dispatchers.IO) {
+            val trainingEndModel = when(param.trainingCode) {
                 // 훈련 달리기
                 TrainingCode.RUNNER -> {
                     trainingRepository.trainingRunner(
@@ -31,9 +33,18 @@ class TrainingMongUseCase @Inject constructor(
 
                 // 훈련 농구
                 TrainingCode.BASKETBALL -> {
-
+                    trainingRepository.trainingBasketball(
+                        mongId = param.mongId,
+                        score = param.score,
+                    )
                 }
             }
+
+            TrainingEndVo(
+                isSuccess = trainingEndModel.isSuccess,
+                rewardPayPoint = trainingEndModel.rewardPayPoint,
+                score = trainingEndModel.score,
+            )
         }
     }
 
@@ -50,9 +61,11 @@ class TrainingMongUseCase @Inject constructor(
         super.handleException(exception)
 
         when(exception) {
-            is TrainingRunnerException -> throw TrainingMongUseCaseException()
+            is TrainingRunnerException -> throw TrainingEndUseCaseException()
 
-            else -> throw TrainingMongUseCaseException()
+            is TrainingBasketballException -> throw TrainingEndUseCaseException()
+
+            else -> throw TrainingEndUseCaseException()
         }
     }
 }

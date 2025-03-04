@@ -16,6 +16,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.mongs.wear.core.exception.usecase.ConnectMqttUseCaseException
+import com.mongs.wear.domain.auth.usecase.GetIsLoginUseCase
 import com.mongs.wear.domain.battle.usecase.UpdateMatchUseCase
 import com.mongs.wear.domain.device.usecase.GetNetworkUseCase
 import com.mongs.wear.domain.device.usecase.SetDeviceIdUseCase
@@ -45,6 +46,7 @@ class MainViewModel @Inject constructor(
     private val updateCurrentSlotUseCase: UpdateCurrentSlotUseCase,
     private val updatePlayerUseCase: UpdatePlayerUseCase,
     private val updateMatchUseCase: UpdateMatchUseCase,
+    private val getIsLoginUseCase: GetIsLoginUseCase,
 ) : BaseViewModel() {
 
     companion object {
@@ -53,6 +55,9 @@ class MainViewModel @Inject constructor(
 
     val network: LiveData<Boolean> get() = _network
     private val _network = MediatorLiveData(true)
+
+    val isLogin: LiveData<Boolean> get() = _isLogin
+    private val _isLogin = MediatorLiveData(true)
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
@@ -73,6 +78,10 @@ class MainViewModel @Inject constructor(
              * 초기 로직 수행
              */
             uiState.loadingBar = true
+
+            _isLogin.addSource(withContext(Dispatchers.IO) { getIsLoginUseCase() }) {
+                _isLogin.value = it
+            }
 
             // network flag 옵저버 객체 조회
             _network.addSource(withContext(Dispatchers.IO) { getNetworkUseCase() }) {

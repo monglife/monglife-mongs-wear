@@ -165,4 +165,18 @@ class DeviceRepositoryImpl @Inject constructor(
     override suspend fun getSoundVolume(): Float {
         return deviceDataStore.getSoundVolume()
     }
+
+    /**
+     * 몽 상호작용 다이얼로그 오픈 여부 설정
+     */
+    override suspend fun setMongInteractionDialogOpenFlag(mongInteractionDialogOpenFlag: Boolean) {
+        deviceDataStore.setMongInteractionDialogOpenFlag(mongInteractionDialogOpenFlag = mongInteractionDialogOpenFlag)
+    }
+
+    /**
+     * 몽 상호작용 다이얼로그 오픈 여부 조회
+     */
+    override suspend fun getMongInteractionDialogOpenFlag(): Boolean {
+        return deviceDataStore.getMongInteractionDialogOpenFlag()
+    }
 }

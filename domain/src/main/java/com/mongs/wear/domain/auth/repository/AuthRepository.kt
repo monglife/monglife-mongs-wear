@@ -1,11 +1,18 @@
 package com.mongs.wear.domain.auth.repository
 
+import androidx.lifecycle.LiveData
+
 interface AuthRepository {
 
     /**
      * 로그인 여부 조회
      */
     suspend fun isLogin() : Boolean
+
+    /**
+     * 로그인 여부 라이브 객체 조회
+     */
+    suspend fun isLoginLive() : LiveData<Boolean>
 
     /**
      * 회원 가입

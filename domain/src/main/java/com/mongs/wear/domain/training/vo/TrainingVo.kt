@@ -1,6 +1,6 @@
-package com.mongs.wear.domain.training.model
+package com.mongs.wear.domain.training.vo
 
-data class TrainingModel(
+data class TrainingVo(
 
     val rewardPayPoint: Int,
 

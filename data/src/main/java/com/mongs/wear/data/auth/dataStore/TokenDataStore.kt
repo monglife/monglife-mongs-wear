@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.asLiveData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,9 +40,6 @@ class TokenDataStore @Inject constructor(
                 if (!preferences.contains(REFRESH_TOKEN)) {
                     preferences[REFRESH_TOKEN] = ""
                 }
-
-//                preferences[ACCESS_TOKEN] = "eyJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50SWQiOjcsImRldmljZUlkIjoiYmQwYjAxMzkyY2IxZjc1NSIsImFwcFBhY2thZ2VOYW1lIjoiY29tLm1vbmdzLndlYXIiLCJidWlsZFZlcnNpb24iOiIyLjAuMCIsImlhdCI6MTczOTg5MDI4NywiZXhwIjoxNzQyNDgyMjg3fQ.UhQu3HRSk3BonevcMWZfmfmA3t9P2I7Fj9fgbVw4GsQ"
-//                preferences[REFRESH_TOKEN] = "eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3Mzk4OTAyODcsImV4cCI6MTc0MjQ4MjI4N30.EYDKWt5YGHp64BWIeh7baP2MZInTEcKaKy1SjCs24Hg"
             }
         }
     }
@@ -68,6 +67,15 @@ class TokenDataStore @Inject constructor(
                 preferences[ACCESS_TOKEN]!!
             }.first()
         }
+    }
+
+    /**
+     * access Token 라이브 객체 조회
+     */
+    suspend fun getAccessTokenLive() : LiveData<String> {
+        return context.store.data.map { preferences ->
+            preferences[ACCESS_TOKEN]!!
+        }.asLiveData()
     }
 
     /**

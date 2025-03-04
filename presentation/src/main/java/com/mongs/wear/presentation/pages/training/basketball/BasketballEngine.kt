@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class BasketballEngine {
 
@@ -24,6 +26,8 @@ class BasketballEngine {
 
         // 공 기본 속도
         private const val BALL_SPEED = 80f
+
+        private const val TENSION = 1.18f
     }
 
     private val _endEvent = MutableSharedFlow<Long>()
@@ -38,38 +42,85 @@ class BasketballEngine {
     /**
      * 게임 시작
      */
-    fun start(sr: Float, sx: Float, sy: Float) {
+    fun start(ballSy: Float, ballSx: Float, ballSr: Float, basketSy: Float, basketSx: Float, basketWidth: Float, basketHeight: Float) {
+
+        isStartGame.value = true
+        playMillis.value = 0L
+        score.value = 0
+
+        ball.value = Ball(
+            initSpeed = BALL_SPEED,
+            initX = ballSx,
+            initY = ballSy,
+            initRadius = ballSr,
+            initDegrees = 0f,
+            initFrame = 0.2f,
+        )
+
+        basket.value = Basket(
+            initX = basketSx,
+            initY = basketSy,
+            width = basketWidth,
+            height = basketHeight,
+        )
+
         CoroutineScope(Dispatchers.IO).launch {
-
-            playMillis.value = 0L
-            isStartGame.value = true
-            score.value = 0
-
-            ball.value = Ball(
-                initSpeed = BALL_SPEED,
-                initX = sx,
-                initY = sy,
-                initRadius = sr,
-                initDegrees = 0f,
-                initFrame = 0.2f,
-            )
-
-            basket.value = Basket(
-                initX = 225f,
-                initY = 155f,
-                initRadius = 15f,
-                width = 125f,
-                height = 50f,
-            )
-
             while (isStartGame.value) {
                 val processStart = LocalDateTime.now()
 
                 // 게임 시간 증가
                 playMillis.value += 1000L / FRAME
 
-                // 농구공 이동
-                moveBall()
+                ball.value?.let { ball ->
+                    basket.value?.let { basket ->
+                        // 농구공 이동
+                        moveBall(ball = ball, basket = basket)
+
+                        if (ball.isTop.value) {
+                            // 왼쪽 충돌 확인
+                            if (isCollision(
+                                    ballRadius = ball.radius.value,
+                                    ballX = ball.currentX.value,
+                                    ballY = ball.currentY.value,
+                                    basketRadius = basket.radius,
+                                    basketX = basket.leftX.value,
+                                    basketY = basket.leftY.value,
+                                )
+                            ) {
+                                ball.isCollisionFirst()
+
+                                val sin = getSin(ballX = ball.currentX.value, ballY = ball.currentY.value, basketX = basket.leftX.value, basketY = basket.leftY.value)
+                                val cos = getCos(ballX = ball.currentX.value, ballY = ball.currentY.value, basketX = basket.leftX.value, basketY = basket.leftY.value)
+
+                                ball.updateSpeed(sin = sin, cos = cos, e = TENSION)
+                            }
+
+                            // 오른쪽 충돌 확인
+                            if (isCollision(
+                                    ballRadius = ball.radius.value,
+                                    ballX = ball.currentX.value,
+                                    ballY = ball.currentY.value,
+                                    basketRadius = basket.radius,
+                                    basketX = basket.rightX.value,
+                                    basketY = basket.rightY.value,
+                                )
+                            ) {
+                                ball.isCollisionFirst()
+
+                                val sin = getSin(ballX = ball.currentX.value, ballY = ball.currentY.value, basketX = basket.rightX.value, basketY = basket.rightY.value)
+                                val cos = getCos(ballX = ball.currentX.value, ballY = ball.currentY.value, basketX = basket.rightX.value, basketY = basket.rightY.value)
+
+                                ball.updateSpeed(sin = sin, cos = cos, e = TENSION)
+                            }
+
+                            // 골 판별
+                            if (!ball.isGoal.value && isGoal(ball = ball, basket = basket)) {
+                                ball.isGoal()
+                                score.value += 1
+                            }
+                        }
+                    }
+                }
 
                 // 좌표 변경 로직 시간 측정
                 val processMillis = Duration.between(processStart, LocalDateTime.now()).toMillis()
@@ -78,15 +129,17 @@ class BasketballEngine {
                 delay(0L.coerceAtLeast(1000L / FRAME - processMillis))
             }
 
-            ball.value?.let {
-                while (it.isThrowing.value) {
+            ball.value?.let { ball ->
+                while (ball.isThrowing.value) {
                     val processStart = LocalDateTime.now()
 
                     // 게임 시간 증가
                     playMillis.value += 1000L / FRAME
 
                     // 농구공 이동
-                    moveBall()
+                    basket.value?.let { basket ->
+                        moveBall(ball = ball, basket = basket)
+                    }
 
                     // 좌표 변경 로직 시간 측정
                     val processMillis = Duration.between(processStart, LocalDateTime.now()).toMillis()
@@ -110,21 +163,55 @@ class BasketballEngine {
     /**
      * 농구공 이동
      */
-    private fun moveBall() {
+    private fun moveBall(ball: Ball, basket: Basket) {
 
-        ball.value?.let { ball ->
-            ball.move()
+        ball.move()
 
-            basket.value?.let { basket ->
-                val ballBottomY = ball.currentY.value + ball.radius.value
-                val basketTopY = basket.currentY.value - basket.height / 2
+        val ballBottomY = ball.currentY.value + ball.radius.value
+        val basketTopY = basket.currentY.value - basket.height / 2
 
-                if (ballBottomY < basketTopY) {
-                    ball.isTopPosition()
-                }
-            }
+        if (ballBottomY < basketTopY) {
+            ball.isTopPosition()
         }
+    }
 
+    /**
+     * 공과 농구 골대의 충돌 여부 확인
+     */
+    private fun isCollision(ballRadius: Float, ballX: Float, ballY: Float, basketRadius: Float, basketX: Float, basketY: Float): Boolean {
+        val radiusSum = ballRadius + basketRadius
+        val distance = sqrt((ballX - basketX).pow(2) + (ballY - basketY).pow(2))
+
+        return distance <= radiusSum
+    }
+
+    /**
+     * 골 판별
+     */
+    private fun isGoal(ball: Ball, basket: Basket) =
+        ball.currentY.value <= basket.currentY.value + basket.height / 2 &&
+        ball.currentY.value >= basket.currentY.value - basket.height / 2 &&
+        ball.currentX.value <= basket.currentX.value + basket.width / 2 &&
+        ball.currentX.value >= basket.currentX.value - basket.width / 2
+
+    /**
+     * sin 값 계산
+     */
+    private fun getSin(ballX: Float, ballY: Float, basketX: Float, basketY: Float): Float {
+
+        val distance = sqrt((ballX - basketX).pow(2) + (ballY - basketY).pow(2))
+
+        return (ballY - basketY) / distance
+    }
+
+    /**
+     * cos 값 계산
+     */
+    private fun getCos(ballX: Float, ballY: Float, basketX: Float, basketY: Float): Float {
+
+        val distance = sqrt((ballX - basketX).pow(2) + (ballY - basketY).pow(2))
+
+        return (ballX - basketX) / distance
     }
 
     /**
@@ -145,9 +232,10 @@ class BasketballEngine {
         var currentX: MutableState<Float> = mutableFloatStateOf(initX),
         var currentY: MutableState<Float> = mutableFloatStateOf(initY),
         var isThrowing: MutableState<Boolean> = mutableStateOf(false),
+        var isCollision: MutableState<Boolean> = mutableStateOf(false),
         var isTop: MutableState<Boolean> = mutableStateOf(false),
+        var isGoal: MutableState<Boolean> = mutableStateOf(false),
     ) {
-
         /**
          * 던짐
          */
@@ -182,11 +270,14 @@ class BasketballEngine {
                 this.throwSpeedY -= GRAVITY * this.throwFrame
 
                 // 좌표 변경
-                val nextPy = this.currentY.value - this.throwSpeedY * this.throwFrame
-                val nextPx = this.currentX.value - this.throwSpeedX * this.throwFrame
+                val nextPy = this.currentY.value - this.throwSpeedY  * this.throwFrame
+                val nextPx = this.currentX.value - this.throwSpeedX  * this.throwFrame
                 this.currentY.value = nextPy
                 this.currentX.value = nextPx
-                this.radius.value -= 0.2f
+
+                if (!this.isCollision.value && !this.isGoal.value) {
+                    this.radius.value -= 0.3f
+                }
 
                 // 각도 변경
                 if (this.throwSpeedX < 0f) {
@@ -204,7 +295,6 @@ class BasketballEngine {
                 // 값 초기화
                 if (this.currentY.value > 600f) {
                     this.isThrowing.value = false
-                    this.isTop.value = false
                     this.currentY.value = initY
                     this.currentX.value = initX
                     this.degrees = initDegrees
@@ -212,8 +302,15 @@ class BasketballEngine {
                     this.throwSpeedY = 0f
                     this.throwSpeedX = 0f
                     this.throwFrame = 0f
+                    this.isCollision.value = false
+                    this.isTop.value = false
+                    this.isGoal.value = false
                 }
             }
+        }
+
+        fun isCollisionFirst() {
+            this.isCollision.value = true
         }
 
         /**
@@ -222,25 +319,44 @@ class BasketballEngine {
         fun isTopPosition() {
             this.isTop.value = true
         }
+
+        /**
+         * 골 여부
+         */
+        fun isGoal() {
+            this.isGoal.value = true
+        }
+
+        /**
+         * 충돌 후 방향 업데이트
+         */
+        fun updateSpeed(sin: Float, cos: Float, e: Float) {
+            val vn = throwSpeedX * cos + throwSpeedY * sin      // 충돌 방향 속도
+            val vt = -throwSpeedX * sin + throwSpeedY * cos     // 수직 방향 속도 (변하지 않음)
+
+            // 탄성 충돌 공식 적용
+            val newVn = -e * vn
+
+            // 새로운 속도를 x, y 축으로 변환
+            throwSpeedX = newVn * cos + vt * (-sin)
+            throwSpeedY = newVn * sin + vt * cos
+        }
     }
 
     /**
      * 농구 골대
      */
     class Basket(
-        private val initRadius: Float,
         private val initX: Float,
         private val initY: Float,
         val width: Float,
         val height: Float,
-        val radius: Float = initRadius,
+        val radius: Float = height / 2,
         var currentX: MutableState<Float> = mutableFloatStateOf(initX),
         var currentY: MutableState<Float> = mutableFloatStateOf(initY),
         var leftX: MutableState<Float> = mutableFloatStateOf(currentX.value - width / 2),
         var leftY: MutableState<Float> = mutableFloatStateOf(currentY.value),
         var rightX: MutableState<Float> = mutableFloatStateOf(currentX.value + width / 2),
         var rightY: MutableState<Float> = mutableFloatStateOf(currentY.value),
-    ) {
-
-    }
+    )
 }

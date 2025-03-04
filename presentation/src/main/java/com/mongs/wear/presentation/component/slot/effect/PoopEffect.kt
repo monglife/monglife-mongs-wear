@@ -15,10 +15,10 @@ import androidx.compose.ui.zIndex
 import com.mongs.wear.presentation.R
 
 private val poopPadding = arrayOf(
-    PaddingValues(end = 80.dp,bottom = 26.dp),
+    PaddingValues(end = 60.dp, bottom = 18.dp),
+    PaddingValues(start = 54.dp, bottom = 16.dp),
+    PaddingValues(end = 80.dp, bottom = 26.dp),
     PaddingValues(start = 76.dp,bottom = 28.dp),
-    PaddingValues(end = 60.dp,bottom = 18.dp),
-    PaddingValues(start = 54.dp, bottom = 16.dp)
 )
 
 @Composable
@@ -34,7 +34,8 @@ fun PoopEffect(
             Image(
                 modifier = Modifier
                     .padding(poopPadding[count - 1])
-                    .size(25.dp),
+                    .size(25.dp)
+                    .zIndex(-count.toFloat()),
                 painter = painterResource(R.drawable.icon_poop),
                 contentDescription = null
             )

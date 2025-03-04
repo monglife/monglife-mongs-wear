@@ -12,6 +12,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +23,8 @@ import androidx.navigation.navigation
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.mongs.wear.presentation.assets.NavItem
 import com.mongs.wear.presentation.component.background.MainBackground
 import com.mongs.wear.presentation.component.common.bar.LoadingBar
@@ -53,6 +56,7 @@ import com.mongs.wear.presentation.pages.slotPick.SlotPickView
 import com.mongs.wear.presentation.pages.training.basketball.TrainingBasketballView
 import com.mongs.wear.presentation.pages.training.menu.TrainingMenuView
 import com.mongs.wear.presentation.pages.training.runner.TrainingRunnerView
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun MainView (
@@ -60,14 +64,15 @@ fun MainView (
     mainViewModel: MainViewModel = hiltViewModel(),
 ) {
     Box {
+        val networkFlag = mainViewModel.network.observeAsState(true)
+
         if (mainViewModel.uiState.loadingBar || mainViewModel.uiState.permissionLoadingBar) {
             MainBackground()
             MainLoadingBar()
         } else {
-            NavContent(modifier = Modifier.zIndex(0f))
+            val isLogin = mainViewModel.isLogin.observeAsState(true)
+            NavContent(isLogin = isLogin, modifier = Modifier.zIndex(0f))
         }
-
-        val networkFlag = mainViewModel.network.observeAsState(true)
 
         if (!networkFlag.value) {
             NetworkErrorDialog(
@@ -123,6 +128,7 @@ fun MainView (
  */
 @Composable
 fun NavContent(
+    isLogin: State<Boolean>,
     context: Context = LocalContext.current,
     modifier: Modifier = Modifier.zIndex(0f)
 ) {
@@ -130,6 +136,19 @@ fun NavContent(
 
     val emptyPagerState = rememberPagerState(MainPagerConst.EMPTY_PAGER_STATE_INIT, 0f) { MainPagerConst.EMPTY_PAGER_STATE_SIZE }
     val pagerState = rememberPagerState(MainPagerConst.NORMAL_PAGER_STATE_INIT, 0f) { MainPagerConst.NORMAL_PAGER_STATE_SIZE }
+
+    /**
+     * 로그인 상태가 아닐 시, 로그인 화면으로 이동
+     */
+    LaunchedEffect(isLogin.value) {
+        if (!isLogin.value) {
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+            GoogleSignIn.getClient(context, gso).signOut().await()
+            navController.navigate(NavItem.Login.route) {
+                popUpTo(navController.graph.id)
+            }
+        }
+    }
 
     /**
      * 메인 페이지 스크롤 이벤트

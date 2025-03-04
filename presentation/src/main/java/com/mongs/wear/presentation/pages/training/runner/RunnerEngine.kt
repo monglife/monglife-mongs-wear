@@ -24,9 +24,9 @@ class RunnerEngine(
         private const val TAG = "RunnerEngine"
 
         private const val GRAVITY = 9.8f
-        private const val FRAME = 60L   // 60FPS
+        private const val FRAME = 60L
         private const val COLLISION_PADDING = 10
-        private const val HURDLE_GENERATE_DELAY_MILLIS = 3000
+        private const val HURDLE_GENERATE_DELAY_MILLIS = 1500
 
         private const val PLAYER_START_X = 24f
         private const val PLAYER_SPEED = 42f
@@ -48,23 +48,24 @@ class RunnerEngine(
      * 시작
      */
     fun start(height: Int, width: Int) {
+
+        var generateHurdleCount = 0L
+
+        isStartGame.value = true
+        playMillis.value = 0L
+        score.value = 0
+
+        // 플레이어 생성
+        player.value = Player(
+            height = height,
+            width = width,
+            sy = defaultY,
+            sx = PLAYER_START_X,
+            ss = PLAYER_SPEED,
+            sf = 0.2f,
+        )
+
         CoroutineScope(Dispatchers.IO).launch {
-
-            var generateHurdleCount = 0L
-            playMillis.value = 0L
-            isStartGame.value = true
-            score.value = 0
-
-            // 플레이어 생성
-            player.value = Player(
-                height = height,
-                width = width,
-                sy = defaultY,
-                sx = PLAYER_START_X,
-                ss = PLAYER_SPEED,
-                sf = 0.2f,
-            )
-
             while (isStartGame.value) {
 
                 val processStart = LocalDateTime.now()
@@ -72,11 +73,13 @@ class RunnerEngine(
                 // 게임 시간 증가
                 playMillis.value += 1000L / FRAME
 
-                // 플레이어 이동
-                movePlayer()
+                player.value?.let { player ->
+                    // 플레이어 이동
+                    movePlayer(player = player)
 
-                // 장애물 이동
-                moveHurdle()
+                    // 장애물 이동
+                    moveHurdle(player = player)
+                }
 
                 // 장애물 생성
                 if (playMillis.value / HURDLE_GENERATE_DELAY_MILLIS > generateHurdleCount) {
@@ -94,19 +97,20 @@ class RunnerEngine(
             }
 
             // 게임 끝 -> 점프 중인 경우 지면에 도착할 때까지 프레임 진행
-            player.value?.let {
-                while (it.isJump.value) {
+            player.value?.let { player ->
+                while (player.isJump.value) {
 
                     val processStart = LocalDateTime.now()
 
                     // 플레이어 이동
-                    movePlayer()
+                    movePlayer(player = player)
 
                     // 장애물 이동
-                    moveHurdle()
+                    moveHurdle(player = player)
 
                     // 좌표 변경 로직 시간 측정
-                    val processMillis = Duration.between(processStart, LocalDateTime.now()).toMillis()
+                    val processMillis =
+                        Duration.between(processStart, LocalDateTime.now()).toMillis()
 
                     // 좌표 변경 로직 시간 제외한 딜레이 진행
                     delay(0L.coerceAtLeast(1000L / FRAME - processMillis))
@@ -127,41 +131,39 @@ class RunnerEngine(
     /**
      * 플레이어 이동
      */
-    private fun movePlayer() {
-        player.value?.move()
+    private fun movePlayer(player: Player) {
+        player.move()
     }
 
     /**
      * 장애물 이동
      */
-    private fun moveHurdle() {
-        player.value?.let { player ->
+    private fun moveHurdle(player: Player) {
 
-            val deleteHurdle = ArrayList<Hurdle>()
+        val deleteHurdle = ArrayList<Hurdle>()
 
-            for (hurdle in hurdleList) {
-                hurdle.move()
+        for (hurdle in hurdleList) {
+            hurdle.move()
 
-                // 장애물 충돌 확인
-                if (isCollision(player = player, hurdle = hurdle)) {
-                    isStartGame.value = false
-                }
-                // 장애물 넘음 확인
-                else if (isUnder(player = player, hurdle = hurdle) && !hurdle.isContainedScore) {
-                    hurdle.isContainedScore = true
-                    score.value++
-                }
-
-                // 지나간 장애물 확인 후 적재
-                if (hurdle.px.value < -150f) {
-                    deleteHurdle.add(hurdle)
-                }
+            // 장애물 충돌 확인
+            if (isCollision(player = player, hurdle = hurdle)) {
+                this.isStartGame.value = false
+            }
+            // 장애물 넘음 확인
+            else if (isUnder(player = player, hurdle = hurdle) && !hurdle.isContainedScore) {
+                hurdle.isContainedScore = true
+                score.value++
             }
 
-            // 지나간 장애물 삭제
-            for (hurdle in deleteHurdle) {
-                hurdleList.remove(hurdle)
+            // 지나간 장애물 확인 후 적재
+            if (hurdle.px.value < -150f) {
+                deleteHurdle.add(hurdle)
             }
+        }
+
+        // 지나간 장애물 삭제
+        for (hurdle in deleteHurdle) {
+            hurdleList.remove(hurdle)
         }
     }
 

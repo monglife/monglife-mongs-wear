@@ -32,10 +32,12 @@ import androidx.navigation.NavController
 import com.mongs.wear.core.enums.TrainingCode
 import com.mongs.wear.presentation.R
 import com.mongs.wear.presentation.assets.MongResourceCode
+import com.mongs.wear.presentation.assets.MongsDarkPurple
 import com.mongs.wear.presentation.assets.NavItem
 import com.mongs.wear.presentation.component.background.TrainingNestedBackground
 import com.mongs.wear.presentation.component.common.bar.LoadingBar
-import com.mongs.wear.presentation.component.common.textbox.PayPoint
+import com.mongs.wear.presentation.component.common.bar.ProgressIndicator
+import com.mongs.wear.presentation.component.common.textbox.ScoreBox
 import com.mongs.wear.presentation.dialog.training.TrainingEndDialog
 import com.mongs.wear.presentation.dialog.training.TrainingStartDialog
 
@@ -44,60 +46,96 @@ fun TrainingRunnerView(
     navController: NavController,
     trainingRunnerViewModel: TrainingRunnerViewModel = hiltViewModel(),
 ) {
+    val mongVo = trainingRunnerViewModel.mongVo.observeAsState()
+    val trainingPayPoint = trainingRunnerViewModel.trainingPayPoint.observeAsState(0)
+    val trainingScore = trainingRunnerViewModel.trainingScore.observeAsState(0)
+    val time = trainingRunnerViewModel.time.observeAsState(0)
+    val timeout = trainingRunnerViewModel.timeout.observeAsState(0)
+    val isSuccess = trainingRunnerViewModel.isSuccess.observeAsState(false)
+
+    val isStartGame = remember { trainingRunnerViewModel.runnerEngine.isStartGame }
+    val score = remember { trainingRunnerViewModel.runnerEngine.score }
+    val player = remember { trainingRunnerViewModel.runnerEngine.player }
+    val hurdleList = remember { trainingRunnerViewModel.runnerEngine.hurdleList }
+
     Box {
         if (trainingRunnerViewModel.uiState.loadingBar) {
             TrainingNestedBackground()
             TrainingRunnerLoadingBar()
         } else {
-
-            val runnerPayPoint = trainingRunnerViewModel.trainingPayPoint.observeAsState(0)
-            val mongVo = trainingRunnerViewModel.mongVo.observeAsState()
-            val isStartGame = remember { trainingRunnerViewModel.runnerEngine.isStartGame }
-            val score = remember { trainingRunnerViewModel.runnerEngine.score }
-            val player = remember { trainingRunnerViewModel.runnerEngine.player }
-            val hurdleList = remember { trainingRunnerViewModel.runnerEngine.hurdleList }
-
             TrainingNestedBackground(isMoving = isStartGame.value)
 
-            mongVo.value?.let {
-                player.value?.let { player ->
-                    TrainingRunnerContent(
-                        mongTypeCode = it.mongTypeCode,
-                        player = player,
-                        hurdleList = hurdleList,
-                        modifier = Modifier.zIndex(1f),
-                    )
+            mongVo.value?.let { mongVo ->
+                TrainingRunnerContent(
+                    mongTypeCode = mongVo.mongTypeCode,
+                    player = player.value,
+                    hurdleList = hurdleList,
+                    modifier = Modifier.zIndex(1f),
+                )
 
-                    TrainingRunnerInfoContent(
-                        payPoint = score.value * runnerPayPoint.value,
-                        modifier = Modifier.zIndex(2f),
-                    )
+                TrainingRunnerScoreContent(
+                    score = score.value,
+                    trainingScore = trainingScore.value,
+                    modifier = Modifier.zIndex(2f),
+                )
+
+                ProgressIndicator(
+                    progress = time.value.toFloat() / timeout.value.toFloat() * 100,
+                    indicatorColor = MongsDarkPurple,
+                    modifier = Modifier.zIndex(3f)
+                )
+
+                // 스코어 달성 이벤트
+                LaunchedEffect(score.value) {
+                    if (score.value >= trainingScore.value) {
+                        trainingRunnerViewModel.runnerEnd(
+                            mongId = mongVo.mongId,
+                            score = score.value,
+                        )
+                    }
                 }
 
-                /**
-                 * Dialog
-                 */
-                if (trainingRunnerViewModel.uiState.trainingStartDialog) {
-                    TrainingStartDialog(
-                        firstText = "화면을 클릭하여",
-                        secondText = "장애물을 뛰어넘기",
-                        rewardPayPoint = runnerPayPoint.value,
-                        trainingStart = { trainingRunnerViewModel.runnerStart() },
-                        modifier = Modifier.zIndex(3f),
-                    )
-                } else if (trainingRunnerViewModel.uiState.trainingOverDialog) {
-                    TrainingEndDialog(
-                        trainingEnd = {
-                            trainingRunnerViewModel.runnerEnd(
-                                mongId = it.mongId,
-                                score = score.value,
-                            )
-                        },
-                        rewardPayPoint = score.value * runnerPayPoint.value,
-                        trainingCode = TrainingCode.RUNNER,
-                        modifier = Modifier.zIndex(3f),
-                    )
+                // 게임 종료 이벤트
+                LaunchedEffect(trainingRunnerViewModel.runnerEngine.endEvent) {
+                    trainingRunnerViewModel.runnerEngine.endEvent.collect {
+                        trainingRunnerViewModel.runnerEnd(
+                            mongId = mongVo.mongId,
+                            score = score.value,
+                        )
+                    }
                 }
+            }
+
+            /**
+             * Dialog
+             */
+            if (trainingRunnerViewModel.uiState.trainingStartDialog) {
+                TrainingStartDialog(
+                    firstText = "화면을 터치해",
+                    secondText = "장애물 뛰어넘기",
+                    timeout = timeout.value,
+                    rewardPayPoint = trainingPayPoint.value,
+                    trainingScore = trainingScore.value,
+                    trainingStart = {
+                        trainingRunnerViewModel.runnerStart(
+                            timeout = timeout.value
+                        )
+                    },
+                    modifier = Modifier.zIndex(4f),
+                )
+            } else if (trainingRunnerViewModel.uiState.trainingOverDialog) {
+                TrainingEndDialog(
+                    isSuccess = isSuccess.value,
+                    rewardPayPoint = trainingPayPoint.value,
+                    trainingCode = TrainingCode.RUNNER,
+                    trainingEnd = {
+                        navController.popBackStack(
+                            route = NavItem.TrainingRunner.route,
+                            inclusive = true
+                        )
+                    },
+                    modifier = Modifier.zIndex(4f),
+                )
             }
         }
     }
@@ -115,100 +153,104 @@ fun TrainingRunnerView(
 @Composable
 private fun TrainingRunnerContent(
     mongTypeCode: String,
-    player: RunnerEngine.Player,
+    player: RunnerEngine.Player?,
     hurdleList: List<RunnerEngine.Hurdle>,
     modifier: Modifier = Modifier.zIndex(0f),
 ) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .fillMaxSize()
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = { player.jump() },
-            )
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Bottom,
-            modifier = Modifier.fillMaxHeight()
+    player?.let {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = { player.jump() },
+                )
         ) {
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.72f)
+            Column(
+                verticalArrangement = Arrangement.Bottom,
+                modifier = Modifier.fillMaxHeight()
             ) {
-                Box(
-                    contentAlignment = Alignment.BottomStart,
-                    modifier = Modifier.fillMaxSize()
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.72f)
                 ) {
                     Box(
-                        modifier = Modifier.zIndex(1f)
+                        contentAlignment = Alignment.BottomStart,
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        hurdleList.forEachIndexed { index, hurdle ->
-                            Hurdle(
-                                image = R.drawable.icon_poop,
-                                height = hurdle.height,
-                                width = hurdle.width,
+                        Box(
+                            modifier = Modifier.zIndex(1f)
+                        ) {
+                            hurdleList.forEachIndexed { index, hurdle ->
+                                Hurdle(
+                                    image = R.drawable.icon_poop,
+                                    height = hurdle.height,
+                                    width = hurdle.width,
+                                    modifier = Modifier
+                                        .zIndex(-index.toFloat())
+                                        .offset {
+                                            IntOffset(
+                                                y = (hurdle.py.value).dp.roundToPx(),
+                                                x = (hurdle.px.value).dp.roundToPx(),
+                                            )
+                                        }
+                                )
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier.zIndex(2f)
+                        ) {
+                            Player(
+                                mongCode = mongTypeCode,
+                                height = player.height,
+                                width = player.width,
                                 modifier = Modifier
-                                    .zIndex(-index.toFloat())
+                                    .zIndex(1f)
                                     .offset {
                                         IntOffset(
-                                            y = (hurdle.py.value).dp.roundToPx(),
-                                            x = (hurdle.px.value).dp.roundToPx(),
+                                            y = (player.py.value).dp.roundToPx(),
+                                            x = (player.px.value).dp.roundToPx(),
                                         )
                                     }
                             )
                         }
                     }
-
-                    Box(
-                        modifier = Modifier.zIndex(2f)
-                    ) {
-                        Player(
-                            mongCode = mongTypeCode,
-                            height = player.height,
-                            width = player.width,
-                            modifier = Modifier
-                                .zIndex(1f)
-                                .offset {
-                                    IntOffset(
-                                        y = (player.py.value).dp.roundToPx(),
-                                        x = (player.px.value).dp.roundToPx(),
-                                    )
-                                }
-                        )
-                    }
                 }
-            }
 
-            Row(
-                horizontalArrangement = Arrangement.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.28f)
-            ) {
-                Spacer(modifier = Modifier)
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.28f)
+                ) {
+                    Spacer(modifier = Modifier)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun TrainingRunnerInfoContent(
-    payPoint: Int,
+private fun TrainingRunnerScoreContent(
+    score: Int,
+    trainingScore: Int,
     modifier: Modifier = Modifier.zIndex(0f),
 ) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxSize()
-            .padding(top = 10.dp)
+            .padding(top = 14.dp)
     ) {
-        PayPoint(
-            payPoint = payPoint,
+        ScoreBox(
+            score = score,
+            maxScore = trainingScore,
             modifier = Modifier
                 .align(Alignment.TopCenter)
         )

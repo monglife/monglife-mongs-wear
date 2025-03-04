@@ -31,7 +31,7 @@ fun NormalContent(
             mong = MongResourceCode.valueOf(mongVo.mongTypeCode),
             onClick = onMongClick,
             modifier = Modifier
-                .padding(bottom = 20.dp)
+                .padding(bottom = 22.dp)
                 .zIndex(1f)
         )
     }

@@ -21,6 +21,7 @@ enum class PresentationErrorCode(
     PRESENTATION_USER_GET_PRODUCTS("인앱 상품 조회 실패", false),
 
     // Auth
+    PRESENTATION_AUTH_TOKEN_EXPIRED("로그인 만료", true),
     PRESENTATION_AUTH_LOGOUT("잠시후 다시 시도", true),
     PRESENTATION_AUTH_NOT_EXISTS_EMAIL("구글 이메일 없음", false),
     PRESENTATION_AUTH_NOT_EXISTS_NAME("구글 계정명 없음", false),

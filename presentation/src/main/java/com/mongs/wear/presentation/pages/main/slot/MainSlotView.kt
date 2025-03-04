@@ -27,6 +27,7 @@ import com.mongs.wear.presentation.component.slot.effect.HeartEffect
 import com.mongs.wear.presentation.component.slot.effect.PoopCleanEffect
 import com.mongs.wear.presentation.component.slot.effect.PoopEffect
 import com.mongs.wear.presentation.component.slot.effect.SleepEffect
+import com.mongs.wear.presentation.dialog.slot.MongInteractionHelpDialog
 import com.mongs.wear.presentation.dialog.slot.SlotInteractionDialog
 import com.mongs.wear.presentation.global.viewModel.BaseViewModel
 import com.mongs.wear.presentation.pages.main.slot.MainSlotViewModel.UiState
@@ -65,34 +66,43 @@ fun MainSlotView(
                 uiState = mainSlotViewModel.uiState,
             )
 
-            if (mainSlotViewModel.uiState.slotInteractionDialog && !isPageChanging.value) {
-                SlotInteractionDialog(
-                    mongVo = mongVo,
-                    inventory = {
-                        Toast.makeText(
-                            context,
-                            "인벤 ${PresentationErrorCode.PRESENTATION_UPDATE_SOON.getMessage()}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        // mainSlotViewModel.uiState.slotInteractionDialog = false
-                        // navController.navigate(NavItem.Inventory.route)
-                    },
-                    feed = {
-                        mainSlotViewModel.uiState.slotInteractionDialog = false
-                        navController.navigate(NavItem.FeedNested.route)
-                    },
-                    sleeping = {
-                        mainSlotViewModel.sleeping(mongId = mongVo.mongId)
-                    },
-                    poopClean = {
-                        mainSlotViewModel.poopClean(mongId = mongVo.mongId)
-                    },
-                    stroke = {
-                        mainSlotViewModel.stroke(mongId = mongVo.mongId)
-                    },
-                    close = { mainSlotViewModel.uiState.slotInteractionDialog = false },
-                    modifier = Modifier.zIndex(3f)
-                )
+            if (!isPageChanging.value) {
+                if (mainSlotViewModel.uiState.slotInteractionDialog) {
+                    SlotInteractionDialog(
+                        mongVo = mongVo,
+                        inventory = {
+                            Toast.makeText(
+                                context,
+                                "인벤 ${PresentationErrorCode.PRESENTATION_UPDATE_SOON.getMessage()}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            // mainSlotViewModel.uiState.slotInteractionDialog = false
+                            // navController.navigate(NavItem.Inventory.route)
+                        },
+                        feed = {
+                            mainSlotViewModel.uiState.slotInteractionDialog = false
+                            navController.navigate(NavItem.FeedNested.route)
+                        },
+                        sleeping = {
+                            mainSlotViewModel.sleeping(mongId = mongVo.mongId)
+                        },
+                        poopClean = {
+                            mainSlotViewModel.poopClean(mongId = mongVo.mongId)
+                        },
+                        stroke = {
+                            mainSlotViewModel.stroke(mongId = mongVo.mongId)
+                        },
+                        close = { mainSlotViewModel.uiState.slotInteractionDialog = false },
+                        modifier = Modifier.zIndex(3f)
+                    )
+                } else if (mainSlotViewModel.uiState.mongInteractionHelpDialog) {
+                    MongInteractionHelpDialog(
+                        mongVo = mongVo,
+                        close = { mainSlotViewModel.uiState.mongInteractionHelpDialog = false },
+                        closeEver = mainSlotViewModel::helpDialogCloseEver,
+                        modifier = Modifier.zIndex(3f)
+                    )
+                }
             }
 
             LaunchedEffect(isPageChanging.value) {
@@ -142,7 +152,7 @@ private fun MainSlotContent(
                 if (!uiState.isEvolution) {
                     NormalContent(
                         mongVo = mongVo,
-                        onMongClick = {},
+                        onMongClick = slotInteractionDialog,
                         modifier = modifier,
                     )
                 }

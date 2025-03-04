@@ -7,8 +7,11 @@ import com.mongs.wear.core.exception.data.ReissueException
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Interceptor.Chain
+import okhttp3.MediaType
+import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.ResponseBody
 
 class AuthorizationInterceptor (
     private val authApi: AuthApi,
@@ -17,6 +20,9 @@ class AuthorizationInterceptor (
 
     companion object {
         private const val AUTHORIZATION_HEADER = "Authorization"
+
+        private const val AUTHORIZATION_RESPONSE_CODE = 403
+        private const val AUTHORIZATION_RESPONSE_MESSAGE = "권한 인가 실패"
 
         private const val CONNECTION_FORBIDDEN_CODE = 401
     }
@@ -31,11 +37,26 @@ class AuthorizationInterceptor (
         val response = chain.proceed(this.generateRequest(chain, accessToken))
 
         if (response.code() == CONNECTION_FORBIDDEN_CODE) {
+            return runBlocking {
+                try {
+                    val newAccessToken = reissue()
 
-            val newAccessToken = runBlocking { reissue() }
+                    return@runBlocking chain.proceed(generateRequest(chain, newAccessToken))
 
-            return chain.proceed(this.generateRequest(chain, newAccessToken))
+                } catch (e: ReissueException) {
+                    // 리프래시 토큰까지 만료된 경우 로그아웃 처리
+                    tokenDataStore.setAccessToken(accessToken = "")
+                    tokenDataStore.setRefreshToken(refreshToken = "")
 
+                    return@runBlocking Response.Builder()
+                        .request(chain.request())
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(AUTHORIZATION_RESPONSE_CODE)
+                        .message(AUTHORIZATION_RESPONSE_MESSAGE)
+                        .body(ResponseBody.create(MediaType.get("application/json"), ""))
+                        .build()
+                }
+            }
         } else {
             return response
         }
@@ -64,11 +85,6 @@ class AuthorizationInterceptor (
 
                 return body.result.accessToken
             }
-        } else if (response.code() == CONNECTION_FORBIDDEN_CODE) {
-            tokenDataStore.setAccessToken(accessToken = "")
-            tokenDataStore.setRefreshToken(refreshToken = "")
-
-            return ""
         }
 
         throw ReissueException()

@@ -38,8 +38,8 @@ enum class UseCaseErrorCode(
 
     // TRAINING
     USE_CASE_GET_BATTLE_PAY_POINT_FAILED("잠시후 재시도", true),
-    USE_CASE_GET_TRAINING_PAY_POINT_FAILED("잠시후 재시도", true),
-    USE_CASE_TRAINING_MONG_FAILED("훈련 완료 실패", true),
+    USE_CASE_GET_TRAINING_FAILED("잠시후 재시도", true),
+    USE_CASE_TRAINING_END_FAILED("훈련 완료 실패", true),
 
     // COLLECTION
     USE_CASE_COLLECTION_CREATE_MAP_COLLECTIONS_FAILED("컬렉션 맵 등록 실패", false),
@@ -84,6 +84,8 @@ enum class UseCaseErrorCode(
     USE_CASE_DEVICE_SET_NOTIFICATION_FAILED("알림 FLAG 변경 실패", false),
     USE_CASE_DEVICE_GET_SOUND_VOLUME_FAILED("음량 조회 실패", false),
     USE_CASE_DEVICE_SET_SOUND_VOLUME_FAILED("음량 변경 실패", false),
+    USE_CASE_DEVICE_GET_MONG_INTERACTION_DIALOG_OPEN_FLAG_FAILED("몽 상호작용 안내 다이얼로그 오픈 여부 조회 실패", false),
+    USE_CASE_DEVICE_SET_MONG_INTERACTION_DIALOG_OPEN_FLAG_FAILED("몽 상호작용 안내 다이얼로그 오픈 여부 설정 실패", false),
     USE_CASE_DEVICE_SET_DEVICE_ID_FAILED("기기 ID 변경 실패", false),
     USE_CASE_PLAYER_GET_STEPS_FAILED("걸음 수 조회 실패", false),
     USE_CASE_PLAYER_EXCHANGE_WALKING_COUNT_FAILED("걸음 수 환전 실패", true),

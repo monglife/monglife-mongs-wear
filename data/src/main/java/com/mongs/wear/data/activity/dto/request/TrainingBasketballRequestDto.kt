@@ -1,6 +1,6 @@
 package com.mongs.wear.data.activity.dto.request
 
-data class TrainingRunnerRequestDto(
+data class TrainingBasketballRequestDto(
 
     val mongId: Long,
 
