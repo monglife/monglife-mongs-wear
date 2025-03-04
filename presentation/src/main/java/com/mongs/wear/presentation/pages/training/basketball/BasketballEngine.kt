@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
+import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -48,10 +49,13 @@ class BasketballEngine {
         playMillis.value = 0L
         score.value = 0
 
+        val initMinRadius = basketWidth / 2 - basketHeight / 2 - 7
+
         ball.value = Ball(
             initSpeed = BALL_SPEED,
             initX = ballSx,
             initY = ballSy,
+            initMinRadius = initMinRadius,
             initRadius = ballSr,
             initDegrees = 0f,
             initFrame = 0.2f,
@@ -87,8 +91,6 @@ class BasketballEngine {
                                     basketY = basket.leftY.value,
                                 )
                             ) {
-                                ball.isCollisionFirst()
-
                                 val sin = getSin(ballX = ball.currentX.value, ballY = ball.currentY.value, basketX = basket.leftX.value, basketY = basket.leftY.value)
                                 val cos = getCos(ballX = ball.currentX.value, ballY = ball.currentY.value, basketX = basket.leftX.value, basketY = basket.leftY.value)
 
@@ -105,8 +107,6 @@ class BasketballEngine {
                                     basketY = basket.rightY.value,
                                 )
                             ) {
-                                ball.isCollisionFirst()
-
                                 val sin = getSin(ballX = ball.currentX.value, ballY = ball.currentY.value, basketX = basket.rightX.value, basketY = basket.rightY.value)
                                 val cos = getCos(ballX = ball.currentX.value, ballY = ball.currentY.value, basketX = basket.rightX.value, basketY = basket.rightY.value)
 
@@ -222,6 +222,7 @@ class BasketballEngine {
         private val initY: Float,                   // 초기 지점 Y
         private val initSpeed: Float,               // 초기 이동 속도
         private val initFrame: Float,               // 초기 프레임 (중력 보정 값)
+        private val initMinRadius: Float,           // 초기 최소 반지름 (원)
         private val initRadius: Float,              // 초기 반지름 (원)
         private val initDegrees: Float,             // 초기 회전 각도 (공 이미지)
         private var throwSpeedX: Float = 0f,        // 현재 X 축 이동 속도
@@ -232,7 +233,6 @@ class BasketballEngine {
         var currentX: MutableState<Float> = mutableFloatStateOf(initX),
         var currentY: MutableState<Float> = mutableFloatStateOf(initY),
         var isThrowing: MutableState<Boolean> = mutableStateOf(false),
-        var isCollision: MutableState<Boolean> = mutableStateOf(false),
         var isTop: MutableState<Boolean> = mutableStateOf(false),
         var isGoal: MutableState<Boolean> = mutableStateOf(false),
     ) {
@@ -275,9 +275,8 @@ class BasketballEngine {
                 this.currentY.value = nextPy
                 this.currentX.value = nextPx
 
-                if (!this.isCollision.value && !this.isGoal.value) {
-                    this.radius.value -= 0.3f
-                }
+                // 원 반지름 감소
+                this.radius.value = max(this.radius.value - 0.3f, initMinRadius)
 
                 // 각도 변경
                 if (this.throwSpeedX < 0f) {
@@ -294,7 +293,6 @@ class BasketballEngine {
 
                 // 값 초기화
                 if (this.currentY.value > 600f) {
-                    this.isThrowing.value = false
                     this.currentY.value = initY
                     this.currentX.value = initX
                     this.degrees = initDegrees
@@ -302,15 +300,11 @@ class BasketballEngine {
                     this.throwSpeedY = 0f
                     this.throwSpeedX = 0f
                     this.throwFrame = 0f
-                    this.isCollision.value = false
+                    this.isThrowing.value = false
                     this.isTop.value = false
                     this.isGoal.value = false
                 }
             }
-        }
-
-        fun isCollisionFirst() {
-            this.isCollision.value = true
         }
 
         /**
