@@ -1,17 +1,14 @@
-# 🐶 Mongs: 걸음 수 기반 스마트워치 펫 키우기 서비스
+# 🚀 Mong Life Mongs Wear App 
 
 ![header](assets/header.png)
 
-## Description
+[Mongs : 걸음 수로 키우는 다마고치 서비스](https://play.google.com/store/apps/details?id=com.mongs.wear)를 서비스하기 위한 안드로이드 앱 개발 프로젝트 입니다.
+
+## 🏗 Project Overview
 
 Mongs는 스마트워치 기반으로 사용자의 걸음 수로 펫 키우는 서비스입니다.
 
-## Architecture
-
-![architecture](assets/architecture.png)
-
-## References
+## 🐶 References
 
 - [Back-End Github](https://github.com/MongLife/monglife-mongs)
-- [Android Github](https://github.com/tableMinPark/mongs_wearable)
 - [Google Play Store](https://play.google.com/store/apps/details?id=com.mongs.wear)
