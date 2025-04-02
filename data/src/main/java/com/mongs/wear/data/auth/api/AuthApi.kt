@@ -41,6 +41,6 @@ interface AuthApi {
     /**
      * 기기 등록
      */
-    @POST("auth/device")
+    @POST("userDevice")
     suspend fun createDevice(@Body createDeviceRequestDto: CreateDeviceRequestDto) : Response<ResponseDto<Void>>
 }

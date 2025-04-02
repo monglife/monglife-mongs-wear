@@ -1,6 +1,10 @@
 package com.mongs.wear.viewModel
 
 import android.annotation.SuppressLint
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.mongs.wear.core.exception.usecase.ConnectMqttUseCaseException
 import com.mongs.wear.domain.device.usecase.SetNetworkUseCase
 import com.mongs.wear.domain.device.usecase.SetServerTotalWalkingCountUseCase
 import com.mongs.wear.domain.global.usecase.ConnectMqttUseCase
@@ -29,63 +33,51 @@ class MainActivityViewModel @Inject constructor(
 ) : BaseViewModel() {
 
     /**
-     * 네트워크 플래그 true 변경
+     * 앱 초기화
      */
-    fun initNetwork() {
+    fun initApp() {
         viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            setNetworkUseCase(
-                SetNetworkUseCase.Param(
-                    network = true
-                )
-            )
-        }
-    }
+            uiState.initPending = true
 
-    /**
-     * 플레이어 정보 동기화
-     */
-    fun updatePlayer() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+            // 네트워크 플래그 초기화
+            setNetworkUseCase(SetNetworkUseCase.Param(network = false))
+            // Mqtt 연결
+            connectMqttUseCase()
+            // 플레이어 정보 동기화
             updatePlayerUseCase()
-        }
-    }
-
-    /**
-     * 현재 몽 동기화
-     */
-    fun updateCurrentSlot() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+            // 현재 몽 정보 동기화
             updateCurrentSlotUseCase()
-        }
-    }
-
-    /**
-     * 걸음 수 동기화
-     */
-    fun updateTotalWalkingCount() {
-        // 로그인 여부 확인
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-
-            val totalWalkingCount = stepSensorManager.getWalkingCount()
-
+            // 걸음 수 동기화
             setServerTotalWalkingCountUseCase(
                 SetServerTotalWalkingCountUseCase.Param(
-                    totalWalkingCount = totalWalkingCount
+                    totalWalkingCount = stepSensorManager.getWalkingCount()
                 )
             )
+
+            uiState.initPending = false
         }
     }
 
     /**
-     * 브로커 연결
+     * 앱 서버 동기화
      */
-    fun connectMqtt() = viewModelScopeWithHandler.launch(Dispatchers.IO) {
+    fun resumeApp() {
+        if (uiState.initPending) return
 
-        uiState.loadingBar = true
-
-        connectMqttUseCase()
-
-        uiState.loadingBar = false
+        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+            // Mqtt 연결
+            connectMqttUseCase()
+            // 플레이어 정보 동기화
+            updatePlayerUseCase()
+            // 현재 몽 정보 동기화
+            updateCurrentSlotUseCase()
+            // 걸음 수 동기화
+            setServerTotalWalkingCountUseCase(
+                SetServerTotalWalkingCountUseCase.Param(
+                    totalWalkingCount = stepSensorManager.getWalkingCount()
+                )
+            )
+        }
     }
 
     /**
@@ -104,11 +96,18 @@ class MainActivityViewModel @Inject constructor(
 
     val uiState = UiState()
 
-    class UiState : BaseUiState()
+    class UiState : BaseUiState() {
+        var initPending by mutableStateOf(false)
+    }
 
     override suspend fun exceptionHandler(exception: Throwable) {
+        exception.printStackTrace()
         when(exception) {
-            else -> uiState.loadingBar = false
+            is ConnectMqttUseCaseException -> {
+                setNetworkUseCase(SetNetworkUseCase.Param(network = false))
+            }
+
+            else -> uiState.initPending = false
         }
     }
 }

@@ -19,6 +19,7 @@ import com.mongs.wear.core.exception.usecase.NeedJoinUseCaseException
 import com.mongs.wear.core.exception.usecase.NeedUpdateAppUseCaseException
 import com.mongs.wear.domain.auth.usecase.JoinUseCase
 import com.mongs.wear.domain.auth.usecase.LoginUseCase
+import com.mongs.wear.domain.global.usecase.ConnectMqttUseCase
 import com.mongs.wear.presentation.global.viewModel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

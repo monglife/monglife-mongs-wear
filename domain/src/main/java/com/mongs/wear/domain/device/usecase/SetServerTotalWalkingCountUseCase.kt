@@ -21,7 +21,6 @@ class SetServerTotalWalkingCountUseCase @Inject constructor(
     override suspend fun execute(param: Param) {
         withContext(Dispatchers.IO) {
             if (authRepository.isLogin()) {
-
                 val deviceBootedDt = TimeUtil.getBootedDt()
 
                 deviceRepository.updateWalkingCountInServer(

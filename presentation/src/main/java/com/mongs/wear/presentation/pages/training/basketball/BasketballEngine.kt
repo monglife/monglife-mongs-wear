@@ -276,7 +276,7 @@ class BasketballEngine {
                 this.currentX.value = nextPx
 
                 // 원 반지름 감소
-                this.radius.value = max(this.radius.value - 0.3f, initMinRadius)
+                this.radius.value = max(this.radius.value - 0.5f, initMinRadius)
 
                 // 각도 변경
                 if (this.throwSpeedX < 0f) {

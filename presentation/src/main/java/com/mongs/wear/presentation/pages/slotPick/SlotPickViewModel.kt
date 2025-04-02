@@ -191,6 +191,8 @@ class SlotPickViewModel @Inject constructor(
 
             getSlots()
 
+            toastEvent("슬롯 구매 완료")
+
             uiState.loadingBar = false
         }
     }

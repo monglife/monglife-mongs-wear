@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,7 +38,7 @@ import com.mongs.wear.presentation.R
 import com.mongs.wear.presentation.assets.DAL_MU_RI
 import com.mongs.wear.presentation.assets.MongsWhite
 import com.mongs.wear.presentation.assets.NavItem
-import com.mongs.wear.presentation.component.background.StoreNestedBackground
+import com.mongs.wear.presentation.component.background.ExchangeNestedBackground
 import com.mongs.wear.presentation.component.common.bar.LoadingBar
 
 @Composable
@@ -49,7 +48,7 @@ fun ExchangeMenuView(
     context: Context = LocalContext.current,
 ) {
     Box {
-        StoreNestedBackground()
+        ExchangeNestedBackground()
 
         if (exchangeMenuViewModel.uiState.loadingBar) {
             ExchangeMenuLoadingBar()
@@ -119,8 +118,16 @@ private fun ExchangeMenuContent(
                         onClick = starPoint
                     ),
             ) {
+                Image(
+                    painter = painterResource(R.drawable.point_icon_star),
+                    contentDescription = null,
+                    modifier = Modifier.size(26.dp)
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
                 Text(
-                    text = "스타포인트 환전",
+                    text = "환전",
                     textAlign = TextAlign.Center,
                     fontFamily = DAL_MU_RI,
                     fontWeight = FontWeight.Light,

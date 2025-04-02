@@ -14,7 +14,6 @@ abstract class BaseNoParamUseCase<R> {
     abstract suspend fun execute(): R
 
     suspend operator fun invoke(): R {
-
         Log.i(TAG, "[UseCase] ${this.javaClass.name}")
 
         return try {

@@ -35,7 +35,7 @@ import androidx.wear.compose.material.Text
 import com.mongs.wear.presentation.R
 import com.mongs.wear.presentation.assets.DAL_MU_RI
 import com.mongs.wear.presentation.assets.MongsWhite
-import com.mongs.wear.presentation.component.background.StoreNestedBackground
+import com.mongs.wear.presentation.component.background.ChargeStarPointBackground
 import com.mongs.wear.presentation.component.common.bar.LoadingBar
 import com.mongs.wear.presentation.component.common.button.BlueButton
 import com.mongs.wear.presentation.component.common.button.SelectButton
@@ -67,7 +67,7 @@ fun ChargeStarPointView(
     }
 
     Box {
-        StoreNestedBackground()
+        ChargeStarPointBackground()
 
         if (chargeStarPointViewModel.uiState.loadingBar) {
             ChargeStarPointLoadingBar()
@@ -144,25 +144,7 @@ private fun ChargeStarPointContent(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(0.2f)
-                ) {
-                    Text(
-                        text = productVo.productName,
-                        textAlign = TextAlign.Left,
-                        fontFamily = DAL_MU_RI,
-                        fontWeight = FontWeight.Light,
-                        fontSize = 16.sp,
-                        color = MongsWhite,
-                        maxLines = 1,
-                    )
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.35f)
+                        .weight(0.5f)
                 ) {
                     SelectButton(
                         leftBtnDisabled = productVoListIndex == 0,
@@ -179,17 +161,17 @@ private fun ChargeStarPointContent(
                             Image(
                                 painter = painterResource(R.drawable.point_icon_star),
                                 contentDescription = null,
-                                modifier = Modifier.size(26.dp)
+                                modifier = Modifier.size(28.dp)
                             )
 
                             Spacer(modifier = Modifier.width(10.dp))
 
                             Text(
-                                text = "+ ${productVo.point}",
+                                text = "x ${productVo.point}",
                                 textAlign = TextAlign.Center,
                                 fontFamily = DAL_MU_RI,
                                 fontWeight = FontWeight.Light,
-                                fontSize = 18.sp,
+                                fontSize = 20.sp,
                                 color = MongsWhite,
                                 maxLines = 1,
                             )
@@ -201,18 +183,22 @@ private fun ChargeStarPointContent(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(0.25f)
+                        .weight(0.3f)
                 ) {
                     if (!productVo.hasNotConsumed) {
                         YellowButton(
                             text = productVo.price,
-                            height = 33,
-                            width = 75,
+                            height = 37,
+                            width = 90,
+                            fontSize = 16,
                             onClick = { productOrder(productVo.productId) },
                         )
                     } else {
                         BlueButton(
                             text = "소비",
+                            height = 37,
+                            width = 90,
+                            fontSize = 16,
                             onClick = { consumeOrder(productVo.productId) },
                         )
                     }

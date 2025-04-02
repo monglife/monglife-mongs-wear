@@ -75,8 +75,8 @@ fun FeedbackView(
                     confirm = {
                         feedbackViewModel.createFeedback(
                             feedbackCode = feedbackCode.value,
-                            content = content.value)
-
+                            content = content.value
+                        )
                         content.value = ""
                     },
                     cancel = {

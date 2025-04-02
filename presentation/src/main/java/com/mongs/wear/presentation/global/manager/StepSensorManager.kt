@@ -26,7 +26,7 @@ class StepSensorManager @Inject constructor(
     }
 
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+    private var stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
     /**
      * 지속적 걸음 수 센서 값 조회
@@ -76,20 +76,24 @@ class StepSensorManager @Inject constructor(
 
     suspend fun getWalkingCount(): Int {
         return suspendCancellableCoroutine { cont ->
-            sensorOnceManager.registerListener(object : SensorEventListener {
-                override fun onSensorChanged(event: SensorEvent?) {
-                    event?.let {
-                        val totalWalkingCount = event.values[0].toInt()
+            stepSensorOnce?.let {
+                sensorOnceManager.registerListener(object : SensorEventListener {
+                    override fun onSensorChanged(event: SensorEvent?) {
+                        event?.let {
+                            val totalWalkingCount = event.values[0].toInt()
 
-                        sensorOnceManager.unregisterListener(this)
+                            sensorOnceManager.unregisterListener(this)
 
-                        cont.resume(totalWalkingCount)
+                            cont.resume(totalWalkingCount)
+                        }
                     }
-                }
 
-                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+                    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
-            }, stepSensorOnce, SensorManager.SENSOR_DELAY_FASTEST)
+                }, stepSensorOnce, SensorManager.SENSOR_DELAY_FASTEST)
+            } ?: run {
+                cont.resume(0)
+            }
         }
     }
 }

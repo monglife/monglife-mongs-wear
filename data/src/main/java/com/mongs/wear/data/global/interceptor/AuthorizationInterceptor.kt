@@ -1,9 +1,10 @@
 package com.mongs.wear.data.global.interceptor
 
+import com.mongs.wear.core.exception.data.ReissueException
 import com.mongs.wear.data.auth.api.AuthApi
 import com.mongs.wear.data.auth.dataStore.TokenDataStore
 import com.mongs.wear.data.auth.dto.request.ReissueRequestDto
-import com.mongs.wear.core.exception.data.ReissueException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Interceptor.Chain
@@ -25,10 +26,12 @@ class AuthorizationInterceptor (
         private const val AUTHORIZATION_RESPONSE_MESSAGE = "권한 인가 실패"
 
         private const val CONNECTION_FORBIDDEN_CODE = 401
+
+        private var reissuePending = false
     }
 
     /**
-     * 엑세스 토큰 인터 셉터
+     * AccessToken 토큰 인터 셉터
      */
     override fun intercept(chain: Chain): Response {
 
@@ -37,25 +40,25 @@ class AuthorizationInterceptor (
         val response = chain.proceed(this.generateRequest(chain, accessToken))
 
         if (response.code() == CONNECTION_FORBIDDEN_CODE) {
-            return runBlocking {
-                try {
-                    val newAccessToken = reissue()
+            return try {
+                val newAccessToken = runBlocking { reissue(refreshToken = tokenDataStore.getRefreshToken()) }
+                chain.proceed(generateRequest(chain, newAccessToken))
 
-                    return@runBlocking chain.proceed(generateRequest(chain, newAccessToken))
-
-                } catch (e: ReissueException) {
-                    // 리프래시 토큰까지 만료된 경우 로그아웃 처리
+            } catch (e: ReissueException) {
+                runBlocking {
                     tokenDataStore.setAccessToken(accessToken = "")
                     tokenDataStore.setRefreshToken(refreshToken = "")
-
-                    return@runBlocking Response.Builder()
-                        .request(chain.request())
-                        .protocol(Protocol.HTTP_1_1)
-                        .code(AUTHORIZATION_RESPONSE_CODE)
-                        .message(AUTHORIZATION_RESPONSE_MESSAGE)
-                        .body(ResponseBody.create(MediaType.get("application/json"), ""))
-                        .build()
                 }
+
+                Response.Builder()
+                    .request(chain.request())
+                    .protocol(Protocol.HTTP_1_1)
+                    .code(AUTHORIZATION_RESPONSE_CODE)
+                    .message(AUTHORIZATION_RESPONSE_MESSAGE)
+                    .body(ResponseBody.create(MediaType.get("application/json"), ""))
+                    .build()
+            } finally {
+                reissuePending = false
             }
         } else {
             return response
@@ -72,21 +75,29 @@ class AuthorizationInterceptor (
     /**
      * 토큰 재발행
      */
-    private suspend fun reissue() : String {
+    private suspend fun reissue(refreshToken: String) : String {
+        if (!reissuePending) {
+            reissuePending = true
 
-        val refreshToken = tokenDataStore.getRefreshToken()
+            val response = authApi.reissue(
+                reissueRequestDto = ReissueRequestDto(
+                    refreshToken = refreshToken
+                )
+            )
 
-        val response = authApi.reissue(ReissueRequestDto(refreshToken = refreshToken))
-
-        if (response.isSuccessful) {
-            response.body()?.let { body ->
-                tokenDataStore.setAccessToken(accessToken = body.result.accessToken)
-                tokenDataStore.setRefreshToken(refreshToken = body.result.refreshToken)
-
-                return body.result.accessToken
+            if (response.isSuccessful) {
+                response.body()?.let { body ->
+                    tokenDataStore.setAccessToken(accessToken = body.result.accessToken)
+                    tokenDataStore.setRefreshToken(refreshToken = body.result.refreshToken)
+                    return body.result.accessToken
+                }
             }
-        }
 
-        throw ReissueException()
+            throw ReissueException()
+        } else {
+            // 이미 발급 중인 경우 기다린 후 발급된 엑세스 토큰 반환
+            while(reissuePending) delay(100)
+            return tokenDataStore.getAccessToken()
+        }
     }
 }

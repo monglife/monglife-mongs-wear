@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,22 +26,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.navigation.NavController
 import androidx.wear.compose.material.Text
 import com.mongs.wear.domain.management.vo.MongVo
 import com.mongs.wear.presentation.R
 import com.mongs.wear.presentation.assets.DAL_MU_RI
 import com.mongs.wear.presentation.assets.MongsWhite
-import com.mongs.wear.presentation.component.background.ExchangeWalkingBackground
+import com.mongs.wear.presentation.component.background.ExchangeNestedBackground
 import com.mongs.wear.presentation.component.common.bar.LoadingBar
 import com.mongs.wear.presentation.component.common.button.BlueButton
 import com.mongs.wear.presentation.component.common.button.SelectButton
 import com.mongs.wear.presentation.component.common.textbox.PayPoint
 import com.mongs.wear.presentation.dialog.common.ConfirmAndCancelDialog
 import com.mongs.wear.presentation.dialog.error.NeedPermissionDialog
-import com.mongs.wear.presentation.global.view.OnLeavePage
 import com.mongs.wear.presentation.pages.exchange.walking.ExchangeWalkingViewModel.UiState
 import kotlin.math.max
 import kotlin.math.min
@@ -60,7 +55,7 @@ fun ExchangeWalkingView(
     val activityPermission = exchangeWalkingViewModel.activityPermission.observeAsState(true)
 
     Box {
-        ExchangeWalkingBackground()
+        ExchangeNestedBackground()
 
         if (exchangeWalkingViewModel.uiState.loadingBar) {
             ExchangeWalkingLoadingBar()
@@ -144,25 +139,7 @@ private fun ExchangeWalkingContent(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.2f)
-            ) {
-                Text(
-                    text = "$remainingSteps 걸음",
-                    textAlign = TextAlign.Center,
-                    fontFamily = DAL_MU_RI,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 16.sp,
-                    color = MongsWhite,
-                    maxLines = 1,
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(0.35f)
+                    .weight(0.6f)
             ) {
                 SelectButton(
                     leftBtnDisabled = ratio == 0,
@@ -170,31 +147,56 @@ private fun ExchangeWalkingContent(
                     leftBtnClick = { decreaseRatio(max(ratio - 1, 0)) },
                     rightBtnClick = { increaseRatio(min(ratio + 1, steps / 1000)) },
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxSize()
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxHeight(),
                     ) {
-                        Image(
-                            painter = painterResource(R.drawable.point_icon_pay),
-                            contentDescription = null,
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .height(24.dp)
-                                .width(24.dp),
-                            contentScale = ContentScale.FillBounds,
-                        )
+                                .fillMaxWidth()
+                                .weight(0.5f)
+                        ) {
+                            Text(
+                                text = "$remainingSteps 걸음",
+                                textAlign = TextAlign.Center,
+                                fontFamily = DAL_MU_RI,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 16.sp,
+                                color = MongsWhite,
+                                maxLines = 1,
+                            )
+                        }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.5f)
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.point_icon_pay),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .height(24.dp)
+                                    .width(24.dp),
+                                contentScale = ContentScale.FillBounds,
+                            )
 
-                        Text(
-                            text = "+ $chargePayPoint",
-                            textAlign = TextAlign.Center,
-                            fontFamily = DAL_MU_RI,
-                            fontWeight = FontWeight.Light,
-                            fontSize = 18.sp,
-                            color = MongsWhite,
-                            maxLines = 1,
-                        )
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = "+ $chargePayPoint",
+                                textAlign = TextAlign.Center,
+                                fontFamily = DAL_MU_RI,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 18.sp,
+                                color = MongsWhite,
+                                maxLines = 1,
+                            )
+                        }
                     }
                 }
             }
@@ -203,7 +205,7 @@ private fun ExchangeWalkingContent(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.25f)
+                    .weight(0.2f)
             ) {
                 BlueButton(
                     text = "환전",
@@ -213,7 +215,7 @@ private fun ExchangeWalkingContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }

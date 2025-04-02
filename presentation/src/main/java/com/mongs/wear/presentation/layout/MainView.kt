@@ -60,26 +60,26 @@ import kotlinx.coroutines.tasks.await
 
 @Composable
 fun MainView (
+    initPending: Boolean,
     context: Context = LocalContext.current,
     mainViewModel: MainViewModel = hiltViewModel(),
 ) {
     Box {
-        val networkFlag = mainViewModel.network.observeAsState(true)
-
-        if (mainViewModel.uiState.loadingBar || mainViewModel.uiState.permissionLoadingBar) {
+        if (initPending || mainViewModel.uiState.loadingBar || mainViewModel.uiState.permissionLoadingBar) {
             MainBackground()
             MainLoadingBar()
         } else {
+            val networkFlag = mainViewModel.network.observeAsState(true)
             val isLogin = mainViewModel.isLogin.observeAsState(true)
             NavContent(isLogin = isLogin, modifier = Modifier.zIndex(0f))
-        }
 
-        if (!networkFlag.value) {
-            NetworkErrorDialog(
-                errorDialogLoadingBar = mainViewModel.uiState.errorDialogLoadingBar,
-                retryNetwork = mainViewModel::retryNetwork,
-                modifier = Modifier.zIndex(1f),
-            )
+            if (!networkFlag.value) {
+                NetworkErrorDialog(
+                    errorDialogLoadingBar = mainViewModel.uiState.errorDialogLoadingBar,
+                    retryNetwork = mainViewModel::retryNetwork,
+                    modifier = Modifier.zIndex(1f),
+                )
+            }
         }
     }
 

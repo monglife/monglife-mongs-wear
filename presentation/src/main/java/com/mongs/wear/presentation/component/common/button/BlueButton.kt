@@ -34,6 +34,7 @@ fun BlueButton(
     onClick: () -> Unit,
     height: Int = 30,
     width: Int = 63,
+    fontSize: Int = 12,
     disable: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
@@ -67,7 +68,7 @@ fun BlueButton(
                 textAlign = TextAlign.Center,
                 fontFamily = DAL_MU_RI,
                 fontWeight = FontWeight.Light,
-                fontSize = 14.sp,
+                fontSize = fontSize.sp,
                 color = MongsNavy,
                 maxLines = 1,
             )

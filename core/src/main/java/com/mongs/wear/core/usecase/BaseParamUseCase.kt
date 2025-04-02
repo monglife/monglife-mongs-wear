@@ -8,14 +8,13 @@ import com.mongs.wear.core.exception.global.UseCaseException
 abstract class BaseParamUseCase<P, R> {
 
     companion object {
-        private const val TAG = "BaseParamUseCase"
+        private const val TAG = "UseCase"
     }
 
     abstract suspend fun execute(param: P): R
 
     suspend operator fun invoke(param: P): R {
-
-        Log.i(TAG, "[UseCase Invoke] ${this.javaClass.name} $param")
+        Log.i(TAG, "[UseCase] ${this.javaClass.name} $param")
 
         return try {
             // 메서드 실행

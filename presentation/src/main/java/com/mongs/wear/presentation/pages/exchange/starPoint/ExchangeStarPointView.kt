@@ -33,7 +33,7 @@ import com.mongs.wear.domain.management.vo.MongVo
 import com.mongs.wear.presentation.R
 import com.mongs.wear.presentation.assets.DAL_MU_RI
 import com.mongs.wear.presentation.assets.MongsWhite
-import com.mongs.wear.presentation.component.background.StoreNestedBackground
+import com.mongs.wear.presentation.component.background.ExchangeNestedBackground
 import com.mongs.wear.presentation.component.common.bar.LoadingBar
 import com.mongs.wear.presentation.component.common.button.SelectButton
 import com.mongs.wear.presentation.component.common.button.YellowButton
@@ -57,7 +57,7 @@ fun ExchangeStarPointView(
     val chargePayPoint = remember { derivedStateOf { StoreConst.STAR_POINT_PER * ratio.intValue } }
 
     Box {
-        StoreNestedBackground()
+        ExchangeNestedBackground()
 
         if (exchangeStarPointViewModel.uiState.loadingBar) {
             ExchangeStarPointLoadingBar()
@@ -128,33 +128,7 @@ private fun ExchangeStarPointContent(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.25f)
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.point_icon_star),
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Text(
-                    text = "X $starPoint",
-                    textAlign = TextAlign.Center,
-                    fontFamily = DAL_MU_RI,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 16.sp,
-                    color = MongsWhite,
-                    maxLines = 1,
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.Top,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.3f)
+                    .weight(0.6f)
             ) {
                 SelectButton(
                     leftBtnDisabled = ratio == 0,
@@ -162,29 +136,62 @@ private fun ExchangeStarPointContent(
                     leftBtnClick = decreaseRatio,
                     rightBtnClick = increaseRatio,
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxSize()
+                    Column(
+                        modifier = Modifier.fillMaxHeight(),
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        Image(
-                            painter = painterResource(R.drawable.point_icon_pay),
-                            contentDescription = null,
-                            modifier = Modifier.size(26.dp),
-                            contentScale = ContentScale.FillBounds,
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.5f)
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.point_icon_star),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
 
-                        Spacer(modifier = Modifier.width(10.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
 
-                        Text(
-                            text = "+ $chargePayPoint",
-                            textAlign = TextAlign.Center,
-                            fontFamily = DAL_MU_RI,
-                            fontWeight = FontWeight.Light,
-                            fontSize = 18.sp,
-                            color = MongsWhite,
-                            maxLines = 1,
-                        )
+                            Text(
+                                text = "x $starPoint",
+                                textAlign = TextAlign.Center,
+                                fontFamily = DAL_MU_RI,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 16.sp,
+                                color = MongsWhite,
+                                maxLines = 1,
+                            )
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.5f)
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.point_icon_pay),
+                                contentDescription = null,
+                                modifier = Modifier.size(26.dp),
+                                contentScale = ContentScale.FillBounds,
+                            )
+
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            Text(
+                                text = "+ $chargePayPoint",
+                                textAlign = TextAlign.Center,
+                                fontFamily = DAL_MU_RI,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 18.sp,
+                                color = MongsWhite,
+                                maxLines = 1,
+                            )
+                        }
                     }
                 }
             }
@@ -193,7 +200,7 @@ private fun ExchangeStarPointContent(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.25f)
+                    .weight(0.2f)
             ) {
                 YellowButton(
                     text = "환전",
@@ -203,7 +210,7 @@ private fun ExchangeStarPointContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }

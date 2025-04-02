@@ -30,7 +30,7 @@ class TrainingBasketballViewModel  @Inject constructor(
 
     companion object {
         private const val DEFAULT_BALL_RADIUS = 50f
-        private const val DEFAULT_BASKET_WIDTH = 115f
+        private const val DEFAULT_BASKET_WIDTH = 125f
         private const val DEFAULT_BASKET_HEIGHT = 22f
     }
 

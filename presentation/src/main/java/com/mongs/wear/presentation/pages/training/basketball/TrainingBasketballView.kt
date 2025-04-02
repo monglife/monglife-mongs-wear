@@ -293,7 +293,7 @@ private fun Basket(
                 height = height,
             ),
             dstOffset = IntOffset(
-                x = (basket.currentX.value - (basket.width + basket.radius * 2) / 2).toInt(),
+                x = (basket.currentX.value - basket.width / 2 - basket.radius).toInt(),
                 y = (basket.currentY.value - basket.height / 2).toInt(),
             ),
         )

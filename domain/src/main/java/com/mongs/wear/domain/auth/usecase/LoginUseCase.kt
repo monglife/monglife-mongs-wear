@@ -9,10 +9,10 @@ import com.mongs.wear.core.exception.usecase.CreateDeviceUseCaseException
 import com.mongs.wear.core.exception.usecase.LoginUseCaseException
 import com.mongs.wear.core.exception.usecase.NeedJoinUseCaseException
 import com.mongs.wear.core.exception.usecase.NeedUpdateAppUseCaseException
+import com.mongs.wear.core.usecase.BaseParamUseCase
 import com.mongs.wear.domain.auth.repository.AuthRepository
 import com.mongs.wear.domain.device.repository.DeviceRepository
 import com.mongs.wear.domain.global.client.MqttClient
-import com.mongs.wear.core.usecase.BaseParamUseCase
 import com.mongs.wear.domain.management.repository.ManagementRepository
 import com.mongs.wear.domain.player.repository.PlayerRepository
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +35,6 @@ class LoginUseCase @Inject constructor(
      * @throws LoginException 로그인 실패
      */
     override suspend fun execute(param: Param) {
-
         withContext(Dispatchers.IO) {
             // 기기 등록
             authRepository.createDevice(
@@ -50,18 +49,15 @@ class LoginUseCase @Inject constructor(
                 googleAccountId = param.googleAccountId
             )
 
+            // 몽 정보 전체 동기화
+            managementRepository.updateMongs()
+            // 플레이어 정보 등록
+            playerRepository.createPlayer()
+
             // 브로커 연결 여부 확인
             if (mqttClient.isConnected()) {
-                // 플레이어 정보 등록
-                playerRepository.createPlayer()
                 // 플레이어 정보 구독
                 mqttClient.subPlayer(accountId = accountId)
-                // 네트워크 flag 설정
-                deviceRepository.setNetwork(network = true)
-                // 몽 정보 전체 동기화
-                managementRepository.updateMongs()
-            } else {
-                throw LoginUseCaseException()
             }
         }
     }
@@ -77,6 +73,7 @@ class LoginUseCase @Inject constructor(
 
     override fun handleException(exception: DataException) {
         super.handleException(exception)
+
 
         when (exception) {
             is NeedUpdateAppException -> throw NeedUpdateAppUseCaseException()

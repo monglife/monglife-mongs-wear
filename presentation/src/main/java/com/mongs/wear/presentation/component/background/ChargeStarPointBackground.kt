@@ -14,16 +14,16 @@ import androidx.compose.ui.zIndex
 import com.mongs.wear.presentation.R
 
 @Composable
-fun ExchangeWalkingBackground(
+fun ChargeStarPointBackground(
     modifier: Modifier = Modifier.zIndex(0f)
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize()
     ) {
         Image(
             painter = painterResource(R.drawable.bg_normal),
-            contentDescription = "ExchangeWalkingBackground",
+            contentDescription = "ChargeStarPointBackground",
             contentScale = ContentScale.Crop
         )
     }
@@ -31,6 +31,6 @@ fun ExchangeWalkingBackground(
 
 @Preview(showSystemUi = true, device = Devices.WEAR_OS_SMALL_ROUND)
 @Composable
-private fun ExchangeWalkingBackgroundPreview() {
-    ExchangeWalkingBackground()
+private fun StoreNestedBackgroundPreview() {
+    ChargeStarPointBackground()
 }
