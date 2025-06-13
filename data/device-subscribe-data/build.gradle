@@ -1,0 +1,11 @@
+android {
+    namespace "${rootProject.ext.namespace}.data.device.subscribe"
+}
+
+dependencies {
+    implementation project(":domain:device-domain")
+
+    // mqtt
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    implementation "com.github.hannesa2:paho.mqtt.android:${parent.ext.mqttVersion}"
+}

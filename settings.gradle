@@ -11,13 +11,51 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven { url "https://jitpack.io" }
     }
 }
 
 rootProject.name = "mongs"
-include ':core'
-include ':app'
-include ':presentation'
-include ':domain'
-include ':data'
+
+include ":app"
+include ":app:mongs-wear-app"
+
+include ":application"
+include ":application:auth-application"
+include ":application:battle-application"
+include ":application:device-application"
+include ":application:member-application"
+include ":application:mong-application"
+
+include ":core"
+include ":core:application-core"
+include ":core:data-core"
+include ":core:presentation-core"
+
+include ":data"
+include ":data:auth-persistence-data"
+include ":data:auth-web-data"
+include ":data:battle-persistence-data"
+include ":data:battle-publish-data"
+include ":data:battle-subscribe-data"
+include ":data:battle-web-data"
+include ":data:device-persistence-data"
+include ":data:device-subscribe-data"
+include ":data:device-web-data"
+include ":data:member-persistence-data"
+include ":data:member-subscribe-data"
+include ":data:member-web-data"
+include ":data:mong-persistence-data"
+include ":data:mong-subscribe-data"
+include ":data:mong-web-data"
+
+include ":domain"
+include ":domain:auth-domain"
+include ":domain:battle-domain"
+include ":domain:device-domain"
+include ":domain:member-domain"
+include ":domain:mong-domain"
+
+include ":presentation"
+include ":presentation:mongs-viewmodel-presentation"
+include ":presentation:mongs-view-wear-presentation"

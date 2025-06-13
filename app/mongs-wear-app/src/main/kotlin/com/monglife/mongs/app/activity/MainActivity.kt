@@ -1,0 +1,22 @@
+package com.monglife.mongs.app.activity
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import com.monglife.mongs.presentation.wear.layout.MainView
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        /**
+         * UI 로딩
+         */
+        setContent {
+            MainView()
+        }
+    }
+}

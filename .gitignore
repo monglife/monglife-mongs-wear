@@ -15,6 +15,10 @@
 .cxx
 local.properties
 
-core/build
+**/src/main/res/values
+**/build/
+**/release
+**/schemas
 
-app/release
+**/*.json
+**/*.pro

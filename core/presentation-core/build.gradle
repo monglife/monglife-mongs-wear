@@ -1,0 +1,20 @@
+apply plugin: "com.android.library"
+apply plugin: "org.jetbrains.kotlin.android"
+
+android {
+    namespace "${rootProject.ext.namespace}.core.presentation"
+
+    compileSdk 35
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.javaVersion
+        targetCompatibility rootProject.ext.javaVersion
+    }
+
+    kotlinOptions {
+        jvmTarget = rootProject.ext.javaVersion.toString()
+    }
+}
+
+dependencies {
+}

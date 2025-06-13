@@ -1,0 +1,21 @@
+subprojects {
+    apply plugin: "org.jetbrains.kotlin.jvm"
+    apply plugin: 'com.google.devtools.ksp'
+
+    dependencies {
+        // core layer
+        implementation project(':core:application-core')
+        implementation project(':domain:auth-domain')
+        implementation project(':domain:battle-domain')
+        implementation project(':domain:device-domain')
+        implementation project(':domain:member-domain')
+        implementation project(':domain:mong-domain')
+
+        // coroutine-flow
+        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
+
+        // dagger-hilt
+        implementation "com.google.dagger:dagger:${rootProject.ext.hiltVersion}"
+        ksp "com.google.dagger:dagger-compiler:${rootProject.ext.hiltVersion}"
+    }
+}

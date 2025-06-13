@@ -1,0 +1,90 @@
+buildscript {
+    ext {
+        hiltWorkerVersion       = "1.2.0"
+        hiltNavigationVersion   = "1.2.0"
+        coilVersion             = "2.5.0"
+        composeVersion          = "1.4.0"
+        composeWearVersion      = "1.7.6"
+        gmsVersion              = "21.3.0"
+        firebaseVersion         = "33.8.0"
+        fcmVersion              = "24.1.0"
+        billingClientVersion    = "7.1.1"
+        workerVersion           = "2.8.1"
+    }
+}
+
+apply plugin: "com.android.application"
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: "dagger.hilt.android.plugin"
+apply plugin: "com.google.gms.google-services"
+apply plugin: 'org.jetbrains.kotlin.android'
+
+android {
+    namespace "${rootProject.ext.namespace}.app.wear"
+
+    compileSdk 35
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.javaVersion
+        targetCompatibility rootProject.ext.javaVersion
+    }
+
+    kotlinOptions {
+        jvmTarget = rootProject.ext.javaVersion.toString()
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.14"
+    }
+
+    defaultConfig {
+        minSdk          30
+        targetSdk       34
+        versionCode     24
+        versionName     "2.0.2"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+}
+
+dependencies {
+    implementation project(":presentation:mongs-view-wear-presentation")
+    implementation project(":presentation:mongs-viewmodel-presentation")
+
+    // dagger & hilt
+    implementation group: "javax.inject", name: "javax.inject", version: "1"
+    implementation "com.google.dagger:hilt-android:2.49"
+    implementation "androidx.compose.foundation:foundation-layout-android:1.7.7"
+    implementation 'androidx.core:core-ktx:1.16.0'
+    ksp "com.google.dagger:hilt-compiler:2.48.1"
+    implementation "androidx.hilt:hilt-work:1.2.0"
+    ksp "androidx.hilt:hilt-compiler:1.2.0"
+
+    // compose
+    api "androidx.wear.compose:compose-material:${composeVersion}"
+    api "androidx.wear.compose:compose-foundation:${composeVersion}"
+    api "androidx.compose.runtime:runtime-livedata:${composeWearVersion}"
+    api "androidx.compose.material:material-icons-extended:${composeWearVersion}"
+    api "androidx.hilt:hilt-navigation-compose:${hiltNavigationVersion}"
+    implementation "androidx.wear.compose:compose-navigation:${composeVersion}"
+    implementation "androidx.compose.ui:ui-tooling-preview:${composeWearVersion}"
+    debugImplementation "androidx.compose.ui:ui-tooling:${composeWearVersion}"
+}

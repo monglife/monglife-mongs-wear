@@ -1,0 +1,25 @@
+apply plugin: "com.android.library"
+apply plugin: "org.jetbrains.kotlin.android"
+
+android {
+    namespace "${rootProject.ext.namespace}.core.data"
+
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 30
+    }
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.javaVersion
+        targetCompatibility rootProject.ext.javaVersion
+    }
+
+    kotlinOptions {
+        jvmTarget = rootProject.ext.javaVersion.toString()
+    }
+}
+
+dependencies {
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+}

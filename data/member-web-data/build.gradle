@@ -1,0 +1,12 @@
+android {
+    namespace "${rootProject.ext.namespace}.data.member.web"
+}
+
+dependencies {
+    implementation project(":domain:member-domain")
+
+    // retrofit2 & coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
+    implementation "com.squareup.retrofit2:retrofit:${parent.ext.retrofitVersion}"
+    implementation "com.squareup.retrofit2:converter-gson:${parent.ext.retrofitVersion}"
+}
