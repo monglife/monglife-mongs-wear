@@ -3,7 +3,7 @@ package com.monglife.mongs.app.activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.monglife.mongs.presentation.wear.layout.MainView
+import com.monglife.mongs.presentation.view.layout.MainView
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

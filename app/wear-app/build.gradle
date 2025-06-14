@@ -1,11 +1,10 @@
 apply plugin: "com.android.application"
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "dagger.hilt.android.plugin"
-//apply plugin: "com.google.gms.google-services"
 apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
-    namespace "${rootProject.ext.namespace}.app.wear"
+    namespace "${rootProject.ext.namespace}"
 
     compileSdk 35
 
@@ -59,18 +58,4 @@ dependencies {
     implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
     ksp "com.google.dagger:dagger-compiler:${rootProject.ext.hiltVersion}"
     ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
-
-//    implementation "androidx.compose.foundation:foundation-layout-android:1.8.2"
-//    implementation 'androidx.core:core-ktx:1.16.0'
-
-    // compose
-//    implementation "androidx.hilt:hilt-navigation-compose:${this.ext.hiltNavigationVersion}"
-//    implementation "androidx.wear.compose:compose-material:${this.ext.composeVersion}"
-//    implementation "androidx.wear.compose:compose-foundation:${this.ext.composeVersion}"
-//    implementation "androidx.wear.compose:compose-navigation:${this.ext.composeVersion}"
-//
-//    implementation "androidx.compose.runtime:runtime-livedata:${this.ext.composeWearVersion}"
-//    implementation "androidx.compose.material:material-icons-extended:${this.ext.composeWearVersion}"
-//    implementation "androidx.compose.ui:ui-tooling-preview:${this.ext.composeWearVersion}"
-//    debugImplementation "androidx.compose.ui:ui-tooling:${this.ext.composeWearVersion}"
 }

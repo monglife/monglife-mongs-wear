@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.wear.layout
+package com.monglife.mongs.presentation.view.layout
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

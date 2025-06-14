@@ -1,8 +1,8 @@
 buildscript {
     ext {
-        hiltNavigationVersion   = "1.2.0"
         composeVersion          = "1.4.1"
         composeWearVersion      = "1.8.2"
+        hiltNavigationVersion   = "1.2.0"
         materialVersion         = "1.7.6"
         coilVersion             = "2.5.0"
     }
@@ -26,7 +26,7 @@ dependencies {
     // compose
     api "androidx.wear.compose:compose-material:${this.ext.composeVersion}"
     api "androidx.wear.compose:compose-foundation:${this.ext.composeVersion}"
-    implementation "androidx.wear.compose:compose-navigation:${this.ext.composeVersion}"
+    api "androidx.wear.compose:compose-navigation:${this.ext.composeVersion}"
     implementation "androidx.compose.runtime:runtime-livedata:${this.ext.composeWearVersion}"
     implementation "androidx.compose.ui:ui-tooling-preview:${this.ext.composeWearVersion}"
     implementation "androidx.hilt:hilt-navigation-compose:${this.ext.hiltNavigationVersion}"

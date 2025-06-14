@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        namespace               = "com.monglife.mongs"
+        namespace               = "com.mongs.wear"
         javaVersion             = JavaVersion.VERSION_17
         androidVersion          = "8.10.1"
         kotlinVersion           = "1.9.24"
