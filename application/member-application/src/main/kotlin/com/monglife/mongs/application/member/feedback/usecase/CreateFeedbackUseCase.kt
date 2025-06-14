@@ -1,9 +1,7 @@
-package com.monglife.mongs.domain.member.feedback.usecase
+package com.monglife.mongs.application.member.feedback.usecase
 
-import com.monglife.mongs.domain.member.feedback.repository.FeedbackRepository
-import com.mongs.wear.core.exception.data.CreateFeedbackException
-import com.mongs.wear.core.exception.global.DataException
-import com.mongs.wear.core.exception.usecase.CreateFeedbackUseCaseException
+import com.monglife.mongs.application.member.feedback.exception.InvalidCreateFeedbackException
+import com.monglife.mongs.application.member.feedback.port.web.FeedbackWebPort
 import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,30 +11,24 @@ import javax.inject.Inject
  * 오류 신고 등록 UseCase
  */
 class CreateFeedbackUseCase @Inject constructor(
-    private val feedbackRepository: FeedbackRepository,
-) : BaseParamUseCase<CreateFeedbackUseCase.Param, Unit>() {
+    private val feedbackWebPort: FeedbackWebPort,
+) : BaseParamUseCase<CreateFeedbackUseCase.Command, Unit>() {
 
-    override suspend fun execute(param: Param) {
+    @Throws(InvalidCreateFeedbackException::class)
+    override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
-            feedbackRepository.createFeedback(
-                title = param.title,
-                content = param.content,
+            // 오류 신고 등록 요청
+            feedbackWebPort.createFeedback(
+                deviceName = command.deviceName,
+                title = command.title,
+                content = command.content,
             )
         }
     }
 
-    data class Param(
+    data class Command(
+        val deviceName: String,
         val title: String,
         val content: String,
     )
-
-    override fun handleException(exception: DataException) {
-        super.handleException(exception)
-
-        when(exception) {
-            is CreateFeedbackException -> throw CreateFeedbackUseCaseException()
-
-            else -> throw CreateFeedbackUseCaseException()
-        }
-    }
 }

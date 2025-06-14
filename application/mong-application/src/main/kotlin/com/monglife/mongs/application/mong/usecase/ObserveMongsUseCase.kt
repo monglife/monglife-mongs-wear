@@ -19,8 +19,10 @@ class ObserveMongsUseCase @Inject constructor(
 
     override suspend fun execute(): List<Flow<MongVo>> {
         return withContext(Dispatchers.IO) {
+            // 몽 Flow 목록 로컬 조회
             managementPersistencePort.getMongsFlow().map { mongFlow: Flow<Mong> ->
                 mongFlow.map { mong: Mong ->
+                    // MongVo 반환
                     MongVo.of(mong = mong)
                 }
             }

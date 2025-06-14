@@ -16,7 +16,7 @@ class GetIsLoginUseCase @Inject constructor(
 
     override suspend fun execute(): Flow<Boolean> {
         return withContext(Dispatchers.IO) {
-            // token 존재 여부 확인
+            // session 존재 여부 로컬 조회
             authPersistencePort.isExistsSessionFlow()
         }
     }

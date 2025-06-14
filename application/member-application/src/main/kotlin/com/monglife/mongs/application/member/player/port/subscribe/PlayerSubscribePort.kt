@@ -1,7 +1,7 @@
 package com.monglife.mongs.application.member.player.port.subscribe
 
-import com.monglife.mongs.application.auth.exception.InvalidDisSubscribePlayerException
-import com.monglife.mongs.application.auth.exception.InvalidSubscribePlayerException
+import com.monglife.mongs.application.member.player.exception.InvalidDisSubscribePlayerException
+import com.monglife.mongs.application.member.player.exception.InvalidSubscribePlayerException
 
 interface PlayerSubscribePort {
 

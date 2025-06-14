@@ -21,7 +21,7 @@ class CreateMongUseCase @Inject constructor(
     @Throws(InvalidCreateMongException::class)
     override suspend fun execute(command: Command): MongVo {
         return withContext(Dispatchers.IO) {
-            // 몽 생성
+            // 몽 생성 요청
             managementWebPort.createMong(
                 name = command.name,
                 sleepAt = command.sleepAt,
@@ -31,7 +31,7 @@ class CreateMongUseCase @Inject constructor(
                 val mong = it.toDomain()
                 // 현재 몽으로 설정
                 mong.selectAsActive()
-                // 몽 저장
+                // 몽 로컬 등록
                 managementPersistencePort.saveMong(mong = mong)
                 // MongVo 반환
                 MongVo.of(mong = mong)

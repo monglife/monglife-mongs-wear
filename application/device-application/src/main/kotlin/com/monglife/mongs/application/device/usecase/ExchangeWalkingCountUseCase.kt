@@ -4,6 +4,7 @@ import com.monglife.mongs.application.device.exception.ExchangeWalkingCountExcep
 import com.monglife.mongs.application.device.exception.NotFoundStepException
 import com.monglife.mongs.application.device.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.device.port.web.DeviceWebPort
+import com.monglife.mongs.application.device.port.web.request.ExchangeWalkingCountRequest
 import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
 import com.monglife.mongs.domain.device.model.Step
 import kotlinx.coroutines.Dispatchers
@@ -19,32 +20,40 @@ class ExchangeWalkingCountUseCase @Inject constructor(
     private val deviceWebPort: DeviceWebPort,
 ) : BaseParamUseCase<ExchangeWalkingCountUseCase.Command, Unit>() {
 
-    @Throws(NotFoundStepException::class, ExchangeWalkingCountException::class)
+    @Throws(ExchangeWalkingCountException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
-            // 로컬 Step 조회
+            // Step 로컬 조회
             val step = runCatching { devicePersistencePort.getStep() }
-                .getOrElse {
-                    // 로컬 Step 등록
-                    devicePersistencePort.saveStep(
-                        step = Step(
-                            totalWalkingCount = command.totalWalkingCount,
-                            deviceBootedAt = command.deviceBootedAt,
+                .getOrElse { ex ->
+                    // 로컬 Step 이 없는 경우
+                    if (ex is NotFoundStepException) {
+                        // Step 로컬 등록
+                        devicePersistencePort.saveStep(
+                            step = Step(
+                                totalWalkingCount = command.totalWalkingCount,
+                                deviceBootedAt = command.deviceBootedAt,
+                            )
                         )
-                    )
+                    } else {
+                        throw ex
+                    }
                 }
-
             // 걸음 수 환전 요청
             deviceWebPort.exchangeWalkingCount(
-                mongId = command.mongId,
-                walkingCount = command.walkingCount,
-                step = step,
+                exchangeWalkingCountRequest = ExchangeWalkingCountRequest(
+                    mongId = command.mongId,
+                    walkingCount = command.walkingCount,
+                    totalWalkingCount = command.totalWalkingCount,
+                    deviceBootedAt = command.deviceBootedAt,
+                ),
             ).let {
-                // Step 수정
+                // Step 업데이트
                 step.updateWalkingCount(
                     consumedWalkingCount = it.consumeWalkingCount,
                     walkingCount = it.walkingCount
                 )
+                // Step 로컬 등록
                 devicePersistencePort.saveStep(step = step)
             }
         }

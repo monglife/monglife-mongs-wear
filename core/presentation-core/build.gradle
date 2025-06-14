@@ -6,6 +6,10 @@ android {
 
     compileSdk 35
 
+    defaultConfig {
+        minSdk 30
+    }
+
     compileOptions {
         sourceCompatibility rootProject.ext.javaVersion
         targetCompatibility rootProject.ext.javaVersion

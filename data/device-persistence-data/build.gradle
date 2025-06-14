@@ -3,18 +3,13 @@ android {
 }
 
 dependencies {
+    // application layer
+    implementation project(":application:device-application")
+
+    // core layer
+    implementation project(":core:data-core:room-data-core")
+
+    // domain layer
     implementation project(":domain:device-domain")
-
-    // room
-    implementation "androidx.room:room-runtime:${parent.ext.roomVersion}"
-    implementation "androidx.room:room-ktx:${parent.ext.roomVersion}"
-    ksp "androidx.room:room-compiler:${parent.ext.roomVersion}"
-
-    // data store
-    implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
-    implementation "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
 }
 
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-}

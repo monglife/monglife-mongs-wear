@@ -15,13 +15,22 @@ class SetMongInteractionDialogOpenFlagUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,
 ) : BaseParamUseCase<SetMongInteractionDialogOpenFlagUseCase.Command, Unit>() {
 
-    @Throws(NotFoundDeviceOptionException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
+            // DeviceOption 로컬 조회
             runCatching { devicePersistencePort.getDeviceOption() }
-                .getOrElse { DeviceOption() }
+                .getOrElse { ex ->
+                    // DeviceOption 이 없는 경우
+                    if (ex is NotFoundDeviceOptionException) {
+                        // DeviceOption 생성
+                        DeviceOption()
+                    } else
+                        throw ex
+                }
                 .let { deviceOption: DeviceOption ->
+                    // DeviceOption mongInteractionDialogOpen 변경
                     deviceOption.updateMongInteractionDialogOpen(mongInteractionDialogOpen = command.isOpen)
+                    // DeviceOption 로컬 등록
                     devicePersistencePort.saveDeviceOption(deviceOption = deviceOption)
                 }
         }

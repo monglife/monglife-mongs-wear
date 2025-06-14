@@ -24,20 +24,22 @@ class RandomDrawUseCase @Inject constructor(
     @Throws(NotFoundMongException::class, InvalidRandomDrawException::class, InvalidBuyRandomDrawTicketException::class)
     override suspend fun execute(command: Command): RandomDrawVo {
         return withContext(Dispatchers.IO) {
+            // 몽 조회 요청
             managementWebPort.getMong(mongId = command.mongId).let {
                 val mong = it.toDomain()
-
+                // 랜덤 뽑기 티켓이 없는 경우
                 if (mong.randomDrawTicketCount <= 0) {
                     // 랜덤 뽑기 티켓 구매 요청
                     interactionWebPort.buyRandomDrawTicket(mongId = mong.mongId).let { response ->
+                        // 랜덤 뽑기 티켓 구매
                         mong.buyRandomDrawTicket(
                             payPoint = response.payPoint,
                             randomDrawTicketCount = response.randomDrawTicketCount,
                         )
+                        // 몽 로컬 등록
                         managementPersistencePort.saveMong(mong = mong)
                     }
                 }
-
                 // 랜덤 뽑기 요청
                 interactionWebPort.randomDraw(mongId = mong.mongId).let { response ->
                     // RandomDrawVo 반환

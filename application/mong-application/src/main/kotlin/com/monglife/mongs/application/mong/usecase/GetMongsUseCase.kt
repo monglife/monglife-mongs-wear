@@ -20,10 +20,11 @@ class GetMongsUseCase @Inject constructor(
     @Throws(NotFoundMongException::class)
     override suspend fun execute(): List<MongVo> {
         return withContext(Dispatchers.IO) {
+            // 몽 목록 조회 요청
             managementWebPort.getMongs().map { response ->
-                // 몽 로컬 정보 조회
+                // 몽 로컬 조회
                 val mong = managementPersistencePort.getMong(mongId = response.mongId)
-                // 몽 수정
+                // 몽 업데이트
                 mong.update(
                     name = response.name,
                     mongCode = response.mongCode,
@@ -46,7 +47,7 @@ class GetMongsUseCase @Inject constructor(
                     createdAt = response.createdAt,
                     updatedAt = response.updatedAt,
                 )
-                // 몽 영속화
+                // 몽 로컬 등록
                 managementPersistencePort.saveMong(mong = mong)
                 // MongVo 반환
                 MongVo.of(mong = mong)

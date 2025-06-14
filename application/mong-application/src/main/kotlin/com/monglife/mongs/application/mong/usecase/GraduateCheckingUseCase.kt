@@ -18,6 +18,7 @@ class GraduateCheckingUseCase @Inject constructor(
     @Throws(NotFoundMongException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
+            // 몽 로컬 조회
             managementPersistencePort.getMong(mongId = command.mongId).let { mong: Mong ->
                 // 졸업 상태 사용자 확인
                 mong.graduateChecking()

@@ -18,10 +18,11 @@ class SetCurrentMongUseCase @Inject constructor(
     @Throws(NotFoundMongException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
+            // 몽 로컬 조회
             managementPersistencePort.getMong(mongId = command.mongId).let { mong: Mong ->
                 // 현재 몽으로 설정
                 mong.selectAsActive()
-                // 몽 저장
+                // 몽 로컬 등록
                 managementPersistencePort.saveMong(mong = mong)
             }
         }

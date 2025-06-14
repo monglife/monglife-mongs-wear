@@ -16,7 +16,9 @@ class GetInventoriesUseCase @Inject constructor(
 
     override suspend fun execute(command: Command): List<InventoryVo> {
         return withContext(Dispatchers.IO) {
+            // 인벤토리 목록 조회 요청
             interactionWebPort.getInventories(command.mongId).map { response ->
+                // InventoryVo 반환
                 InventoryVo.of(response.toDomain())
             }
         }

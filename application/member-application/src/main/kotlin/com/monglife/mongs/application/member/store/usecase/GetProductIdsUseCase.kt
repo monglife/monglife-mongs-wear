@@ -1,37 +1,32 @@
-package com.monglife.mongs.domain.member.store.usecase
+package com.monglife.mongs.application.member.store.usecase
 
-import com.monglife.mongs.domain.member.store.repository.StoreRepository
-import com.mongs.wear.core.exception.data.GetProductIdsException
-import com.mongs.wear.core.exception.global.DataException
-import com.mongs.wear.core.exception.usecase.GetProductIdsUseCaseException
+import com.monglife.mongs.application.member.store.port.web.StoreWebPort
+import com.monglife.mongs.application.member.store.vo.ProductVo
 import com.monglife.mongs.core.domain.usecase.BaseNoParamUseCase
+import com.monglife.mongs.domain.member.store.model.Product
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * 인앱 상품 ID 목록 조회 UseCase
+ * 인앱 상품 목록 조회 UseCase
  */
 class GetProductIdsUseCase @Inject constructor(
-    private val storeRepository: StoreRepository,
-) : BaseNoParamUseCase<List<String>>() {
+    private val storeWebPort: StoreWebPort,
+) : BaseNoParamUseCase<List<ProductVo>>() {
 
-    override suspend fun execute(): List<String> {
+    override suspend fun execute(): List<ProductVo> {
         return withContext(Dispatchers.IO) {
-            storeRepository.getProductIds().map { productId ->
-                // 공통 코드 (대문자) -> 구글 사용 코드 (소문자) 변환
-                productId.lowercase()
+            // 인앱 상품 목록 조회 요청
+            storeWebPort.getProducts().map { response ->
+                val product = Product(
+                    productId = response.productId,
+                    productName = response.productName,
+                    price = response.price,
+                )
+                // ProductVo 반환
+                ProductVo.of(product = product)
             }
-        }
-    }
-
-    override fun handleException(exception: DataException) {
-        super.handleException(exception)
-
-        when(exception) {
-            is GetProductIdsException -> throw GetProductIdsUseCaseException()
-
-            else -> throw GetProductIdsUseCaseException()
         }
     }
 }

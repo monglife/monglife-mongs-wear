@@ -7,6 +7,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+/**
+ * 매치 큐 구독 해제 UseCase
+ */
 class DisSubscribeQueueUseCase @Inject constructor(
     private val queueSubscribePort: QueueSubscribePort,
 ) : BaseParamUseCase<DisSubscribeQueueUseCase.Command, Unit>() {

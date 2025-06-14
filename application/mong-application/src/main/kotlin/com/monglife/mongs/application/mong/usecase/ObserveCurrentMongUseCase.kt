@@ -22,8 +22,11 @@ class ObserveCurrentMongUseCase @Inject constructor(
     @Throws(NotFoundMongException::class)
     override suspend fun execute(): Flow<MongVo?> {
         return withContext(Dispatchers.IO) {
+            // 현재 몽 ID 조회
             managementPersistencePort.getCurrentMongId()?.let { mongId: Long ->
+                // 몽 Flow 로컬 조회
                 managementPersistencePort.getMongFlow(mongId = mongId).map { mong: Mong ->
+                    // MongVo 반환
                     MongVo.of(mong = mong)
                 }
             } ?: flowOf(null)

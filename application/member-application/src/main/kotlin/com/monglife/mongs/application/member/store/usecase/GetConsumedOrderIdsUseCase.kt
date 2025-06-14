@@ -1,40 +1,36 @@
-package com.monglife.mongs.domain.member.store.usecase
+package com.monglife.mongs.application.member.store.usecase
 
-import com.monglife.mongs.domain.member.store.repository.StoreRepository
-import com.mongs.wear.core.exception.data.GetConsumedOrderIdsException
-import com.mongs.wear.core.exception.global.DataException
-import com.mongs.wear.core.exception.usecase.GetConsumedOrderIdsUseCaseException
+import com.monglife.mongs.application.member.store.port.web.StoreWebPort
+import com.monglife.mongs.application.member.store.vo.OrderVo
 import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.mongs.domain.member.store.model.Order
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * 소비 주문 ID 목록 조회 UseCase
+ * 소비 주문 목록 조회 UseCase
  */
 class GetConsumedOrderIdsUseCase @Inject constructor(
-    private val storeRepository: StoreRepository,
-) : BaseParamUseCase<GetConsumedOrderIdsUseCase.Param, List<String>>() {
+    private val storeWebPort: StoreWebPort,
+) : BaseParamUseCase<GetConsumedOrderIdsUseCase.Command, List<OrderVo>>() {
 
-    override suspend fun execute(param: Param): List<String> {
+    override suspend fun execute(command: Command): List<OrderVo> {
         return withContext(Dispatchers.IO) {
-            storeRepository.getConsumedOrderIds(
-                orderIds = param.orderIds,
-            )
+            // 소비 주문 목록 조회 요청
+            storeWebPort.getConsumedOrders(socialOrderIds = command.socialOrderIds).map { response ->
+                val order = Order(
+                    orderId = response.orderId,
+                    socialOrderId = response.socialOrderId,
+                    productId = response.productId,
+                )
+                // OrderVo 반환
+                OrderVo.of(order = order)
+            }
         }
     }
 
-    data class Param(
-        val orderIds: List<String>,
+    data class Command(
+        val socialOrderIds: List<String>,
     )
-
-    override fun handleException(exception: DataException) {
-        super.handleException(exception)
-
-        when(exception) {
-            is GetConsumedOrderIdsException -> throw GetConsumedOrderIdsUseCaseException()
-
-            else -> throw GetConsumedOrderIdsUseCaseException()
-        }
-    }
 }

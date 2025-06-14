@@ -3,9 +3,9 @@ android {
 }
 
 dependencies {
-    implementation project(":domain:battle-domain")
+    // application layer
+    implementation project(":application:battle-application")
 
-    // mqtt
-    implementation "androidx.legacy:legacy-support-v4:1.0.0"
-    implementation "com.github.hannesa2:paho.mqtt.android:${parent.ext.mqttVersion}"
+    // core layer
+    implementation project(":core:data-core:mqtt-data-core")
 }

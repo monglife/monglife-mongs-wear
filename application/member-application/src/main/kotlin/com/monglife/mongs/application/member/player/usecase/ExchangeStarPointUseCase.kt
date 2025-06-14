@@ -1,9 +1,10 @@
-package com.monglife.mongs.domain.member.player.usecase
+package com.monglife.mongs.application.member.player.usecase
 
-import com.monglife.mongs.domain.member.player.repository.PlayerRepository
-import com.mongs.wear.core.exception.data.ExchangeStarPointException
-import com.mongs.wear.core.exception.global.DataException
-import com.mongs.wear.core.exception.usecase.ExchangeStarPointUseCaseException
+import com.monglife.mongs.application.member.player.exception.InvalidExchangeStarPointException
+import com.monglife.mongs.application.member.player.exception.NotFoundPlayerException
+import com.monglife.mongs.application.member.player.port.persistence.PlayerPersistencePort
+import com.monglife.mongs.application.member.player.port.web.PlayerWebPort
+import com.monglife.mongs.application.member.player.vo.PlayerVo
 import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,30 +14,34 @@ import javax.inject.Inject
  * 스타 포인트 환전 UseCase
  */
 class ExchangeStarPointUseCase @Inject constructor(
-    private val playerRepository: PlayerRepository,
-) : BaseParamUseCase<ExchangeStarPointUseCase.Param, Unit>() {
+    private val playerWebPort: PlayerWebPort,
+    private val playerPersistencePort: PlayerPersistencePort,
+) : BaseParamUseCase<ExchangeStarPointUseCase.Command, Unit>() {
 
-    override suspend fun execute(param: Param) {
+    @Throws(NotFoundPlayerException::class, InvalidExchangeStarPointException::class)
+    override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
-            playerRepository.exchangeStarPoint(
-                mongId = param.mongId,
-                starPoint = param.starPoint,
-            )
+            // 플레이어 조회 요청
+            playerWebPort.getPlayer().let { response ->
+                val player = response.toDomain()
+                // 스타 포인트 환전 요청
+                playerWebPort.exchangeStarPoint(
+                    mongId = command.mongId,
+                    starPoint = command.starPoint,
+                ).let {
+                    // 플레이어 스타 포인트 환전
+                    player.exchangeStarPoint(starPoint = it.starPoint)
+                }
+                // 플레이어 로컬 등록
+                playerPersistencePort.savePlayer(player = player)
+                // PlayerVo 반환
+                PlayerVo.of(player = player)
+            }
         }
     }
 
-    data class Param(
+    data class Command(
         val mongId: Long,
         val starPoint: Int,
     )
-
-    override fun handleException(exception: DataException) {
-        super.handleException(exception)
-
-        when(exception) {
-            is ExchangeStarPointException -> throw ExchangeStarPointUseCaseException()
-
-            else -> throw ExchangeStarPointUseCaseException()
-        }
-    }
 }

@@ -17,15 +17,23 @@ class GetStepUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,
 ) : BaseNoParamUseCase<Flow<Int>>() {
 
-    @Throws(NotFoundStepException::class)
     override suspend fun execute(): Flow<Int> {
         return withContext(Dispatchers.IO) {
+            // Step 로컬 조회
             runCatching { devicePersistencePort.getStepFlow() }
-                .getOrElse {
-                    // 로컬 Step 등록
-                    devicePersistencePort.saveStep(step = Step())
-                    devicePersistencePort.getStepFlow()
-                }.map { it.getWalkingCount() }
+                .getOrElse { ex ->
+                    if (ex is NotFoundStepException) {
+                        // Step 로컬 등록
+                        devicePersistencePort.saveStep(step = Step())
+                        // Step Flow 로컬 조회
+                        devicePersistencePort.getStepFlow()
+                    } else {
+                        throw ex
+                    }
+                }.map { step: Step ->
+                    // Step 현재 사용 가능한 총 걸음 수 Flow 반환
+                    step.getCurrentWalkingCount()
+                }
         }
     }
 }

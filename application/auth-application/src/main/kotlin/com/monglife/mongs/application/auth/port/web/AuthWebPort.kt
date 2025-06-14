@@ -1,10 +1,12 @@
 package com.monglife.mongs.application.auth.port.web
 
-import com.monglife.mongs.application.auth.exception.JoinException
-import com.monglife.mongs.application.auth.exception.LoginException
-import com.monglife.mongs.application.auth.exception.LogoutException
+import com.monglife.mongs.application.auth.exception.InvalidJoinException
+import com.monglife.mongs.application.auth.exception.InvalidLoginException
+import com.monglife.mongs.application.auth.exception.InvalidLogoutException
 import com.monglife.mongs.application.auth.exception.NeedJoinException
 import com.monglife.mongs.application.auth.exception.VerifyAppVersionException
+import com.monglife.mongs.application.auth.port.web.response.LoginResponse
+import com.monglife.mongs.application.auth.port.web.response.VerifyAppVersionResponse
 
 interface AuthWebPort {
 
@@ -17,19 +19,19 @@ interface AuthWebPort {
     /**
      * 회원 가입
      */
-    @Throws(JoinException::class)
+    @Throws(InvalidJoinException::class)
     suspend fun join(email: String, name: String, googleAccountId: String)
 
     /**
      * 로그인
      */
-    @Throws(LoginException::class, NeedJoinException::class, VerifyAppVersionException::class)
+    @Throws(InvalidLoginException::class, NeedJoinException::class, VerifyAppVersionException::class)
     suspend fun login(deviceId: String, email: String, googleAccountId: String, appPackageName: String, deviceName: String, buildVersion: String): LoginResponse
 
     /**
      * 로그 아웃
      */
-    @Throws(LogoutException::class)
+    @Throws(InvalidLogoutException::class)
     suspend fun logout()
 
 }

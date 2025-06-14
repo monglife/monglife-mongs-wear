@@ -38,7 +38,7 @@ class EvolutionMongUseCase @Inject constructor(
                         createdAt = response.createdAt,
                         updatedAt = response.updatedAt,
                     )
-                    // 몽 영속화
+                    // 몽 로컬 등록
                     managementPersistencePort.saveMong(mong = mong)
                     // MongVo 반환
                     MongVo.of(mong = mong)

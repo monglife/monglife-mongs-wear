@@ -16,7 +16,9 @@ class GetFoodsUseCase @Inject constructor(
 
     override suspend fun execute(command: Command): List<FoodVo> {
         return withContext(Dispatchers.IO) {
+            // 음식 목록 조회 요청
             interactionWebPort.getFoods(mongId = command.mongId).map { response ->
+                // FoodVo 반환
                 FoodVo.of(food = response.toDomain())
             }
         }

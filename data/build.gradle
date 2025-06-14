@@ -1,10 +1,6 @@
 buildscript {
     ext {
         lifecycleVersion  = "2.8.7"
-        retrofitVersion   = "2.9.0"
-        roomVersion       = "2.7.1"
-        dataStoreVersion  = "1.1.2"
-        mqttVersion       = "4.2.3"
     }
 }
 
@@ -29,7 +25,7 @@ subprojects {
 
     dependencies {
         // core layer
-        implementation project(":core:data-core")
+        implementation project(":core:data-core:common-data-core")
 
         // dagger-hilt
         implementation group: "javax.inject", name: "javax.inject", version: "1"

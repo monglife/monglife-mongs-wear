@@ -1,9 +1,7 @@
-package com.monglife.mongs.domain.member.store.usecase
+package com.monglife.mongs.application.member.store.usecase
 
-import com.monglife.mongs.domain.member.store.repository.StoreRepository
-import com.mongs.wear.core.exception.data.ConsumeProductOrderException
-import com.mongs.wear.core.exception.global.DataException
-import com.mongs.wear.core.exception.usecase.ConsumeProductOrderUseCaseException
+import com.monglife.mongs.application.member.store.exception.InvalidSubscribePlayerException
+import com.monglife.mongs.application.member.store.port.web.StoreWebPort
 import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,32 +11,24 @@ import javax.inject.Inject
  * 인앱 상품 주문 소비 UseCase
  */
 class ConsumeProductOrderUseCase @Inject constructor(
-    private val storeRepository: StoreRepository,
-) : BaseParamUseCase<ConsumeProductOrderUseCase.Param, Unit>() {
+    private val storeWebPort: StoreWebPort,
+) : BaseParamUseCase<ConsumeProductOrderUseCase.Command, Unit>() {
 
-    override suspend fun execute(param: Param) {
+    @Throws(InvalidSubscribePlayerException::class)
+    override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
-            storeRepository.consumeProductOrder(
-                productId = param.productId,
-                orderId = param.orderId,
-                purchaseToken = param.purchaseToken
+            // 주문 소비 요청
+            storeWebPort.consumeOrder(
+                productId = command.productId,
+                socialOrderId = command.socialOrderId,
+                purchaseToken = command.purchaseToken,
             )
         }
     }
 
-    data class Param(
+    data class Command(
         val productId: String,
-        val orderId: String,
+        val socialOrderId: String,
         val purchaseToken: String,
     )
-
-    override fun handleException(exception: DataException) {
-        super.handleException(exception)
-
-        when(exception) {
-            is ConsumeProductOrderException -> throw ConsumeProductOrderUseCaseException()
-
-            else -> throw ConsumeProductOrderUseCaseException()
-        }
-    }
 }

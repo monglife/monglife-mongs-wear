@@ -20,6 +20,7 @@ class DeleteMongUseCase @Inject constructor(
     @Throws(NotFoundMongException::class, InvalidDeleteMongException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
+            // 몽 조회 요청
             managementWebPort.getMong(mongId = command.mongId).let {
                 // 몽 삭제 요청
                 managementWebPort.deleteMong(mongId = it.mongId)

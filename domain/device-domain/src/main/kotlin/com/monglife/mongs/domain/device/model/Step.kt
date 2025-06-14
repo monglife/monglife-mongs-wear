@@ -17,10 +17,11 @@ class Step(
         private set
     var consumedWalkingCount: Int = consumedWalkingCount
         private set
+
     /**
      * 총 걸음 수 조회
      */
-    fun getWalkingCount(): Int {
+    fun getCurrentWalkingCount(): Int {
         return 0.coerceAtLeast(totalWalkingCount - consumedWalkingCount + walkingCount)
     }
 

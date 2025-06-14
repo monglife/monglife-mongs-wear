@@ -16,16 +16,23 @@ class SetLocalTotalWalkingCountUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,
 ) : BaseParamUseCase<SetLocalTotalWalkingCountUseCase.Command, Unit>() {
 
-    @Throws(NotFoundStepException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
+            // Step 로컬 조회
             runCatching { devicePersistencePort.getStep() }
-                .getOrElse {
-                    // 로컬 Step 등록
-                    devicePersistencePort.saveStep(step = Step(
-                        totalWalkingCount = command.totalWalkingCount,
-                        deviceBootedAt = command.deviceBootedAt,
-                    ))
+                .getOrElse { ex ->
+                    // 로컬 Step 이 없는 경우
+                    if (ex is NotFoundStepException) {
+                        // Step 로컬 등록
+                        devicePersistencePort.saveStep(
+                            step = Step(
+                                totalWalkingCount = command.totalWalkingCount,
+                                deviceBootedAt = command.deviceBootedAt,
+                            )
+                        )
+                    } else {
+                        throw ex
+                    }
                 }
         }
     }

@@ -8,6 +8,14 @@ import com.monglife.mongs.application.mong.exception.InvalidPoopCleanMongExcepti
 import com.monglife.mongs.application.mong.exception.InvalidSleepingMongException
 import com.monglife.mongs.application.mong.exception.InvalidStrokeMongException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
+import com.monglife.mongs.application.mong.port.web.response.CreateMongResponseVo
+import com.monglife.mongs.application.mong.port.web.response.DeleteMongResponseVo
+import com.monglife.mongs.application.mong.port.web.response.EvolutionMongResponseVo
+import com.monglife.mongs.application.mong.port.web.response.GetMongResponseVo
+import com.monglife.mongs.application.mong.port.web.response.GraduateMongResponseVo
+import com.monglife.mongs.application.mong.port.web.response.PoopCleanMongResponseVo
+import com.monglife.mongs.application.mong.port.web.response.SleepingMongResponseVo
+import com.monglife.mongs.application.mong.port.web.response.StrokeMongResponseVo
 import java.time.LocalTime
 
 interface ManagementWebPort {

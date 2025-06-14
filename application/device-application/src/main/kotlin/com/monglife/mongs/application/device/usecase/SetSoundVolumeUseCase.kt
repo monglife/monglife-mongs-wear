@@ -15,13 +15,22 @@ class SetSoundVolumeUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,
 ) : BaseParamUseCase<SetSoundVolumeUseCase.Command, Unit>() {
 
-    @Throws(NotFoundDeviceOptionException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
+            // DeviceOption 로컬 조회
             runCatching { devicePersistencePort.getDeviceOption() }
-                .getOrElse { DeviceOption() }
+                .getOrElse { ex ->
+                    // DeviceOption 이 없는 경우
+                    if (ex is NotFoundDeviceOptionException) {
+                        // DeviceOption 생성
+                        DeviceOption()
+                    } else
+                        throw ex
+                }
                 .let { deviceOption: DeviceOption ->
+                    // DeviceOption soundVolume 변경
                     deviceOption.updateSoundVolume(soundVolume = command.soundVolume)
+                    // DeviceOption 로컬 등록
                     devicePersistencePort.saveDeviceOption(deviceOption = deviceOption)
                 }
         }

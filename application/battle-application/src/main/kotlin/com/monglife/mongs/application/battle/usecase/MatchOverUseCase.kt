@@ -22,19 +22,21 @@ class MatchOverUseCase @Inject constructor(
     @Throws(NotFoundMatchException::class, NotFoundWinnerMatchPlayerException::class)
     override suspend fun execute(command: Command): WinMatchPlayerVo {
         return withContext(Dispatchers.IO) {
-            matchWebPort.getWinnerMatchPlayer(matchId = command.matchId).let {
+            // 매치 승리 플레이어 정보 조회 요청
+            matchWebPort.getWinnerMatchPlayer(matchId = command.matchId).let { response ->
+                // 매치 로컬 조회
                 matchPersistencePort.getMatch(matchId = command.matchId).let { match: Match ->
-                    // 매치 종료
+                    // 매치 종료 변경
                     match.over()
-                    // 매치 영속화
+                    // 매치 로컬 저장
                     matchPersistencePort.saveMatch(match = match)
                 }
                 // WinMatchPlayerVo 반환
                 WinMatchPlayerVo(
-                    playerId = it.playerId,
-                    mongCode = it.mongCode,
-                    mongName = it.mongName,
-                    name = it.mongName,
+                    playerId = response.playerId,
+                    mongCode = response.mongCode,
+                    mongName = response.mongName,
+                    name = response.mongName,
                 )
             }
         }

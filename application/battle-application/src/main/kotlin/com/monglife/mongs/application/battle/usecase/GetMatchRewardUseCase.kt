@@ -18,10 +18,12 @@ class GetMatchRewardUseCase @Inject constructor(
     @Throws(NotFoundMatchRewardException::class)
     override suspend fun execute(): MatchRewardVo {
         return withContext(Dispatchers.IO) {
-            matchWebPort.getBattleReward().let {
+            // 매치 보상 정보 조회 요청
+            matchWebPort.getBattleReward().let { response ->
+                // MatchRewardVo 반환
                 MatchRewardVo(
-                    rewardPayPoint = it.rewardPayPoint,
-                    bettingPayPoint = it.battlePayPoint,
+                    rewardPayPoint = response.rewardPayPoint,
+                    bettingPayPoint = response.battlePayPoint,
                 )
             }
         }

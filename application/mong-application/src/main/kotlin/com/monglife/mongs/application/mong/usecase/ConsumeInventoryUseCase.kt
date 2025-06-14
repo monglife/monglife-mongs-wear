@@ -23,6 +23,7 @@ class ConsumeInventoryUseCase @Inject constructor(
     @Throws(NotFoundMongException::class, InvalidConsumeInventoryException::class)
     override suspend fun execute(command: Command): MongVo {
         return withContext(Dispatchers.IO) {
+            // 몽 조회 요청
             managementWebPort.getMong(mongId = command.mongId).let {
                 val mong = it.toDomain()
                 // 인벤토리 소비 요청
@@ -39,7 +40,7 @@ class ConsumeInventoryUseCase @Inject constructor(
                         stateCode = response.stateCode,
                         statusCode = response.statusCode,
                     )
-                    // 몽 영속화
+                    // 몽 로컬 등록
                     managementPersistencePort.saveMong(mong = mong)
                     // MongVo 반환
                     MongVo.of(mong = mong)

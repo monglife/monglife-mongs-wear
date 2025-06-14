@@ -5,11 +5,6 @@ subprojects {
     dependencies {
         // core layer
         implementation project(':core:application-core')
-        implementation project(':domain:auth-domain')
-        implementation project(':domain:battle-domain')
-        implementation project(':domain:device-domain')
-        implementation project(':domain:member-domain')
-        implementation project(':domain:mong-domain')
 
         // coroutine-flow
         implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
@@ -17,5 +12,11 @@ subprojects {
         // dagger-hilt
         implementation "com.google.dagger:dagger:${rootProject.ext.hiltVersion}"
         ksp "com.google.dagger:dagger-compiler:${rootProject.ext.hiltVersion}"
+
+        // test
+        testImplementation "junit:junit:${rootProject.ext.junitVersion}"
+        testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
+        testImplementation "org.mockito.kotlin:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
+        testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0"
     }
 }

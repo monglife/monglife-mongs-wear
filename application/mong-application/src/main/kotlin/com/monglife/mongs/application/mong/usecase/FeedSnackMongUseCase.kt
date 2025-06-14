@@ -42,7 +42,7 @@ class FeedSnackMongUseCase @Inject constructor(
                         stateCode = response.stateCode,
                         statusCode = response.statusCode,
                     )
-                    // 몽 영속화
+                    // 몽 로컬 등록
                     managementPersistencePort.saveMong(mong = mong)
                 }
             }

@@ -1,0 +1,13 @@
+apply plugin: "com.android.library"
+apply plugin: "org.jetbrains.kotlin.android"
+
+android {
+    namespace "${rootProject.ext.namespace}.core.data.retrofit"
+}
+
+dependencies {
+    // retrofit2 & coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
+    implementation "com.squareup.retrofit2:retrofit:${parent.ext.retrofitVersion}"
+    implementation "com.squareup.retrofit2:converter-gson:${parent.ext.retrofitVersion}"
+}

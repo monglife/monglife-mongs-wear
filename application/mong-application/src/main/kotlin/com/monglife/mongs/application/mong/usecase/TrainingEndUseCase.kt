@@ -23,8 +23,8 @@ class TrainingEndUseCase @Inject constructor(
     @Throws(NotFoundMongException::class, InvalidTrainingException::class)
     override suspend fun execute(command: Command): TrainingEndVo {
         return withContext(Dispatchers.IO) {
+            // 몽 조회 요청
             managementWebPort.getMong(mongId = command.mongId).let {
-                // 몽 도메인 변환
                 val mong = it.toDomain()
                 // 몽 훈련 요청
                 activityWebPort.training(
@@ -45,7 +45,7 @@ class TrainingEndUseCase @Inject constructor(
                         stateCode = response.stateCode,
                         statusCode = response.statusCode,
                     )
-                    // 몽 영속화
+                    // 몽 로컬 등록
                     managementPersistencePort.saveMong(mong = mong)
                     // TrainingEndVo 반환
                     TrainingEndVo(

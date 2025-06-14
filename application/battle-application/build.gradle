@@ -1,2 +1,4 @@
 dependencies {
+    // domain layer
+    implementation project(':domain:battle-domain')\
 }

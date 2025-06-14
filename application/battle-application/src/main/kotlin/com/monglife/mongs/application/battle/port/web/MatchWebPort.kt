@@ -3,6 +3,9 @@ package com.monglife.mongs.application.battle.port.web
 import com.monglife.mongs.application.battle.exception.NotFoundMatchException
 import com.monglife.mongs.application.battle.exception.NotFoundMatchRewardException
 import com.monglife.mongs.application.battle.exception.NotFoundWinnerMatchPlayerException
+import com.monglife.mongs.application.battle.port.web.response.GetBattleRewardResponse
+import com.monglife.mongs.application.battle.port.web.response.GetMatchResponse
+import com.monglife.mongs.application.battle.port.web.response.GetWinnerMatchPlayerResponse
 
 interface MatchWebPort {
 

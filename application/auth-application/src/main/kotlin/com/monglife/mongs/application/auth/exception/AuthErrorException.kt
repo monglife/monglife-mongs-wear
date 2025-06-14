@@ -31,40 +31,24 @@ class NeedJoinException(
 /**
  * 회원 가입 실패 예외
  */
-class JoinException(
-    override val code: ErrorCode = AuthErrorCode.JOIN,
+class InvalidJoinException(
+    override val code: ErrorCode = AuthErrorCode.INVALID_JOIN,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)
 
 /**
  * 로그인 실패 예외
  */
-class LoginException(
-    override val code: ErrorCode = AuthErrorCode.LOGIN,
+class InvalidLoginException(
+    override val code: ErrorCode = AuthErrorCode.INVALID_LOGIN,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)
 
 /**
  * 로그 아웃 실패 예외
  */
-class LogoutException(
-    override val code: ErrorCode = AuthErrorCode.LOGOUT,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- *  플레이어 조회 실패 예외
- */
-class NotFoundPlayerException(
-    override val code: ErrorCode = AuthErrorCode.NOT_FOUND_PLAYER,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- *  플레이어 등록 실패 예외
- */
-class InvalidCreatePlayerException(
-    override val code: ErrorCode = AuthErrorCode.INVALID_CREATE_PLAYER,
+class InvalidLogoutException(
+    override val code: ErrorCode = AuthErrorCode.INVALID_LOGOUT,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)
 

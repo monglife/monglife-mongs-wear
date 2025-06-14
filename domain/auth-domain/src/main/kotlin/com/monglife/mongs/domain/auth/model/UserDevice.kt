@@ -6,7 +6,6 @@ class UserDevice(
     appPackageName: String,
     fcmToken: String,
 ) {
-
     var deviceId: String = deviceId
         private set
     var deviceName: String = deviceName

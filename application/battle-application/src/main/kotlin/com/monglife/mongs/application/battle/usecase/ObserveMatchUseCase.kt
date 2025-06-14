@@ -21,7 +21,9 @@ class ObserveMatchUseCase @Inject constructor(
     @Throws(NotFoundMatchException::class)
     override suspend fun execute(command: Command): Flow<MatchVo> {
         return withContext(Dispatchers.IO) {
+            // 매치 라이브 객체 로컬 조회
             matchPersistencePort.getMatchFlow(deviceId = command.deviceId).map { match: Match ->
+                // MatchVo 반환
                 MatchVo.of(match = match)
             }
         }

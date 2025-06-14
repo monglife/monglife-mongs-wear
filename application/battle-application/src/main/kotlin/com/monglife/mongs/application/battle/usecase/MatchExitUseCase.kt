@@ -22,10 +22,11 @@ class MatchExitUseCase @Inject constructor(
     @Throws(NotFoundMatchException::class, InvalidPublishMatchExitException::class)
     override suspend fun execute(command: Command): MatchVo {
         return withContext(Dispatchers.IO) {
+            // 매치 로컬 조회
             matchPersistencePort.getMatch(matchId = command.matchId).let { match: Match ->
-                // 매치 삭제
+                // 매치 로컬 삭제
                 matchPersistencePort.deleteMatch(matchId = match.matchId)
-                // 배틀 퇴장
+                // 배틀 퇴장 이벤트 전송
                 matchPublishPort.publishMatchExit(matchId = match.matchId)
                 // MatchVo 반환
                 MatchVo.of(match = match)

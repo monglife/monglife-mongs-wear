@@ -45,22 +45,6 @@ class NotFoundMatchException(
 ) : ErrorException(code = code, message = message)
 
 /**
- * 매치 플레이어 조회 실패 예외
- */
-class NotFoundMatchPlayerException(
-    override val code: ErrorCode = BattleErrorCode.NOT_FOUND_MATCH_PLAYER,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- * 몽 조회 실패 예외
- */
-class NotFoundMongException(
-    override val code: ErrorCode = BattleErrorCode.NOT_FOUND_MONG,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
  * 매치 입장 이벤트 전송 실패 예외
  */
 class InvalidPublishMatchEnterException(

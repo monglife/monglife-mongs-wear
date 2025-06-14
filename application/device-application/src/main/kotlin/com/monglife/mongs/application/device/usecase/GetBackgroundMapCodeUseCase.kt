@@ -17,16 +17,22 @@ class GetBackgroundMapCodeUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,
 ) : BaseNoParamUseCase<Flow<String>>() {
 
-    @Throws(NotFoundDeviceOptionException::class)
     override suspend fun execute(): Flow<String> {
         return withContext(Dispatchers.IO) {
+            // DeviceOption 로컬 조회
             runCatching { devicePersistencePort.getDeviceOptionFlow() }
-                .getOrElse {
-                    // 새로운 DeviceOption 등록
-                    devicePersistencePort.saveDeviceOption(deviceOption = DeviceOption())
-                    // Flow 객체 조회
-                    devicePersistencePort.getDeviceOptionFlow()
+                .getOrElse { ex ->
+                    // DeviceOption 이 없는 경우
+                    if (ex is NotFoundDeviceOptionException) {
+                        // DeviceOption 로컬 등록
+                        devicePersistencePort.saveDeviceOption(deviceOption = DeviceOption())
+                        // DeviceOption Flow 로컬 조회
+                        devicePersistencePort.getDeviceOptionFlow()
+                    } else {
+                        throw ex
+                    }
                 }.map { deviceOption: DeviceOption ->
+                    // backgroundMapCode Flow 반환
                     deviceOption.backgroundMapCode
                 }
         }

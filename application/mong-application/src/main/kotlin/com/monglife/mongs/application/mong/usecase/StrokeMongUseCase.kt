@@ -21,8 +21,8 @@ class StrokeMongUseCase @Inject constructor(
     @Throws(NotFoundMongException::class, InvalidStrokeMongException::class)
     override suspend fun execute(command: Command): MongVo {
         return withContext(Dispatchers.IO) {
+            // 몽 조회 요청
             managementWebPort.getMong(mongId = command.mongId).let {
-                // 몽 도메인 변환
                 val mong = it.toDomain()
                 // 몽 쓰다듬기 요청
                 managementWebPort.strokeMong(mongId = mong.mongId).let { response ->
@@ -33,7 +33,7 @@ class StrokeMongUseCase @Inject constructor(
                         createdAt = response.createdAt,
                         updatedAt = response.updatedAt,
                     )
-                    // 몽 영속화
+                    // 몽 로컬 등록
                     managementPersistencePort.saveMong(mong = mong)
                     // MongVo 반환
                     MongVo.of(mong = mong)

@@ -1,0 +1,22 @@
+apply plugin: "com.android.library"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: 'com.google.devtools.ksp'
+
+android {
+    namespace "${rootProject.ext.namespace}.core.data.room"
+}
+
+dependencies {
+    // room
+    implementation "androidx.room:room-runtime:${parent.ext.roomVersion}"
+    implementation "androidx.room:room-ktx:${parent.ext.roomVersion}"
+    ksp "androidx.room:room-compiler:${parent.ext.roomVersion}"
+
+    // data store
+    implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
+    implementation "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}

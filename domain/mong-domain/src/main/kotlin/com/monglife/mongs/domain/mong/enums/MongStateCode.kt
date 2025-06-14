@@ -3,9 +3,6 @@ package com.monglife.mongs.domain.mong.enums
 enum class MongStateCode(
     val message: String,
 ) {
-    /**
-     * 몽 상태 코드
-     */
     NORMAL("정상 상태"),
     GRADUATE_READY("졸업 대기 상태"),
     EVOLUTION_READY("진화 대기 상태"),

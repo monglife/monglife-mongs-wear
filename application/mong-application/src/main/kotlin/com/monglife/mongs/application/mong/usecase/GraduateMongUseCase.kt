@@ -21,6 +21,7 @@ class GraduateMongUseCase @Inject constructor(
     @Throws(NotFoundMongException::class, InvalidGraduateMongException::class)
     override suspend fun execute(command: Command) {
         return withContext(Dispatchers.IO) {
+            // 몽 조회 요청
             managementWebPort.getMong(mongId = command.mongId).let {
                 val mong = it.toDomain()
                 // 몽 졸업 요청

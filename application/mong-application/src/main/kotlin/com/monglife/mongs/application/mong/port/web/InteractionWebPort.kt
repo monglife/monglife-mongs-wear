@@ -5,6 +5,14 @@ import com.monglife.mongs.application.mong.exception.InvalidConsumeInventoryExce
 import com.monglife.mongs.application.mong.exception.InvalidFeedFoodException
 import com.monglife.mongs.application.mong.exception.InvalidFeedSnackException
 import com.monglife.mongs.application.mong.exception.InvalidRandomDrawException
+import com.monglife.mongs.application.mong.port.web.response.BuyRandomDrawTicketResponseVo
+import com.monglife.mongs.application.mong.port.web.response.ConsumeInventoryResponseVo
+import com.monglife.mongs.application.mong.port.web.response.FeedFoodMongResponseVo
+import com.monglife.mongs.application.mong.port.web.response.FeedSnackMongResponseVo
+import com.monglife.mongs.application.mong.port.web.response.GetFoodResponseVo
+import com.monglife.mongs.application.mong.port.web.response.GetInventoryResponseVo
+import com.monglife.mongs.application.mong.port.web.response.GetSnackResponseVo
+import com.monglife.mongs.application.mong.port.web.response.RandomDrawResponseVo
 
 interface InteractionWebPort {
 

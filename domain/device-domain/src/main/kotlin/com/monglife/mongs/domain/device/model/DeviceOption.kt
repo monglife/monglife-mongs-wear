@@ -7,10 +7,6 @@ class DeviceOption(
     soundVolume: Float = 0f,
     mongInteractionDialogOpen: Boolean = true,
 ) {
-    companion object {
-        const val DEFAULT_MAP_TYPE_CODE = "MP000"
-    }
-
     var backgroundMapCode: String = backgroundMapCode
         private set
     var networkOption: Boolean = networkOption
@@ -21,6 +17,11 @@ class DeviceOption(
         private set
     var mongInteractionDialogOpen: Boolean = mongInteractionDialogOpen
         private set
+
+    companion object {
+        const val DEFAULT_MAP_TYPE_CODE = "MP000"
+    }
+
     /**
      * 맵 배경 코드 변경
      */

@@ -22,8 +22,9 @@ class MatchEnterUseCase @Inject constructor(
     @Throws(NotFoundMatchException::class, InvalidPublishMatchEnterException::class)
     override suspend fun execute(command: Command): MatchVo {
         return withContext(Dispatchers.IO) {
+            // 매치 로컬 조회
             matchPersistencePort.getMatch(matchId = command.matchId).let { match: Match ->
-                // 매치 입장
+                // 매치 입장 이벤트 전송
                 matchPublishPort.publishMatchEnter(matchId = match.matchId)
                 // MatchVo 반환
                 MatchVo.of(match = match)

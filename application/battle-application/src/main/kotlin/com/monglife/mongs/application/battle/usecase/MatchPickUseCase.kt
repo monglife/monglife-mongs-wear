@@ -20,20 +20,21 @@ class MatchPickUseCase @Inject constructor(
     private val matchPublishPort: MatchPublishPort,
 ) : BaseParamUseCase<MatchPickUseCase.Command, MatchVo>() {
 
-    @Throws(InvalidPublishMatchPickException::class, NotFoundMatchException::class)
+    @Throws(NotFoundMatchException::class, InvalidPublishMatchPickException::class)
     override suspend fun execute(command: Command): MatchVo {
         return withContext(Dispatchers.IO) {
+            // 매치 로컬 조회
             matchPersistencePort.getMatch(matchId = command.matchId).let { match: Match ->
-                // 매치 선택 요청
+                // 매치 선택 이벤트 전송
                 matchPublishPort.publishMatchPick(
                     matchId = command.matchId,
                     playerId = command.playerId,
                     targetPlayerId = command.targetPlayerId,
-                    pickCode = command.pickCode
+                    pickCode = command.pickCode.name
                 )
-                // 매치 선택
+                // 매치 선택 변경
                 match.pick()
-                // 매치 영속화
+                // 매치 로컬 저장
                 matchPersistencePort.saveMatch(match = match)
                 // MatchVo 반환
                 MatchVo.of(match = match)

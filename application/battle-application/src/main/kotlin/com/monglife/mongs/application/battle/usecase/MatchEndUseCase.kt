@@ -19,8 +19,9 @@ class MatchEndUseCase @Inject constructor(
     @Throws(NotFoundMatchException::class)
     override suspend fun execute(command: Command): MatchVo {
         return withContext(Dispatchers.IO) {
+            // 매치 로컬 조회
             matchPersistencePort.getMatch(matchId = command.matchId).let { match: Match ->
-                // 매치 삭제
+                // 매치 로컬 삭제
                 matchPersistencePort.deleteMatch(matchId = match.matchId)
                 // MatchVo 반환
                 MatchVo.of(match = match)

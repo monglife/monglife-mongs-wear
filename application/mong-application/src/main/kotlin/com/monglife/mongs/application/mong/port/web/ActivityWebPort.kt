@@ -2,6 +2,8 @@ package com.monglife.mongs.application.mong.port.web
 
 import com.monglife.mongs.application.mong.exception.InvalidTrainingException
 import com.monglife.mongs.application.mong.exception.NotFoundTrainingException
+import com.monglife.mongs.application.mong.port.web.response.GetTrainingResponseVo
+import com.monglife.mongs.application.mong.port.web.response.TrainingResponseVo
 
 interface ActivityWebPort {
 

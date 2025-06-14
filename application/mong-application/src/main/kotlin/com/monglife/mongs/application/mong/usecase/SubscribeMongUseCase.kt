@@ -17,6 +17,7 @@ class SubscribeMongUseCase  @Inject constructor(
     @Throws(InvalidSubscribeMongException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
+            // 몽 구독
             managementSubscribePort.subscribeMong(mongId = command.mongId)
         }
     }

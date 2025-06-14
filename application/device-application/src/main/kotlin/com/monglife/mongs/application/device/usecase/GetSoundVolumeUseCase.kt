@@ -15,14 +15,20 @@ class GetSoundVolumeUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,
 ) : BaseNoParamUseCase<Float>() {
 
-    @Throws(NotFoundDeviceOptionException::class)
     override suspend fun execute(): Float {
         return withContext(Dispatchers.IO) {
+            // DeviceOption 로컬 조회
             runCatching { devicePersistencePort.getDeviceOption() }
-                .getOrElse {
-                    // 새로운 DeviceOption 등록
-                    devicePersistencePort.saveDeviceOption(deviceOption = DeviceOption())
+                .getOrElse { ex ->
+                    // DeviceOption 이 없는 경우
+                    if (ex is NotFoundDeviceOptionException) {
+                        // DeviceOption 로컬 등록
+                        devicePersistencePort.saveDeviceOption(deviceOption = DeviceOption())
+                    } else {
+                        throw ex
+                    }
                 }.let { deviceOption: DeviceOption ->
+                    // soundVolume 반환
                     deviceOption.soundVolume
                 }
         }

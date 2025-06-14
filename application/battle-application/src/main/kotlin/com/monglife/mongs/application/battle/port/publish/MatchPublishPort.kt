@@ -3,7 +3,6 @@ package com.monglife.mongs.application.battle.port.publish
 import com.monglife.mongs.application.battle.exception.InvalidPublishMatchEnterException
 import com.monglife.mongs.application.battle.exception.InvalidPublishMatchExitException
 import com.monglife.mongs.application.battle.exception.InvalidPublishMatchPickException
-import com.monglife.mongs.domain.battle.enums.MatchPickCode
 
 interface MatchPublishPort {
 
@@ -23,5 +22,5 @@ interface MatchPublishPort {
      * 매치 선택
      */
     @Throws(InvalidPublishMatchPickException::class)
-    suspend fun publishMatchPick(matchId: Long, playerId: String, targetPlayerId: String, pickCode: MatchPickCode)
+    suspend fun publishMatchPick(matchId: Long, playerId: String, targetPlayerId: String, pickCode: String)
 }

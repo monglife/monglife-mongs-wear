@@ -16,7 +16,9 @@ class GetTrainingsUseCase @Inject constructor(
 
     override suspend fun execute(): List<TrainingTypeVo> {
         return withContext(Dispatchers.IO) {
+            // 훈련 타입 목록 조회 요청
             activityWebPort.getTrainings().map { response ->
+                // TrainingTypeVo 반환
                 TrainingTypeVo.of(trainingType = response.toDomain())
             }
         }

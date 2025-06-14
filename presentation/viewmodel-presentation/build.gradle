@@ -1,0 +1,35 @@
+buildscript {
+    ext {
+        firebaseVersion         = "33.8.0"
+        fcmVersion              = "24.1.1"
+        gmsversion              = "21.3.0"
+        workerVersion           = "2.10.1"
+        billingClientVersion    = "7.1.1"
+    }
+}
+
+android {
+    namespace "${rootProject.ext.namespace}.presentation.viewmodel"
+}
+
+dependencies {
+    // application layer
+    api project(":application:auth-application")
+    api project(":application:battle-application")
+    api project(":application:device-application")
+    api project(":application:member-application")
+    api project(":application:mong-application")
+
+    // google-auth & firebase-fcm & google-location
+    implementation "com.google.firebase:firebase-auth"
+    implementation platform("com.google.firebase:firebase-bom:${this.ext.firebaseVersion}")
+    implementation "com.google.firebase:firebase-messaging-ktx:${this.ext.fcmVersion}"
+    implementation "com.google.android.gms:play-services-auth:${this.ext.gmsversion}"
+    implementation "com.google.android.gms:play-services-location:${this.ext.gmsversion}"
+
+    // worker
+    implementation "androidx.work:work-runtime-ktx:${this.ext.workerVersion}"
+
+    // billing
+    implementation "com.android.billingclient:billing-ktx:${this.ext.billingClientVersion}"
+}
