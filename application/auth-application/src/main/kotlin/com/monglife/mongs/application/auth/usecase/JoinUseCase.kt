@@ -21,13 +21,13 @@ class JoinUseCase @Inject constructor(
             authWebPort.join(
                 email = command.email,
                 name = command.name,
-                googleAccountId = command.googleAccountId,
+                socialAccountId = command.socialAccountId,
             )
         }
     }
 
     data class Command(
-        val googleAccountId: String,
+        val socialAccountId: String,
         val email: String,
         val name: String,
     )

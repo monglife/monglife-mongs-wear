@@ -1,6 +1,6 @@
 package com.monglife.mongs.application.member.store.usecase
 
-import com.monglife.mongs.application.member.store.exception.InvalidSubscribePlayerException
+import com.monglife.mongs.application.member.store.exception.InvalidConsumeOrderException
 import com.monglife.mongs.application.member.store.port.web.StoreWebPort
 import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +14,7 @@ class ConsumeProductOrderUseCase @Inject constructor(
     private val storeWebPort: StoreWebPort,
 ) : BaseParamUseCase<ConsumeProductOrderUseCase.Command, Unit>() {
 
-    @Throws(InvalidSubscribePlayerException::class)
+    @Throws(InvalidConsumeOrderException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
             // 주문 소비 요청

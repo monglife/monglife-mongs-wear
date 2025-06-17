@@ -20,18 +20,18 @@ interface AuthWebPort {
      * 회원 가입
      */
     @Throws(InvalidJoinException::class)
-    suspend fun join(email: String, name: String, googleAccountId: String)
+    suspend fun join(email: String, name: String, socialAccountId: String)
 
     /**
      * 로그인
      */
-    @Throws(InvalidLoginException::class, NeedJoinException::class, VerifyAppVersionException::class)
+    @Throws(InvalidLoginException::class, NeedJoinException::class)
     suspend fun login(deviceId: String, email: String, googleAccountId: String, appPackageName: String, deviceName: String, buildVersion: String): LoginResponse
 
     /**
      * 로그 아웃
      */
     @Throws(InvalidLogoutException::class)
-    suspend fun logout()
+    suspend fun logout(refreshToken: String)
 
 }

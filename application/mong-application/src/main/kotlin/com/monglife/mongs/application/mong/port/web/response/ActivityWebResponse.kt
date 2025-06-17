@@ -5,9 +5,9 @@ import com.monglife.mongs.domain.mong.enums.MongStatusCode
 import com.monglife.mongs.domain.mong.model.TrainingType
 
 /**
- * 훈련 조회 응답 Vo
+ * 훈련 조회 응답
  */
-data class GetTrainingResponseVo(
+data class GetTrainingResponse(
     val trainingTypeId: Long,
     val trainingCode: String,
     val trainingName: String,
@@ -38,9 +38,9 @@ data class GetTrainingResponseVo(
 }
 
 /**
- * 훈련 완료 응답 Vo
+ * 훈련 완료 응답
  */
-data class TrainingResponseVo(
+data class TrainingResponse(
     val isSuccess: Boolean,
     val rewardPayPoint: Int,
     val score: Int,

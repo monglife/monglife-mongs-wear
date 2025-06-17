@@ -4,11 +4,8 @@ import com.monglife.mongs.domain.mong.enums.InventoryTypeCode
 import com.monglife.mongs.domain.mong.model.RandomDraw
 
 data class RandomDrawVo(
-
     val randomDrawCode: String,
-
     val randomDrawName: String,
-
     val inventoryTypeCode: InventoryTypeCode,
 ) {
     companion object {

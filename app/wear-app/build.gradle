@@ -2,6 +2,7 @@ apply plugin: "com.android.application"
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "dagger.hilt.android.plugin"
 apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: "com.google.gms.google-services"
 
 android {
     namespace "${rootProject.ext.namespace}"
@@ -51,11 +52,15 @@ android {
 
 dependencies {
     implementation project(":presentation:wear-view-presentation")
-    implementation project(":presentation:viewmodel-presentation")
 
     // dagger & hilt
     implementation group: "javax.inject", name: "javax.inject", version: "1"
     implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
+    implementation "androidx.hilt:hilt-work:${rootProject.ext.hiltWorkerVersion}"
     ksp "com.google.dagger:dagger-compiler:${rootProject.ext.hiltVersion}"
     ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
+
+    // fcm
+    implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
+    implementation "com.google.firebase:firebase-messaging-ktx:${rootProject.ext.fcmVersion}"
 }

@@ -20,5 +20,6 @@ local.properties
 **/release
 **/schemas
 
+**/*.xml
 **/*.json
 **/*.pro

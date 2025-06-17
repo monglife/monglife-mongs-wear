@@ -4,15 +4,10 @@ import com.monglife.mongs.domain.mong.enums.InventoryTypeCode
 import com.monglife.mongs.domain.mong.model.Inventory
 
 data class InventoryVo(
-
     val inventoryId: Long,
-
     val mongId: Long,
-
     val inventoryCode: String,
-
     val inventoryName: String,
-
     val inventoryTypeCode: InventoryTypeCode,
 ) {
     companion object {

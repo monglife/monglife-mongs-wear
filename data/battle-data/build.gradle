@@ -1,0 +1,12 @@
+android {
+    namespace "${rootProject.ext.namespace}.data.battle"
+}
+
+dependencies {
+    // application layer
+    implementation project(":application:battle-application")
+    // core layer
+    implementation project(":core:data-core:room-data-core")
+    implementation project(":core:data-core:mqtt-data-core")
+    implementation project(":core:data-core:retrofit-data-core")
+}

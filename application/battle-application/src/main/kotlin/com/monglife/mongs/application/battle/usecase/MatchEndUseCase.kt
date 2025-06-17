@@ -21,10 +21,11 @@ class MatchEndUseCase @Inject constructor(
         return withContext(Dispatchers.IO) {
             // 매치 로컬 조회
             matchPersistencePort.getMatch(matchId = command.matchId).let { match: Match ->
-                // 매치 로컬 삭제
-                matchPersistencePort.deleteMatch(matchId = match.matchId)
+                // 매치 삭제
+                matchPersistencePort.deleteAllMatch()
                 // MatchVo 반환
-                MatchVo.of(match = match)
+                val matchPlayers = matchPersistencePort.getMatchPlayers(matchId = match.matchId)
+                MatchVo.of(match = match, matchPlayers = matchPlayers)
             }
         }
     }

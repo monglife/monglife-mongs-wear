@@ -1,6 +1,6 @@
 package com.monglife.mongs.application.member.store.port.web
 
-import com.monglife.mongs.application.member.store.exception.InvalidSubscribePlayerException
+import com.monglife.mongs.application.member.store.exception.InvalidConsumeOrderException
 import com.monglife.mongs.application.member.store.port.web.response.ConsumeOrderResponse
 import com.monglife.mongs.application.member.store.port.web.response.GetConsumedOrderResponse
 import com.monglife.mongs.application.member.store.port.web.response.GetProductResponse
@@ -15,11 +15,11 @@ interface StoreWebPort {
     /**
      * 소비된 주문 목록 조회
      */
-    suspend fun getConsumedOrders(socialOrderIds: List<String>): List<GetConsumedOrderResponse>
+    suspend fun getConsumedOrders(): List<GetConsumedOrderResponse>
 
     /**
      * 주문 소비
      */
-    @Throws(InvalidSubscribePlayerException::class)
+    @Throws(InvalidConsumeOrderException::class)
     suspend fun consumeOrder(socialOrderId: String, productId: String, purchaseToken: String): ConsumeOrderResponse
 }

@@ -1,7 +1,7 @@
 package com.monglife.mongs.application.member.player.usecase
 
+import com.monglife.mongs.application.member.player.exception.InvalidSubscribePlayerException
 import com.monglife.mongs.application.member.player.port.subscribe.PlayerSubscribePort
-import com.monglife.mongs.application.member.store.exception.InvalidSubscribePlayerException
 import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

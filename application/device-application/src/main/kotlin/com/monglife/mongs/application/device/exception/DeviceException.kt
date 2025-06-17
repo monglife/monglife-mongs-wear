@@ -21,14 +21,6 @@ class UpdateWalkingCountException(
 ) : ErrorException(code = code, message = message)
 
 /**
- * Step 조회 실패 예외
- */
-class NotFoundStepException(
-    override val code: ErrorCode = DeviceErrorCode.NOT_FOUND_STEP,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
  * DeviceOption 조회 실패 예외
  */
 class NotFoundDeviceOptionException(

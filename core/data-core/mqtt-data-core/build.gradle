@@ -2,11 +2,11 @@ apply plugin: "com.android.library"
 apply plugin: "org.jetbrains.kotlin.android"
 
 android {
-    namespace "${rootProject.ext.namespace}.core.data.mqtt"
+    namespace "${rootProject.ext.namespace}.data.core.mqtt"
 }
 
 dependencies {
     // mqtt
-    implementation "androidx.legacy:legacy-support-v4:1.0.0"
-    implementation "com.github.hannesa2:paho.mqtt.android:${parent.ext.mqttVersion}"
+    api "androidx.legacy:legacy-support-v4:1.0.0"
+    api "com.github.hannesa2:paho.mqtt.android:${parent.ext.mqttVersion}"
 }

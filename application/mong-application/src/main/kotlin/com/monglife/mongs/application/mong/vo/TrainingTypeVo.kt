@@ -3,25 +3,15 @@ package com.monglife.mongs.application.mong.vo
 import com.monglife.mongs.domain.mong.model.TrainingType
 
 data class TrainingTypeVo(
-
     val trainingCode: String,
-
     val trainingName: String,
-
     val payPoint: Int,
-
     val score: Int,
-
     val timeout: Int,
-
     val exp: Double,
-
     val weight: Double,
-
     val strength: Double,
-
     val satiety: Double,
-
     val fatigue: Double,
 ) {
     companion object {

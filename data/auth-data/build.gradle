@@ -1,0 +1,13 @@
+android {
+    namespace "${rootProject.ext.namespace}.data.auth"
+}
+
+dependencies {
+    // application layer
+    implementation project(":application:auth-application")
+    implementation project(":application:device-application")
+    implementation project(":application:member-application")
+    implementation project(":application:mong-application")
+    // core layer
+    implementation project(":core:data-core:retrofit-data-core")
+}

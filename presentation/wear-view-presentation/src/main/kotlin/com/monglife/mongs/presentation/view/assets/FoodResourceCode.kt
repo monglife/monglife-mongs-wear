@@ -1,0 +1,19 @@
+package com.monglife.mongs.presentation.view.assets
+
+import com.mongs.wear.presentation.view.wear.R
+
+/**
+ * 음식 리소스
+ */
+enum class FoodResourceCode (
+    val code: Int
+) {
+    FD000(R.drawable.food_fd000),
+    FD010(R.drawable.food_fd010),
+    FD011(R.drawable.food_fd011),
+    FD012(R.drawable.food_fd012),
+    FD020(R.drawable.food_fd020),
+    FD021(R.drawable.food_fd021),
+    FD022(R.drawable.food_fd022),
+    FD030(R.drawable.food_fd030),
+}

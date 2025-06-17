@@ -9,9 +9,9 @@ import com.monglife.mongs.domain.mong.model.RandomDraw
 import com.monglife.mongs.domain.mong.model.Snack
 
 /**
- * 몽 먹이 조회 응답 Vo
+ * 몽 먹이 조회 응답
  */
-data class GetFoodResponseVo(
+data class GetFoodResponse(
     val foodCode: String,
     val foodName: String,
     val price: Int,
@@ -38,9 +38,9 @@ data class GetFoodResponseVo(
 }
 
 /**
- * 몽 간식 조회 응답 Vo
+ * 몽 간식 조회 응답
  */
-data class GetSnackResponseVo(
+data class GetSnackResponse(
     val snackCode: String,
     val snackName: String,
     val price: Int,
@@ -67,9 +67,9 @@ data class GetSnackResponseVo(
 }
 
 /**
- * 몽 먹이 주기 응답 Vo
+ * 몽 먹이 주기 응답
  */
-data class FeedFoodMongResponseVo(
+data class FeedFoodMongResponse(
     val mongId: Long,
     val payPoint: Int,
     val expRatio: Double,
@@ -83,9 +83,9 @@ data class FeedFoodMongResponseVo(
 )
 
 /**
- * 몽 간식 주기 응답 Vo
+ * 몽 간식 주기 응답
  */
-data class FeedSnackMongResponseVo(
+data class FeedSnackMongResponse(
     val mongId: Long,
     val payPoint: Int,
     val expRatio: Double,
@@ -99,9 +99,9 @@ data class FeedSnackMongResponseVo(
 )
 
 /**
- * 인벤토리 조회 응답 Vo
+ * 인벤토리 조회 응답
  */
-data class GetInventoryResponseVo(
+data class GetInventoryResponse(
     val inventoryId: Long,
     val mongId: Long,
     val inventoryCode: String,
@@ -120,9 +120,9 @@ data class GetInventoryResponseVo(
 }
 
 /**
- * 인벤토리 소비 응답 Vo
+ * 인벤토리 소비 응답
  */
-data class ConsumeInventoryResponseVo(
+data class ConsumeInventoryResponse(
     val mongId: Long,
     val payPoint: Int,
     val expRatio: Double,
@@ -136,16 +136,16 @@ data class ConsumeInventoryResponseVo(
 )
 
 /**
- * 랜덤 뽑기 티켓 구매 응답 Vo
+ * 랜덤 뽑기 티켓 구매 응답
  */
-data class BuyRandomDrawTicketResponseVo(
+data class BuyRandomDrawTicketResponse(
     val mongId: Long,
     val payPoint: Int,
     val randomDrawTicketCount: Int,
 )
 
 /**
- * 랜덤 뽑기 응답 Vo
+ * 랜덤 뽑기 응답
  */
 data class RandomDrawResponseVo(
     val randomDrawCode: String,

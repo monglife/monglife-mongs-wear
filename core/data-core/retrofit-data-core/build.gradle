@@ -6,8 +6,15 @@ android {
 }
 
 dependencies {
+    // domain layer
+    implementation project(":domain:auth-domain")
+
     // retrofit2 & coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
-    implementation "com.squareup.retrofit2:retrofit:${parent.ext.retrofitVersion}"
-    implementation "com.squareup.retrofit2:converter-gson:${parent.ext.retrofitVersion}"
+    api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
+    api 'com.squareup.okio:okio:3.9.0'
+    api "com.squareup.retrofit2:retrofit:${parent.ext.retrofitVersion}"
+    api "com.squareup.retrofit2:converter-gson:${parent.ext.retrofitVersion}"
+
+    implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
+    api "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
 }

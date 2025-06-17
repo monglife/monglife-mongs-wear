@@ -13,14 +13,6 @@ class VerifyAppVersionException(
 ) : ErrorException(code = code, message = message)
 
 /**
- * 앱 업데이트 필요 예외
- */
-class NeedUpdateAppException(
-    override val code: ErrorCode = AuthErrorCode.NEED_UPDATE_APP,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
  * 회원 가입 필요 예외
  */
 class NeedJoinException(

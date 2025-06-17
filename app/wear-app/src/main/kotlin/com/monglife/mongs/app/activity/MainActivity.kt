@@ -3,7 +3,8 @@ package com.monglife.mongs.app.activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.monglife.mongs.presentation.view.layout.MainView
+import com.monglife.mongs.presentation.view.assets.MongsTheme
+import com.monglife.mongs.presentation.view.layout.Layout
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -16,7 +17,9 @@ class MainActivity : ComponentActivity() {
          * UI 로딩
          */
         setContent {
-            MainView()
+            MongsTheme {
+                Layout()
+            }
         }
     }
 }

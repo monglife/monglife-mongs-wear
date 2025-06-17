@@ -16,5 +16,6 @@ data class ExchangeWalkingCountRequest(
  * 걸음 수 서버 동기화 요청
  */
 data class UpdateWalkingCountRequest(
+    val totalWalkingCount: Int,
     val deviceBootedAt: LocalDateTime,
 )

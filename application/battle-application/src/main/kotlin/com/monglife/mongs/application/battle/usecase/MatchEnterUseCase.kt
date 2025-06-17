@@ -27,7 +27,8 @@ class MatchEnterUseCase @Inject constructor(
                 // 매치 입장 이벤트 전송
                 matchPublishPort.publishMatchEnter(matchId = match.matchId)
                 // MatchVo 반환
-                MatchVo.of(match = match)
+                val matchPlayers = matchPersistencePort.getMatchPlayers(matchId = match.matchId)
+                MatchVo.of(match = match, matchPlayers = matchPlayers)
             }
         }
     }

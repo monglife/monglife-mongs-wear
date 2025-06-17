@@ -7,9 +7,9 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 /**
- * 몽 조회 응답 Vo
+ * 몽 조회 응답
  */
-data class GetMongResponseVo(
+data class GetMongResponse(
     val mongId: Long,
     val name: String,
     val mongCode: String,
@@ -60,9 +60,9 @@ data class GetMongResponseVo(
 }
 
 /**
- * 몽 생성 응답 Vo
+ * 몽 생성 응답
  */
-data class CreateMongResponseVo(
+data class CreateMongResponse(
     val mongId: Long,
     val name: String,
     val mongCode: String,
@@ -113,16 +113,16 @@ data class CreateMongResponseVo(
 }
 
 /**
- * 몽 삭제 응답 Vo
+ * 몽 삭제 응답
  */
-data class DeleteMongResponseVo(
+data class DeleteMongResponse(
     val mongId: Long,
 )
 
 /**
- * 몽 쓰다 듬기 응답 Vo
+ * 몽 쓰다 듬기 응답
  */
-data class StrokeMongResponseVo(
+data class StrokeMongResponse(
     val mongId: Long,
     val expRatio: Double,
     val createdAt: LocalDateTime,
@@ -130,9 +130,9 @@ data class StrokeMongResponseVo(
 )
 
 /**
- * 몽 수면/기상 응답 Vo
+ * 몽 수면/기상 응답
  */
-data class SleepingMongResponseVo(
+data class SleepingMongResponse(
     val mongId: Long,
     val isSleep: Boolean,
     val createdAt: LocalDateTime,
@@ -140,9 +140,9 @@ data class SleepingMongResponseVo(
 )
 
 /**
- * 몽 배변 처리 응답 Vo
+ * 몽 배변 처리 응답
  */
-data class PoopCleanMongResponseVo(
+data class PoopCleanMongResponse(
     val mongId: Long,
     val expRatio: Double,
     val poopCount: Int,
@@ -151,9 +151,9 @@ data class PoopCleanMongResponseVo(
 )
 
 /**
- * 몽 진화 응답 Vo
+ * 몽 진화 응답
  */
-data class EvolutionMongResponseVo(
+data class EvolutionMongResponse(
     val mongId: Long,
     val mongCode: String,
     val expRatio: Double,
@@ -166,8 +166,8 @@ data class EvolutionMongResponseVo(
 )
 
 /**
- * 몽 졸업 응답 Vo
+ * 몽 졸업 응답
  */
-data class GraduateMongResponseVo(
+data class GraduateMongResponse(
     val mongId: Long,
 )

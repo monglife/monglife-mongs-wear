@@ -4,7 +4,7 @@ subprojects {
 
     dependencies {
         // core layer
-        implementation project(':core:application-core')
+        api project(':core:application-core')
 
         // coroutine-flow
         implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"

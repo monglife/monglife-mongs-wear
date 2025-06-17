@@ -3,9 +3,8 @@ package com.monglife.mongs.application.auth.usecase
 import com.monglife.mongs.application.auth.exception.InvalidCreateUserDeviceException
 import com.monglife.mongs.application.auth.exception.InvalidLoginException
 import com.monglife.mongs.application.auth.exception.NeedJoinException
-import com.monglife.mongs.application.auth.exception.NeedUpdateAppException
-import com.monglife.mongs.application.auth.exception.VerifyAppVersionException
 import com.monglife.mongs.application.auth.port.persistence.AuthPersistencePort
+import com.monglife.mongs.application.auth.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.auth.port.web.AuthWebPort
 import com.monglife.mongs.application.auth.port.web.UserDeviceWebPort
 import com.monglife.mongs.application.auth.port.web.request.CreateDeviceRequest
@@ -20,32 +19,38 @@ import javax.inject.Inject
  */
 class LoginUseCase @Inject constructor(
     private val authWebPort: AuthWebPort,
+    private val devicePersistencePort: DevicePersistencePort,
     private val userDeviceWebPort: UserDeviceWebPort,
     private val authPersistencePort: AuthPersistencePort,
 ) : BaseParamUseCase<LoginUseCase.Command, Unit>() {
 
-    @Throws(VerifyAppVersionException::class, NeedUpdateAppException::class, InvalidLoginException::class, NeedJoinException::class, InvalidCreateUserDeviceException::class)
+    @Throws(InvalidLoginException::class, NeedJoinException::class, InvalidCreateUserDeviceException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
-            // 앱 버전 검증 조회 요청
-            authWebPort.verifyAppVersion(
-                appPackageName = command.appPackageName,
-                buildVersion = command.buildVersion,
-            ).let { response ->
-                if (response.mustUpdate) {
-                    // 앱 업데이트 필요한 경우 예외 발생
-                    throw NeedUpdateAppException()
-                }
-            }
+            val deviceId = devicePersistencePort.getDeviceId()
+            val appPackageName = devicePersistencePort.getAppPackageName()
+            val buildVersion = devicePersistencePort.getBuildVersion()
+            val deviceName = devicePersistencePort.getDeviceName()
+            val fcmToken = devicePersistencePort.getFcmToken()
+
+            // 기기 등록 요청
+            userDeviceWebPort.createDevice(
+                createDeviceRequest = CreateDeviceRequest(
+                    deviceId = deviceId,
+                    deviceName = deviceName,
+                    appPackageName = appPackageName,
+                    fcmToken = fcmToken,
+                )
+            )
 
             // 로그인 요청
             authWebPort.login(
-                deviceId = command.deviceId,
                 email = command.email,
                 googleAccountId = command.googleAccountId,
-                appPackageName = command.appPackageName,
-                deviceName = command.deviceName,
-                buildVersion = command.buildVersion,
+                deviceId = deviceId,
+                appPackageName = appPackageName,
+                deviceName = deviceName,
+                buildVersion = buildVersion,
             ).let { response ->
                 // 세션 로컬 등록
                 authPersistencePort.saveSession(session = Session(
@@ -53,16 +58,6 @@ class LoginUseCase @Inject constructor(
                     accessToken = response.accessToken,
                     refreshToken = response.refreshToken,
                 ))
-
-                // 기기 등록 요청
-                userDeviceWebPort.createDevice(
-                    createDeviceRequest = CreateDeviceRequest(
-                        deviceId = command.deviceId,
-                        deviceName = command.deviceName,
-                        appPackageName = command.appPackageName,
-                        fcmToken = command.fcmToken,
-                    )
-                )
             }
         }
     }
@@ -70,10 +65,5 @@ class LoginUseCase @Inject constructor(
     data class Command(
         val googleAccountId: String,
         val email: String,
-        val deviceId: String,
-        val deviceName: String,
-        val appPackageName: String,
-        val buildVersion: String,
-        val fcmToken: String,
     )
 }

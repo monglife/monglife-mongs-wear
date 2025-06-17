@@ -2,14 +2,11 @@ package com.monglife.mongs.domain.device.model
 
 class DeviceOption(
     backgroundMapCode: String = DEFAULT_MAP_TYPE_CODE,
-    networkOption: Boolean = false,
     notificationOption: Boolean = false,
     soundVolume: Float = 0f,
     mongInteractionDialogOpen: Boolean = true,
 ) {
     var backgroundMapCode: String = backgroundMapCode
-        private set
-    var networkOption: Boolean = networkOption
         private set
     var notificationOption: Boolean = notificationOption
         private set
@@ -27,13 +24,6 @@ class DeviceOption(
      */
     fun updateBackgroundMapCode(backgroundMapCode: String) {
         this.backgroundMapCode = backgroundMapCode
-    }
-
-    /**
-     * 네트워크 옵션 수정
-     */
-    fun updateNetworkOption(networkOption: Boolean) {
-        this.networkOption = networkOption
     }
 
     /**

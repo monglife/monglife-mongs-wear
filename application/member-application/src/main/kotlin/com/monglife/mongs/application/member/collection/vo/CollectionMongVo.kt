@@ -3,11 +3,8 @@ package com.monglife.mongs.application.member.collection.vo
 import com.monglife.mongs.domain.member.collection.model.CollectionMong
 
 data class CollectionMongVo(
-
     val code: String,
-
     val name: String,
-
     val isIncluded: Boolean,
 ) {
     companion object {

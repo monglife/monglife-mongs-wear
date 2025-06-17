@@ -6,6 +6,11 @@ import kotlinx.coroutines.flow.Flow
 interface AuthPersistencePort {
 
     /**
+     * Session 조회
+     */
+    suspend fun getSession(): Session?
+
+    /**
      * 로그인 여부 라이브 객체 조회
      */
     suspend fun isExistsSessionFlow(): Flow<Boolean>

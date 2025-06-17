@@ -10,4 +10,13 @@ class Session(
     var accessToken: String = accessToken
         private set
     var refreshToken: String = refreshToken
-        private set}
+        private set
+
+    /**
+     * 토큰 동기화
+     */
+    fun update(accessToken: String, refreshToken: String) {
+        this.accessToken = accessToken
+        this.refreshToken = refreshToken
+    }
+}

@@ -1,7 +1,6 @@
 package com.monglife.mongs.application.device.port.persistence
 
 import com.monglife.mongs.application.device.exception.NotFoundDeviceOptionException
-import com.monglife.mongs.application.device.exception.NotFoundStepException
 import com.monglife.mongs.domain.device.model.DeviceOption
 import com.monglife.mongs.domain.device.model.Step
 import kotlinx.coroutines.flow.Flow
@@ -11,13 +10,11 @@ interface DevicePersistencePort {
     /**
      * 걸음 수 조회
      */
-    @Throws(NotFoundStepException::class)
     suspend fun getStep(): Step
 
     /**
      * 걸음 수 라이브 객체 조회
      */
-    @Throws(NotFoundStepException::class)
     suspend fun getStepFlow(): Flow<Step>
 
     /**

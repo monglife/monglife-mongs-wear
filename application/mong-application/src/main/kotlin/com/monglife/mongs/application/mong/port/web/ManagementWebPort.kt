@@ -8,14 +8,14 @@ import com.monglife.mongs.application.mong.exception.InvalidPoopCleanMongExcepti
 import com.monglife.mongs.application.mong.exception.InvalidSleepingMongException
 import com.monglife.mongs.application.mong.exception.InvalidStrokeMongException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
-import com.monglife.mongs.application.mong.port.web.response.CreateMongResponseVo
-import com.monglife.mongs.application.mong.port.web.response.DeleteMongResponseVo
-import com.monglife.mongs.application.mong.port.web.response.EvolutionMongResponseVo
-import com.monglife.mongs.application.mong.port.web.response.GetMongResponseVo
-import com.monglife.mongs.application.mong.port.web.response.GraduateMongResponseVo
-import com.monglife.mongs.application.mong.port.web.response.PoopCleanMongResponseVo
-import com.monglife.mongs.application.mong.port.web.response.SleepingMongResponseVo
-import com.monglife.mongs.application.mong.port.web.response.StrokeMongResponseVo
+import com.monglife.mongs.application.mong.port.web.response.CreateMongResponse
+import com.monglife.mongs.application.mong.port.web.response.DeleteMongResponse
+import com.monglife.mongs.application.mong.port.web.response.EvolutionMongResponse
+import com.monglife.mongs.application.mong.port.web.response.GetMongResponse
+import com.monglife.mongs.application.mong.port.web.response.GraduateMongResponse
+import com.monglife.mongs.application.mong.port.web.response.PoopCleanMongResponse
+import com.monglife.mongs.application.mong.port.web.response.SleepingMongResponse
+import com.monglife.mongs.application.mong.port.web.response.StrokeMongResponse
 import java.time.LocalTime
 
 interface ManagementWebPort {
@@ -23,54 +23,54 @@ interface ManagementWebPort {
     /**
      * 몽 목록 조회
      */
-    suspend fun getMongs(): List<GetMongResponseVo>
+    suspend fun getMongs(): List<GetMongResponse>
 
     /**
      * 몽 조회
      */
     @Throws(NotFoundMongException::class)
-    suspend fun getMong(mongId: Long): GetMongResponseVo
+    suspend fun getMong(mongId: Long): GetMongResponse
 
     /**
      * 몽 생성
      */
     @Throws(InvalidCreateMongException::class)
-    suspend fun createMong(name: String, sleepAt: LocalTime, wakeupAt: LocalTime): CreateMongResponseVo
+    suspend fun createMong(name: String, sleepAt: LocalTime, wakeupAt: LocalTime): CreateMongResponse
 
     /**
      * 몽 삭제
      */
     @Throws(InvalidDeleteMongException::class)
-    suspend fun deleteMong(mongId: Long): DeleteMongResponseVo
+    suspend fun deleteMong(mongId: Long): DeleteMongResponse
 
     /**
      * 몽 쓰다 듬기
      */
     @Throws(InvalidStrokeMongException::class)
-    suspend fun strokeMong(mongId: Long): StrokeMongResponseVo
+    suspend fun strokeMong(mongId: Long): StrokeMongResponse
 
     /**
      * 몽 수면/기상
      */
     @Throws(InvalidSleepingMongException::class)
-    suspend fun sleepingMong(mongId: Long): SleepingMongResponseVo
+    suspend fun sleepingMong(mongId: Long): SleepingMongResponse
 
     /**
      * 몽 배변 처리
      */
     @Throws(InvalidPoopCleanMongException::class)
-    suspend fun poopCleanMong(mongId: Long): PoopCleanMongResponseVo
+    suspend fun poopCleanMong(mongId: Long): PoopCleanMongResponse
 
     /**
      * 몽 진화
      */
     @Throws(InvalidEvolutionMongException::class)
-    suspend fun evolutionMong(mongId: Long): EvolutionMongResponseVo
+    suspend fun evolutionMong(mongId: Long): EvolutionMongResponse
 
     /**
      * 몽 졸업
      */
     @Throws(InvalidGraduateMongException::class)
-    suspend fun graduateMong(mongId: Long): GraduateMongResponseVo
+    suspend fun graduateMong(mongId: Long): GraduateMongResponse
 
 }

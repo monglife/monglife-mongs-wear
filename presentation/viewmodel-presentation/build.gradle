@@ -1,37 +1,35 @@
-buildscript {
-    ext {
-        workerVersion           = "2.10.1"
-        hiltWorkerVersion       = "1.2.0"
-        firebaseVersion         = "33.8.0"
-        fcmVersion              = "24.1.1"
-        gmsversion              = "21.3.0"
-        billingClientVersion    = "7.1.1"
-    }
-}
-
 android {
     namespace "${rootProject.ext.namespace}.presentation.viewmodel"
 }
 
 dependencies {
     // application layer
-//    api project(":application:auth-application")
-//    api project(":application:battle-application")
-//    api project(":application:device-application")
-//    api project(":application:member-application")
-//    api project(":application:mong-application")
+    api project(":application:auth-application")
+    api project(":application:battle-application")
+    api project(":application:device-application")
+    api project(":application:member-application")
+    api project(":application:mong-application")
 
-    // worker
-    api "androidx.work:work-runtime-ktx:${this.ext.workerVersion}"
-    api "androidx.hilt:hilt-work:${this.ext.hiltWorkerVersion}"
+    // data layer
+    implementation project(":data:auth-data")
+    implementation project(":data:battle-data")
+    implementation project(":data:device-data")
+    implementation project(":data:member-data")
+    implementation project(":data:mong-data")
+
+    // livedata
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:${rootProject.ext.lifecycleVersion}"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:${rootProject.ext.lifecycleVersion}"
+
+    // viewmodel
+    implementation "androidx.wear.compose:compose-foundation:${parent.ext.composeVersion}"
+    implementation "androidx.wear.compose:compose-navigation:${parent.ext.composeVersion}"
 
     // google-auth & firebase-fcm & google-location
     implementation "com.google.firebase:firebase-auth"
-    implementation platform("com.google.firebase:firebase-bom:${this.ext.firebaseVersion}")
-    implementation "com.google.firebase:firebase-messaging-ktx:${this.ext.fcmVersion}"
-    implementation "com.google.android.gms:play-services-auth:${this.ext.gmsversion}"
-    implementation "com.google.android.gms:play-services-location:${this.ext.gmsversion}"
+    implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
+    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsversion}"
 
     // billing
-    implementation "com.android.billingclient:billing-ktx:${this.ext.billingClientVersion}"
+    implementation "com.android.billingclient:billing-ktx:${rootProject.ext.billingClientVersion}"
 }

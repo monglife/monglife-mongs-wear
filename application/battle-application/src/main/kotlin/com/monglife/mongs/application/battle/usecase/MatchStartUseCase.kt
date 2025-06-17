@@ -26,7 +26,8 @@ class MatchStartUseCase @Inject constructor(
                 // 매치 로컬 저장
                 matchPersistencePort.saveMatch(match = match)
                 // MatchVo 반환
-                MatchVo.of(match = match)
+                val matchPlayers = matchPersistencePort.getMatchPlayers(matchId = match.matchId)
+                MatchVo.of(match = match, matchPlayers = matchPlayers)
             }
         }
     }

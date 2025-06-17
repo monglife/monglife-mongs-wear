@@ -1,0 +1,14 @@
+android {
+    namespace "${rootProject.ext.namespace}.data.member"
+}
+
+dependencies {
+    // application layer
+    implementation project(":application:member-application")
+    // core layer
+    implementation project(":core:data-core:store-data-core")
+    implementation project(":core:data-core:mqtt-data-core")
+    implementation project(":core:data-core:retrofit-data-core")
+    // billing
+    implementation "com.android.billingclient:billing-ktx:${rootProject.ext.billingClientVersion}"
+}

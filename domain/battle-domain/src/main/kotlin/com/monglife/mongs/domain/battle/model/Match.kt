@@ -1,17 +1,16 @@
 package com.monglife.mongs.domain.battle.model
 
 import com.monglife.mongs.domain.battle.enums.MatchStateCode
+import java.util.UUID
 
 class Match(
+    val queueId: String = UUID.randomUUID().toString(),
     matchId: Long = -1L,
-    deviceId: String,
     round: Int = 0,
     isLastRound: Boolean = false,
     stateCode: MatchStateCode = MatchStateCode.NONE,
 ) {
     var matchId: Long = matchId
-        private set
-    var deviceId: String = deviceId
         private set
     var round: Int = round
         private set
@@ -19,6 +18,7 @@ class Match(
         private set
     var stateCode: MatchStateCode = stateCode
         private set
+
     /**
      * 매치 큐
      */
@@ -64,7 +64,12 @@ class Match(
     /**
      * 라운드 종료
      */
-    fun fight() {
+    fun fight(
+        round: Int,
+        isLastRound: Boolean,
+    ) {
+        this.round = round
+        this.isLastRound = isLastRound
         this.stateCode = MatchStateCode.MATCH_FIGHT
     }
 

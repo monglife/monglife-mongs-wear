@@ -1,0 +1,12 @@
+android {
+    namespace "${rootProject.ext.namespace}.data.mong"
+}
+
+dependencies {
+    // application layer
+    implementation project(":application:mong-application")
+    // core layer
+    implementation project(":core:data-core:room-data-core")
+    implementation project(":core:data-core:mqtt-data-core")
+    implementation project(":core:data-core:retrofit-data-core")
+}

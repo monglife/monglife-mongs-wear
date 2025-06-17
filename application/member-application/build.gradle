@@ -1,4 +1,4 @@
 dependencies {
     // domain layer
-    implementation project(':domain:member-domain')\
+    api project(':domain:member-domain')
 }

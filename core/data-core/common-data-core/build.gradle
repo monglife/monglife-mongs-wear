@@ -2,8 +2,9 @@ apply plugin: "com.android.library"
 apply plugin: "org.jetbrains.kotlin.android"
 
 android {
-    namespace "${rootProject.ext.namespace}.core.data.common"
+    namespace "${rootProject.ext.namespace}.data.core.common"
 }
 
 dependencies {
+    api 'com.google.code.gson:gson:2.11.0'
 }
