@@ -11,7 +11,7 @@ import javax.inject.Inject
 /**
  * 몽 상호작용 다이얼로그 오픈 여부 조회 UseCase
  */
-class GetMongInteractionDialogOpenFlagUseCase @Inject constructor(
+class GetInitNotificationDialogOpenOptionUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,
 ) : BaseNoParamUseCase<Boolean>() {
 
@@ -29,7 +29,7 @@ class GetMongInteractionDialogOpenFlagUseCase @Inject constructor(
                     }
                 }.let { deviceOption: DeviceOption ->
                     // mongInteractionDialogOpen 반환
-                    deviceOption.mongInteractionDialogOpen
+                    deviceOption.initNotificationDialogOpen
                 }
         }
     }

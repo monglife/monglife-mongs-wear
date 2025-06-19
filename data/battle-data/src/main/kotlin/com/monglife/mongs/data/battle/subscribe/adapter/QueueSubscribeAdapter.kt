@@ -1,10 +1,12 @@
 package com.monglife.mongs.data.battle.subscribe.adapter
 
+import android.util.Log
 import com.monglife.mongs.application.battle.exception.InvalidDisSubscribeQueueException
 import com.monglife.mongs.application.battle.exception.InvalidSubscribeQueueException
 import com.monglife.mongs.application.battle.port.subscribe.QueueSubscribePort
 import com.monglife.mongs.application.battle.port.subscribe.event.UpdateQueueEvent
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +20,9 @@ class QueueSubscribeAdapter @Inject constructor(
      */
     @Throws(InvalidSubscribeQueueException::class)
     override suspend fun subscribeQueue(deviceId: String): Flow<UpdateQueueEvent> {
-        TODO("Not yet implemented")
+        Log.d("TEST", "subscribeQueue")
+
+        return flow {  }
     }
 
     /**
@@ -26,6 +30,6 @@ class QueueSubscribeAdapter @Inject constructor(
      */
     @Throws(InvalidDisSubscribeQueueException::class)
     override suspend fun disSubscribeQueue(deviceId: String) {
-        TODO("Not yet implemented")
+        Log.d("TEST", "disSubscribeQueue")
     }
 }

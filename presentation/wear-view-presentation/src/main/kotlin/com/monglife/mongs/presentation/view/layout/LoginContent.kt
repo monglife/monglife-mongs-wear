@@ -18,7 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.GoogleSignInButton
 import com.monglife.mongs.presentation.view.component.common.logo.Logo
-import com.monglife.mongs.presentation.viewmodel.pages.login.LoginViewModel
+import com.monglife.mongs.presentation.viewmodel.layout.LoginViewModel
 
 /**
  * 로그인 화면

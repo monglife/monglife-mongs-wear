@@ -16,14 +16,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 fun OnLeavePage(
     navController: NavController,
     lifecycleOwner: LifecycleOwner,
-    onLeavePage: () -> Unit,
+    callback: () -> Unit,
 ) {
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
     DisposableEffect(currentBackStackEntry) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_DESTROY) {
-                onLeavePage()
+                callback()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)

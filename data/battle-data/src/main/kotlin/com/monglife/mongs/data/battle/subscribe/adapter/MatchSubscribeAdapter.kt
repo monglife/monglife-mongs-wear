@@ -1,10 +1,12 @@
 package com.monglife.mongs.data.battle.subscribe.adapter
 
+import android.util.Log
 import com.monglife.mongs.application.battle.exception.InvalidDisSubscribeMatchException
 import com.monglife.mongs.application.battle.exception.InvalidSubscribeMatchException
 import com.monglife.mongs.application.battle.port.subscribe.MatchSubscribePort
 import com.monglife.mongs.application.battle.port.subscribe.event.MatchEvent
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +20,8 @@ class MatchSubscribeAdapter @Inject constructor(
      */
     @Throws(InvalidSubscribeMatchException::class)
     override suspend fun subscribeMatch(matchId: Long): Flow<MatchEvent> {
-        TODO("Not yet implemented")
+        Log.d("TEST", "subscribeMatch")
+        return flow {  }
     }
 
     /**
@@ -26,6 +29,6 @@ class MatchSubscribeAdapter @Inject constructor(
      */
     @Throws(InvalidDisSubscribeMatchException::class)
     override suspend fun disSubscribeMatch(matchId: Long) {
-        TODO("Not yet implemented")
+        Log.d("TEST", "disSubscribeMatch")
     }
 }

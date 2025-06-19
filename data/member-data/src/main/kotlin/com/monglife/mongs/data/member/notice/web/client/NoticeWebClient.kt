@@ -1,4 +1,4 @@
-package com.monglife.mongs.data.battle.web.client
+package com.monglife.mongs.data.member.notice.web.client
 
 interface NoticeWebClient {
 }

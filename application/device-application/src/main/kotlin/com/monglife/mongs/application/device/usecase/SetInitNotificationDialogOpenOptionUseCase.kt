@@ -9,11 +9,11 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * 몽 상호작용 다이얼로그 오픈 여부 설정 UseCase
+ * 초기 알림 다이얼로그 오픈 여부 설정 UseCase
  */
-class SetMongInteractionDialogOpenFlagUseCase @Inject constructor(
+class SetInitNotificationDialogOpenOptionUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,
-) : BaseParamUseCase<SetMongInteractionDialogOpenFlagUseCase.Command, Unit>() {
+) : BaseParamUseCase<SetInitNotificationDialogOpenOptionUseCase.Command, Unit>() {
 
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
@@ -29,7 +29,7 @@ class SetMongInteractionDialogOpenFlagUseCase @Inject constructor(
                 }
                 .let { deviceOption: DeviceOption ->
                     // DeviceOption mongInteractionDialogOpen 변경
-                    deviceOption.updateMongInteractionDialogOpen(mongInteractionDialogOpen = command.isOpen)
+                    deviceOption.updateInitNotificationDialogOpen(initNotificationDialogOpen = command.isOpen)
                     // DeviceOption 로컬 등록
                     devicePersistencePort.saveDeviceOption(deviceOption = deviceOption)
                 }

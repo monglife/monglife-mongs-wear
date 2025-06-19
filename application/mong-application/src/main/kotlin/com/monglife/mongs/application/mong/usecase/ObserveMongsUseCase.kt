@@ -15,13 +15,13 @@ import javax.inject.Inject
  */
 class ObserveMongsUseCase @Inject constructor(
     private val managementPersistencePort: ManagementPersistencePort,
-) : BaseNoParamUseCase<List<Flow<MongVo>>>() {
+) : BaseNoParamUseCase<Flow<List<MongVo>>>() {
 
-    override suspend fun execute(): List<Flow<MongVo>> {
+    override suspend fun execute(): Flow<List<MongVo>> {
         return withContext(Dispatchers.IO) {
             // 몽 Flow 목록 로컬 조회
-            managementPersistencePort.getMongsFlow().map { mongFlow: Flow<Mong> ->
-                mongFlow.map { mong: Mong ->
+            managementPersistencePort.getMongsFlow().map {
+                it.map { mong: Mong ->
                     // MongVo 반환
                     MongVo.of(mong = mong)
                 }

@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun GoogleSignInButton(
+internal fun GoogleSignInButton(
     onClick: () -> Unit = {},
     height: Int = 45,
     width: Int = 160,

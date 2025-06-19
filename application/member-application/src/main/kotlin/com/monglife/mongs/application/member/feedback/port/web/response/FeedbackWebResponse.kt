@@ -5,7 +5,7 @@ import com.monglife.mongs.domain.member.feedback.model.FeedbackType
 /**
  * 오류 신고 타입 조회 응답
  */
-data class GetFeedbackTypesResponse(
+data class GetFeedbackTypeResponse(
     val feedbackTypeId: Long,
     val feedbackName: String,
     val description: String,

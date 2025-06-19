@@ -1,5 +1,6 @@
 package com.monglife.mongs.data.mong.subscribe.adapter
 
+import android.util.Log
 import com.monglife.mongs.application.mong.exception.InvalidDisSubscribeMongException
 import com.monglife.mongs.application.mong.exception.InvalidSubscribeMongException
 import com.monglife.mongs.application.mong.port.subscribe.ManagementSubscribePort
@@ -16,7 +17,7 @@ class ManagementSubscribeAdapter @Inject constructor(
      */
     @Throws(InvalidSubscribeMongException::class)
     override suspend fun subscribeMong(mongId: Long) {
-        TODO("Not yet implemented")
+        Log.d("TEST", "subscribeMong")
     }
 
     /**
@@ -24,6 +25,6 @@ class ManagementSubscribeAdapter @Inject constructor(
      */
     @Throws(InvalidDisSubscribeMongException::class)
     override suspend fun disSubscribeMong(mongId: Long) {
-        TODO("Not yet implemented")
+        Log.d("TEST", "disSubscribeMong")
     }
 }

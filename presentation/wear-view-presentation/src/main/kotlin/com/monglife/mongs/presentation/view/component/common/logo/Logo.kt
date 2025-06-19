@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun Logo(
+internal fun Logo(
     isOpen: Boolean = true,
 ) {
     if (isOpen) {

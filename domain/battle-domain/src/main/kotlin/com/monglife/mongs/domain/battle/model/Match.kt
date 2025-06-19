@@ -1,6 +1,7 @@
 package com.monglife.mongs.domain.battle.model
 
 import com.monglife.mongs.domain.battle.enums.MatchStateCode
+import java.time.LocalDateTime
 import java.util.UUID
 
 class Match(
@@ -9,6 +10,7 @@ class Match(
     round: Int = 0,
     isLastRound: Boolean = false,
     stateCode: MatchStateCode = MatchStateCode.NONE,
+    val createdAt: LocalDateTime = LocalDateTime.now(),
 ) {
     var matchId: Long = matchId
         private set

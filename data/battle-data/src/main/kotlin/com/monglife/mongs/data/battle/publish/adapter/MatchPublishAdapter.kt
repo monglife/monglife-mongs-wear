@@ -1,5 +1,6 @@
 package com.monglife.mongs.data.battle.publish.adapter
 
+import android.util.Log
 import com.monglife.mongs.application.battle.exception.InvalidPublishMatchEnterException
 import com.monglife.mongs.application.battle.exception.InvalidPublishMatchExitException
 import com.monglife.mongs.application.battle.exception.InvalidPublishMatchPickException
@@ -17,7 +18,7 @@ class MatchPublishAdapter @Inject constructor(
      */
     @Throws(InvalidPublishMatchEnterException::class)
     override suspend fun publishMatchEnter(matchId: Long) {
-        TODO("Not yet implemented")
+        Log.d("TEST", "publishMatchEnter")
     }
 
     /**
@@ -25,7 +26,7 @@ class MatchPublishAdapter @Inject constructor(
      */
     @Throws(InvalidPublishMatchExitException::class)
     override suspend fun publishMatchExit(matchId: Long) {
-        TODO("Not yet implemented")
+        Log.d("TEST", "publishMatchExit")
     }
 
     /**
@@ -38,6 +39,6 @@ class MatchPublishAdapter @Inject constructor(
         targetPlayerId: String,
         pickCode: String
     ) {
-        TODO("Not yet implemented")
+        Log.d("TEST", "publishMatchPick")
     }
 }

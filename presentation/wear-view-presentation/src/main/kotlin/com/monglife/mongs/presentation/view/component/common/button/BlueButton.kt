@@ -26,7 +26,7 @@ import com.monglife.mongs.presentation.view.assets.MongsNavy
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun BlueButton(
+internal fun BlueButton(
     modifier: Modifier = Modifier,
     text: String,
     onClick: () -> Unit,

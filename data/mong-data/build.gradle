@@ -6,7 +6,14 @@ dependencies {
     // application layer
     implementation project(":application:mong-application")
     // core layer
-    implementation project(":core:data-core:room-data-core")
     implementation project(":core:data-core:mqtt-data-core")
     implementation project(":core:data-core:retrofit-data-core")
+    // room
+    api "androidx.room:room-runtime:${parent.ext.roomVersion}"
+    api "androidx.room:room-ktx:${parent.ext.roomVersion}"
+    ksp "androidx.room:room-compiler:${parent.ext.roomVersion}"
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }

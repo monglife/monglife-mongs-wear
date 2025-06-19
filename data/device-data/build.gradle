@@ -9,8 +9,10 @@ dependencies {
     implementation project(":application:device-application")
     implementation project(":application:member-application")
     // core layer
-    implementation project(":core:data-core:store-data-core")
     implementation project(":core:data-core:retrofit-data-core")
+    // data store
+    implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
+    implementation "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
     // worker
     implementation "androidx.work:work-runtime-ktx:${rootProject.ext.workerVersion}"
     implementation "androidx.hilt:hilt-work:${rootProject.ext.hiltWorkerVersion}"

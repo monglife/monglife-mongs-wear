@@ -36,7 +36,7 @@ class LayoutViewModel @Inject constructor(
      */
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            uiState = LayoutUiState.Loading
+            uiState = UiState.Loading
 
             // 로그인 여부 옵저빙 데이터 로드
             _isLogin.addSource(withContext(Dispatchers.IO) { getIsLoginUseCase() }.asLiveData()) {
@@ -49,7 +49,7 @@ class LayoutViewModel @Inject constructor(
             if (permissions.isNotEmpty()) {
                 _requestPermissionEvent.emit(permissions.toTypedArray())
             } else {
-                uiState = LayoutUiState.Idle
+                uiState = UiState.Idle
             }
         }
     }
@@ -59,26 +59,26 @@ class LayoutViewModel @Inject constructor(
      */
     fun verifyPermission() {
         viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            uiState = LayoutUiState.Idle
+            uiState = UiState.Idle
         }
     }
 
     /**
      * UI 상태 변수
      */
-    var uiState by mutableStateOf<LayoutUiState>(LayoutUiState.Idle)
+    var uiState by mutableStateOf<UiState>(UiState.Idle)
         private set
 
     /**
      * UI 상태 정의
      */
-    sealed class LayoutUiState(
+    sealed class UiState(
         val loadingBar: Boolean,
         val mustUpdateApp: Boolean,
     ) {
-        data object Idle : LayoutUiState(loadingBar = false, mustUpdateApp = false)
-        data object Loading : LayoutUiState(loadingBar = true, mustUpdateApp = false)
-        data object NeedUpdate : LayoutUiState(loadingBar = false, mustUpdateApp = true)
+        data object Idle : UiState(loadingBar = false, mustUpdateApp = false)
+        data object Loading : UiState(loadingBar = true, mustUpdateApp = false)
+        data object NeedUpdate : UiState(loadingBar = false, mustUpdateApp = true)
     }
 
     /**
@@ -87,22 +87,24 @@ class LayoutViewModel @Inject constructor(
     override fun initialize() {
         viewModelScopeWithHandler.launch(Dispatchers.IO) {
             // UI 초기화
-            uiState = LayoutUiState.Loading
+            uiState = UiState.Loading
 
             runCatching {
                 // 앱 버전 체크
                 val mustUpdate = getMustUpdateAppUseCase()
 
                 if (mustUpdate) {
-                    uiState = LayoutUiState.NeedUpdate
+                    uiState = UiState.NeedUpdate
                 }
-            }.also {
-                uiState = LayoutUiState.Idle
+            }.onFailure {
+                uiState = UiState.NeedUpdate
+            }.onSuccess {
+                uiState = UiState.Idle
             }
         }
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        uiState = LayoutUiState.Loading
+        uiState = UiState.Loading
     }
 }

@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.monglife.mongs.presentation.view.assets.MongsTheme
-import com.monglife.mongs.presentation.view.layout.Layout
+import com.monglife.mongs.presentation.view.layout.LayoutView
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
          */
         setContent {
             MongsTheme {
-                Layout()
+                LayoutView()
             }
         }
     }

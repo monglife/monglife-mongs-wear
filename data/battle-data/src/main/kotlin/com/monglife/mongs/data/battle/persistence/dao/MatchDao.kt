@@ -57,7 +57,7 @@ interface MatchDao {
      * 매치 영속화
      */
     @Transaction
-    fun save(matchEntity: MatchEntity) : MatchEntity {
+    fun save(matchEntity: MatchEntity): MatchEntity {
 
         if (this.insert(matchEntity = matchEntity) == -1L) {
             this.update(matchEntity = matchEntity)

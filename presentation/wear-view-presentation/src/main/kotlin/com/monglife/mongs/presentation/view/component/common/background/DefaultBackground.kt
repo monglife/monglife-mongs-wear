@@ -8,10 +8,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import com.mongs.wear.presentation.view.wear.R
+import com.monglife.mongs.presentation.view.assets.MapResourceCode
 
 @Composable
-fun DefaultBackground(
+internal fun DefaultBackground(
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -19,7 +19,7 @@ fun DefaultBackground(
         modifier = modifier.fillMaxSize(),
     ) {
         Image(
-            painter = painterResource(R.drawable.bg_normal),
+            painter = painterResource(MapResourceCode.MP000.code),
             contentDescription = "MainBackground",
             contentScale = ContentScale.Crop
         )

@@ -13,6 +13,7 @@ class MatchEntity(
     round: Int,
     isLastRound: Boolean,
     stateCode: MatchStateCode,
+    createdAt: LocalDateTime,
 ) {
     @PrimaryKey
     val queueId: String = queueId
@@ -25,8 +26,11 @@ class MatchEntity(
 
     val stateCode: MatchStateCode = stateCode
 
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val createdAt: LocalDateTime = createdAt
 
+    /**
+     * 엔티티 도메인 변환
+     */
     fun toDomain(): Match {
         return Match(
             queueId = this.queueId,

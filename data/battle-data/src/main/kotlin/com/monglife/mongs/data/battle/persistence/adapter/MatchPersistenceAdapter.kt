@@ -84,6 +84,7 @@ class MatchPersistenceAdapter @Inject constructor(
                 round = match.round,
                 isLastRound = match.isLastRound,
                 stateCode = match.stateCode,
+                createdAt = match.createdAt,
             )
         ).toDomain()
 

@@ -7,7 +7,6 @@ import com.monglife.mongs.data.battle.persistence.dao.MatchDao
 import com.monglife.mongs.data.battle.persistence.dao.MatchPlayerDao
 import com.monglife.mongs.data.battle.persistence.entity.MatchEntity
 import com.monglife.mongs.data.battle.persistence.entity.MatchPlayerEntity
-import com.monglife.mongs.data.core.room.convertors.RoomConverters
 
 @Database(entities = [ MatchEntity::class, MatchPlayerEntity::class ], version = 1)
 @TypeConverters(RoomConverters::class)

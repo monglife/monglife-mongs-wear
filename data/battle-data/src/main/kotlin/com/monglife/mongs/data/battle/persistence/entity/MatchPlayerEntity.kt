@@ -27,6 +27,9 @@ class MatchPlayerEntity(
 
     val roundCode: MatchRoundCode = roundCode
 
+    /**
+     * 엔티티 도메인 변환
+     */
     fun toDomain(): MatchPlayer {
         return MatchPlayer(
             playerId = this.playerId,

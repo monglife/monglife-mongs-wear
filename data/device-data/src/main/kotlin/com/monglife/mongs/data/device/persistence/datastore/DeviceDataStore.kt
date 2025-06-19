@@ -28,14 +28,14 @@ class DeviceDataStore @Inject constructor(
         val BACKGROUND_MAP_CODE = stringPreferencesKey("backgroundMapCode")
         val NOTIFICATION_OPTION = booleanPreferencesKey("notificationOption")
         val SOUND_VOLUME = floatPreferencesKey("soundVolume")
-        val MONG_INTERACTION_DIALOG_OPEN = booleanPreferencesKey("mongInteractionDialogOpen")
+        val INIT_NOTIFICATION_DIALOG_OPEN = booleanPreferencesKey("initNotificationDialogOpen")
 
         const val WALKING_COUNT_INIT_VALUE = 0
         const val CONSUME_WALKING_COUNT_INIT_VALUE = 0
         const val BACKGROUND_MAP_CODE_INIT_VALUE = ""
         const val NOTIFICATION_OPTION_INIT_VALUE = true
         const val SOUND_VOLUME_INIT_VALUE = 0f
-        const val MONG_INTERACTION_DIALOG_OPEN_INIT_VALUE = true
+        const val INIT_NOTIFICATION_DIALOG_OPEN_INIT_VALUE = true
     }
 
     init {
@@ -51,8 +51,8 @@ class DeviceDataStore @Inject constructor(
                     NOTIFICATION_OPTION_INIT_VALUE
                 if (!preferences.contains(SOUND_VOLUME)) preferences[SOUND_VOLUME] =
                     SOUND_VOLUME_INIT_VALUE
-                if (!preferences.contains(MONG_INTERACTION_DIALOG_OPEN)) preferences[MONG_INTERACTION_DIALOG_OPEN] =
-                    MONG_INTERACTION_DIALOG_OPEN_INIT_VALUE
+                if (!preferences.contains(INIT_NOTIFICATION_DIALOG_OPEN)) preferences[INIT_NOTIFICATION_DIALOG_OPEN] =
+                    INIT_NOTIFICATION_DIALOG_OPEN_INIT_VALUE
             }
         }
     }

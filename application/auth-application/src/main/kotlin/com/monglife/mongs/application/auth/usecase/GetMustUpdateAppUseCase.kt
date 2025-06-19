@@ -19,7 +19,7 @@ class GetMustUpdateAppUseCase @Inject constructor(
 
     override suspend fun execute(): Boolean {
         return withContext(Dispatchers.IO) {
-            val appPackageName = devicePersistencePort.getDeviceId()
+            val appPackageName = devicePersistencePort.getAppPackageName()
             val buildVersion = devicePersistencePort.getBuildVersion()
 
             // 앱 버전 검증 조회 요청

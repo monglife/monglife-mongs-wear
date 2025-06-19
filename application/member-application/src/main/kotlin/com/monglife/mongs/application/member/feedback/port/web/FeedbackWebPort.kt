@@ -1,14 +1,14 @@
 package com.monglife.mongs.application.member.feedback.port.web
 
 import com.monglife.mongs.application.member.feedback.exception.InvalidCreateFeedbackException
-import com.monglife.mongs.application.member.feedback.port.web.response.GetFeedbackTypesResponse
+import com.monglife.mongs.application.member.feedback.port.web.response.GetFeedbackTypeResponse
 
 interface FeedbackWebPort {
 
     /**
      * 오류 신고 타입 목록 조회
      */
-    suspend fun getFeedbackTypes(): List<GetFeedbackTypesResponse>
+    suspend fun getFeedbackTypes(): List<GetFeedbackTypeResponse>
 
     /**
      * 오류 신고 등록

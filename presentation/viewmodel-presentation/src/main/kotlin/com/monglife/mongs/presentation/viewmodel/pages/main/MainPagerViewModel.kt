@@ -5,12 +5,15 @@ import androidx.lifecycle.MediatorLiveData
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 @HiltViewModel
 class MainPagerViewModel @Inject constructor(
-
 ) : BaseViewModel() {
 
     companion object {
@@ -23,30 +26,30 @@ class MainPagerViewModel @Inject constructor(
         val NORMAL_PAGER_STATE_SIZE = NORMAL_PAGER_BRIGHTNESS.size
     }
 
-    val emptyPager: LiveData<Int> get() = _emptyPager
-    private val _emptyPager = MediatorLiveData(EMPTY_PAGER_STATE_INIT)
+    private val _emptyPagerEvent = MutableSharedFlow<Int>()
+    val emptyPagerEvent = _emptyPagerEvent.asSharedFlow()
 
-    val emptyPagerBrightness: LiveData<Float> get() = _emptyPagerBrightness
-    private val _emptyPagerBrightness = MediatorLiveData(EMPTY_PAGER_BRIGHTNESS[EMPTY_PAGER_STATE_INIT])
+    private val _normalPagerEvent = MutableSharedFlow<Int>()
+    val normalPagerEvent = _normalPagerEvent.asSharedFlow()
 
-    val normalPager: LiveData<Int> get() = _normalPager
-    private val _normalPager = MediatorLiveData(NORMAL_PAGER_STATE_INIT)
+    private val _isPagerChange = MediatorLiveData(false)
+    val isPagerChange: LiveData<Boolean> get() = _isPagerChange
 
-    val normalPagerBrightness: LiveData<Float> get() = _normalPagerBrightness
-    private val _normalPagerBrightness = MediatorLiveData(NORMAL_PAGER_BRIGHTNESS[NORMAL_PAGER_STATE_INIT])
-
-    fun emptyPagerScroll(page: Int) {
+    /**
+     * 메인 페이지 스크롤 이벤트
+     */
+    fun pagerScroll(page: Int) {
         viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            _emptyPagerBrightness.postValue(EMPTY_PAGER_BRIGHTNESS[page])
-            _emptyPager.postValue(page)
+            _emptyPagerEvent.emit(max(0, min(page, EMPTY_PAGER_STATE_SIZE)))
+            _normalPagerEvent.emit(max(0, min(page, NORMAL_PAGER_STATE_SIZE)))
         }
     }
 
-    fun normalPagerScroll(page: Int) {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            _normalPagerBrightness.postValue(NORMAL_PAGER_BRIGHTNESS[page])
-            _normalPager.postValue(page)
-        }
+    /**
+     * 페이지 스크롤 여부 업데이트
+     */
+    fun updateIsPagerChange(isPagerChange: Boolean) {
+        _isPagerChange.postValue(isPagerChange)
     }
 
     /**
@@ -54,8 +57,10 @@ class MainPagerViewModel @Inject constructor(
      */
     override fun initialize() {
         viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            emptyPagerScroll(EMPTY_PAGER_STATE_INIT)
-            normalPagerScroll(NORMAL_PAGER_STATE_INIT)
+            _emptyPagerEvent.emit(EMPTY_PAGER_STATE_INIT)
+            _normalPagerEvent.emit(NORMAL_PAGER_STATE_INIT)
         }
     }
+
+    override suspend fun exceptionHandler(exception: Throwable) {}
 }

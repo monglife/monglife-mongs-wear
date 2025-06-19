@@ -29,3 +29,100 @@ plugins {
     id "com.google.dagger.hilt.android" version "${hiltVersion}"        apply false
     id "com.google.gms.google-services" version "${gmsPluginVersion}"   apply false
 }
+
+subprojects {
+    // 개발 환경 파일 복사
+    tasks.register("copyPrivateDev", DefaultTask) {
+        def profile = "dev"
+        def configPath = "${rootDir}/configs"
+        def fullPath = project.path
+        def pathSegments = fullPath.tokenize(":")
+
+        if (pathSegments.size() > 1) {
+            def parentModule = pathSegments[-2]
+            def currentModule = pathSegments[-1]
+
+            doLast {
+                if (parentModule == 'app') {
+                    project.delete fileTree("src/main/res/values") {
+                        include("*.xml")
+                    }
+                    project.delete fileTree("./") {
+                        include("*.json")
+                        include("*.pro")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*.xml")
+                        }
+                        into("src/main/res/values")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*.json")
+                            include("*.pro")
+                        }
+                        into("./")
+                    }
+                } else {
+                    project.delete fileTree("src/main/res/values") {
+                        include("*.xml")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*${profile}.xml")
+                        }
+                        into("src/main/res/values")
+                    }
+                }
+            }
+        }
+    }
+    // 프로덕트 환경 파일 복사
+    tasks.register("copyPrivatePrd", DefaultTask) {
+        def profile = "prd"
+        def configPath = "${rootDir}/configs"
+        def fullPath = project.path
+        def pathSegments = fullPath.tokenize(":")
+
+        if (pathSegments.size() > 1) {
+            def parentModule = pathSegments[-2]
+            def currentModule = pathSegments[-1]
+
+            doLast {
+                if (parentModule == 'app') {
+                    project.delete fileTree("src/main/res/values") {
+                        include("*.xml")
+                    }
+                    project.delete fileTree("./") {
+                        include("*.json")
+                        include("*.pro")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*.xml")
+                        }
+                        into("src/main/res/values")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*.json")
+                            include("*.pro")
+                        }
+                        into("./")
+                    }
+                } else {
+                    project.delete fileTree("src/main/res/values") {
+                        include("*.xml")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*${profile}.xml")
+                        }
+                        into("src/main/res/values")
+                    }
+                }
+            }
+        }
+    }
+}

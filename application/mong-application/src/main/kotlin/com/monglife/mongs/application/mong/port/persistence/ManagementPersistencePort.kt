@@ -26,7 +26,7 @@ interface ManagementPersistencePort {
     /**
      * 현재 몽 라이브 객체 목록 조회
      */
-    suspend fun getMongsFlow(): List<Flow<Mong>>
+    suspend fun getMongsFlow(): Flow<List<Mong>>
 
     /**
      * 몽 영속화
@@ -36,5 +36,5 @@ interface ManagementPersistencePort {
     /**
      * 몽 삭제
      */
-    suspend fun deleteMong(mongId: Long): Mong
+    suspend fun deleteMong(mongId: Long)
 }

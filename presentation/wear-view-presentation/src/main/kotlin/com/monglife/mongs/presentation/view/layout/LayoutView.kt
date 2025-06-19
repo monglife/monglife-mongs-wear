@@ -13,15 +13,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
-import com.monglife.mongs.presentation.view.router.Router
 import com.monglife.mongs.presentation.viewmodel.layout.LayoutViewModel
 
 @Composable
-fun Layout (
+fun LayoutView (
     context: Context = LocalContext.current,
     layoutViewModel: LayoutViewModel = hiltViewModel(),
 ) {
-
     val isLogin = layoutViewModel.isLogin.observeAsState(false)
     val permissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ -> layoutViewModel.verifyPermission() }

@@ -18,18 +18,19 @@ class AuthPersistenceAdapter @Inject constructor(
     com.monglife.mongs.application.mong.port.persistence.AuthPersistencePort {
 
     /**
-     * 로그인 여부 조회
+     * 세션 존재 여부 조회
      */
     override suspend fun isExistsSession(): Boolean = sessionDataStore.getStore().data.map {
         it[SessionDataStore.ACCOUNT_ID] != SessionDataStore.ACCOUNT_INIT_VALUE
     }.first()
 
     /**
-     * 로그인 여부 라이브 객체 조회
+     * 세션 존재 라이브 객체 조회
      */
-    override suspend fun isExistsSessionFlow(): Flow<Boolean> = sessionDataStore.getStore().data.map {
-        it[SessionDataStore.ACCOUNT_ID] != SessionDataStore.ACCOUNT_INIT_VALUE
-    }
+    override suspend fun isExistsSessionFlow(): Flow<Boolean> =
+        sessionDataStore.getStore().data.map {
+            it[SessionDataStore.ACCOUNT_ID] != SessionDataStore.ACCOUNT_INIT_VALUE
+        }
 
     /**
      * 세션 조회
@@ -54,22 +55,23 @@ class AuthPersistenceAdapter @Inject constructor(
     /**
      * 세션 저장
      */
-    override suspend fun saveSession(session: Session): Session = sessionDataStore.getStore().let { store ->
+    override suspend fun saveSession(session: Session): Session =
+        sessionDataStore.getStore().let { store ->
 
-        store.edit { preferences ->
-            preferences[SessionDataStore.ACCOUNT_ID] = session.accountId
-            preferences[SessionDataStore.ACCESS_TOKEN] = session.accessToken
-            preferences[SessionDataStore.REFRESH_TOKEN] = session.refreshToken
+            store.edit { preferences ->
+                preferences[SessionDataStore.ACCOUNT_ID] = session.accountId
+                preferences[SessionDataStore.ACCESS_TOKEN] = session.accessToken
+                preferences[SessionDataStore.REFRESH_TOKEN] = session.refreshToken
+            }
+
+            store.data.map {
+                Session(
+                    accountId = it[SessionDataStore.ACCOUNT_ID]!!,
+                    accessToken = it[SessionDataStore.ACCESS_TOKEN]!!,
+                    refreshToken = it[SessionDataStore.REFRESH_TOKEN]!!,
+                )
+            }.first()
         }
-
-        store.data.map {
-            Session(
-                accountId = it[SessionDataStore.ACCOUNT_ID]!!,
-                accessToken = it[SessionDataStore.ACCESS_TOKEN]!!,
-                refreshToken = it[SessionDataStore.REFRESH_TOKEN]!!,
-            )
-        }.first()
-    }
 
     /**
      * 세션 삭제

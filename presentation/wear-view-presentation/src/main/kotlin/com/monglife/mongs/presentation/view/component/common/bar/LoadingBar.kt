@@ -16,7 +16,7 @@ import coil.decode.ImageDecoderDecoder
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun LoadingBar(
+internal fun LoadingBar(
     modifier: Modifier = Modifier,
     height: Int = 40,
     width: Int = 40,

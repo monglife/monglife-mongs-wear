@@ -1,2 +1,2 @@
-package com.monglife.mongs.data.battle.web.client.response
+package com.monglife.mongs.data.member.feedback.web.client.response
 

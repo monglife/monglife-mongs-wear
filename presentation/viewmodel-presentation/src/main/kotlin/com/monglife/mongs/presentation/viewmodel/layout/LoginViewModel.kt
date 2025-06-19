@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.viewmodel.pages.login
+package com.monglife.mongs.presentation.viewmodel.layout
 
 import android.app.Activity
 import android.content.Context
@@ -36,7 +36,7 @@ class LoginViewModel @Inject constructor(
      */
     fun googleLogin(googleLoginLauncher: ActivityResultLauncher<Intent>) {
         viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            uiState = LoginUiState.Loading
+            uiState = UiState.Loading
 
             val googleSignIn = GoogleSignIn.getLastSignedInAccount(context)
             val googleSignInOption = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -59,7 +59,7 @@ class LoginViewModel @Inject constructor(
      */
     fun login(googleSignInResult: ActivityResult) {
         viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            uiState = LoginUiState.Loading
+            uiState = UiState.Loading
 
             if (googleSignInResult.resultCode == Activity.RESULT_OK) {
                 GoogleSignIn.getSignedInAccountFromIntent(googleSignInResult.data).result?.let { account ->
@@ -76,7 +76,7 @@ class LoginViewModel @Inject constructor(
                 }
             }
 
-            uiState = LoginUiState.Idle
+            uiState = UiState.Idle
         }
     }
 
@@ -85,7 +85,7 @@ class LoginViewModel @Inject constructor(
      */
     private fun joinAndLogin() {
         viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            uiState = LoginUiState.Loading
+            uiState = UiState.Loading
 
             GoogleSignIn.getLastSignedInAccount(context)?.let { account ->
 
@@ -109,7 +109,7 @@ class LoginViewModel @Inject constructor(
                 )
             }
 
-            uiState = LoginUiState.Idle
+            uiState = UiState.Idle
         }
     }
 
@@ -124,22 +124,21 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-
     /**
      * UI 상태 변수
      */
-    var uiState by mutableStateOf<LoginUiState>(LoginUiState.Idle)
+    var uiState by mutableStateOf<UiState>(UiState.Idle)
         private set
 
     /**
      * UI 상태 정의
      */
-    sealed class LoginUiState(
+    sealed class UiState(
         val loadingBar: Boolean,
         val signInButton: Boolean,
     ) {
-        data object Idle : LoginUiState(loadingBar = false, signInButton = true)
-        data object Loading : LoginUiState(loadingBar = true, signInButton = false)
+        data object Idle : UiState(loadingBar = false, signInButton = true)
+        data object Loading : UiState(loadingBar = true, signInButton = false)
     }
 
     /**
@@ -149,7 +148,7 @@ class LoginViewModel @Inject constructor(
         // 구글 로그아웃
         googleLogout()
         // UI 초기화
-        uiState = LoginUiState.Idle
+        uiState = UiState.Idle
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {

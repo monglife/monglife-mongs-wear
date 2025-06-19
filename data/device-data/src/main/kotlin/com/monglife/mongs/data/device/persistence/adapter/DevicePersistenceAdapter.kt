@@ -116,7 +116,7 @@ class DevicePersistenceAdapter @Inject constructor(
             backgroundMapCode = it[DeviceDataStore.BACKGROUND_MAP_CODE] ?: "",
             notificationOption = it[DeviceDataStore.NOTIFICATION_OPTION] ?: true,
             soundVolume = it[DeviceDataStore.SOUND_VOLUME] ?: 1f,
-            mongInteractionDialogOpen = it[DeviceDataStore.MONG_INTERACTION_DIALOG_OPEN] ?: true,
+            initNotificationDialogOpen = it[DeviceDataStore.INIT_NOTIFICATION_DIALOG_OPEN] ?: true,
         )
     }.first()
 
@@ -130,7 +130,7 @@ class DevicePersistenceAdapter @Inject constructor(
                 backgroundMapCode = it[DeviceDataStore.BACKGROUND_MAP_CODE] ?: "",
                 notificationOption = it[DeviceDataStore.NOTIFICATION_OPTION] ?: true,
                 soundVolume = it[DeviceDataStore.SOUND_VOLUME] ?: 1f,
-                mongInteractionDialogOpen = it[DeviceDataStore.MONG_INTERACTION_DIALOG_OPEN]
+                initNotificationDialogOpen = it[DeviceDataStore.INIT_NOTIFICATION_DIALOG_OPEN]
                     ?: true,
             )
         }
@@ -143,8 +143,8 @@ class DevicePersistenceAdapter @Inject constructor(
             preferences[DeviceDataStore.BACKGROUND_MAP_CODE] = deviceOption.backgroundMapCode
             preferences[DeviceDataStore.NOTIFICATION_OPTION] = deviceOption.notificationOption
             preferences[DeviceDataStore.SOUND_VOLUME] = deviceOption.soundVolume
-            preferences[DeviceDataStore.MONG_INTERACTION_DIALOG_OPEN] =
-                deviceOption.mongInteractionDialogOpen
+            preferences[DeviceDataStore.INIT_NOTIFICATION_DIALOG_OPEN] =
+                deviceOption.initNotificationDialogOpen
         }
 
         return deviceDataStore.getStore().data.map {
@@ -152,7 +152,7 @@ class DevicePersistenceAdapter @Inject constructor(
                 backgroundMapCode = it[DeviceDataStore.BACKGROUND_MAP_CODE] ?: "",
                 notificationOption = it[DeviceDataStore.NOTIFICATION_OPTION] ?: true,
                 soundVolume = it[DeviceDataStore.SOUND_VOLUME] ?: 1f,
-                mongInteractionDialogOpen = it[DeviceDataStore.MONG_INTERACTION_DIALOG_OPEN]
+                initNotificationDialogOpen = it[DeviceDataStore.INIT_NOTIFICATION_DIALOG_OPEN]
                     ?: true,
             )
         }.first()
