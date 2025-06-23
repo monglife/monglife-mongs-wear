@@ -13,7 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.mongs.wear.presentation.view.wear.R
-import kotlin.math.max
+import kotlin.math.min
 
 private val poopPadding = arrayOf(
     PaddingValues(end = 60.dp, bottom = 18.dp),
@@ -31,7 +31,7 @@ internal fun PoopEffect(
         contentAlignment = Alignment.BottomCenter,
         modifier = modifier.fillMaxSize(),
     ) {
-        for (count in 1..max(poopCount, poopPadding.size)) {
+        for (count in 1..min(poopCount, poopPadding.size)) {
             Image(
                 modifier = Modifier
                     .padding(poopPadding[count - 1])

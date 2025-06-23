@@ -11,6 +11,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class AdapterModule {
 
+    /**
+     * Bind PlayerPersistencePort for MemberApplication
+     */
     @Binds
     @Singleton
     abstract fun bindPlayerPersistencePort(adapter: PlayerPersistenceAdapter): PlayerPersistencePort

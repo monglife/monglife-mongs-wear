@@ -26,8 +26,8 @@ import com.monglife.mongs.presentation.view.component.main.slot.section.DeleteSe
 import com.monglife.mongs.presentation.view.component.main.slot.section.EmptySection
 import com.monglife.mongs.presentation.view.component.main.slot.section.GraduatedSection
 import com.monglife.mongs.presentation.view.component.main.slot.section.NormalSection
-import com.monglife.mongs.presentation.view.dialog.pages.main.InitNotificationDialog
-import com.monglife.mongs.presentation.view.dialog.pages.main.InteractionDialog
+import com.monglife.mongs.presentation.view.dialog.main.InitNotificationDialog
+import com.monglife.mongs.presentation.view.dialog.main.InteractionDialog
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainPagerViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainSlotViewModel
 

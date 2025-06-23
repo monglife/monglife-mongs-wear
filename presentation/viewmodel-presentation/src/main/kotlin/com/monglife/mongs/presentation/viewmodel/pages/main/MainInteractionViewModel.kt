@@ -5,15 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.asLiveData
-import com.monglife.mongs.application.mong.usecase.ObserveCurrentMongUseCase
+import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainSlotViewModel.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,14 +23,9 @@ class MainInteractionViewModel @Inject constructor(
     val mongVo: LiveData<MongVo?> get() = _mongVo
 
     init {
-        viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            uiState = UiState.Loading
-
-            _mongVo.addSource(withContext(Dispatchers.IO) { observeCurrentMongUseCase().asLiveData() }) {
-                _mongVo.value = it
-            }
-
-            uiState = UiState.Idle
+        // 몽 정보 옵저빙
+        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+            observeCurrentMongUseCase().collect { _mongVo.postValue(it) }
         }
     }
 
@@ -56,8 +49,9 @@ class MainInteractionViewModel @Inject constructor(
      * 화면 초기화 메서드
      */
     override fun initialize() {
-        // UI 초기화
-        uiState = UiState.Idle
+        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+            uiState = UiState.Idle
+        }
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {

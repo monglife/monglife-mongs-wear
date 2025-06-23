@@ -1,6 +1,6 @@
 package com.monglife.mongs.data.mong.web.client
 
-import com.monglife.mongs.data.core.common.dto.response.ResponseDto
+import com.monglife.mongs.data.core.dto.response.ResponseDto
 import com.monglife.mongs.data.mong.web.client.request.CreateMongRequestDto
 import com.monglife.mongs.data.mong.web.client.response.CreateMongResponseDto
 import com.monglife.mongs.data.mong.web.client.response.DeleteMongResponseDto

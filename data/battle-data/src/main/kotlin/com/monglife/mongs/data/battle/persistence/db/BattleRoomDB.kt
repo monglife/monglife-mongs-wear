@@ -13,12 +13,12 @@ import com.monglife.mongs.data.battle.persistence.entity.MatchPlayerEntity
 abstract class BattleRoomDB : RoomDatabase() {
 
     /**
-     * 매치 DAO
+     * 매치 Dao
      */
     abstract fun matchDao(): MatchDao
 
     /**
-     * 매치 플레이어 DAO
+     * 매치 플레이어 Dao
      */
     abstract fun matchPlayerDao(): MatchPlayerDao
 }

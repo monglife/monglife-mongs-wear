@@ -11,6 +11,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class AdapterModule {
 
+    /**
+     * Bind ManagementSubscribePort for MongApplication
+     */
     @Binds
     @Singleton
     abstract fun bindManagementSubscribePort(adapter: ManagementSubscribeAdapter): ManagementSubscribePort

@@ -11,6 +11,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class AdapterModule {
 
+    /**
+     * Bind MatchPublishPort for BattleApplication
+     */
     @Binds
     @Singleton
     abstract fun bindMatchPublishPort(adapter: MatchPublishAdapter): MatchPublishPort

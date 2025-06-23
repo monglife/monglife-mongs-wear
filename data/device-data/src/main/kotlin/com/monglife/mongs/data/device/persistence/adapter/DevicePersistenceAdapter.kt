@@ -23,12 +23,10 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 @SuppressLint("HardwareIds")
-@Singleton
 class DevicePersistenceAdapter @Inject constructor(
     @ApplicationContext private val context: Context,
     private val firebaseMessaging: FirebaseMessaging,

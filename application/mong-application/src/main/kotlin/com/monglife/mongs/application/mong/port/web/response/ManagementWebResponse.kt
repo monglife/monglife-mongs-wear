@@ -156,6 +156,8 @@ data class PoopCleanMongResponse(
 data class EvolutionMongResponse(
     val mongId: Long,
     val mongCode: String,
+    val stateCode: MongStateCode,
+    val statusCode: MongStatusCode,
     val expRatio: Double,
     val strengthRatio: Double,
     val healthyRatio: Double,

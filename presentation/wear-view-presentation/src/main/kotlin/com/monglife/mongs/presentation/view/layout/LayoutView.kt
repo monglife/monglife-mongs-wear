@@ -21,8 +21,9 @@ fun LayoutView (
     layoutViewModel: LayoutViewModel = hiltViewModel(),
 ) {
     val isLogin = layoutViewModel.isLogin.observeAsState(false)
-    val permissionLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ -> layoutViewModel.verifyPermission() }
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
+        layoutViewModel.verifyPermission()
+    }
 
     Box {
         DefaultBackground()
@@ -45,10 +46,6 @@ fun LayoutView (
         layoutViewModel.requestPermissionEvent.collect { permissions ->
             permissionLauncher.launch(permissions)
         }
-    }
-
-    LaunchedEffect(Unit) {
-        layoutViewModel.initialize()
     }
 
     /**

@@ -6,6 +6,7 @@ import com.monglife.mongs.domain.battle.model.Match
 import com.monglife.mongs.domain.battle.model.MatchPlayer
 
 data class MatchVo(
+    val queueId: String,
     val matchId: Long,
     val round: Int,
     val isLastRound: Boolean,
@@ -18,6 +19,7 @@ data class MatchVo(
          * 도메인 Vo 변환
          */
         fun of(match: Match, matchPlayers: List<MatchPlayer>): MatchVo = MatchVo(
+            queueId = match.queueId,
             matchId = match.matchId,
             round = match.round,
             isLastRound = match.isLastRound,
@@ -29,6 +31,7 @@ data class MatchVo(
     data class MatchPlayerVo(
         val playerId: String,
         val mongCode: String,
+        val mongName: String,
         val name: String,
         val hp: Double,
         val roundCode: MatchRoundCode,
@@ -41,6 +44,7 @@ data class MatchVo(
             fun of(matchPlayer: MatchPlayer): MatchPlayerVo = MatchPlayerVo(
                 playerId = matchPlayer.playerId,
                 mongCode = matchPlayer.mongCode,
+                mongName = matchPlayer.mongName,
                 name = matchPlayer.name,
                 hp = matchPlayer.hp,
                 roundCode = matchPlayer.roundCode,

@@ -11,6 +11,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class AdapterModule {
 
+    /**
+     * Bind DeviceWebAdapter for DeviceApplication
+     */
     @Binds
     @Singleton
     abstract fun bindDeviceWebPort(adapter: DeviceWebAdapter): DeviceWebPort

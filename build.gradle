@@ -14,7 +14,7 @@ buildscript {
         gmsPluginVersion        = "4.4.2"
         gmsversion              = "21.3.0"
         billingClientVersion    = "7.1.1"
-        junitVersion            = "4.13.2"
+        jupiterVersion          = "4.13.2"
         mockitoVersion          = "5.14.2"
         mockitoKotlinVersion    = "5.2.1"
     }

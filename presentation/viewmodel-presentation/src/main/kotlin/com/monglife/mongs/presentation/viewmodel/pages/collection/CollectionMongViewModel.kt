@@ -35,6 +35,15 @@ class CollectionMongViewModel @Inject constructor(
     }
 
     /**
+     * 컬렉션 몽 조회
+     */
+    fun getCollectionMons() {
+        viewModelScopeWithHandler.launch (Dispatchers.IO) {
+
+        }
+    }
+
+    /**
      * UI 상태 변수
      */
     var uiState by mutableStateOf<UiState>(UiState.Idle)

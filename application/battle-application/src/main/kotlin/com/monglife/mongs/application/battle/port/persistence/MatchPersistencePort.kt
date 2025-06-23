@@ -12,6 +12,12 @@ interface MatchPersistencePort {
      * 매치 객체 조회
      */
     @Throws(NotFoundMatchException::class)
+    suspend fun getMatch(queueId: String): Match
+
+    /**
+     * 매치 객체 조회
+     */
+    @Throws(NotFoundMatchException::class)
     suspend fun getMatch(matchId: Long): Match
 
     /**

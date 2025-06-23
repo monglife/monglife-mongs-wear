@@ -107,3 +107,11 @@ class InvalidDisSubscribeQueueException(
     override val code: ErrorCode = BattleErrorCode.INVALID_DIS_SUBSCRIBE_QUEUE,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)
+
+/**
+ * 매치 큐 매칭 실패 예외
+ */
+class InvalidQueueMatchingException(
+    override val code: ErrorCode = BattleErrorCode.INVALID_MATCHING,
+    override val message: String = code.getMessage()
+) : ErrorException(code = code, message = message)

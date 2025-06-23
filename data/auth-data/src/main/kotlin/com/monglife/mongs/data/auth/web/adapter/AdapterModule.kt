@@ -12,10 +12,16 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class AdapterModule {
 
+    /**
+     * Bind AuthWebPort for AuthApplication
+     */
     @Binds
     @Singleton
     abstract fun bindAuthWebPort(adapter: AuthWebAdapter): AuthWebPort
 
+    /**
+     * Bind UserDeviceWebPort for AuthApplication
+     */
     @Binds
     @Singleton
     abstract fun bindUserDeviceWebPort(adapter: UserDeviceWebAdapter): UserDeviceWebPort

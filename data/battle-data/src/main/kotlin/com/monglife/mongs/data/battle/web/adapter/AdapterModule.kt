@@ -12,10 +12,16 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class AdapterModule {
 
+    /**
+     * Bind MatchWebPort for BattleApplication
+     */
     @Binds
     @Singleton
     abstract fun bindMatchWebPort(adapter: MatchWebAdapter): MatchWebPort
 
+    /**
+     * Bind QueueWebPort for BattleApplication
+     */
     @Binds
     @Singleton
     abstract fun bindQueueWebPort(adapter: QueueWebAdapter): QueueWebPort

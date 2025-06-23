@@ -11,12 +11,18 @@ import com.monglife.mongs.domain.battle.model.MatchPlayer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class MatchPersistenceAdapter @Inject constructor(
     private val roomDB: BattleRoomDB,
 ) : MatchPersistencePort {
+
+    /**
+     * 매치 객체 조회
+     */
+    @Throws(NotFoundMatchException::class)
+    override suspend fun getMatch(queueId: String): Match  =
+        roomDB.matchDao().findMatchByQueueId(queueId = queueId)?.toDomain()
+            ?: throw NotFoundMatchException()
 
     /**
      * 매치 객체 조회
@@ -97,6 +103,7 @@ class MatchPersistenceAdapter @Inject constructor(
                 playerId = matchPlayer.playerId,
                 matchId = matchPlayer.matchId,
                 mongCode = matchPlayer.mongCode,
+                mongName = matchPlayer.mongName,
                 name = matchPlayer.name,
                 hp = matchPlayer.hp,
                 roundCode = matchPlayer.roundCode,

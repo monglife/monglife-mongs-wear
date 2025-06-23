@@ -12,10 +12,16 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class AdapterModule {
 
+    /**
+     * Bind MatchSubscribePort for BattleApplication
+     */
     @Binds
     @Singleton
     abstract fun bindMatchSubscribePort(adapter: MatchSubscribeAdapter): MatchSubscribePort
 
+    /**
+     * Bind QueueSubscribePort for BattleApplication
+     */
     @Binds
     @Singleton
     abstract fun bindQueueSubscribePort(adapter: QueueSubscribeAdapter): QueueSubscribePort

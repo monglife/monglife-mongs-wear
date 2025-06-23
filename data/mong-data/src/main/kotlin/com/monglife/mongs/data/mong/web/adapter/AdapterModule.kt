@@ -13,14 +13,23 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class AdapterModule {
 
+    /**
+     * Bind ActivityWebPort for MongApplication
+     */
     @Binds
     @Singleton
     abstract fun bindActivityWebPort(adapter: ActivityWebAdapter): ActivityWebPort
 
+    /**
+     * Bind InteractionWebPort for MongApplication
+     */
     @Binds
     @Singleton
     abstract fun bindInteractionWebPort(adapter: InteractionWebAdapter): InteractionWebPort
 
+    /**
+     * Bind ManagementWebPort for MongApplication
+     */
     @Binds
     @Singleton
     abstract fun bindManagementWebPort(adapter: ManagementWebAdapter): ManagementWebPort

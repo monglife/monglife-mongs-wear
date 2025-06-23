@@ -108,6 +108,8 @@ data class EvolutionMongResponseDto(
     val healthyRatio: Double,
     val satietyRatio: Double,
     val fatigueRatio: Double,
+    val stateCode: MongStateCode,
+    val statusCode: MongStatusCode,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
 )

@@ -1,6 +1,7 @@
 package com.monglife.mongs.core.presentation.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.monglife.mongs.core.domain.exception.ErrorException
@@ -8,7 +9,9 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 abstract class BaseViewModel : ViewModel() {
@@ -56,7 +59,7 @@ abstract class BaseViewModel : ViewModel() {
                     errorToast(exception.message)
                 }
             } else {
-                Log.e(exception.javaClass.simpleName, "[Exception] ${exception.javaClass.name} ${exception.message ?: ""}")
+                Log.e(exception.javaClass.simpleName, "[Exception] ${exception.javaClass.name} ${exception.message ?: ""}\n${exception.stackTraceToString()}")
             }
 
             // 자식 클래스 exception handler 실행
@@ -70,4 +73,12 @@ abstract class BaseViewModel : ViewModel() {
     protected val viewModelScopeWithHandler = CoroutineScope(
         viewModelScope.coroutineContext + exceptionHandler
     )
+
+    protected fun <T> observeForever(flow: StateFlow<T>, state: MediatorLiveData<T>) {
+        viewModelScopeWithHandler.launch {
+            flow.drop(1).collect {
+                state.value = it
+            }
+        }
+    }
 }

@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.asLiveData
 import com.monglife.mongs.application.auth.usecase.GetIsLoginUseCase
 import com.monglife.mongs.application.auth.usecase.GetMustUpdateAppUseCase
 import com.monglife.mongs.core.presentation.utils.PermissionUtil
@@ -13,9 +12,11 @@ import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,40 +26,55 @@ class LayoutViewModel @Inject constructor(
     private val getIsLoginUseCase: GetIsLoginUseCase,
 ) : BaseViewModel() {
 
-    val isLogin: LiveData<Boolean> get() = _isLogin
     private val _isLogin = MediatorLiveData(false)
+    val isLogin: LiveData<Boolean> get() = _isLogin
 
     private val _requestPermissionEvent = MutableSharedFlow<Array<String>>()
     val requestPermissionEvent = _requestPermissionEvent.asSharedFlow()
 
-    /**
-     * 옵저빙 데이터 로드 (init)
-     */
     init {
+
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             uiState = UiState.Loading
 
-            // 로그인 여부 옵저빙 데이터 로드
-            _isLogin.addSource(withContext(Dispatchers.IO) { getIsLoginUseCase() }.asLiveData()) {
-                _isLogin.value = it
+            // 앱 강제 업데이트 체크
+            if (verifyAppVersion()) {
+                uiState = UiState.NeedUpdate
+                return@launch
             }
 
             // 권한 확인
-            val permissions =
-                permissionUtil.verifyNotificationPermission() + permissionUtil.verifyActivityPermission() + permissionUtil.verifyLocationPermission()
+            val permissions = buildList {
+                addAll(permissionUtil.verifyNotificationPermission())
+                addAll(permissionUtil.verifyActivityPermission())
+                addAll(permissionUtil.verifyLocationPermission())
+            }
+
             if (permissions.isNotEmpty()) {
                 _requestPermissionEvent.emit(permissions.toTypedArray())
-            } else {
-                uiState = UiState.Idle
             }
+
+            val isLoginFlow = getIsLoginUseCase().stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, false)
+            _isLogin.value = isLoginFlow.first()
+
+
+            uiState = UiState.Idle
+
+            observeForever(isLoginFlow, _isLogin)
         }
     }
+
+    /**
+     * 앱 버전 체크
+     */
+    private suspend fun verifyAppVersion() =
+        runCatching { getMustUpdateAppUseCase() }.getOrElse { true }
 
     /**
      * 권한 부여 여부 확인
      */
     fun verifyPermission() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
             uiState = UiState.Idle
         }
     }
@@ -85,22 +101,8 @@ class LayoutViewModel @Inject constructor(
      * 화면 초기화 메서드
      */
     override fun initialize() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            // UI 초기화
-            uiState = UiState.Loading
-
-            runCatching {
-                // 앱 버전 체크
-                val mustUpdate = getMustUpdateAppUseCase()
-
-                if (mustUpdate) {
-                    uiState = UiState.NeedUpdate
-                }
-            }.onFailure {
-                uiState = UiState.NeedUpdate
-            }.onSuccess {
-                uiState = UiState.Idle
-            }
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            uiState = UiState.Idle
         }
     }
 

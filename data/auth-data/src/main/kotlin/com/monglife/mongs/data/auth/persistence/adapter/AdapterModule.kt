@@ -10,19 +10,24 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class AdapterModule {
 
+    /**
+     * Bind AuthPersistencePort for AuthApplication
+     */
     @Binds
     @Singleton
     abstract fun bindAuthPersistencePortForAuthApplication(adapter: AuthPersistenceAdapter): com.monglife.mongs.application.auth.port.persistence.AuthPersistencePort
 
+    /**
+     * Bind AuthPersistencePort for DeviceApplication
+     */
     @Binds
     @Singleton
     abstract fun bindAuthPersistencePortForDeviceApplication(adapter: AuthPersistenceAdapter): com.monglife.mongs.application.device.port.persistence.AuthPersistencePort
 
+    /**
+     * Bind AuthPersistencePort for MemberApplication
+     */
     @Binds
     @Singleton
     abstract fun bindAuthPersistencePortForPlayerApplication(adapter: AuthPersistenceAdapter): com.monglife.mongs.application.member.player.port.persistence.AuthPersistencePort
-
-    @Binds
-    @Singleton
-    abstract fun bindAuthPersistencePortForMongApplication(adapter: AuthPersistenceAdapter): com.monglife.mongs.application.mong.port.persistence.AuthPersistencePort
 }

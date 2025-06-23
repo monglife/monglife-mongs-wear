@@ -7,27 +7,15 @@ import com.monglife.mongs.domain.battle.model.Match
 import java.time.LocalDateTime
 
 @Entity("match")
-class MatchEntity(
-    queueId: String,
-    matchId: Long,
-    round: Int,
-    isLastRound: Boolean,
-    stateCode: MatchStateCode,
-    createdAt: LocalDateTime,
-) {
+data class MatchEntity(
     @PrimaryKey
-    val queueId: String = queueId
-
-    val matchId: Long = matchId
-
-    val round: Int = round
-
-    val isLastRound: Boolean = isLastRound
-
-    val stateCode: MatchStateCode = stateCode
-
-    val createdAt: LocalDateTime = createdAt
-
+    val queueId: String,
+    val matchId: Long,
+    val round: Int,
+    val isLastRound: Boolean,
+    val stateCode: MatchStateCode,
+    val createdAt: LocalDateTime,
+) {
     /**
      * 엔티티 도메인 변환
      */

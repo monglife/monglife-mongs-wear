@@ -5,13 +5,25 @@ android {
 dependencies {
     // application layer
     implementation project(":application:mong-application")
-    // core layer
-    implementation project(":core:data-core:mqtt-data-core")
-    implementation project(":core:data-core:retrofit-data-core")
+
+    // retrofit2 & coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
+    implementation 'com.squareup.okio:okio:3.9.0'
+    implementation "com.squareup.retrofit2:retrofit:${parent.ext.retrofitVersion}"
+    implementation "com.squareup.retrofit2:converter-gson:${parent.ext.retrofitVersion}"
+
+    // mqtt
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    implementation "com.github.hannesa2:paho.mqtt.android:${parent.ext.mqttVersion}"
+
     // room
-    api "androidx.room:room-runtime:${parent.ext.roomVersion}"
-    api "androidx.room:room-ktx:${parent.ext.roomVersion}"
+    implementation "androidx.room:room-runtime:${parent.ext.roomVersion}"
+    implementation "androidx.room:room-ktx:${parent.ext.roomVersion}"
     ksp "androidx.room:room-compiler:${parent.ext.roomVersion}"
+
+    // data store
+    implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
+    implementation "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
 }
 
 ksp {

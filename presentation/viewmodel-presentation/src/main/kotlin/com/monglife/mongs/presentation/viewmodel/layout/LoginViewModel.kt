@@ -19,7 +19,6 @@ import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -114,17 +113,6 @@ class LoginViewModel @Inject constructor(
     }
 
     /**
-     * 구글 로그아웃
-     */
-    private fun googleLogout() {
-        viewModelScopeWithHandler.launch (Dispatchers.IO) {
-            delay(10000)
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-            GoogleSignIn.getClient(context, gso).signOut().await()
-        }
-    }
-
-    /**
      * UI 상태 변수
      */
     var uiState by mutableStateOf<UiState>(UiState.Idle)
@@ -145,10 +133,13 @@ class LoginViewModel @Inject constructor(
      * 화면 초기화 메서드
      */
     override fun initialize() {
-        // 구글 로그아웃
-        googleLogout()
-        // UI 초기화
-        uiState = UiState.Idle
+        viewModelScopeWithHandler.launch (Dispatchers.IO) {
+            // 구글 로그아웃
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+            GoogleSignIn.getClient(context, gso).signOut().await()
+
+            uiState = UiState.Idle
+        }
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {

@@ -6,16 +6,11 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.monglife.mongs.data.mong.persistence.entity.MongEntity
+import com.monglife.mongs.data.mong.persistence.entity.MongOptionEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MongDao {
-
-    /**
-     * 현재 선택된 몽 조회
-     */
-    @Query("SELECT * FROM mong WHERE isCurrent = true")
-    fun findMongByIsCurrentTrue(): MongEntity?
 
     /**
      * MongId 기준 몽 조회
@@ -30,16 +25,10 @@ interface MongDao {
     fun findMongFlowByMongId(mongId: Long): Flow<MongEntity?>
 
     /**
-     * MongId 기준 몽 Flow 목록 조회
-     */
-    @Query("SELECT * FROM mong")
-    fun findAllMongFlow(): Flow<List<MongEntity>>
-
-    /**
      * MongId 기준 몽 삭제
      */
     @Query("DELETE FROM mong WHERE mongId = :mongId")
-    fun deleteByMongId(mongId: Long)
+    fun deleteMongByMongId(mongId: Long)
 
     /**
      * 몽 등록
@@ -58,11 +47,56 @@ interface MongDao {
      */
     @Transaction
     fun save(mongEntity: MongEntity): MongEntity {
-
-        if (this.insert(mongEntity = mongEntity) == -1L) {
+        this.findMongByMongId(mongId = mongEntity.mongId)?.let {
             this.update(mongEntity = mongEntity)
+        } ?: run {
+            this.insert(mongEntity = mongEntity)
         }
 
         return mongEntity
+    }
+
+    /**
+     * MongId 기준 몽 옵션 조회
+     */
+    @Query("SELECT * FROM mong_option WHERE mongId = :mongId")
+    fun findMongOptionByMongId(mongId: Long): MongOptionEntity?
+
+    /**
+     * MongId 기준 몽 옵션 조회
+     */
+    @Query("SELECT * FROM mong_option WHERE mongId = :mongId")
+    fun findMongOptionFlowByMongId(mongId: Long): Flow<MongOptionEntity?>
+
+    /**
+     * MongId 기준 몽 옵션 삭제
+     */
+    @Query("DELETE FROM mong_option WHERE mongId = :mongId")
+    fun deleteMongOptionByMongId(mongId: Long)
+
+    /**
+     * 몽 옵션 등록
+     */
+    @Insert(entity = MongOptionEntity::class)
+    fun insert(mongOptionEntity: MongOptionEntity): Long
+
+    /**
+     * 몽 옵션 수정
+     */
+    @Update(entity = MongOptionEntity::class)
+    fun update(mongOptionEntity: MongOptionEntity)
+
+    /**
+     * 몽 옵션 영속화
+     */
+    @Transaction
+    fun save(mongOptionEntity: MongOptionEntity): MongOptionEntity {
+        this.findMongOptionByMongId(mongId = mongOptionEntity.mongId)?.let {
+            this.update(mongOptionEntity = mongOptionEntity)
+        } ?: run {
+            this.insert(mongOptionEntity = mongOptionEntity)
+        }
+
+        return mongOptionEntity
     }
 }

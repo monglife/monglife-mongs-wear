@@ -5,22 +5,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.asLiveData
 import com.monglife.mongs.application.device.usecase.GetInitNotificationDialogOpenOptionUseCase
 import com.monglife.mongs.application.device.usecase.SetInitNotificationDialogOpenOptionUseCase
-import com.monglife.mongs.application.mong.usecase.EvolutionMongUseCase
-import com.monglife.mongs.application.mong.usecase.GraduateCheckingUseCase
-import com.monglife.mongs.application.mong.usecase.ObserveCurrentMongUseCase
-import com.monglife.mongs.application.mong.usecase.PoopCleanMongUseCase
-import com.monglife.mongs.application.mong.usecase.SleepingMongUseCase
-import com.monglife.mongs.application.mong.usecase.StrokeMongUseCase
+import com.monglife.mongs.application.mong.usecase.management.EvolutionMongUseCase
+import com.monglife.mongs.application.mong.usecase.management.GraduateCheckingUseCase
+import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
+import com.monglife.mongs.application.mong.usecase.management.PoopCleanMongUseCase
+import com.monglife.mongs.application.mong.usecase.management.SleepingMongUseCase
+import com.monglife.mongs.application.mong.usecase.management.StrokeMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,11 +40,14 @@ class MainSlotViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             uiState = UiState.Loading
 
-            _mongVo.addSource(withContext(Dispatchers.IO) { observeCurrentMongUseCase().asLiveData() }) {
-                _mongVo.value = it
-            }
+            val initNotificationDialogOpen = getInitNotificationDialogOpenOptionUseCase()
 
-            uiState = if (getInitNotificationDialogOpenOptionUseCase()) UiState.InitNotification else UiState.Idle
+            uiState = if (initNotificationDialogOpen) UiState.InitNotification else UiState.Idle
+        }
+
+        // 몽 정보 옵저빙
+        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+            observeCurrentMongUseCase().collect { _mongVo.postValue(it) }
         }
     }
 

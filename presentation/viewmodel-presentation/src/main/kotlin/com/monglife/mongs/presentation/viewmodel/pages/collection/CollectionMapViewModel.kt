@@ -35,6 +35,24 @@ class CollectionMapViewModel @Inject constructor(
     }
 
     /**
+     * 컬렉션 맵 조회
+     */
+    fun getCollectionMaps() {
+        viewModelScopeWithHandler.launch (Dispatchers.IO) {
+
+        }
+    }
+
+    /**
+     * 배경 설정
+     */
+    fun setBackgroundMap(mapCode: String) {
+        viewModelScopeWithHandler.launch (Dispatchers.IO) {
+
+        }
+    }
+
+    /**
      * UI 상태 변수
      */
     var uiState by mutableStateOf<UiState>(UiState.Idle)

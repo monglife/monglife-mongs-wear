@@ -3,6 +3,7 @@ package com.monglife.mongs.application.mong.vo
 import com.monglife.mongs.domain.mong.enums.MongStateCode
 import com.monglife.mongs.domain.mong.enums.MongStatusCode
 import com.monglife.mongs.domain.mong.model.Mong
+import com.monglife.mongs.domain.mong.model.MongOption
 import java.time.LocalDateTime
 import java.time.LocalTime
 
@@ -28,7 +29,6 @@ data class MongVo(
     val randomDrawTicketCount: Int,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
-    val isCurrent: Boolean,
     val graduateCheck: Boolean,
 ) {
     companion object {
@@ -36,7 +36,7 @@ data class MongVo(
         /**
          * 도메인 Vo 변환
          */
-        fun of(mong: Mong): MongVo {
+        fun of(mong: Mong, mongOption: MongOption): MongVo {
             return MongVo(
                 mongId = mong.mongId,
                 name = mong.name,
@@ -59,8 +59,7 @@ data class MongVo(
                 randomDrawTicketCount = mong.randomDrawTicketCount,
                 createdAt = mong.createdAt,
                 updatedAt = mong.updatedAt,
-                isCurrent = mong.isCurrent,
-                graduateCheck = mong.graduateCheck,
+                graduateCheck = mongOption.graduateCheck,
             )
         }
     }

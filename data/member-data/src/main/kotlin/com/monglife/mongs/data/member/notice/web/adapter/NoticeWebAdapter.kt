@@ -3,26 +3,52 @@ package com.monglife.mongs.data.member.notice.web.adapter
 import com.monglife.mongs.application.member.notice.exception.NotFoundNoticeException
 import com.monglife.mongs.application.member.notice.port.web.NoticeWebPort
 import com.monglife.mongs.application.member.notice.port.web.response.GetNoticeResponse
+import com.monglife.mongs.data.member.notice.web.client.NoticeWebClient
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class NoticeWebAdapter @Inject constructor(
-
+    private val noticeWebClient: NoticeWebClient,
 ) : NoticeWebPort {
 
     /**
      * 공지 사항 조회
      */
     @Throws(NotFoundNoticeException::class)
-    override suspend fun getNotice(noticeId: Long): GetNoticeResponse {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getNotice(noticeId: Long): GetNoticeResponse =
+        noticeWebClient.getNotice(noticeId = noticeId).let { response ->
+
+            val body =
+                response.takeIf { it.isSuccessful }?.body() ?: throw NotFoundNoticeException()
+
+            GetNoticeResponse(
+                noticeId = body.result.noticeId,
+                title = body.result.title,
+                content = body.result.content,
+                writerName = body.result.writerName,
+                createdAt = body.result.createdAt,
+                updatedAt = body.result.updatedAt,
+            )
+        }
 
     /**
      * 공지 사항 목록 조회
      */
-    override suspend fun getNotices(page: Int, size: Int): List<GetNoticeResponse> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getNotices(page: Int, size: Int): List<GetNoticeResponse> =
+        noticeWebClient.getNotices(page = page, size = size).let { response ->
+
+            val body = response.takeIf { it.isSuccessful }?.body()
+
+            body?.result?.map {
+                GetNoticeResponse(
+                    noticeId = it.noticeId,
+                    title = it.title,
+                    content = it.content,
+                    writerName = it.writerName,
+                    createdAt = it.createdAt,
+                    updatedAt = it.updatedAt,
+                )
+            } ?: emptyList()
+        }
 }

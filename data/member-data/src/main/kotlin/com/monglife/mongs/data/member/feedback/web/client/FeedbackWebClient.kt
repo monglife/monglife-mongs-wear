@@ -1,6 +1,6 @@
 package com.monglife.mongs.data.member.feedback.web.client
 
-import com.monglife.mongs.data.core.common.dto.response.ResponseDto
+import com.monglife.mongs.data.core.dto.response.ResponseDto
 import com.monglife.mongs.data.member.feedback.web.client.request.CreateFeedbackRequestDto
 import retrofit2.Response
 import retrofit2.http.Body

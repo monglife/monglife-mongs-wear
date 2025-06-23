@@ -11,6 +11,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class AdapterModule {
 
+    /**
+     * Bind MatchPersistencePort for BattleApplication
+     */
     @Binds
     @Singleton
     abstract fun bindMatchPersistencePort(adapter: MatchPersistenceAdapter): MatchPersistencePort

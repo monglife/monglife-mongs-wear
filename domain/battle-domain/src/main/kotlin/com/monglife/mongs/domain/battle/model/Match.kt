@@ -25,60 +25,40 @@ class Match(
      * 매치 큐
      */
     fun search() {
-        this.stateCode = MatchStateCode.MATCH_SEARCH
+        this.stateCode = MatchStateCode.SEARCH
     }
 
     /**
      * 매치 큐 매칭
      */
-    fun matching() {
-        this.stateCode = MatchStateCode.MATCH_MATCHING
-    }
-
-    /**
-     * 모든 매치 플레이어 입장
-     */
-    fun enter() {
-        this.stateCode = MatchStateCode.MATCH_ENTER
+    fun matching(matchId: Long) {
+        this.matchId = matchId
+        this.stateCode = MatchStateCode.MATCHING
     }
 
     /**
      * 매치 시작
      */
     fun start() {
-        this.stateCode = MatchStateCode.MATCH_WAIT
-    }
-
-    /**
-     * 다음 라운드 진행
-     */
-    fun nextRound() {
-        this.stateCode = MatchStateCode.MATCH_WAIT
-    }
-
-    /**
-     * 매치 선택 완료
-     */
-    fun pick() {
-        this.stateCode = MatchStateCode.MATCH_PICK_WAIT
+        this.stateCode = MatchStateCode.MATCH
     }
 
     /**
      * 라운드 종료
      */
-    fun fight(
+    fun update(
         round: Int,
         isLastRound: Boolean,
     ) {
         this.round = round
         this.isLastRound = isLastRound
-        this.stateCode = MatchStateCode.MATCH_FIGHT
     }
 
     /**
      * 매치 종료
      */
-    fun over() {
-        this.stateCode = MatchStateCode.MATCH_OVER
+    fun end() {
+        this.isLastRound = true
+        this.stateCode = MatchStateCode.NONE
     }
 }

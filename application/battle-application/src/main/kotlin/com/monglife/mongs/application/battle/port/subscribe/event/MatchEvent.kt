@@ -19,24 +19,51 @@ open class MatchEvent(
 )
 
 /**
- * 매치 플레이어 정보 비동기 업데이트 Dto
+ * 매치 시작 이벤트
+ * code: MATCH_PLAYERS_ENTERED
  */
-class UpdateMatchPlayerDto(
-    val playerId: String,
-    val deviceId: String,
-    val mongCode: String,
-    val mongName: String,
-    val hp: Double,
-    val roundCode: MatchRoundCode,
-)
-
-/**
- * 라운드 종료 매치 비동기 업데이트 Dto
- */
-class FightMatchDto(
+data class MatchStartEvent(
     override val code: MatchEventCode,
     val matchId: Long,
     val round: Int,
     val isLastRound: Boolean,
-    val matchPlayers: List<UpdateMatchPlayerDto>
+    val matchPlayers: List<MatchPlayerVo>
 ): MatchEvent(code = code)
+
+/**
+ * 매치 라운드 종료 이벤트
+ * code: MATCH
+ */
+data class MatchRoundOverEvent(
+    override val code: MatchEventCode,
+    val matchId: Long,
+    val round: Int,
+    val isLastRound: Boolean,
+    val matchPlayers: List<MatchPlayerVo>
+): MatchEvent(code = code)
+
+/**
+ * 매치 종료 비동기 업데이트 이벤트
+ * code: MATCH_END
+ */
+data class MatchEndEvent(
+    override val code: MatchEventCode,
+    val matchId: Long,
+    val playerId: String,
+    val name: String,
+    val mongCode: String,
+    val mongName: String,
+): MatchEvent(code = code)
+
+/**
+ * 매치 플레이어 정보 Vo
+ */
+data class MatchPlayerVo(
+    val playerId: String,
+    val deviceId: String,
+    val mongCode: String,
+    val mongName: String,
+    val name: String,
+    val hp: Double,
+    val roundCode: MatchRoundCode,
+)

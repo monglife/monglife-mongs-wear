@@ -27,7 +27,7 @@ class MatchWebAdapter @Inject constructor(
      * 매치 조회
      */
     @Throws(NotFoundMatchException::class)
-    override suspend fun getMatch(): GetMatchResponse {
+    override suspend fun getMatch(matchId: Long): GetMatchResponse {
         TODO("Not yet implemented")
     }
 

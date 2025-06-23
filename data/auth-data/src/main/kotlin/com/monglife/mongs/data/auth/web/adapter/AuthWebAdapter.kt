@@ -8,10 +8,10 @@ import com.monglife.mongs.application.auth.exception.VerifyAppVersionException
 import com.monglife.mongs.application.auth.port.web.AuthWebPort
 import com.monglife.mongs.application.auth.port.web.response.LoginResponse
 import com.monglife.mongs.application.auth.port.web.response.VerifyAppVersionResponse
-import com.monglife.mongs.data.auth.web.client.AuthWebClient
-import com.monglife.mongs.data.auth.web.client.request.JoinRequestDto
-import com.monglife.mongs.data.auth.web.client.request.LoginRequestDto
-import com.monglife.mongs.data.auth.web.client.request.LogoutRequestDto
+import com.monglife.mongs.data.core.client.AuthWebClient
+import com.monglife.mongs.data.core.client.request.JoinRequestDto
+import com.monglife.mongs.data.core.client.request.LoginRequestDto
+import com.monglife.mongs.data.core.client.request.LogoutRequestDto
 import javax.inject.Inject
 
 class AuthWebAdapter @Inject constructor(

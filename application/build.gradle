@@ -14,7 +14,7 @@ subprojects {
         ksp "com.google.dagger:dagger-compiler:${rootProject.ext.hiltVersion}"
 
         // test
-        testImplementation "junit:junit:${rootProject.ext.junitVersion}"
+        testImplementation "junit:junit:${rootProject.ext.jupiterVersion}"
         testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
         testImplementation "org.mockito.kotlin:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
         testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0"

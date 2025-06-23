@@ -27,8 +27,6 @@ class Mong(
     randomDrawTicketCount: Int,
     createdAt: LocalDateTime,
     updatedAt: LocalDateTime,
-    isCurrent: Boolean = false,
-    graduateCheck: Boolean = false,
 ) {
     var mongId: Long = mongId
         private set
@@ -72,24 +70,6 @@ class Mong(
         private set
     var updatedAt: LocalDateTime = updatedAt
         private set
-    var isCurrent: Boolean = isCurrent
-        private set
-    var graduateCheck: Boolean = graduateCheck
-        private set
-
-    /**
-     * 현재 몽으로 설정
-     */
-    fun selectAsActive() {
-        this.isCurrent = true
-    }
-
-    /**
-     * 졸업 상태 여부 사용자 확인
-     */
-    fun graduateChecking() {
-        this.graduateCheck = true
-    }
 
     /**
      * 진화
@@ -101,6 +81,8 @@ class Mong(
         healthyRatio: Double,
         satietyRatio: Double,
         fatigueRatio: Double,
+        stateCode: MongStateCode,
+        statusCode: MongStatusCode,
         createdAt: LocalDateTime,
         updatedAt: LocalDateTime,
     ) {
@@ -110,6 +92,8 @@ class Mong(
         this.healthyRatio = healthyRatio
         this.satietyRatio = satietyRatio
         this.fatigueRatio = fatigueRatio
+        this.stateCode = stateCode
+        this.statusCode = statusCode
         this.createdAt = createdAt
         this.updatedAt = updatedAt
     }

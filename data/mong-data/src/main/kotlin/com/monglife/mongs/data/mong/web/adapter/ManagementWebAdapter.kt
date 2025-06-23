@@ -223,6 +223,8 @@ class ManagementWebAdapter @Inject constructor(
                 healthyRatio = body.result.healthyRatio,
                 satietyRatio = body.result.satietyRatio,
                 fatigueRatio = body.result.fatigueRatio,
+                stateCode = body.result.stateCode,
+                statusCode = body.result.statusCode,
                 createdAt = body.result.createdAt,
                 updatedAt = body.result.updatedAt,
             )

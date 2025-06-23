@@ -3,18 +3,21 @@ package com.monglife.mongs.domain.battle.model
 import com.monglife.mongs.domain.battle.enums.MatchRoundCode
 
 class MatchPlayer(
-    playerId: String,
     matchId: Long,
+    playerId: String,
     mongCode: String,
+    mongName: String,
     name: String,
-    hp: Double,
-    roundCode: MatchRoundCode,
+    hp: Double = 0.0,
+    roundCode: MatchRoundCode = MatchRoundCode.NONE,
 ) {
     var playerId: String = playerId
         private set
     var matchId: Long = matchId
         private set
     var mongCode: String = mongCode
+        private set
+    var mongName: String = mongName
         private set
     var name: String = name
         private set
@@ -26,7 +29,7 @@ class MatchPlayer(
     /**
      * 업데이트
      */
-    fun fight(
+    fun update(
         hp: Double,
         roundCode: MatchRoundCode,
     ) {

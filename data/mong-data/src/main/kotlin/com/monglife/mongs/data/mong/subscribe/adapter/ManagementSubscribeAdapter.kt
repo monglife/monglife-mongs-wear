@@ -4,6 +4,9 @@ import android.util.Log
 import com.monglife.mongs.application.mong.exception.InvalidDisSubscribeMongException
 import com.monglife.mongs.application.mong.exception.InvalidSubscribeMongException
 import com.monglife.mongs.application.mong.port.subscribe.ManagementSubscribePort
+import com.monglife.mongs.application.mong.port.subscribe.event.ManagementEvent
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,8 +19,9 @@ class ManagementSubscribeAdapter @Inject constructor(
      * 몽 구독
      */
     @Throws(InvalidSubscribeMongException::class)
-    override suspend fun subscribeMong(mongId: Long) {
-        Log.d("TEST", "subscribeMong")
+    override suspend fun subscribeMong(mongId: Long): Flow<ManagementEvent> {
+        Log.d("TEST", "subscribe mong")
+        return flow {  }
     }
 
     /**
@@ -25,6 +29,6 @@ class ManagementSubscribeAdapter @Inject constructor(
      */
     @Throws(InvalidDisSubscribeMongException::class)
     override suspend fun disSubscribeMong(mongId: Long) {
-        Log.d("TEST", "disSubscribeMong")
+        Log.d("TEST", "disSubscribe mong")
     }
 }

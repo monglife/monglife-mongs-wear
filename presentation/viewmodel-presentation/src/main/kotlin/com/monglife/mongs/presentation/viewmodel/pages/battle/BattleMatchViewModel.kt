@@ -29,6 +29,13 @@ class BattleMatchViewModel @Inject constructor(
 //            _someData.addSource(withContext(Dispatchers.IO) { observeUseCase().asLiveData() }) {
 //                _someData.value = it
 //            }
+            /**
+             SEARCH      : 매칭 진행중
+             MATCHING    : 매칭 성공
+             MATCH       : 매치 진행중
+             NONE        : 매치 종료
+             null        : 매치 삭제
+             */
 
             uiState = UiState.Idle
         }

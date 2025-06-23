@@ -5,18 +5,26 @@ import com.monglife.mongs.core.domain.error.ErrorCode
 import com.monglife.mongs.core.domain.exception.ErrorException
 
 /**
- * 몽 구독 실패 예외
+ * 몽 옵션 조회 실패 예외
  */
-class InvalidSubscribeMongException(
-    override val code: ErrorCode = MongErrorCode.INVALID_SUBSCRIBE_MONG,
+class NotFoundCurrentMongIdException(
+    override val code: ErrorCode = MongErrorCode.NOT_FOUND_CURRENT_MONG_ID,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)
 
 /**
- * 몽 구독 해제 실패 예외
+ * 몽 옵션 조회 실패 예외
  */
-class InvalidDisSubscribeMongException(
-    override val code: ErrorCode = MongErrorCode.INVALID_DIS_SUBSCRIBE_MONG,
+class NotFoundMongOptionException(
+    override val code: ErrorCode = MongErrorCode.NOT_FOUND_MONG_OPTION,
+    override val message: String = code.getMessage()
+) : ErrorException(code = code, message = message)
+
+/**
+ * 몽 조회 실패 예외
+ */
+class NotFoundMongException(
+    override val code: ErrorCode = MongErrorCode.NOT_FOUND_MONG,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)
 
@@ -77,14 +85,6 @@ class InvalidRandomDrawException(
 ) : ErrorException(code = code, message = message)
 
 /**
- * 몽 조회 실패 예외
- */
-class NotFoundMongException(
-    override val code: ErrorCode = MongErrorCode.NOT_FOUND_MONG,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
  * 몽 생성 실패 예외
  */
 class InvalidCreateMongException(
@@ -137,5 +137,21 @@ class InvalidEvolutionMongException(
  */
 class InvalidGraduateMongException(
     override val code: ErrorCode = MongErrorCode.INVALID_GRADUATE_MONG,
+    override val message: String = code.getMessage()
+) : ErrorException(code = code, message = message)
+
+/**
+ * 몽 구독 실패 예외
+ */
+class InvalidSubscribeMongException(
+    override val code: ErrorCode = MongErrorCode.INVALID_SUBSCRIBE_MONG,
+    override val message: String = code.getMessage()
+) : ErrorException(code = code, message = message)
+
+/**
+ * 몽 구독 해제 실패 예외
+ */
+class InvalidDisSubscribeMongException(
+    override val code: ErrorCode = MongErrorCode.INVALID_DIS_SUBSCRIBE_MONG,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)

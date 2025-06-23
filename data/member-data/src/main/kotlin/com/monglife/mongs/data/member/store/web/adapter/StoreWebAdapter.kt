@@ -17,6 +17,9 @@ import com.monglife.mongs.application.member.store.port.web.StoreWebPort
 import com.monglife.mongs.application.member.store.port.web.response.ConsumeOrderResponse
 import com.monglife.mongs.application.member.store.port.web.response.GetConsumedOrderResponse
 import com.monglife.mongs.application.member.store.port.web.response.GetProductResponse
+import com.monglife.mongs.data.member.store.web.client.StoreWebClient
+import com.monglife.mongs.data.member.store.web.client.request.ConsumeOrderRequestDto
+import com.monglife.mongs.data.member.store.web.client.request.GetConsumedOrdersRequestDto
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
@@ -27,14 +30,25 @@ import kotlin.coroutines.resumeWithException
 @Singleton
 class StoreWebAdapter @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val storeWebClient: StoreWebClient,
 ) : StoreWebPort {
 
     /**
      * 인앱 상품 목록 조회
      */
-    override suspend fun getProducts(): List<GetProductResponse> {
-        TODO("MONGS API 통신 상품 목록 조회")
-    }
+    override suspend fun getProducts(): List<GetProductResponse> =
+        storeWebClient.getProducts().let { response ->
+
+            val body = response.takeIf { it.isSuccessful }?.body()
+
+            body?.result?.map {
+                GetProductResponse(
+                    productId = it.productId,
+                    productName = it.productName,
+                    price = it.price,
+                )
+            } ?: emptyList()
+        }
 
     /**
      * 소비된 주문 목록 조회
@@ -57,7 +71,22 @@ class StoreWebAdapter @Inject constructor(
             })
         }
 
-        TODO("MONGS API 통신 소비 주문 목록 조회")
+        return storeWebClient.getConsumedOrders(
+            getConsumedOrdersRequestDto = GetConsumedOrdersRequestDto(
+                socialOrderIds = socialOrderIds
+            )
+        ).let { response ->
+
+            val body = response.takeIf { it.isSuccessful }?.body()
+
+            body?.result?.map {
+                GetConsumedOrderResponse(
+                    orderId = it.orderId,
+                    socialOrderId = it.socialOrderId,
+                    productId = it.productId,
+                )
+            } ?: emptyList()
+        }
     }
 
     /**
@@ -68,8 +97,26 @@ class StoreWebAdapter @Inject constructor(
         socialOrderId: String,
         productId: String,
         purchaseToken: String
-    ): ConsumeOrderResponse {
-        TODO("Not yet implemented")
+    ): ConsumeOrderResponse = storeWebClient.consumeOrder(
+        consumeOrderRequestDto = ConsumeOrderRequestDto(
+            socialOrderId = socialOrderId,
+            productId = productId,
+            purchaseToken = purchaseToken,
+        )
+    ).let { response ->
+
+        val body =
+            response.takeIf { it.isSuccessful }?.body() ?: throw InvalidConsumeOrderException()
+
+        ConsumeOrderResponse(
+            accountId = body.result.accountId,
+            orderId = body.result.orderId,
+            socialOrderId = body.result.socialOrderId,
+            productId = body.result.productId,
+            purchaseToken = body.result.purchaseToken,
+            starPoint = body.result.starPoint,
+            slotCount = body.result.slotCount,
+        )
     }
 
     /**
@@ -81,7 +128,8 @@ class StoreWebAdapter @Inject constructor(
             .enablePendingPurchases(
                 PendingPurchasesParams.newBuilder()
                     .enableOneTimeProducts()
-                    .build())
+                    .build()
+            )
             .build()
 
         if (billingClient.connectionState == ConnectionState.DISCONNECTED) {

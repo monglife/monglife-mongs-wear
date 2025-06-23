@@ -5,9 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.asLiveData
 import com.monglife.mongs.application.device.usecase.ObserveCurrentWalkingCountUseCase
-import com.monglife.mongs.application.mong.usecase.ObserveCurrentMongUseCase
+import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.core.presentation.utils.PermissionUtil
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
@@ -15,7 +14,6 @@ import com.monglife.mongs.presentation.viewmodel.pages.main.MainViewModel.UiStat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,30 +23,33 @@ class MainStepViewModel @Inject constructor(
     private val observeCurrentWalkingCountUseCase: ObserveCurrentWalkingCountUseCase,
 ) : BaseViewModel() {
 
+    private val _activityPermission = MediatorLiveData(true)
+    val activityPermission: LiveData<Boolean> get() = _activityPermission
+
     private val _mongVo = MediatorLiveData<MongVo?>(null)
     val mongVo: LiveData<MongVo?> get() = _mongVo
 
     private val _currentWalkingCount = MediatorLiveData<Int>()
     val currentWalkingCount: LiveData<Int> get() = _currentWalkingCount
 
-    private val _activityPermission = MediatorLiveData(true)
-    val activityPermission: LiveData<Boolean> get() = _activityPermission
-
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             uiState = UiState.Loading
 
-            _mongVo.addSource(withContext(Dispatchers.IO) { observeCurrentMongUseCase().asLiveData() }) {
-                _mongVo.value = it
-            }
-
-            _currentWalkingCount.addSource(withContext(Dispatchers.IO) { observeCurrentWalkingCountUseCase().asLiveData() }) {
-                _currentWalkingCount.value = it
-            }
-
+            // 활동 권한 정보 목록
             _activityPermission.postValue(permissionUtil.verifyActivityPermission().isEmpty())
 
             uiState = UiState.Idle
+        }
+
+        // 몽 정보 옵저빙
+        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+            observeCurrentMongUseCase().collect { _mongVo.postValue(it) }
+        }
+
+        // 현재 총 걸음 수 옵저빙
+        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+            observeCurrentWalkingCountUseCase().collect { _currentWalkingCount.postValue(it) }
         }
     }
 

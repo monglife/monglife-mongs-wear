@@ -20,6 +20,7 @@ enum class BattleErrorCode(
     INVALID_DIS_SUBSCRIBE_MATCH("매치 구독 해제 실패", false),
     INVALID_SUBSCRIBE_QUEUE("매치 큐 구독 실패", false),
     INVALID_DIS_SUBSCRIBE_QUEUE("매치 큐 구독 해제 실패", false),
+    INVALID_MATCHING("매치 큐 매칭 실패", false),
     ;
 
     override fun getMessage(): String {

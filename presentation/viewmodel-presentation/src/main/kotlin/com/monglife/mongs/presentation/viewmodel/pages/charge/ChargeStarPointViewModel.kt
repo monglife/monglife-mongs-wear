@@ -3,6 +3,9 @@ package com.monglife.mongs.presentation.viewmodel.pages.charge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import com.monglife.mongs.application.member.store.vo.ProductVo
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +24,12 @@ class ChargeStarPointViewModel @Inject constructor(
 //    private val _someEvent = MutableSharedFlow<Int>()
 //    val someEvent = _someEvent.asSharedFlow()
 
+    private val _starPoint = MediatorLiveData<Int>()
+    val starPoint: LiveData<Int> get() = _starPoint
+
+    private val _productVos = MediatorLiveData<List<ProductVo>>()
+    val productVos: LiveData<List<ProductVo>> get() = _productVos
+
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             uiState = UiState.Loading
@@ -32,6 +41,27 @@ class ChargeStarPointViewModel @Inject constructor(
 
             uiState = UiState.Idle
         }
+    }
+
+    /**
+     * 인앱 상품 목록 조회
+     */
+    fun getProducts() {
+
+    }
+
+    /**
+     * 인앱 상품 주문 및 소비
+     */
+    fun consumeWithOrder() {
+
+    }
+
+    /**
+     * 인앱 상품 소비
+     */
+    fun consume() {
+
     }
 
     /**

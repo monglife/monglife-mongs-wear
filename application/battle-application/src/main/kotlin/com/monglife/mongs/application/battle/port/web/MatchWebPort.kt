@@ -19,7 +19,7 @@ interface MatchWebPort {
      * 매치 조회
      */
     @Throws(NotFoundMatchException::class)
-    suspend fun getMatch(): GetMatchResponse
+    suspend fun getMatch(matchId: Long): GetMatchResponse
 
     /**
      * 승리 매치 플레이어 조회

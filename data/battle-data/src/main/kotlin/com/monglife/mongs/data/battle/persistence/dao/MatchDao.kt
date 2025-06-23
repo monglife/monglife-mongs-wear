@@ -18,6 +18,12 @@ interface MatchDao {
     fun findTopMatch(): MatchEntity?
 
     /**
+     * QueueId 기준 매치 엔티티 조회
+     */
+    @Query("SELECT * FROM `match` WHERE queueId = :queueId")
+    fun findMatchByQueueId(queueId: String): MatchEntity?
+
+    /**
      * MatchId 기준 매치 엔티티 조회
      */
     @Query("SELECT * FROM `match` WHERE matchId = :matchId")

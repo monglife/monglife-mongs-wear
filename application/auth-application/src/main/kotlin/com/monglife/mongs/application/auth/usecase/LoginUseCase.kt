@@ -53,11 +53,14 @@ class LoginUseCase @Inject constructor(
                 buildVersion = buildVersion,
             ).let { response ->
                 // 세션 로컬 등록
-                authPersistencePort.saveSession(session = Session(
-                    accountId = response.accountId,
-                    accessToken = response.accessToken,
-                    refreshToken = response.refreshToken,
-                ))
+                authPersistencePort.saveSession(
+                    session = Session(
+                        accountId = response.accountId,
+                        accessToken = response.accessToken,
+                        refreshToken = response.refreshToken,
+                        version = 1L,
+                    )
+                )
             }
         }
     }

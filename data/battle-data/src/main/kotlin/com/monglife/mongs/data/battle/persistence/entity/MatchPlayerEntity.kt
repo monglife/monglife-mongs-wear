@@ -7,26 +7,15 @@ import com.monglife.mongs.domain.battle.model.MatchPlayer
 
 @Entity("match_player")
 class MatchPlayerEntity(
-    playerId: String,
-    matchId: Long,
-    mongCode: String,
-    name: String,
-    hp: Double,
-    roundCode: MatchRoundCode,
-) {
     @PrimaryKey
-    val playerId: String = playerId
-
-    val matchId: Long = matchId
-
-    val mongCode: String = mongCode
-
-    val name: String = name
-
-    val hp: Double = hp
-
-    val roundCode: MatchRoundCode = roundCode
-
+    val playerId: String,
+    val matchId: Long,
+    val mongCode: String,
+    val mongName: String,
+    val name: String,
+    val hp: Double,
+    val roundCode: MatchRoundCode,
+) {
     /**
      * 엔티티 도메인 변환
      */
@@ -35,6 +24,7 @@ class MatchPlayerEntity(
             playerId = this.playerId,
             matchId = this.matchId,
             mongCode = this.mongCode,
+            mongName = this.mongName,
             name = this.name,
             hp = this.hp,
             roundCode = this.roundCode,

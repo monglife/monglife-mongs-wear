@@ -2,8 +2,6 @@ package com.monglife.mongs.data.member.player.web.client
 
 import android.content.Context
 import com.google.gson.Gson
-import com.monglife.mongs.data.core.retrofit.interceptor.AuthorizationInterceptor
-import com.monglife.mongs.data.core.retrofit.interceptor.HttpLogInterceptor
 import com.mongs.wear.data.member.R
 import dagger.Module
 import dagger.Provides
@@ -13,7 +11,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -28,27 +26,11 @@ object WebClientModule {
     fun providePlayerWebClient(
         @ApplicationContext context: Context,
         gson: Gson,
-        httpLogInterceptor: HttpLogInterceptor,
-        authorizationInterceptor: AuthorizationInterceptor
-    ): PlayerWebClient {
-
-        val okHttpClient = OkHttpClient.Builder()
-            .connectTimeout(
-                context.getString(R.string.api_connect_time_out).toLong(),
-                TimeUnit.SECONDS
-            )
-            .readTimeout(context.getString(R.string.api_read_time_out).toLong(), TimeUnit.SECONDS)
-            .writeTimeout(context.getString(R.string.api_write_time_out).toLong(), TimeUnit.SECONDS)
-            .addInterceptor(httpLogInterceptor)
-            .addInterceptor(authorizationInterceptor)
-            .build()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(context.getString(R.string.api_url))
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .client(okHttpClient)
-            .build()
-
-        return retrofit.create(PlayerWebClient::class.java)
-    }
+        @Named("authorization") okHttpClient: OkHttpClient,
+    ): PlayerWebClient = Retrofit.Builder()
+        .baseUrl(context.getString(R.string.mongs_gateway_api_url) + "user/")
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .client(okHttpClient)
+        .build()
+        .create(PlayerWebClient::class.java)
 }

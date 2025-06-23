@@ -6,11 +6,8 @@ import com.monglife.mongs.application.battle.exception.InvalidPublishMatchExitEx
 import com.monglife.mongs.application.battle.exception.InvalidPublishMatchPickException
 import com.monglife.mongs.application.battle.port.publish.MatchPublishPort
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class MatchPublishAdapter @Inject constructor(
-
 ) : MatchPublishPort {
 
     /**
@@ -18,7 +15,7 @@ class MatchPublishAdapter @Inject constructor(
      */
     @Throws(InvalidPublishMatchEnterException::class)
     override suspend fun publishMatchEnter(matchId: Long) {
-        Log.d("TEST", "publishMatchEnter")
+        Log.d("TEST", "publish match enter")
     }
 
     /**
@@ -26,7 +23,7 @@ class MatchPublishAdapter @Inject constructor(
      */
     @Throws(InvalidPublishMatchExitException::class)
     override suspend fun publishMatchExit(matchId: Long) {
-        Log.d("TEST", "publishMatchExit")
+        Log.d("TEST", "publish match exit")
     }
 
     /**
@@ -39,6 +36,6 @@ class MatchPublishAdapter @Inject constructor(
         targetPlayerId: String,
         pickCode: String
     ) {
-        Log.d("TEST", "publishMatchPick")
+        Log.d("TEST", "publish match pick")
     }
 }

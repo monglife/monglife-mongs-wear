@@ -16,9 +16,32 @@ open class QueueEvent(
 )
 
 /**
- * 매치 큐 정보 비동기 업데이트 이벤트
+ * 매치 큐 매칭 성공 이벤트
+ * code: MATCHING_QUEUE_PLAYER
  */
-class UpdateQueueEvent(
+data class MatchingEvent(
     override val code: QueueEventCode,
     val matchId: Long,
+    val matchPlayers: List<QueuePlayerVo>
+) : QueueEvent(code = code) {
+    /**
+     * 매치 큐 플레이어 정보 비동기 업데이트 Dto
+     */
+    data class QueuePlayerVo(
+        val deviceId: String,
+        val playerId: String,
+        val mongId: Long,
+        val mongCode: String,
+        val mongName: String,
+        val name: String,
+    )
+}
+
+/**
+ * 매치 큐 실패 이벤트
+ * code: MATCHING_QUEUE_PLAYER_FAIL
+ */
+data class MatchingFailEvent(
+    override val code: QueueEventCode,
+    val deviceId: String,
 ): QueueEvent(code = code)
