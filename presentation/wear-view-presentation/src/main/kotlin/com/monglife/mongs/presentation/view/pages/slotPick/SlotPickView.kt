@@ -41,10 +41,10 @@ fun SlotPickView(
     val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
 
     val uiState = slotPickViewModel.uiState.collectAsState()
-    val currentMongVo = slotPickViewModel.mongVo.collectAsState()
-    val mongVos = slotPickViewModel.mongVos.collectAsState()
     val slotCount = slotPickViewModel.slotCount.collectAsState()
     val starPoint = slotPickViewModel.starPoint.collectAsState()
+    val currentMongVo = slotPickViewModel.mongVo.collectAsState()
+    val mongVos = slotPickViewModel.mongVos.collectAsState()
     val slotIndex = remember { mutableIntStateOf(0) }
     val slotVos = remember {
         derivedStateOf {

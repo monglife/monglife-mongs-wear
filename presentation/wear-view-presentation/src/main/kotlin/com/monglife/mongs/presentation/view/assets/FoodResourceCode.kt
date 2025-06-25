@@ -16,4 +16,5 @@ enum class FoodResourceCode (
     FD021(R.drawable.food_fd021),
     FD022(R.drawable.food_fd022),
     FD030(R.drawable.food_fd030),
+    FD444(R.drawable.mong_none),
 }

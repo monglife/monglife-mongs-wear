@@ -63,7 +63,7 @@ class ViewModel @Inject constructor(
      */
     override fun initialize() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            uiState = UiState.Idle
+            _uiState.value = UiState.Idle
         }
     }
 

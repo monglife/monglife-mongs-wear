@@ -14,5 +14,6 @@ enum class SnackResourceCode (
     SN010(R.drawable.snack_sn010),
     SN011(R.drawable.snack_sn011),
     SN012(R.drawable.snack_sn012),
-    SN013(R.drawable.snack_sn013)
+    SN013(R.drawable.snack_sn013),
+    SN444(R.drawable.mong_none)
 }
