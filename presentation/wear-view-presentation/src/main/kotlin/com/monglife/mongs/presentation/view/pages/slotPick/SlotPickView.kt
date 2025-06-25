@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,10 +40,11 @@ fun SlotPickView(
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
 
-    val currentMongVo = slotPickViewModel.mongVo.observeAsState()
-    val mongVos = slotPickViewModel.mongVos.observeAsState(emptyList())
-    val slotCount = slotPickViewModel.slotCount.observeAsState(0)
-    val starPoint = slotPickViewModel.starPoint.observeAsState(0)
+    val uiState = slotPickViewModel.uiState.collectAsState()
+    val currentMongVo = slotPickViewModel.mongVo.collectAsState()
+    val mongVos = slotPickViewModel.mongVos.collectAsState()
+    val slotCount = slotPickViewModel.slotCount.collectAsState()
+    val starPoint = slotPickViewModel.starPoint.collectAsState()
     val slotIndex = remember { mutableIntStateOf(0) }
     val slotVos = remember {
         derivedStateOf {
@@ -85,7 +86,7 @@ fun SlotPickView(
     Box {
         DefaultBackground()
 
-        if (slotPickViewModel.uiState.loadingBar) {
+        if (uiState.value.loadingBar) {
              LoadingBar()
         } else {
             Box(
@@ -137,13 +138,13 @@ fun SlotPickView(
             }
 
             Box(modifier = Modifier.zIndex(2f)) {
-                if (slotPickViewModel.uiState.createDialogOpen) {
+                if (uiState.value.createDialogOpen) {
                     CreateSlotDialog(
                         modifier = Modifier.zIndex(2f),
                         onCreateClick = { name, sleepAt, wakeupAt -> slotPickViewModel.createMong(name, sleepAt, wakeupAt) },
                         onCloseClick = slotPickViewModel::initialize,
                     )
-                } else if (slotPickViewModel.uiState.buySlotDialogOpen) {
+                } else if (uiState.value.buySlotDialogOpen) {
                     ConfirmAndCancelDialog(
                         modifier = Modifier.zIndex(2f),
                         text = "새로운 슬롯을\n구매하시겠습니까?",
@@ -153,7 +154,7 @@ fun SlotPickView(
                 }
 
                 currentSlotVo.value?.mongVo?.let {
-                    if (slotPickViewModel.uiState.detailDialogOpen) {
+                    if (uiState.value.detailDialogOpen) {
                         SlotDetailDialog(
                             modifier = Modifier.zIndex(3f),
                             mongId = it.mongId,
@@ -169,14 +170,14 @@ fun SlotPickView(
                             born = it.createdAt,
                             onClick = slotPickViewModel::initialize,
                         )
-                    } else if (slotPickViewModel.uiState.deleteDialogOpen) {
+                    } else if (uiState.value.deleteDialogOpen) {
                         ConfirmAndCancelDialog(
                             modifier = Modifier.zIndex(3f),
                             text = "현재 몽을\n삭제하시겠습니까?",
                             confirm = { slotPickViewModel.deleteMong(mongId = it.mongId) },
                             cancel = slotPickViewModel::initialize
                         )
-                    } else if (slotPickViewModel.uiState.pickDialogOpen) {
+                    } else if (uiState.value.pickDialogOpen) {
                         ConfirmAndCancelDialog(
                             modifier = Modifier.zIndex(3f),
                             text = "현재 몽을\n선택하시겠습니까?",
@@ -191,7 +192,7 @@ fun SlotPickView(
                             },
                             cancel = slotPickViewModel::initialize
                         )
-                    } else if (slotPickViewModel.uiState.graduateDialogOpen) {
+                    } else if (uiState.value.graduateDialogOpen) {
                         ConfirmAndCancelDialog(
                             modifier = Modifier.zIndex(3f),
                             text = "현재 몽을\n졸업시키시겠습니까?",

@@ -1,12 +1,13 @@
 package com.monglife.mongs.presentation.viewmodel.pages.main
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.max
@@ -32,14 +33,20 @@ class MainPagerViewModel @Inject constructor(
     private val _normalPagerEvent = MutableSharedFlow<Int>()
     val normalPagerEvent = _normalPagerEvent.asSharedFlow()
 
-    private val _isPagerChange = MediatorLiveData(false)
-    val isPagerChange: LiveData<Boolean> get() = _isPagerChange
+    /**
+     * 변수
+     */
+    private val _page = MutableStateFlow<Int?>(null)
+    val page: StateFlow<Int?> = _page.asStateFlow()
+
+    private val _isPagerChange = MutableStateFlow(true)
+    val isPagerChange: StateFlow<Boolean> = _isPagerChange.asStateFlow()
 
     /**
      * 메인 페이지 스크롤 이벤트
      */
     fun pagerScroll(page: Int) {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _emptyPagerEvent.emit(max(0, min(page, EMPTY_PAGER_STATE_SIZE)))
             _normalPagerEvent.emit(max(0, min(page, NORMAL_PAGER_STATE_SIZE)))
         }
@@ -48,15 +55,18 @@ class MainPagerViewModel @Inject constructor(
     /**
      * 페이지 스크롤 여부 업데이트
      */
-    fun updateIsPagerChange(isPagerChange: Boolean) {
-        _isPagerChange.postValue(isPagerChange)
+    fun updatePageInfo(page: Int, isPagerChange: Boolean) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _page.value = page
+            _isPagerChange.value = isPagerChange
+        }
     }
 
     /**
      * 화면 초기화
      */
     override fun initialize() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _emptyPagerEvent.emit(EMPTY_PAGER_STATE_INIT)
             _normalPagerEvent.emit(NORMAL_PAGER_STATE_INIT)
         }

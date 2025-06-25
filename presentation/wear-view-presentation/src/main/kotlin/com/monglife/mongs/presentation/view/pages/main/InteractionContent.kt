@@ -11,8 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -31,13 +30,14 @@ internal fun InteractionContent(
     navController: NavController,
     mainInteractionViewModel: MainInteractionViewModel = hiltViewModel()
 ) {
-    val mongVo = mainInteractionViewModel.mongVo.observeAsState()
+    val uiState = mainInteractionViewModel.uiState.collectAsState()
+    val mongVo = mainInteractionViewModel.mongVo.collectAsState()
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        if (mainInteractionViewModel.uiState.loadingBar) {
+        if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
 
@@ -133,9 +133,5 @@ internal fun InteractionContent(
                 }
             }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        mainInteractionViewModel.initialize()
     }
 }

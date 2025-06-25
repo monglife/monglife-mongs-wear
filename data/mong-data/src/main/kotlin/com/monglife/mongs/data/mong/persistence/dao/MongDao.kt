@@ -13,6 +13,12 @@ import kotlinx.coroutines.flow.Flow
 interface MongDao {
 
     /**
+     * MongIds 기준 MongId 조회
+     */
+    @Query("SELECT mongId FROM mong WHERE mongId NOT IN (:mongIds)")
+    fun findAllNotExistsMongIds(mongIds: List<Long>): List<Long>
+
+    /**
      * MongId 기준 몽 조회
      */
     @Query("SELECT * FROM mong WHERE mongId = :mongId")

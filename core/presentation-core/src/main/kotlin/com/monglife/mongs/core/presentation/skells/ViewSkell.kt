@@ -10,8 +10,10 @@ import androidx.navigation.NavController
 @Composable
 internal fun View(
     navController: NavController,
-    // TODO: Add viewModel if need
+    someViewModel: SomeViewModel = hiltViewModel(),
 ) {
+    val uiState = someViewModel.uiState.collectAsState()
+
     // TODO: For control mainPageView pagerState
 //    val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
 //    val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
@@ -23,20 +25,26 @@ internal fun View(
 //    val mongVo = mainSlotViewModel.mongVo.observeAsState()
 
     Box {
-        // TODO: Add background method
-//         DefaultBackground()
-//
-//        if (ViewModel.uiState.loadingBar) {
-//             LoadingBar()
-//        } else {
-//            Content()
-//        }
+         DefaultBackground()
+
+        if (uiState.value.loadingBar) {
+             LoadingBar()
+        } else {
+            Content()
+        }
     }
 
-        // TODO: call viewModel initialize method
-//    LaunchedEffect(Unit) {
-//        ViewModel.initialize()
-//    }
+    // UI 이벤트 소비
+    LaunchedEffect(Unit) {
+        someViewModel.uiEvent.collect { event ->
+            when (event) {
+                is SomeViewModel.UiEvent.SomeEvent -> {
+                    // TODO: event consume logic
+                }
+                else -> {}
+            }
+        }
+    }
 }
 
 @Composable

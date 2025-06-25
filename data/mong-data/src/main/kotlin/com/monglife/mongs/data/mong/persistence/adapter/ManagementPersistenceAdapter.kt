@@ -1,7 +1,7 @@
 package com.monglife.mongs.data.mong.persistence.adapter
 
+import android.util.Log
 import androidx.datastore.preferences.core.edit
-import com.monglife.mongs.application.mong.exception.NotFoundCurrentMongIdException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.exception.NotFoundMongOptionException
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
@@ -11,9 +11,17 @@ import com.monglife.mongs.data.mong.persistence.entity.MongEntity
 import com.monglife.mongs.data.mong.persistence.entity.MongOptionEntity
 import com.monglife.mongs.domain.mong.model.Mong
 import com.monglife.mongs.domain.mong.model.MongOption
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,25 +31,26 @@ class ManagementPersistenceAdapter @Inject constructor(
     private val mongDataStore: MongDataStore,
 ) : ManagementPersistencePort {
 
+    private val subscribeCounterMap = HashMap<Long, AtomicInteger>()
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     /**
      * 현재 몽 ID 조회
      */
-    @Throws(NotFoundCurrentMongIdException::class)
-    override suspend fun getCurrentMongId(): Long =
+    override suspend fun getCurrentMongId(): Long? =
         mongDataStore.getStore().data.map {
             it[MongDataStore.CURRENT_MONG_ID]?.let { currentMongId ->
-                currentMongId.takeIf { it != MongDataStore.CURRENT_MONG_ID_INIT }
+                currentMongId.takeIf { currentMongId != MongDataStore.CURRENT_MONG_ID_INIT }
             }
-        }.first() ?: throw NotFoundCurrentMongIdException()
+        }.first()
 
     /**
      * 현재 몽 ID Flow 조회
      */
-    @Throws(NotFoundCurrentMongIdException::class)
     override suspend fun getCurrentMongIdFlow(): Flow<Long?> =
         mongDataStore.getStore().data.map {
             it[MongDataStore.CURRENT_MONG_ID]?.let { currentMongId ->
-                currentMongId.takeIf { it != MongDataStore.CURRENT_MONG_ID_INIT }
+                currentMongId.takeIf { currentMongId != MongDataStore.CURRENT_MONG_ID_INIT }
             }
         }
 
@@ -106,12 +115,33 @@ class ManagementPersistenceAdapter @Inject constructor(
             ?: throw NotFoundMongException()
 
     /**
-     * 몽 라이브 객체 조회
+     * 몽 Flow 객체 조회
      */
-    override suspend fun getMongFlow(mongId: Long): Flow<Mong?> =
-        roomDB.mongDao().findMongFlowByMongId(mongId = mongId).map {
-            it?.toDomain()
+    override suspend fun getMongFlow(mongId: Long): Flow<Mong?> = flow {
+
+        val subscribeCount = subscribeCounterMap.getOrPut(mongId) { AtomicInteger(0) }
+
+        if (subscribeCount.getAndIncrement() == 0) {
+            // TODO: MQTT 구독
+            Log.d("TEST", "subscribe mongId: $mongId")
         }
+
+        try {
+            emitAll(roomDB.mongDao().findMongFlowByMongId(mongId = mongId).map {
+                it?.toDomain()
+            })
+        } finally {
+            // TODO: MQTT 구독 해제
+            if (subscribeCount.decrementAndGet() == 0) {
+                Log.d("TEST", "disSubscribe mongId: $mongId")
+                subscribeCounterMap.remove(mongId)
+            }
+        }
+    }.shareIn(
+        scope = applicationScope,
+        started = SharingStarted.WhileSubscribed(),
+        replay = 1,
+    )
 
     /**
      * 몽 영속화
@@ -148,5 +178,14 @@ class ManagementPersistenceAdapter @Inject constructor(
      */
     override suspend fun deleteMong(mongId: Long) {
         roomDB.mongDao().deleteMongByMongId(mongId = mongId)
+    }
+
+    /**
+     * MongId 가 존재하지 않는 몽 삭제
+     */
+    override suspend fun deleteMongIfNotExistsMongIds(mongIds: List<Long>) {
+        roomDB.mongDao().findAllNotExistsMongIds(mongIds = mongIds).forEach {
+            roomDB.mongDao().deleteMongByMongId(mongId = it)
+        }
     }
 }

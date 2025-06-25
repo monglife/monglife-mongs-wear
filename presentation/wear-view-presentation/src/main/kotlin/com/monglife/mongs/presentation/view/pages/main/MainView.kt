@@ -7,8 +7,8 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -34,20 +34,15 @@ fun MainView(
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
 
-    val mongVo = mainViewModel.mongVo.observeAsState()
-    val backgroundMapCode = mainViewModel.backgroundMapCode.observeAsState()
+    val uiState = mainViewModel.uiState.collectAsState()
+    val mongVo = mainViewModel.mongVo.collectAsState()
+    val backgroundMapCode = mainViewModel.backgroundMapCode.collectAsState()
 
-    val emptyPagerState = rememberPagerState(
-        MainPagerViewModel.EMPTY_PAGER_STATE_INIT,
-        0f
-    ) { MainPagerViewModel.EMPTY_PAGER_STATE_SIZE }
-    val normalPagerState = rememberPagerState(
-        MainPagerViewModel.NORMAL_PAGER_STATE_INIT,
-        0f
-    ) { MainPagerViewModel.NORMAL_PAGER_STATE_SIZE }
+    val emptyPagerState = rememberPagerState(MainPagerViewModel.EMPTY_PAGER_STATE_INIT, 0f) { MainPagerViewModel.EMPTY_PAGER_STATE_SIZE }
+    val normalPagerState = rememberPagerState(MainPagerViewModel.NORMAL_PAGER_STATE_INIT, 0f) { MainPagerViewModel.NORMAL_PAGER_STATE_SIZE }
 
     Box {
-        if (mainViewModel.uiState.loadingBar) {
+        if (uiState.value.loadingBar) {
             DefaultBackground()
             LoadingBar()
         } else {
@@ -83,7 +78,10 @@ fun MainView(
                 }
 
                 LaunchedEffect(isPageChanging.value) {
-                    mainPagerViewModel.updateIsPagerChange(isPageChanging.value)
+                    mainPagerViewModel.updatePageInfo(
+                        page = normalPagerState.currentPage,
+                        isPagerChange = isPageChanging.value
+                    )
                 }
 
                 LaunchedEffect(Unit) {
@@ -124,7 +122,10 @@ fun MainView(
                 }
 
                 LaunchedEffect(isPageChanging.value) {
-                    mainPagerViewModel.updateIsPagerChange(isPageChanging.value)
+                    mainPagerViewModel.updatePageInfo(
+                        page = emptyPagerState.currentPage,
+                        isPagerChange = isPageChanging.value
+                    )
                 }
 
                 LaunchedEffect(Unit) {
@@ -135,10 +136,6 @@ fun MainView(
                 }
             }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        mainViewModel.initialize()
     }
 }
 

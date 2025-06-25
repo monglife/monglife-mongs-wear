@@ -1,39 +1,25 @@
 package com.monglife.mongs.presentation.viewmodel.pages.main
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainViewModel.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class MainConditionViewModel @Inject constructor(
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
 ) : BaseViewModel() {
-
-    private val _mongVo = MediatorLiveData<MongVo?>(null)
-    val mongVo: LiveData<MongVo?> get() = _mongVo
-
-    init {
-        // 몽 정보 옵저빙
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            observeCurrentMongUseCase().collect { _mongVo.postValue(it) }
-        }
-    }
-
-    /**
-     * UI 상태 변수
-     */
-    var uiState by mutableStateOf<UiState>(UiState.Idle)
-        private set
 
     /**
      * UI 상태 정의
@@ -46,11 +32,41 @@ class MainConditionViewModel @Inject constructor(
     }
 
     /**
+     * UI 상태 변수
+     */
+    private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    /**
+     * 변수
+     */
+    private val _mongVo = MutableStateFlow<MongVo?>(null)
+    val mongVo: StateFlow<MongVo?> = _mongVo.asStateFlow()
+
+    init {
+        // 몽 정보 옵저빙
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Loading
+
+            withContext(Dispatchers.IO) {
+                observeCurrentMongUseCase()
+                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, null)
+                    .let {
+                        observeForever(it, _mongVo)
+                        _mongVo.value = it.first()
+                    }
+            }
+
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
      * 화면 초기화 메서드
      */
     override fun initialize() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            uiState = UiState.Idle
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Idle
         }
     }
 

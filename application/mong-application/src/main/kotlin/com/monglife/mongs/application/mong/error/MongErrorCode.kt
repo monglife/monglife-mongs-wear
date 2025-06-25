@@ -7,7 +7,6 @@ enum class MongErrorCode(
     private val isMessageShow: Boolean,
 ) : ErrorCode {
 
-    NOT_FOUND_CURRENT_MONG_ID("현재 몽 ID 조회 실패", false),
     NOT_FOUND_MONG_OPTION("몽 옵션 조회 실패", false),
     NOT_FOUND_MONG("몽 조회 실패", false),
     NOT_FOUND_TRAINING("훈련 조회 실패", false),

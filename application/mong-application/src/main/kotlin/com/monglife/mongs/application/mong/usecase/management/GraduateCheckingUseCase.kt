@@ -17,7 +17,7 @@ class GraduateCheckingUseCase @Inject constructor(
     @Throws(NotFoundMongOptionException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
-            managementPersistencePort.getCurrentMongId().let { currentMongId ->
+            managementPersistencePort.getCurrentMongId()?.let { currentMongId ->
                 if (currentMongId == command.mongId) {
                     // 현재 몽 ID 삭제
                     managementPersistencePort.deleteCurrentMongId()

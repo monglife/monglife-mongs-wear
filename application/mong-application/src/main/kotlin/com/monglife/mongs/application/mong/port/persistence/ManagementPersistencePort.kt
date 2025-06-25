@@ -1,6 +1,5 @@
 package com.monglife.mongs.application.mong.port.persistence
 
-import com.monglife.mongs.application.mong.exception.NotFoundCurrentMongIdException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.exception.NotFoundMongOptionException
 import com.monglife.mongs.domain.mong.model.Mong
@@ -12,8 +11,7 @@ interface ManagementPersistencePort {
     /**
      * 현재 몽 ID 조회
      */
-    @Throws(NotFoundCurrentMongIdException::class)
-    suspend fun getCurrentMongId(): Long
+    suspend fun getCurrentMongId(): Long?
 
     /**
      * 현재 몽 ID Flow 조회
@@ -71,4 +69,9 @@ interface ManagementPersistencePort {
      * 몽 삭제
      */
     suspend fun deleteMong(mongId: Long)
+
+    /**
+     * MongId 가 존재하지 않는 몽 삭제
+     */
+    suspend fun deleteMongIfNotExistsMongIds(mongIds: List<Long>)
 }

@@ -9,8 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,15 +36,16 @@ internal fun ConditionContent(
 ) {
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
-    val isPagerChange = mainPagerViewModel.isPagerChange.observeAsState(false)
+    val isPagerChange = mainPagerViewModel.isPagerChange.collectAsState()
 
-    val mongVo = mainConditionViewModel.mongVo.observeAsState()
+    val uiState = mainConditionViewModel.uiState.collectAsState()
+    val mongVo = mainConditionViewModel.mongVo.collectAsState()
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize(),
     ) {
-        if (mainConditionViewModel.uiState.loadingBar) {
+        if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
             mongVo.value?.let {
@@ -95,9 +95,5 @@ internal fun ConditionContent(
                 }
             }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        mainConditionViewModel.initialize()
     }
 }

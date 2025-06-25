@@ -7,7 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
@@ -20,7 +20,8 @@ fun LayoutView (
     context: Context = LocalContext.current,
     layoutViewModel: LayoutViewModel = hiltViewModel(),
 ) {
-    val isLogin = layoutViewModel.isLogin.observeAsState(false)
+    val uiState = layoutViewModel.uiState.collectAsState()
+    val isLogin = layoutViewModel.isLogin.collectAsState()
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
         layoutViewModel.verifyPermission()
     }
@@ -28,9 +29,9 @@ fun LayoutView (
     Box {
         DefaultBackground()
 
-        if (layoutViewModel.uiState.loadingBar) {
+        if (uiState.value.loadingBar) {
             LoadingBar()
-        } else if (layoutViewModel.uiState.mustUpdateApp) {
+        } else if (uiState.value.mustUpdateApp) {
             NeedUpdateContent()
         } else {
             if (!isLogin.value) {
@@ -41,10 +42,15 @@ fun LayoutView (
         }
     }
 
-    // 권한 확인
+    // UI 이벤트 소비
     LaunchedEffect(Unit) {
-        layoutViewModel.requestPermissionEvent.collect { permissions ->
-            permissionLauncher.launch(permissions)
+        layoutViewModel.uiEvent.collect { event ->
+            when (event) {
+                is LayoutViewModel.UiEvent.RequestPermission -> {
+                    permissionLauncher.launch(event.permissions.toTypedArray())
+                }
+                else -> {}
+            }
         }
     }
 

@@ -1,10 +1,5 @@
 package com.monglife.mongs.presentation.viewmodel.pages.main
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import com.monglife.mongs.application.device.usecase.GetInitNotificationDialogOpenOptionUseCase
 import com.monglife.mongs.application.device.usecase.SetInitNotificationDialogOpenOptionUseCase
 import com.monglife.mongs.application.mong.usecase.management.EvolutionMongUseCase
@@ -18,7 +13,14 @@ import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,172 +34,6 @@ class MainSlotViewModel @Inject constructor(
     private val sleepingMongUseCase: SleepingMongUseCase,
     private val poopCleanMongUseCase: PoopCleanMongUseCase,
 ) : BaseViewModel() {
-
-    private val _mongVo = MediatorLiveData<MongVo?>(null)
-    val mongVo: LiveData<MongVo?> get() = _mongVo
-
-    init {
-        viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            uiState = UiState.Loading
-
-            val initNotificationDialogOpen = getInitNotificationDialogOpenOptionUseCase()
-
-            uiState = if (initNotificationDialogOpen) UiState.InitNotification else UiState.Idle
-        }
-
-        // 몽 정보 옵저빙
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            observeCurrentMongUseCase().collect { _mongVo.postValue(it) }
-        }
-    }
-
-    /**
-     * 초기 다이얼로그 닫기
-     */
-    fun initDialogClose() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            uiState = UiState.Idle
-        }
-    }
-
-    /**
-     * 초기 다이얼로그 다시 보지 않기 옵션 설정 및 닫기
-     */
-    fun initDialogCloseForever() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            setInitNotificationDialogOpenOptionUseCase(
-                command = SetInitNotificationDialogOpenOptionUseCase.Command(
-                    isOpen = false
-                )
-            )
-            uiState = UiState.Idle
-        }
-    }
-
-    /**
-     * 상호 작용 다이얼로그 오픈
-     */
-    fun interactionDialogOpen() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            uiState = UiState.Interaction
-        }
-    }
-
-    /**
-     * 상호 작용 다이얼로그 닫기
-     */
-    fun interactionDialogClose() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            uiState = UiState.Idle
-        }
-    }
-
-    /**
-     * 쓰다듬기
-     */
-    fun strokeMong(mongId: Long) {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            if (uiState != UiState.Happy) {
-                strokeMongUseCase(
-                    command = StrokeMongUseCase.Command(
-                        mongId = mongId,
-                    )
-                )
-
-                uiState = UiState.Happy
-                delay(3000)
-                uiState = UiState.Idle
-            }
-        }
-    }
-
-    /**
-     * 수면, 기상
-     */
-    fun sleepMong(mongId: Long) {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            sleepingMongUseCase(
-                command = SleepingMongUseCase.Command(
-                    mongId = mongId
-                )
-            )
-        }
-    }
-
-    /**
-     * 배변 처리
-     */
-    fun poopCleanMong(mongId: Long) {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            if (uiState != UiState.PoopClean) {
-                poopCleanMongUseCase(
-                    command = PoopCleanMongUseCase.Command(
-                        mongId = mongId
-                    )
-                )
-
-                uiState = UiState.PoopClean
-                delay(3000)
-                uiState = UiState.Idle
-            }
-        }
-    }
-
-    /**
-     * 진화 이펙트 시작
-     */
-    fun evolutionMong() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            uiState = UiState.Evolution
-        }
-    }
-
-    /**
-     * 진화
-     */
-    fun evolutionMong(mongId: Long) {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            if (uiState == UiState.Evolution) {
-                evolutionMongUseCase(
-                    command = EvolutionMongUseCase.Command(
-                        mongId = mongId,
-                    )
-                )
-                uiState = UiState.Idle
-            }
-        }
-    }
-
-    /**
-     * 졸업 준비 여부 사용자 확인
-     */
-    fun graduateMongCheck(mongId: Long) {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            graduateCheckingUseCase(
-                command = GraduateCheckingUseCase.Command(
-                    mongId = mongId
-                )
-            )
-        }
-    }
-
-    /**
-     * 섭취 이벤트 발생
-     * for FeedNested Route
-     */
-    fun eatingEvent() {
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            uiState = UiState.Eating
-            delay(3000)
-            uiState = UiState.Idle
-        }
-    }
-
-    /**
-     * UI 상태 변수
-     */
-    var uiState by mutableStateOf<UiState>(UiState.Idle)
-        private set
 
     /**
      * UI 상태 정의
@@ -222,12 +58,208 @@ class MainSlotViewModel @Inject constructor(
     }
 
     /**
+     * UI 상태 변수
+     */
+    private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    /**
+     * 변수
+     */
+    private val _mongVo = MutableStateFlow<MongVo?>(null)
+    val mongVo: StateFlow<MongVo?> = _mongVo.asStateFlow()
+
+    init {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Loading
+
+            val initNotificationDialogOpen = withContext(Dispatchers.IO) {
+                observeCurrentMongUseCase()
+                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, null)
+                    .let {
+                        observeForever(it, _mongVo)
+                        _mongVo.value = it.first()
+                    }
+
+                getInitNotificationDialogOpenOptionUseCase()
+            }
+
+            _uiState.value = if (initNotificationDialogOpen) UiState.InitNotification else UiState.Idle
+        }
+    }
+
+    /**
+     * 초기 다이얼로그 닫기
+     */
+    fun initDialogClose() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
+     * 초기 다이얼로그 다시 보지 않기 옵션 설정 및 닫기
+     */
+    fun initDialogCloseForever() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            withContext(Dispatchers.IO) {
+                setInitNotificationDialogOpenOptionUseCase(
+                    command = SetInitNotificationDialogOpenOptionUseCase.Command(
+                        isOpen = false
+                    )
+                )
+            }
+
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
+     * 상호 작용 다이얼로그 오픈
+     */
+    fun interactionDialogOpen() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Interaction
+        }
+    }
+
+    /**
+     * 상호 작용 다이얼로그 닫기
+     */
+    fun interactionDialogClose() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
+     * 쓰다듬기
+     */
+    fun strokeMong(mongId: Long) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            if (_uiState.value != UiState.Happy) {
+                _uiState.value = UiState.Loading
+
+                withContext(Dispatchers.IO) {
+                    strokeMongUseCase(
+                        command = StrokeMongUseCase.Command(
+                            mongId = mongId,
+                        )
+                    )
+                }
+
+                _uiState.value = UiState.Happy
+                delay(3000)
+                _uiState.value = UiState.Idle
+            }
+        }
+    }
+
+    /**
+     * 수면, 기상
+     */
+    fun sleepMong(mongId: Long) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Loading
+
+            withContext(Dispatchers.IO) {
+                sleepingMongUseCase(
+                    command = SleepingMongUseCase.Command(
+                        mongId = mongId
+                    )
+                )
+            }
+
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
+     * 배변 처리
+     */
+    fun poopCleanMong(mongId: Long) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            if (_uiState.value != UiState.PoopClean) {
+                _uiState.value = UiState.Loading
+
+                withContext(Dispatchers.IO) {
+                    poopCleanMongUseCase(
+                        command = PoopCleanMongUseCase.Command(
+                            mongId = mongId
+                        )
+                    )
+                }
+
+                _uiState.value = UiState.PoopClean
+                delay(3000)
+                _uiState.value = UiState.Idle
+            }
+        }
+    }
+
+    /**
+     * 진화 이펙트 시작
+     */
+    fun evolutionMong() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Evolution
+        }
+    }
+
+    /**
+     * 진화
+     */
+    fun evolutionMong(mongId: Long) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            if (_uiState.value == UiState.Evolution) {
+                withContext(Dispatchers.IO) {
+                    evolutionMongUseCase(
+                        command = EvolutionMongUseCase.Command(
+                            mongId = mongId,
+                        )
+                    )
+                }
+
+                _uiState.value = UiState.Idle
+            }
+        }
+    }
+
+    /**
+     * 졸업 준비 여부 사용자 확인
+     */
+    fun graduateMongCheck(mongId: Long) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            withContext(Dispatchers.IO) {
+                graduateCheckingUseCase(
+                    command = GraduateCheckingUseCase.Command(
+                        mongId = mongId
+                    )
+                )
+            }
+        }
+    }
+
+    /**
+     * 섭취 이벤트 발생
+     * for FeedNested Route
+     */
+    fun eatingEvent() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Eating
+            delay(3000)
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
      * 화면 초기화 메서드
      */
     override fun initialize() {
-        // UI 초기화
-        if (uiState != UiState.InitNotification) {
-            uiState = UiState.Idle
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            if (_uiState.value != UiState.InitNotification) {
+                _uiState.value = UiState.Idle
+            }
         }
     }
 

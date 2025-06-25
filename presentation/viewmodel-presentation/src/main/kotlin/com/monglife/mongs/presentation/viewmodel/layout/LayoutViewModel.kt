@@ -1,22 +1,20 @@
 package com.monglife.mongs.presentation.viewmodel.layout
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import com.monglife.mongs.application.auth.usecase.GetIsLoginUseCase
 import com.monglife.mongs.application.auth.usecase.GetMustUpdateAppUseCase
 import com.monglife.mongs.core.presentation.utils.PermissionUtil
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.presentation.viewmodel.layout.LoginViewModel.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,20 +24,65 @@ class LayoutViewModel @Inject constructor(
     private val getIsLoginUseCase: GetIsLoginUseCase,
 ) : BaseViewModel() {
 
-    private val _isLogin = MediatorLiveData(false)
-    val isLogin: LiveData<Boolean> get() = _isLogin
+    /**
+     * UI 상태 정의
+     */
+    sealed class UiState(
+        val loadingBar: Boolean = false,
+        val mustUpdateApp: Boolean = false,
+    ) {
+        data object Idle : UiState()
+        data object Loading : UiState(loadingBar = true)
+        data object NeedUpdate : UiState(mustUpdateApp = true)
+    }
 
-    private val _requestPermissionEvent = MutableSharedFlow<Array<String>>()
-    val requestPermissionEvent = _requestPermissionEvent.asSharedFlow()
+    /**
+     * UI 이벤트 정의
+     */
+    sealed class UiEvent {
+        data object Idle: UiEvent()
+        data class RequestPermission(val permissions: List<String>): UiEvent()
+    }
+
+    /**
+     * UI 상태 변수
+     */
+    private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    /**
+     * UI 이벤트 변수
+     */
+    private val _uiEvent = MutableStateFlow<UiEvent>(UiEvent.Idle)
+    val uiEvent: StateFlow<UiEvent> = _uiEvent.asStateFlow()
+
+    /**
+     * 변수
+     */
+    private val _isLogin = MutableStateFlow(false)
+    val isLogin: StateFlow<Boolean> = _isLogin.asStateFlow()
 
     init {
-
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            uiState = UiState.Loading
+            _uiState.value = UiState.Loading
 
-            // 앱 강제 업데이트 체크
-            if (verifyAppVersion()) {
-                uiState = UiState.NeedUpdate
+            // 로그인 여부 로딩
+            withContext(Dispatchers.IO) {
+                getIsLoginUseCase()
+                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, false)
+                    .let {
+                        observeForever(it, _isLogin)
+                        _isLogin.value = it.first()
+                    }
+            }
+
+            // 앱 업데이트 체크
+            val mustUpdateApp = runCatching {
+                withContext(Dispatchers.IO) { getMustUpdateAppUseCase() }
+            }.getOrElse { true }
+
+            if (mustUpdateApp) {
+                _uiState.value = UiState.NeedUpdate
                 return@launch
             }
 
@@ -51,50 +94,20 @@ class LayoutViewModel @Inject constructor(
             }
 
             if (permissions.isNotEmpty()) {
-                _requestPermissionEvent.emit(permissions.toTypedArray())
+                _uiEvent.emit(UiEvent.RequestPermission(permissions))
+            } else {
+                _uiState.value = UiState.Idle
             }
-
-            val isLoginFlow = getIsLoginUseCase().stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, false)
-            _isLogin.value = isLoginFlow.first()
-
-
-            uiState = UiState.Idle
-
-            observeForever(isLoginFlow, _isLogin)
         }
     }
 
     /**
-     * 앱 버전 체크
-     */
-    private suspend fun verifyAppVersion() =
-        runCatching { getMustUpdateAppUseCase() }.getOrElse { true }
-
-    /**
-     * 권한 부여 여부 확인
+     * 권한 부여 설정 Activity 종료
      */
     fun verifyPermission() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            uiState = UiState.Idle
+            _uiState.value = UiState.Idle
         }
-    }
-
-    /**
-     * UI 상태 변수
-     */
-    var uiState by mutableStateOf<UiState>(UiState.Idle)
-        private set
-
-    /**
-     * UI 상태 정의
-     */
-    sealed class UiState(
-        val loadingBar: Boolean,
-        val mustUpdateApp: Boolean,
-    ) {
-        data object Idle : UiState(loadingBar = false, mustUpdateApp = false)
-        data object Loading : UiState(loadingBar = true, mustUpdateApp = false)
-        data object NeedUpdate : UiState(loadingBar = false, mustUpdateApp = true)
     }
 
     /**
@@ -102,11 +115,11 @@ class LayoutViewModel @Inject constructor(
      */
     override fun initialize() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            uiState = UiState.Idle
+            _uiState.value = UiState.Idle
         }
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        uiState = UiState.Loading
+        initialize()
     }
 }

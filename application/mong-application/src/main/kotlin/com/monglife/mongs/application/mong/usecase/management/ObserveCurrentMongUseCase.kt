@@ -11,29 +11,31 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * 현재 몽 ID 옵저빙 UseCase
  */
+@Singleton
 class ObserveCurrentMongUseCase @Inject constructor(
     private val managementPersistencePort: ManagementPersistencePort,
-    ) : BaseNoParamUseCase<Flow<MongVo?>>() {
+) : BaseNoParamUseCase<Flow<MongVo?>>() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun execute(): Flow<MongVo?> =
-
-        managementPersistencePort.getCurrentMongIdFlow()
-            .flatMapLatest { mongId ->
-                mongId?.let {
-                    managementPersistencePort.getMongFlow(mongId)
-                        .map { mong ->
-                            mong?.let {
-                                managementPersistencePort.getMongOption(mongId = mong.mongId).let {
-                                    MongVo.of(mong = mong, mongOption = it)
+    override suspend fun execute(): Flow<MongVo?> {
+        return managementPersistencePort.getCurrentMongIdFlow()
+            .flatMapLatest { mongId -> mongId?.let {
+                managementPersistencePort.getMongFlow(mongId = mongId)
+                    .map { mong ->
+                        mong?.let {
+                            managementPersistencePort.getMongOption(mongId = mong.mongId)
+                                .let { mongOption ->
+                                    MongVo.of(mong = mong, mongOption = mongOption)
                                 }
-                            }
                         }
+                    }
                 } ?: flowOf(null)
             }
             .flowOn(Dispatchers.IO)
+    }
 }

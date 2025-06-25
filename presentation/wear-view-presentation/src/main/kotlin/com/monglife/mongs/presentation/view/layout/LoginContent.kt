@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -28,6 +29,7 @@ fun LoginContent(
     modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel = hiltViewModel(),
 ) {
+    val uiState = loginViewModel.uiState.collectAsState()
     val googleLoginLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
         loginViewModel::login
@@ -46,16 +48,16 @@ fun LoginContent(
                     verticalAlignment = Alignment.Bottom,
                     modifier = Modifier.weight(0.6f)
                 ) {
-                    Logo(isOpen = !loginViewModel.uiState.signInButton)
+                    Logo(isOpen = !uiState.value.signInButton)
                 }
 
                 Spacer(modifier = Modifier.height(5.dp))
 
                 Row(
-                    verticalAlignment = if (loginViewModel.uiState.signInButton) Alignment.Top else Alignment.CenterVertically,
+                    verticalAlignment = if (uiState.value.signInButton) Alignment.Top else Alignment.CenterVertically,
                     modifier = Modifier.weight(0.4f)
                 ) {
-                    if (loginViewModel.uiState.signInButton) {
+                    if (uiState.value.signInButton) {
                         GoogleSignInButton(onClick = {
                             loginViewModel.googleLogin(
                                 googleLoginLauncher = googleLoginLauncher
@@ -63,7 +65,7 @@ fun LoginContent(
                         })
                     }
 
-                    if (loginViewModel.uiState.loadingBar) {
+                    if (uiState.value.loadingBar) {
                         LoadingBar()
                     }
                 }
