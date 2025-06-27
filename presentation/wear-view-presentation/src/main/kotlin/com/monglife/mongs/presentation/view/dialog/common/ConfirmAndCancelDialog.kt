@@ -29,9 +29,9 @@ import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 @Composable
 fun ConfirmAndCancelDialog(
     modifier: Modifier = Modifier,
-    text: String = "",
-    confirm: () -> Unit = {},
-    cancel: () -> Unit = {},
+    text: String,
+    confirm: () -> Unit,
+    cancel: () -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,

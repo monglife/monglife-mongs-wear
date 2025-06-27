@@ -117,11 +117,11 @@ fun Router(
         }
         // 오류 신고
         composable(route = RouterPath.Feedback.route) {
-            FeedbackView(navController = navController)
+            FeedbackView()
         }
         // 도움말
         composable(route = RouterPath.Help.route) {
-            HelpView(navController = navController)
+            HelpView()
         }
         // 인벤토리
         composable(route = RouterPath.Inventory.route) {
@@ -135,7 +135,7 @@ fun Router(
         }
         // 공지사항
         composable(route = RouterPath.Notice.route) {
-            NoticeView(navController = navController)
+            NoticeView()
         }
         // 랜덤 뽑기
         composable(route = RouterPath.RandomDraw.route) {
@@ -151,7 +151,7 @@ fun Router(
         }
         // 환경 설정
         composable(route = RouterPath.Setting.route) {
-            SettingView(navController = navController)
+            SettingView()
         }
         // 슬롯 선택
         composable(route = RouterPath.SlotPick.route) {

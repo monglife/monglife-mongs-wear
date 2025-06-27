@@ -17,6 +17,8 @@ import com.monglife.mongs.presentation.view.assets.MongsWhite
 internal fun PageIndicator(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
+    indicatorSize: Int = 6,
+    spacing: Int = 4,
 ) {
     val pageIndicatorState: PageIndicatorState = object : PageIndicatorState {
         override val pageOffset: Float
@@ -28,15 +30,15 @@ internal fun PageIndicator(
     }
 
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         contentAlignment = Alignment.BottomCenter
     ) {
         HorizontalPageIndicator(
             pageIndicatorState = pageIndicatorState,
             selectedColor = MongsNavy,
             unselectedColor = MongsWhite,
-            indicatorSize = 6.dp,
-            modifier = Modifier.padding(bottom = 5.dp)
+            indicatorSize = indicatorSize.dp,
+            spacing  = spacing.dp,
         )
     }
 }
@@ -45,17 +47,19 @@ internal fun PageIndicator(
 internal fun PageIndicator(
     modifier: Modifier = Modifier,
     pageIndicatorState: PageIndicatorState,
+    indicatorSize: Int = 6,
+    spacing: Int = 4,
 ) {
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         contentAlignment = Alignment.BottomCenter
     ) {
         HorizontalPageIndicator(
             pageIndicatorState = pageIndicatorState,
             selectedColor = MongsNavy,
             unselectedColor = MongsWhite,
-            indicatorSize = 6.dp,
-            modifier = Modifier.padding(bottom = 5.dp)
+            indicatorSize = indicatorSize.dp,
+            spacing = spacing.dp,
         )
     }
 }

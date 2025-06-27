@@ -1,6 +1,6 @@
 package com.monglife.mongs.application.device.error
 
-import com.monglife.mongs.core.domain.error.ErrorCode
+import com.monglife.core.common.error.ErrorCode
 
 enum class DeviceErrorCode(
     private val message: String,

@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
-import com.monglife.mongs.presentation.view.assets.MongsWhite
+import com.monglife.mongs.presentation.view.assets.MongsDarkBrown
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
@@ -66,7 +66,7 @@ fun YellowButton(
                 fontFamily = DAL_MU_RI,
                 fontWeight = FontWeight.Light,
                 fontSize = fontSize.sp,
-                color = MongsWhite,
+                color = MongsDarkBrown,
                 maxLines = 1,
             )
         }

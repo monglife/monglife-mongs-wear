@@ -60,11 +60,9 @@ class SyncRemoteMongsUseCase @Inject constructor(
                 // 몽 로컬 등록
                 managementPersistencePort.saveMong(mong = response.toDomain())
             }
-
-            response.mongId
-        }.let {
+        }.also { mongs ->
             // 존재하지 않는 몽 로컬 삭제
-            managementPersistencePort.deleteMongIfNotExistsMongIds(mongIds = it)
+            managementPersistencePort.deleteMongIfNotExistsMongIds(mongIds = mongs.map { it.mongId })
         }
     }
 }

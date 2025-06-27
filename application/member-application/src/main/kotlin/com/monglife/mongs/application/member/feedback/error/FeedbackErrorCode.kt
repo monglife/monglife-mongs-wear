@@ -1,6 +1,6 @@
 package com.monglife.mongs.application.member.feedback.error
 
-import com.monglife.mongs.core.domain.error.ErrorCode
+import com.monglife.core.common.error.ErrorCode
 
 enum class FeedbackErrorCode(
     private val message: String,

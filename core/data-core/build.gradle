@@ -30,10 +30,14 @@ android {
 }
 
 dependencies {
-    api 'com.google.code.gson:gson:2.11.0'
+    // core layer
+    api project(":core:common-core")
 
     // domain layer
     implementation project(":domain:auth-domain")
+
+    // gson
+    api 'com.google.code.gson:gson:2.11.0'
 
     // retrofit2 & coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'

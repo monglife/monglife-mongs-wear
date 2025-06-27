@@ -218,6 +218,7 @@ class ManagementWebAdapter @Inject constructor(
             EvolutionMongResponse(
                 mongId = body.result.mongId,
                 mongCode = body.result.mongCode,
+                level = body.result.level,
                 expRatio = body.result.expRatio,
                 strengthRatio = body.result.strengthRatio,
                 healthyRatio = body.result.healthyRatio,

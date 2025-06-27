@@ -3,6 +3,7 @@ package com.monglife.mongs.presentation.view.pages.slotPick
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -10,6 +11,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -19,12 +21,12 @@ import com.monglife.mongs.presentation.view.component.common.background.DefaultB
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.SelectButton
 import com.monglife.mongs.presentation.view.component.common.pagenation.PageIndicator
-import com.monglife.mongs.presentation.view.component.slotPick.BuySlot
-import com.monglife.mongs.presentation.view.component.slotPick.EmptySlot
-import com.monglife.mongs.presentation.view.component.slotPick.Slot
+import com.monglife.mongs.presentation.view.component.pages.slotPick.BuySlot
+import com.monglife.mongs.presentation.view.component.pages.slotPick.EmptySlot
+import com.monglife.mongs.presentation.view.component.pages.slotPick.Slot
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
-import com.monglife.mongs.presentation.view.dialog.slotPick.CreateSlotDialog
-import com.monglife.mongs.presentation.view.dialog.slotPick.SlotDetailDialog
+import com.monglife.mongs.presentation.view.dialog.pages.slotPick.CreateSlotDialog
+import com.monglife.mongs.presentation.view.dialog.pages.slotPick.SlotDetailDialog
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainPagerViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.slotPick.SlotPickViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.slotPick.SlotPickViewModel.SlotVo
@@ -61,11 +63,13 @@ fun SlotPickView(
                     )
                 )
             }
-            slotVos.add(SlotVo(type = SlotVo.SlotType.BUY))
+            if (slotVos.size < 3) {
+                slotVos.add(SlotVo(type = SlotVo.SlotType.BUY))
+            }
             slotVos
         }
     }
-    val currentSlotVo = remember {
+    val slotVo = remember {
         derivedStateOf {
             if (slotIndex.intValue < slotVos.value.size) {
                 slotVos.value[slotIndex.intValue]
@@ -95,10 +99,13 @@ fun SlotPickView(
             ) {
                 PageIndicator(
                     pageIndicatorState = pageIndicatorState,
-                    modifier = Modifier.zIndex(1f)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 5.dp)
+                        .zIndex(1f)
                 )
 
-                currentSlotVo.value?.let { slotVo ->
+                slotVo.value?.let { slotVo ->
                     when (slotVo.type) {
                         SlotVo.SlotType.EXISTS -> {
                             slotVo.mongVo?.let {
@@ -153,7 +160,7 @@ fun SlotPickView(
                     )
                 }
 
-                currentSlotVo.value?.mongVo?.let {
+                slotVo.value?.mongVo?.let {
                     if (uiState.value.detailDialogOpen) {
                         SlotDetailDialog(
                             modifier = Modifier.zIndex(3f),

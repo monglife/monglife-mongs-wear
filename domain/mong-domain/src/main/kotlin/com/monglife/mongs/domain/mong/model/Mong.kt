@@ -76,6 +76,7 @@ class Mong(
      */
     fun evolution(
         mongCode: String,
+        level: Int,
         expRatio: Double,
         strengthRatio: Double,
         healthyRatio: Double,
@@ -87,6 +88,7 @@ class Mong(
         updatedAt: LocalDateTime,
     ) {
         this.mongCode = mongCode
+        this.level = level
         this.expRatio = expRatio
         this.strengthRatio = strengthRatio
         this.healthyRatio = healthyRatio

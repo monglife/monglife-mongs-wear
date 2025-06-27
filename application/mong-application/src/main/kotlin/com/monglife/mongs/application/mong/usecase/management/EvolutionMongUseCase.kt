@@ -26,6 +26,7 @@ class EvolutionMongUseCase @Inject constructor(
                 // 몽 진화
                 mong.evolution(
                     mongCode = response.mongCode,
+                    level = response.level,
                     expRatio = response.expRatio,
                     strengthRatio = response.strengthRatio,
                     healthyRatio = response.healthyRatio,

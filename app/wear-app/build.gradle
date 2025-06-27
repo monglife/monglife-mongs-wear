@@ -52,6 +52,7 @@ android {
 
 dependencies {
     implementation project(":presentation:wear-view-presentation")
+    implementation project(":core:data-core")
 
     // dagger & hilt
     implementation group: "javax.inject", name: "javax.inject", version: "1"

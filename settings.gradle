@@ -28,9 +28,11 @@ include ":application:member-application"
 include ":application:mong-application"
 
 include ":core"
+include ":core:common-core"
+include ":core:presentation-core"
 include ":core:application-core"
 include ":core:data-core"
-include ":core:presentation-core"
+include ":core:billing-core"
 
 include ":data"
 include ":data:auth-data"

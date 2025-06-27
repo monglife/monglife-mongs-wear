@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.member.notice.exception
 
 import com.monglife.mongs.application.member.notice.error.NoticeErrorCode
-import com.monglife.mongs.core.domain.error.ErrorCode
-import com.monglife.mongs.core.domain.exception.ErrorException
+import com.monglife.core.common.error.ErrorCode
+import com.monglife.core.common.exception.ErrorException
 
 /**
  * 공지 사항 조회 실패 예외

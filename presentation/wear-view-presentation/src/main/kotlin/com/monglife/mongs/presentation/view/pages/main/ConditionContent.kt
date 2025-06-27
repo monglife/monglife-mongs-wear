@@ -22,7 +22,7 @@ import com.monglife.mongs.presentation.view.assets.MongsPink
 import com.monglife.mongs.presentation.view.assets.MongsYellow
 import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
-import com.monglife.mongs.presentation.view.component.main.condition.ConditionSection
+import com.monglife.mongs.presentation.view.component.pages.main.condition.ConditionSection
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainConditionViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainPagerViewModel
 import com.monglife.mongs.presentation.wear.component.common.bar.ProgressIndicator

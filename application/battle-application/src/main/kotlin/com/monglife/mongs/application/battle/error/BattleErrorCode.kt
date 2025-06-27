@@ -1,6 +1,6 @@
 package com.monglife.mongs.application.battle.error
 
-import com.monglife.mongs.core.domain.error.ErrorCode
+import com.monglife.core.common.error.ErrorCode
 
 enum class BattleErrorCode(
     private val message: String,

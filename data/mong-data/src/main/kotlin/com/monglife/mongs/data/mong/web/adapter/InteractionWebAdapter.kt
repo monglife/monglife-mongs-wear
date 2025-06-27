@@ -14,6 +14,7 @@ import com.monglife.mongs.application.mong.port.web.response.GetFoodResponse
 import com.monglife.mongs.application.mong.port.web.response.GetInventoryResponse
 import com.monglife.mongs.application.mong.port.web.response.GetSnackResponse
 import com.monglife.mongs.application.mong.port.web.response.RandomDrawResponseVo
+import com.monglife.mongs.core.domain.port.response.PageResponse
 import com.monglife.mongs.data.mong.web.client.InteractionWebClient
 import com.monglife.mongs.data.mong.web.client.request.FeedFoodRequestDto
 import com.monglife.mongs.data.mong.web.client.request.FeedSnackRequestDto
@@ -129,12 +130,12 @@ class InteractionWebAdapter @Inject constructor(
     /**
      * 인벤토리 목록 조회
      */
-    override suspend fun getInventories(mongId: Long): List<GetInventoryResponse> =
-        interactionWebClient.getInventories(mongId = mongId).let { response ->
+    override suspend fun getInventories(mongId: Long, page: Int, size: Int): PageResponse<GetInventoryResponse> =
+        interactionWebClient.getInventories(mongId = mongId, page = page, size = size).let { response ->
 
             val body = response.takeIf { it.isSuccessful }?.body()
 
-            body?.result?.map {
+            val result = body?.result?.map {
                 GetInventoryResponse(
                     inventoryId = it.inventoryId,
                     mongId = it.mongId,
@@ -143,6 +144,14 @@ class InteractionWebAdapter @Inject constructor(
                     inventoryTypeCode = it.inventoryTypeCode,
                 )
             } ?: emptyList()
+
+            PageResponse(
+                page = body?.page ?: page,
+                size = body?.size ?: size,
+                totalPage = body?.totalPage ?: 0,
+                isLastPage = body?.isLastPage ?: true,
+                result = result,
+            )
         }
 
     /**

@@ -1,5 +1,6 @@
 package com.monglife.mongs.data.member.notice.web.client
 
+import com.monglife.mongs.data.core.dto.response.PageResponseDto
 import com.monglife.mongs.data.core.dto.response.ResponseDto
 import com.monglife.mongs.data.member.notice.web.client.response.GetNoticeResponseDto
 import retrofit2.Response
@@ -19,5 +20,5 @@ interface NoticeWebClient {
      * 공지 사항 목록 조회 API 호출
      */
     @GET("notice")
-    suspend fun getNotices(@Query("page") page: Int, @Query("size") size: Int): Response<ResponseDto<List<GetNoticeResponseDto>>>
+    suspend fun getNotices(@Query("page") page: Int, @Query("size") size: Int): Response<PageResponseDto<List<GetNoticeResponseDto>>>
 }

@@ -1,6 +1,6 @@
 package com.monglife.mongs.application.member.player.error
 
-import com.monglife.mongs.core.domain.error.ErrorCode
+import com.monglife.core.common.error.ErrorCode
 
 enum class PlayerErrorCode(
     private val message: String,

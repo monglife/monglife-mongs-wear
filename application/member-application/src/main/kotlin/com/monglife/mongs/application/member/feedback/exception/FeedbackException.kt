@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.member.feedback.exception
 
 import com.monglife.mongs.application.member.feedback.error.FeedbackErrorCode
-import com.monglife.mongs.core.domain.error.ErrorCode
-import com.monglife.mongs.core.domain.exception.ErrorException
+import com.monglife.core.common.error.ErrorCode
+import com.monglife.core.common.exception.ErrorException
 
 /**
  * 오류 신고 등록 실패 예외

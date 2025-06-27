@@ -12,6 +12,7 @@ import com.monglife.mongs.application.auth.exception.InvalidLoginException
 import com.monglife.mongs.application.auth.exception.NeedJoinException
 import com.monglife.mongs.application.auth.usecase.JoinUseCase
 import com.monglife.mongs.application.auth.usecase.LoginUseCase
+import com.monglife.mongs.core.presentation.utils.PermissionUtil
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -27,6 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val permissionUtil: PermissionUtil,
     private val loginUseCase: LoginUseCase,
     private val joinUseCase: JoinUseCase,
 ): BaseViewModel() {
@@ -43,10 +45,51 @@ class LoginViewModel @Inject constructor(
     }
 
     /**
+     * UI 이벤트 정의
+     */
+    sealed class UiEvent {
+        data object Idle: UiEvent()
+        data class RequestPermission(val permissions: List<String>): UiEvent()
+    }
+
+    /**
      * UI 상태 변수
      */
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    /**
+     * UI 이벤트 변수
+     */
+    private val _uiEvent = MutableStateFlow<UiEvent>(UiEvent.Idle)
+    val uiEvent: StateFlow<UiEvent> = _uiEvent.asStateFlow()
+
+    /**
+     * 권한 부여 설정 인덴트 오픈
+     */
+    fun verifyPermissionIntentOpen() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            // 권한 확인
+            val permissions = buildList {
+                addAll(permissionUtil.verifyNotificationPermission())
+                addAll(permissionUtil.verifyActivityPermission())
+                addAll(permissionUtil.verifyLocationPermission())
+            }
+
+            if (permissions.isNotEmpty()) {
+                _uiEvent.emit(UiEvent.RequestPermission(permissions))
+            }
+        }
+    }
+
+    /**
+     * 권한 부여 설정 인덴트 닫기
+     */
+    fun verifyPermissionIntentClose() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Idle
+        }
+    }
 
     /**
      * 구글 로그인

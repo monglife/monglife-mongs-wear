@@ -1,74 +1,37 @@
 package com.monglife.mongs.presentation.viewmodel.pages.charge
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
+import android.app.Activity
+import android.util.Log
+import com.monglife.core.billing.client.GoogleBillingClient
+import com.monglife.core.billing.exception.BillingNotSupportException
+import com.monglife.mongs.application.member.player.usecase.ObservePlayerUseCase
+import com.monglife.mongs.application.member.store.usecase.ConsumeProductOrderUseCase
+import com.monglife.mongs.application.member.store.usecase.GetNotConsumedOrdersUseCase
+import com.monglife.mongs.application.member.store.usecase.GetProductsUseCase
+import com.monglife.mongs.application.member.store.vo.OrderVo
 import com.monglife.mongs.application.member.store.vo.ProductVo
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class ChargeStarPointViewModel @Inject constructor(
-
+    private val observePlayerUseCase: ObservePlayerUseCase,
+    private val getProductsUseCase: GetProductsUseCase,
+    private val getNotConsumedOrdersUseCase: GetNotConsumedOrdersUseCase,
+    private val consumeProductOrderUseCase: ConsumeProductOrderUseCase,
+    private val billingClient: GoogleBillingClient,
 ): BaseViewModel() {
-
-    //TODO: observe data for view
-//    private val _someData = MediatorLiveData<String>()
-//    val someData: LiveData<String> get() = _someData
-    // TODO: event for view
-//    private val _someEvent = MutableSharedFlow<Int>()
-//    val someEvent = _someEvent.asSharedFlow()
-
-    private val _starPoint = MediatorLiveData<Int>()
-    val starPoint: LiveData<Int> get() = _starPoint
-
-    private val _productVos = MediatorLiveData<List<ProductVo>>()
-    val productVos: LiveData<List<ProductVo>> get() = _productVos
-
-    init {
-        viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            uiState = UiState.Loading
-
-            // TODO: load observe data
-//            _someData.addSource(withContext(Dispatchers.IO) { observeUseCase().asLiveData() }) {
-//                _someData.value = it
-//            }
-
-            uiState = UiState.Idle
-        }
-    }
-
-    /**
-     * 인앱 상품 목록 조회
-     */
-    fun getProducts() {
-
-    }
-
-    /**
-     * 인앱 상품 주문 및 소비
-     */
-    fun consumeWithOrder() {
-
-    }
-
-    /**
-     * 인앱 상품 소비
-     */
-    fun consume() {
-
-    }
-
-    /**
-     * UI 상태 변수
-     */
-    var uiState by mutableStateOf<UiState>(UiState.Idle)
-        private set
 
     /**
      * UI 상태 정의
@@ -81,13 +44,136 @@ class ChargeStarPointViewModel @Inject constructor(
     }
 
     /**
+     * UI 이벤트 정의
+     */
+    sealed class UiEvent {
+        data object Idle: UiEvent()
+        data class Buy(val message: String): UiEvent()
+        data class Consume(val message: String): UiEvent()
+        data object NavMain: UiEvent()
+    }
+
+    /**
+     * UI 상태 변수
+     */
+    private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    /**
+     * UI 이벤트 변수
+     */
+    private val _uiEvent = MutableStateFlow<UiEvent>(UiEvent.Idle)
+    val uiEvent: StateFlow<UiEvent> = _uiEvent.asStateFlow()
+
+    /**
+     * 변수
+     */
+    private val _starPoint = MutableStateFlow(0)
+    val starPoint: StateFlow<Int> = _starPoint.asStateFlow()
+
+    private val _productVos = MutableStateFlow<List<ProductVo>>(emptyList())
+    val productVos: StateFlow<List<ProductVo>> = _productVos.asStateFlow()
+
+    private val _notConsumedOrderVos = MutableStateFlow<List<OrderVo>>(emptyList())
+    val notConsumedOrderVos: StateFlow<List<OrderVo>> = _notConsumedOrderVos.asStateFlow()
+
+    init {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Loading
+
+            withContext(Dispatchers.IO) {
+                _productVos.value = getProductsUseCase()
+                _notConsumedOrderVos.value = getNotConsumedOrdersUseCase()
+
+                observePlayerUseCase()
+                    .let { playerVoFlow ->
+                        playerVoFlow.map { it.starPoint }
+                            .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, 0)
+                            .let {
+                                observeForever(it, _starPoint)
+                                _starPoint.value = it.first()
+                            }
+                    }
+            }
+
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
+     * 인앱 상품 주문 및 소비
+     */
+    fun orderAndConsume(productId: String, activity: Activity) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Loading
+
+            val googleOrderVo = billingClient.billing(activity = activity, productId = productId)
+                .first()
+
+            withContext(Dispatchers.IO) {
+                consumeProductOrderUseCase(
+                    command = ConsumeProductOrderUseCase.Command(
+                        productId = googleOrderVo.productId,
+                        socialOrderId = googleOrderVo.socialOrderId,
+                        purchaseToken = googleOrderVo.purchaseToken,
+                    )
+                )
+
+                _uiEvent.emit(UiEvent.Buy("충전 완료"))
+                _productVos.value = getProductsUseCase()
+                _notConsumedOrderVos.value = getNotConsumedOrdersUseCase()
+            }
+
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
+     * 인앱 상품 소비
+     */
+    fun consume(orderVo: OrderVo) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Loading
+
+            withContext(Dispatchers.IO) {
+                consumeProductOrderUseCase(
+                    command = ConsumeProductOrderUseCase.Command(
+                        productId = orderVo.productId,
+                        socialOrderId = orderVo.socialOrderId,
+                        purchaseToken = orderVo.purchaseToken,
+                    )
+                )
+
+                _uiEvent.emit(UiEvent.Consume("소비 완료"))
+                _productVos.value = getProductsUseCase()
+                _notConsumedOrderVos.value = getNotConsumedOrdersUseCase()
+            }
+
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
      * 화면 초기화 메서드
      */
     override fun initialize() {
-        uiState = UiState.Idle
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Loading
+
+            withContext(Dispatchers.IO) {
+                _productVos.value = getProductsUseCase()
+                _notConsumedOrderVos.value = getNotConsumedOrdersUseCase()
+            }
+
+            _uiState.value = UiState.Idle
+        }
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        initialize()
+
+        when (exception) {
+            is BillingNotSupportException -> _uiEvent.emit(UiEvent.NavMain)
+            else -> initialize()
+        }
     }
 }

@@ -16,9 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.GoogleSignInButton
 import com.monglife.mongs.presentation.view.component.common.logo.Logo
+import com.monglife.mongs.presentation.view.utils.ViewLifeCycle
 import com.monglife.mongs.presentation.viewmodel.layout.LoginViewModel
 
 /**
@@ -28,12 +31,16 @@ import com.monglife.mongs.presentation.viewmodel.layout.LoginViewModel
 fun LoginContent(
     modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel = hiltViewModel(),
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
 ) {
     val uiState = loginViewModel.uiState.collectAsState()
     val googleLoginLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
         loginViewModel::login
     )
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
+        loginViewModel.verifyPermissionIntentClose()
+    }
 
     Box {
         Box(
@@ -73,7 +80,24 @@ fun LoginContent(
         }
     }
 
+    // UI 이벤트 소비
+    LaunchedEffect(Unit) {
+        loginViewModel.uiEvent.collect { event ->
+            when (event) {
+                is LoginViewModel.UiEvent.RequestPermission -> {
+                    permissionLauncher.launch(event.permissions.toTypedArray())
+                }
+                else -> {}
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         loginViewModel.initialize()
     }
+
+    ViewLifeCycle(
+        lifecycleOwner = lifecycleOwner,
+        onCreate = loginViewModel::verifyPermissionIntentOpen
+    )
 }

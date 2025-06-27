@@ -3,6 +3,7 @@ package com.monglife.mongs.data.member.notice.web.adapter
 import com.monglife.mongs.application.member.notice.exception.NotFoundNoticeException
 import com.monglife.mongs.application.member.notice.port.web.NoticeWebPort
 import com.monglife.mongs.application.member.notice.port.web.response.GetNoticeResponse
+import com.monglife.mongs.core.domain.port.response.PageResponse
 import com.monglife.mongs.data.member.notice.web.client.NoticeWebClient
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,12 +36,12 @@ class NoticeWebAdapter @Inject constructor(
     /**
      * 공지 사항 목록 조회
      */
-    override suspend fun getNotices(page: Int, size: Int): List<GetNoticeResponse> =
+    override suspend fun getNotices(page: Int, size: Int): PageResponse<GetNoticeResponse> =
         noticeWebClient.getNotices(page = page, size = size).let { response ->
 
             val body = response.takeIf { it.isSuccessful }?.body()
 
-            body?.result?.map {
+            val result = body?.result?.map {
                 GetNoticeResponse(
                     noticeId = it.noticeId,
                     title = it.title,
@@ -50,5 +51,13 @@ class NoticeWebAdapter @Inject constructor(
                     updatedAt = it.updatedAt,
                 )
             } ?: emptyList()
+
+            PageResponse(
+                page = body?.page ?: page,
+                size = body?.size ?: size,
+                totalPage = body?.totalPage ?: 0,
+                isLastPage = body?.isLastPage ?: true,
+                result = result,
+            )
         }
 }

@@ -2,8 +2,6 @@ package com.monglife.mongs.presentation.view.layout
 
 import android.content.Context
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,14 +15,11 @@ import com.monglife.mongs.presentation.viewmodel.layout.LayoutViewModel
 
 @Composable
 fun LayoutView (
-    context: Context = LocalContext.current,
     layoutViewModel: LayoutViewModel = hiltViewModel(),
+    context: Context = LocalContext.current,
 ) {
     val uiState = layoutViewModel.uiState.collectAsState()
     val isLogin = layoutViewModel.isLogin.collectAsState()
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
-        layoutViewModel.verifyPermission()
-    }
 
     Box {
         DefaultBackground()
@@ -38,18 +33,6 @@ fun LayoutView (
                 LoginContent()
             } else {
                 Router()
-            }
-        }
-    }
-
-    // UI 이벤트 소비
-    LaunchedEffect(Unit) {
-        layoutViewModel.uiEvent.collect { event ->
-            when (event) {
-                is LayoutViewModel.UiEvent.RequestPermission -> {
-                    permissionLauncher.launch(event.permissions.toTypedArray())
-                }
-                else -> {}
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.monglife.mongs.data.mong.web.client
 
+import com.monglife.mongs.data.core.dto.response.PageResponseDto
 import com.monglife.mongs.data.core.dto.response.ResponseDto
 import com.monglife.mongs.data.mong.web.client.request.FeedFoodRequestDto
 import com.monglife.mongs.data.mong.web.client.request.FeedSnackRequestDto
@@ -17,6 +18,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface InteractionWebClient {
 
@@ -48,7 +50,7 @@ interface InteractionWebClient {
      * 인벤토리 목록 조회 API 요청
      */
     @GET("interaction/inventory/{mongId}")
-    suspend fun getInventories(@Path("mongId") mongId: Long): Response<ResponseDto<List<GetInventoryResponseDto>>>
+    suspend fun getInventories(@Path("mongId") mongId: Long, @Query("page") page: Int, @Query("size") size: Int): Response<PageResponseDto<List<GetInventoryResponseDto>>>
 
     /**
      * 인벤토리 소비 API 요청

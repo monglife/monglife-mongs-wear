@@ -15,20 +15,21 @@ import androidx.navigation.NavController
 import com.monglife.mongs.domain.mong.enums.MongStateCode
 import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
-import com.monglife.mongs.presentation.view.component.main.slot.effect.EvolutionEffect
-import com.monglife.mongs.presentation.view.component.main.slot.effect.GraduatedEffect
-import com.monglife.mongs.presentation.view.component.main.slot.effect.GraduationEffect
-import com.monglife.mongs.presentation.view.component.main.slot.effect.HeartEffect
-import com.monglife.mongs.presentation.view.component.main.slot.effect.PoopCleanEffect
-import com.monglife.mongs.presentation.view.component.main.slot.effect.PoopEffect
-import com.monglife.mongs.presentation.view.component.main.slot.effect.SleepEffect
-import com.monglife.mongs.presentation.view.component.main.slot.section.DeadSection
-import com.monglife.mongs.presentation.view.component.main.slot.section.DeleteSection
-import com.monglife.mongs.presentation.view.component.main.slot.section.EmptySection
-import com.monglife.mongs.presentation.view.component.main.slot.section.GraduatedSection
-import com.monglife.mongs.presentation.view.component.main.slot.section.NormalSection
-import com.monglife.mongs.presentation.view.dialog.main.InitNotificationDialog
-import com.monglife.mongs.presentation.view.dialog.main.InteractionDialog
+import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.EvolutionEffect
+import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.GraduatedEffect
+import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.GraduationEffect
+import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.HeartEffect
+import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.LoadingEffect
+import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.PoopCleanEffect
+import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.PoopEffect
+import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.SleepEffect
+import com.monglife.mongs.presentation.view.component.pages.main.slot.section.DeadSection
+import com.monglife.mongs.presentation.view.component.pages.main.slot.section.DeleteSection
+import com.monglife.mongs.presentation.view.component.pages.main.slot.section.EmptySection
+import com.monglife.mongs.presentation.view.component.pages.main.slot.section.GraduatedSection
+import com.monglife.mongs.presentation.view.component.pages.main.slot.section.NormalSection
+import com.monglife.mongs.presentation.view.dialog.pages.main.InitNotificationDialog
+import com.monglife.mongs.presentation.view.dialog.pages.main.InteractionDialog
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainPagerViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainSlotViewModel
 
@@ -94,7 +95,9 @@ internal fun SlotContent(
                 mongVo.value?.let {
                     when (it.stateCode) {
                         MongStateCode.NORMAL -> {
-                            if (uiState.value.isHappy) {
+                            if (uiState.value.effectLoadingBar) {
+                                LoadingEffect()
+                            } else if (uiState.value.isHappy) {
                                 HeartEffect()
                             } else if (uiState.value.isPoopCleaning) {
                                 PoopCleanEffect()

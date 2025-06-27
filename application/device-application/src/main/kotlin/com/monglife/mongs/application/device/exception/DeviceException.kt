@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.device.exception
 
 import com.monglife.mongs.application.device.error.DeviceErrorCode
-import com.monglife.mongs.core.domain.error.ErrorCode
-import com.monglife.mongs.core.domain.exception.ErrorException
+import com.monglife.core.common.error.ErrorCode
+import com.monglife.core.common.exception.ErrorException
 
 /**
  * 걸음 수 환전 실패 예외

@@ -32,7 +32,8 @@ fun InputTextBox(
     textAlign: TextAlign = TextAlign.Center,
     placeholder: String = "",
     icon: Boolean = true,
-    changeInput: (String) -> Unit,
+    readOnly: Boolean = false,
+    changeInput: (String) -> Unit = {},
 ) {
     BasicTextField(
         modifier = modifier,
@@ -43,8 +44,11 @@ fun InputTextBox(
             fontFamily = DAL_MU_RI,
             fontWeight = FontWeight.Light,
             fontSize = 12.sp,
+            lineHeight = 16.sp,
             color = Color.Black,
         ),
+        singleLine = maxLines == 1,
+        readOnly = readOnly,
         maxLines = maxLines,
         decorationBox = { innerTextField ->
             Row(

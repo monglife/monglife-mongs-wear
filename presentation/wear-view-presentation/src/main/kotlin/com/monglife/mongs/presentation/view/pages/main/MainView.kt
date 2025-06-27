@@ -2,6 +2,8 @@ package com.monglife.mongs.presentation.view.pages.main
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -12,6 +14,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -54,8 +57,11 @@ fun MainView(
                 )
 
                 PageIndicator(
-                    modifier = Modifier.zIndex(1f),
                     pagerState = normalPagerState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 5.dp)
+                        .zIndex(1f),
                 )
 
                 NormalMainPager(
@@ -98,8 +104,11 @@ fun MainView(
                 )
 
                 PageIndicator(
-                    modifier = Modifier.zIndex(1f),
                     pagerState = emptyPagerState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 5.dp)
+                        .zIndex(1f),
                 )
 
                 EmptyMainPager(

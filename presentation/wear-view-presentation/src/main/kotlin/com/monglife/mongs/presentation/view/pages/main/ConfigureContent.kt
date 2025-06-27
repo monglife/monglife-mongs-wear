@@ -40,7 +40,7 @@ internal fun ConfigureContent(
                     text = "i",
                     border = R.drawable.btn_border_purple_dark,
                 ) {
-                    navController.navigate(RouterPath.Notice.route)
+                    navController.navigate(RouterPath.Help.route)
                 }
             }
             Row(
@@ -61,7 +61,7 @@ internal fun ConfigureContent(
                     icon = R.drawable.btn_icon_notice,
                     border = R.drawable.btn_border_purple_dark,
                 ) {
-                    navController.navigate(RouterPath.Feedback.route)
+                    navController.navigate(RouterPath.Notice.route)
                 }
             }
             Row(
@@ -73,7 +73,7 @@ internal fun ConfigureContent(
                     icon = R.drawable.btn_icon_feedback,
                     border = R.drawable.btn_border_purple_dark,
                 ) {
-                    navController.navigate(RouterPath.Setting.route)
+                    navController.navigate(RouterPath.Feedback.route)
                 }
 
                 Spacer(modifier = Modifier.width(10.dp))
@@ -82,7 +82,7 @@ internal fun ConfigureContent(
                     icon = R.drawable.btn_icon_setting,
                     border = R.drawable.btn_border_purple_dark,
                 ) {
-                    navController.navigate(RouterPath.Help.route)
+                    navController.navigate(RouterPath.Setting.route)
                 }
             }
         }

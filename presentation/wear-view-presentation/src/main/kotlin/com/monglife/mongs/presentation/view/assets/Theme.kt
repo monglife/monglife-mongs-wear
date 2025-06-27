@@ -21,14 +21,15 @@ val MongsPink200 = Color(0xFFFED9D9)
 val MongsGreen = Color(0xFF3BE368)
 val MongsDarkGreen = Color(0xFF179B3D)
 val MongsYellow = Color(0xFFFFDA2D)
-val MongsDarkYellow = Color(0xFFF1C702)
+val MongsDarkYellow = Color(0xFFFFEB3B)
 val MongsBlue = Color(0xFF8DCEFE)
 val MongsPurple = Color(0xFFCCA2FE)
 val MongsDarkPurple = Color(0xFF8F47E6)
 val MongsNavy = Color(0xFF0C4DA2)
 val MongsWhite = Color(0xFFFFFFFF)
-val MongsDarkGray = Color(0xFF737373)
 val MongsLightGray = Color(0xFFF0F0F0)
+val MongsDarkGray = Color(0xFF737373)
+val MongsDarkBrown = Color(0xFF5D4037)
 
 @Composable
 fun MongsTheme(content: @Composable () -> Unit) {

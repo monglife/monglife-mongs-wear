@@ -1,8 +1,10 @@
 package com.monglife.mongs.application.member.store.usecase
 
+import com.monglife.mongs.application.member.player.port.persistence.PlayerPersistencePort
 import com.monglife.mongs.application.member.store.exception.InvalidConsumeOrderException
 import com.monglife.mongs.application.member.store.port.web.StoreWebPort
 import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.mongs.domain.member.player.model.Player
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -12,6 +14,7 @@ import javax.inject.Inject
  */
 class ConsumeProductOrderUseCase @Inject constructor(
     private val storeWebPort: StoreWebPort,
+    private val playerPersistencePort: PlayerPersistencePort,
 ) : BaseParamUseCase<ConsumeProductOrderUseCase.Command, Unit>() {
 
     @Throws(InvalidConsumeOrderException::class)
@@ -22,7 +25,18 @@ class ConsumeProductOrderUseCase @Inject constructor(
                 productId = command.productId,
                 socialOrderId = command.socialOrderId,
                 purchaseToken = command.purchaseToken,
-            )
+            ).let { response ->
+                // 플레이어 로컬 조회
+                playerPersistencePort.getPlayer().let { player: Player ->
+                    // 플레이어 업데이트
+                    player.update(
+                        slotCount = response.slotCount,
+                        starPoint = response.starPoint,
+                    )
+                    // 플레이어 로컬 등록
+                    playerPersistencePort.savePlayer(player = player)
+                }
+            }
         }
     }
 

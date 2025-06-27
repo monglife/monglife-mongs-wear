@@ -97,6 +97,9 @@ internal fun InteractionContent(
                     CircleImageButton(
                         icon = R.drawable.btn_icon_luck_draw,
                         border = R.drawable.btn_border_purple,
+                        disable = mongVo.value?.let {
+                            it.stateCode == MongStateCode.DEAD || it.stateCode == MongStateCode.DELETE
+                        } ?: true,
                         iconSize = 34f,
                     ) {
                         navController.navigate(RouterPath.RandomDraw.route)

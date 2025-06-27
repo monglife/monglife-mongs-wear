@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
-import com.monglife.mongs.presentation.view.assets.MongsDarkYellow
+import com.monglife.mongs.presentation.view.assets.MongsDarkBrown
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
@@ -69,7 +69,7 @@ internal fun StarPoint(
                 fontFamily = DAL_MU_RI,
                 fontWeight = FontWeight.Light,
                 fontSize = 14.sp,
-                color = MongsDarkYellow,
+                color = MongsDarkBrown,
                 maxLines = 1,
                 modifier = Modifier.weight(0.8f)
             )

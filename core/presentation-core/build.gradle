@@ -29,6 +29,8 @@ android {
 }
 
 dependencies {
+    // core layer
+    api project(":core:common-core")
     implementation project(":core:application-core")
 
     // dagger & hilt

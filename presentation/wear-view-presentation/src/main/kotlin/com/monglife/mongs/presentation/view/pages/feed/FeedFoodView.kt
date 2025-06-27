@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,7 +49,7 @@ import com.monglife.mongs.presentation.view.component.common.button.SelectButton
 import com.monglife.mongs.presentation.view.component.common.pagenation.PageIndicator
 import com.monglife.mongs.presentation.view.component.common.textbox.PayPoint
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
-import com.monglife.mongs.presentation.view.dialog.feed.FeedItemDetailDialog
+import com.monglife.mongs.presentation.view.dialog.pages.feed.FeedItemDetailDialog
 import com.monglife.mongs.presentation.viewmodel.pages.feed.FeedFoodViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainSlotViewModel
 import kotlin.math.max
@@ -104,7 +105,10 @@ fun FeedFoodView(
 
                     PageIndicator(
                         pageIndicatorState = pageIndicatorState,
-                        modifier = Modifier.zIndex(1f)
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 5.dp)
+                            .zIndex(1f)
                     )
 
                     Box(

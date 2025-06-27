@@ -35,11 +35,16 @@ class MainSlotViewModel @Inject constructor(
     private val poopCleanMongUseCase: PoopCleanMongUseCase,
 ) : BaseViewModel() {
 
+    companion object {
+        private const val EFFECT_DELAY = 4000L
+    }
+
     /**
      * UI 상태 정의
      */
     sealed class UiState(
         val loadingBar: Boolean = false,
+        val effectLoadingBar: Boolean = false,
         val initNotificationDialogOpen: Boolean = false,
         val interactionDialogOpen: Boolean = false,
         val isHappy: Boolean = false,
@@ -49,6 +54,7 @@ class MainSlotViewModel @Inject constructor(
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
+        data object EffectLoading : UiState(effectLoadingBar = true)
         data object InitNotification : UiState(initNotificationDialogOpen = true)
         data object Interaction : UiState(interactionDialogOpen = true)
         data object Happy : UiState(isHappy = true)
@@ -138,7 +144,7 @@ class MainSlotViewModel @Inject constructor(
     fun strokeMong(mongId: Long) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             if (_uiState.value != UiState.Happy) {
-                _uiState.value = UiState.Loading
+                _uiState.value = UiState.EffectLoading
 
                 withContext(Dispatchers.IO) {
                     strokeMongUseCase(
@@ -149,7 +155,7 @@ class MainSlotViewModel @Inject constructor(
                 }
 
                 _uiState.value = UiState.Happy
-                delay(3000)
+                delay(EFFECT_DELAY)
                 _uiState.value = UiState.Idle
             }
         }
@@ -160,7 +166,7 @@ class MainSlotViewModel @Inject constructor(
      */
     fun sleepMong(mongId: Long) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Loading
+            _uiState.value = UiState.EffectLoading
 
             withContext(Dispatchers.IO) {
                 sleepingMongUseCase(
@@ -180,7 +186,7 @@ class MainSlotViewModel @Inject constructor(
     fun poopCleanMong(mongId: Long) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             if (_uiState.value != UiState.PoopClean) {
-                _uiState.value = UiState.Loading
+                _uiState.value = UiState.EffectLoading
 
                 withContext(Dispatchers.IO) {
                     poopCleanMongUseCase(
@@ -191,7 +197,7 @@ class MainSlotViewModel @Inject constructor(
                 }
 
                 _uiState.value = UiState.PoopClean
-                delay(3000)
+                delay(EFFECT_DELAY)
                 _uiState.value = UiState.Idle
             }
         }
@@ -247,7 +253,7 @@ class MainSlotViewModel @Inject constructor(
     fun eatingEvent() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Eating
-            delay(3000)
+            delay(EFFECT_DELAY)
             _uiState.value = UiState.Idle
         }
     }

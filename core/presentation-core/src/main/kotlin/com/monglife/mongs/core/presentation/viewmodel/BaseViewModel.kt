@@ -3,7 +3,7 @@ package com.monglife.mongs.core.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.monglife.mongs.core.domain.exception.ErrorException
+import com.monglife.core.common.exception.ErrorException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

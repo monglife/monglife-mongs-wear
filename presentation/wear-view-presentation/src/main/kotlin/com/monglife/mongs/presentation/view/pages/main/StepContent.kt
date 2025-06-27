@@ -70,7 +70,9 @@ internal fun StepContent(
                         .fillMaxWidth()
                         .weight(0.2f),
                 ) {
-                    PayPoint(payPoint = mongVo.value?.payPoint ?: 0)
+                    mongVo.value?.let {
+                        PayPoint(payPoint = mongVo.value?.payPoint ?: 0)
+                    }
                 }
                 Row(
                     horizontalArrangement = Arrangement.Center,
@@ -96,18 +98,20 @@ internal fun StepContent(
                         .fillMaxWidth()
                         .weight(0.3f)
                 ) {
-                    if (activityPermission.value) {
-                        BlueButton(
-                            text = "환전",
-                            width = 70,
-                            onClick = { navController.navigate(RouterPath.ExchangeStep.route) },
-                            disable = mongVo.value?.let {
-                                it.stateCode in arrayOf(
-                                    MongStateCode.DEAD,
-                                    MongStateCode.DELETE
-                                )
-                            } ?: false,
-                        )
+                    mongVo.value?.let {
+                        if (activityPermission.value) {
+                            BlueButton(
+                                text = "환전",
+                                width = 70,
+                                onClick = { navController.navigate(RouterPath.ExchangeStep.route) },
+                                disable = mongVo.value?.let {
+                                    it.stateCode in arrayOf(
+                                        MongStateCode.DEAD,
+                                        MongStateCode.DELETE
+                                    )
+                                } ?: false,
+                            )
+                        }
                     }
                 }
             }

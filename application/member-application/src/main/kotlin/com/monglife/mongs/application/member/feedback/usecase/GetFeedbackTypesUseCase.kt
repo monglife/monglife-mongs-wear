@@ -12,10 +12,10 @@ import javax.inject.Inject
  */
 class GetFeedbackTypesUseCase @Inject constructor(
     private val feedbackWebPort: FeedbackWebPort,
-) : BaseNoParamUseCase<Unit>() {
+) : BaseNoParamUseCase<List<FeedbackTypeVo>>() {
 
-    override suspend fun execute() {
-        withContext(Dispatchers.IO) {
+    override suspend fun execute(): List<FeedbackTypeVo> {
+        return withContext(Dispatchers.IO) {
             // 오류 신고 타입 목록 조회 요청
             feedbackWebPort.getFeedbackTypes().map { response ->
                 // FeedbackTypeVo 반환

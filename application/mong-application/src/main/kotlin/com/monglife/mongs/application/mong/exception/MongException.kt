@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.mong.exception
 
 import com.monglife.mongs.application.mong.error.MongErrorCode
-import com.monglife.mongs.core.domain.error.ErrorCode
-import com.monglife.mongs.core.domain.exception.ErrorException
+import com.monglife.core.common.error.ErrorCode
+import com.monglife.core.common.exception.ErrorException
 
 /**
  * 몽 옵션 조회 실패 예외

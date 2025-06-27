@@ -70,10 +70,10 @@ class SlotPickViewModel @Inject constructor(
     private val _mongVos = MutableStateFlow<List<MongVo>>(emptyList())
     val mongVos: StateFlow<List<MongVo>> get() = _mongVos
 
-    private val _slotCount = MutableStateFlow<Int>(0)
+    private val _slotCount = MutableStateFlow(0)
     val slotCount: StateFlow<Int> get() = _slotCount
 
-    private val _starPoint = MutableStateFlow<Int>(0)
+    private val _starPoint = MutableStateFlow(0)
     val starPoint: StateFlow<Int> get() = _starPoint
 
     init {

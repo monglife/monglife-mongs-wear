@@ -10,12 +10,12 @@ data class GetProductResponse(
 )
 
 /**
- * 소비된 주문 목록 조회 응답
+ * 소비 전 주문 목록 조회 응답
  */
-data class GetConsumedOrderResponse(
-    val orderId: Long,
+data class GetNotConsumedOrderResponse(
     val socialOrderId: String,
     val productId: String,
+    val purchaseToken: String,
 )
 
 /**

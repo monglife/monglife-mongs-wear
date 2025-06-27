@@ -1,0 +1,41 @@
+package com.monglife.mongs.presentation.view.utils
+
+import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+
+/**
+ * 화면 라이프 사이클
+ */
+@Composable
+fun ViewLifeCycle(
+    lifecycleOwner: LifecycleOwner,
+    onCreate: () -> Unit = {},
+    onResume: () -> Unit = {},
+    onPause: () -> Unit = {},
+    onDestroy: () -> Unit = {},
+) {
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_CREATE -> {
+                    Log.d("TEST", "onCreate!")
+                    onCreate()
+                }
+                Lifecycle.Event.ON_RESUME -> onResume()
+                Lifecycle.Event.ON_PAUSE -> onPause()
+                Lifecycle.Event.ON_DESTROY -> onDestroy()
+                else -> {}
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+}

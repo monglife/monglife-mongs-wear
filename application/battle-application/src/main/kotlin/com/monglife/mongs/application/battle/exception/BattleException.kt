@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.battle.exception
 
 import com.monglife.mongs.application.battle.error.BattleErrorCode
-import com.monglife.mongs.core.domain.error.ErrorCode
-import com.monglife.mongs.core.domain.exception.ErrorException
+import com.monglife.core.common.error.ErrorCode
+import com.monglife.core.common.exception.ErrorException
 
 /**
  * 매치 큐 등록 실패 예외

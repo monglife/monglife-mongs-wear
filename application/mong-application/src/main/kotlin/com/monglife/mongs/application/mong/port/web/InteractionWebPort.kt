@@ -13,6 +13,7 @@ import com.monglife.mongs.application.mong.port.web.response.GetFoodResponse
 import com.monglife.mongs.application.mong.port.web.response.GetInventoryResponse
 import com.monglife.mongs.application.mong.port.web.response.GetSnackResponse
 import com.monglife.mongs.application.mong.port.web.response.RandomDrawResponseVo
+import com.monglife.mongs.core.domain.port.response.PageResponse
 
 interface InteractionWebPort {
 
@@ -41,7 +42,7 @@ interface InteractionWebPort {
     /**
      * 인벤토리 목록 조회
      */
-    suspend fun getInventories(mongId: Long): List<GetInventoryResponse>
+    suspend fun getInventories(mongId: Long, page: Int, size: Int): PageResponse<GetInventoryResponse>
 
     /**
      * 인벤토리 소비

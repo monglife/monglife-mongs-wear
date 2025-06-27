@@ -25,6 +25,7 @@ class LogoutUseCase @Inject constructor(
                 authWebPort.logout(refreshToken = session.refreshToken)
                 // 세션 로컬 삭제
                 authPersistencePort.deleteSession()
+                // 현재 몽 설정 삭제
             } ?: throw InvalidLogoutException()
         }
     }

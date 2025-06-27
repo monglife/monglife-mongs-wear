@@ -1,36 +1,21 @@
 package com.monglife.mongs.data.member.store.web.adapter
 
-import android.content.Context
-import android.os.Build
-import com.android.billingclient.api.BillingClient
-import com.android.billingclient.api.BillingClient.BillingResponseCode
-import com.android.billingclient.api.BillingClient.ConnectionState
-import com.android.billingclient.api.BillingClient.ProductType
-import com.android.billingclient.api.BillingClientStateListener
-import com.android.billingclient.api.BillingResult
-import com.android.billingclient.api.PendingPurchasesParams
-import com.android.billingclient.api.QueryPurchasesParams
-import com.monglife.mongs.application.member.store.exception.BillingNotSupportException
+import com.monglife.core.billing.client.GoogleBillingClient
 import com.monglife.mongs.application.member.store.exception.InvalidConsumeOrderException
-import com.monglife.mongs.application.member.store.exception.InvalidGetConsumedOrdersException
 import com.monglife.mongs.application.member.store.port.web.StoreWebPort
 import com.monglife.mongs.application.member.store.port.web.response.ConsumeOrderResponse
-import com.monglife.mongs.application.member.store.port.web.response.GetConsumedOrderResponse
+import com.monglife.mongs.application.member.store.port.web.response.GetNotConsumedOrderResponse
 import com.monglife.mongs.application.member.store.port.web.response.GetProductResponse
 import com.monglife.mongs.data.member.store.web.client.StoreWebClient
 import com.monglife.mongs.data.member.store.web.client.request.ConsumeOrderRequestDto
 import com.monglife.mongs.data.member.store.web.client.request.GetConsumedOrdersRequestDto
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 @Singleton
 class StoreWebAdapter @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val storeWebClient: StoreWebClient,
+    private val googleBillingClient: GoogleBillingClient,
 ) : StoreWebPort {
 
     /**
@@ -51,41 +36,37 @@ class StoreWebAdapter @Inject constructor(
         }
 
     /**
-     * 소비된 주문 목록 조회
+     * 소비 전 주문 목록 조회
      */
-    override suspend fun getConsumedOrders(): List<GetConsumedOrderResponse> {
+    override suspend fun getNotConsumedOrders(): List<GetNotConsumedOrderResponse> {
 
-        val purchasesParams = QueryPurchasesParams.newBuilder()
-            .setProductType(ProductType.INAPP)
-            .build()
+        val notConsumedGoogleOrderVos = googleBillingClient.getNotConsumedGoogleOrders()
 
-        val billingClient = getBillingClient()
-
-        val socialOrderIds = suspendCancellableCoroutine { cont ->
-            billingClient.queryPurchasesAsync(purchasesParams, { billingResult, purchases ->
-                if (billingResult.responseCode == BillingResponseCode.OK) {
-                    cont.resume(purchases.map { purchase -> purchase.orderId ?: "-" })
-                } else {
-                    cont.resumeWithException(InvalidGetConsumedOrdersException())
-                }
-            })
+        if (notConsumedGoogleOrderVos.isEmpty()) {
+            return emptyList()
         }
 
         return storeWebClient.getConsumedOrders(
             getConsumedOrdersRequestDto = GetConsumedOrdersRequestDto(
-                socialOrderIds = socialOrderIds
+                socialOrderIds = notConsumedGoogleOrderVos.map { it.socialOrderId },
             )
         ).let { response ->
 
             val body = response.takeIf { it.isSuccessful }?.body()
 
-            body?.result?.map {
-                GetConsumedOrderResponse(
-                    orderId = it.orderId,
-                    socialOrderId = it.socialOrderId,
-                    productId = it.productId,
-                )
-            } ?: emptyList()
+            val getConsumedOrderResponseDtos = body?.result ?: emptyList()
+
+            notConsumedGoogleOrderVos.filter { notConsumedGoogleOrderVo ->
+                    !getConsumedOrderResponseDtos
+                        .map { it.socialOrderId }
+                        .contains(notConsumedGoogleOrderVo.socialOrderId)
+                }.map {
+                    GetNotConsumedOrderResponse(
+                        socialOrderId = it.socialOrderId,
+                        productId = it.productId.uppercase(),
+                        purchaseToken = it.purchaseToken,
+                    )
+                }
         }
     }
 
@@ -117,37 +98,5 @@ class StoreWebAdapter @Inject constructor(
             starPoint = body.result.starPoint,
             slotCount = body.result.slotCount,
         )
-    }
-
-    /**
-     * Billing Client 생성
-     */
-    private suspend fun getBillingClient(): BillingClient = suspendCancellableCoroutine { cont ->
-
-        val billingClient = BillingClient.newBuilder(context)
-            .enablePendingPurchases(
-                PendingPurchasesParams.newBuilder()
-                    .enableOneTimeProducts()
-                    .build()
-            )
-            .build()
-
-        if (billingClient.connectionState == ConnectionState.DISCONNECTED) {
-            billingClient.startConnection(object : BillingClientStateListener {
-                override fun onBillingSetupFinished(billingResult: BillingResult) {
-                    if (billingResult.responseCode == BillingResponseCode.OK) {
-                        cont.resume(billingClient)
-                    } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                        cont.resumeWithException(BillingNotSupportException())
-                    } else {
-                        cont.resumeWithException(InvalidConsumeOrderException())
-                    }
-                }
-
-                override fun onBillingServiceDisconnected() {}
-            })
-        } else {
-            cont.resume(billingClient)
-        }
     }
 }

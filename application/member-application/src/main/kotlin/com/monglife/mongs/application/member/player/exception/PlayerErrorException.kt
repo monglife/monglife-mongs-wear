@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.member.player.exception
 
 import com.monglife.mongs.application.member.player.error.PlayerErrorCode
-import com.monglife.mongs.core.domain.error.ErrorCode
-import com.monglife.mongs.core.domain.exception.ErrorException
+import com.monglife.core.common.error.ErrorCode
+import com.monglife.core.common.exception.ErrorException
 
 /**
  * 플레이어 구독 실패 예외

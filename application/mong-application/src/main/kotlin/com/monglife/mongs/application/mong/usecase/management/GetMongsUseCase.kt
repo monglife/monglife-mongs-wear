@@ -61,11 +61,14 @@ class GetMongsUseCase @Inject constructor(
                     )
                     // 몽 로컬 등록
                     managementPersistencePort.saveMong(mong = response.toDomain())
-                }.let { mong ->
-                    // MongVo 반환
-                    managementPersistencePort.getMongOption(mongId = mong.mongId).let {
-                        MongVo.of(mong = mong, mongOption = it)
-                    }
+                }
+            }.also { mongs ->
+                // 존재하지 않는 몽 로컬 삭제
+                managementPersistencePort.deleteMongIfNotExistsMongIds(mongIds = mongs.map { it.mongId })
+            }.map { mong ->
+                // MongVo 반환
+                managementPersistencePort.getMongOption(mongId = mong.mongId).let {
+                    MongVo.of(mong = mong, mongOption = it)
                 }
             }
         }

@@ -3,6 +3,9 @@ android {
 }
 
 dependencies {
+    // core layer
+    implementation project(":core:billing-core")
+
     // application layer
     api project(":application:auth-application")
     api project(":application:battle-application")
@@ -29,7 +32,4 @@ dependencies {
     implementation "com.google.firebase:firebase-auth"
     implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
     implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsversion}"
-
-    // billing
-    implementation "com.android.billingclient:billing-ktx:${rootProject.ext.billingClientVersion}"
 }

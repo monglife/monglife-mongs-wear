@@ -1,51 +1,46 @@
 package com.monglife.mongs.presentation.view.pages.inventory
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
+import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
+import com.monglife.mongs.presentation.viewmodel.pages.inventory.InventoryViewModel
 
 @Composable
 fun InventoryView(
     navController: NavController,
-    // TODO: Add viewModel if need
+    inventoryViewModel: InventoryViewModel = hiltViewModel(),
 ) {
-    // TODO: For control mainPageView pagerState
-//    val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
-//    val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
-//    val isPagerChange = mainPagerViewModel.isPagerChange.observeAsState(false)
-
-    // TODO: For control mainSlotView mongVo
-//    val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
-//    val mainSlotViewModel: MainSlotViewModel = hiltViewModel<MainSlotViewModel>(parentEntry)
-//    val mongVo = mainSlotViewModel.mongVo.observeAsState()
+    val uiState = inventoryViewModel.uiState.collectAsState()
+    val page = inventoryViewModel.page.collectAsState()
+    val size = inventoryViewModel.size.collectAsState()
+    val totalPage = inventoryViewModel.totalPage.collectAsState()
+    val isLastPage = inventoryViewModel.isLastPage.collectAsState()
+    val inventoryVos = inventoryViewModel.inventoryVos.collectAsState()
 
     Box {
-        // TODO: Add background method
-//         DefaultBackground()
-//
-//        if (ViewModel.uiState.loadingBar) {
-//             LoadingBar()
-//        } else {
-//            InventoryContent()
-//        }
-    }
+        DefaultBackground()
 
-        // TODO: call viewModel initialize method
-//    LaunchedEffect(Unit) {
-//        ViewModel.initialize()
-//    }
-}
-
-@Composable
-private fun InventoryContent(
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize(),
-    ) {
-
+        if (uiState.value.loadingBar) {
+             LoadingBar()
+        } else {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                Log.d("TEST", "page: ${page.value}")
+                Log.d("TEST", "size: ${size.value}")
+                Log.d("TEST", "totalPage: ${totalPage.value}")
+                Log.d("TEST", "isLastPage: ${isLastPage.value}")
+                Log.d("TEST", "inventories: ${inventoryVos.value.map { it.inventoryName }}")
+            }
+        }
     }
 }

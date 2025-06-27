@@ -3,6 +3,9 @@ android {
 }
 
 dependencies {
+    // core layer
+    implementation project(":core:billing-core")
+
     // application layer
     implementation project(":application:member-application")
 
@@ -19,7 +22,4 @@ dependencies {
     // data store
     implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
     implementation "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
-
-    // billing
-    implementation "com.android.billingclient:billing-ktx:${rootProject.ext.billingClientVersion}"
 }

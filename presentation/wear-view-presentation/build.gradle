@@ -19,6 +19,7 @@ android {
 }
 
 dependencies {
+    // application layer
     api project(":presentation:viewmodel-presentation")
 
     // compose
