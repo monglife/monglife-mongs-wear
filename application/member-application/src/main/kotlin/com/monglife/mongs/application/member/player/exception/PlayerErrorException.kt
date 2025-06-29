@@ -5,22 +5,6 @@ import com.monglife.core.common.error.ErrorCode
 import com.monglife.core.common.exception.ErrorException
 
 /**
- * 플레이어 구독 실패 예외
- */
-class InvalidSubscribePlayerException(
-    override val code: ErrorCode = PlayerErrorCode.INVALID_SUBSCRIBE_PLAYER,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- * 플레이어 구독 해제 실패 예외
- */
-class InvalidDisSubscribePlayerException(
-    override val code: ErrorCode = PlayerErrorCode.INVALID_DIS_SUBSCRIBE_PLAYER,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
  *  플레이어 등록 실패 예외
  */
 class InvalidCreatePlayerException(

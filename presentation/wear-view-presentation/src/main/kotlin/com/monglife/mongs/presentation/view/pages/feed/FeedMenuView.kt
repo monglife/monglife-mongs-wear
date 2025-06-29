@@ -53,9 +53,7 @@ fun FeedMenuView(
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
-                                onClick = {
-                                    navController.navigate(RouterPath.FeedFood.route)
-                                }
+                                onClick = { navController.navigate(RouterPath.FeedFood.route) }
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -92,9 +90,7 @@ fun FeedMenuView(
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
-                                onClick = {
-                                    navController.navigate(RouterPath.FeedSnack.route)
-                                }
+                                onClick = { navController.navigate(RouterPath.FeedSnack.route) }
                             ),
                         contentAlignment = Alignment.Center
                     ) {

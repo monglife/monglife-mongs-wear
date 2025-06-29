@@ -79,10 +79,10 @@ fun Router(
                 CollectionMenuView(navController = navController)
             }
             composable(route = RouterPath.CollectionMap.route) {
-                CollectionMapView(navController = navController)
+                CollectionMapView()
             }
             composable(route = RouterPath.CollectionMong.route) {
-                CollectionMongView(navController = navController)
+                CollectionMongView()
             }
         }
         // 환전

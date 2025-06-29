@@ -3,14 +3,16 @@ package com.monglife.mongs.presentation.viewmodel.pages.setting
 import com.monglife.mongs.application.auth.usecase.LogoutUseCase
 import com.monglife.mongs.application.device.usecase.ObserveNotificationOptionUseCase
 import com.monglife.mongs.application.device.usecase.SetNotificationOptionUseCase
-import com.monglife.mongs.application.mong.usecase.management.DeleteCurrentMongIdUseCase
 import com.monglife.mongs.core.presentation.utils.PermissionUtil
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -24,7 +26,6 @@ class SettingViewModel @Inject constructor(
     private val observeNotificationOptionUseCase: ObserveNotificationOptionUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val setNotificationOptionUseCase: SetNotificationOptionUseCase,
-    private val deleteCurrentMongIdUseCase: DeleteCurrentMongIdUseCase,
 ): BaseViewModel() {
 
     /**
@@ -56,8 +57,8 @@ class SettingViewModel @Inject constructor(
     /**
      * UI 이벤트 변수
      */
-    private val _uiEvent = MutableStateFlow<UiEvent>(UiEvent.Idle)
-    val uiEvent: StateFlow<UiEvent> = _uiEvent.asStateFlow()
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
 
     /**
      * 변수
@@ -134,7 +135,6 @@ class SettingViewModel @Inject constructor(
 
             withContext(Dispatchers.IO) {
                 logoutUseCase()
-                deleteCurrentMongIdUseCase()
             }
 
             _uiState.value = UiState.Idle

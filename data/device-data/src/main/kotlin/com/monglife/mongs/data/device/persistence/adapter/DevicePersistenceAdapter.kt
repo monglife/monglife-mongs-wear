@@ -7,8 +7,9 @@ import android.provider.Settings
 import androidx.datastore.preferences.core.edit
 import com.google.firebase.messaging.FirebaseMessaging
 import com.monglife.mongs.application.auth.exception.InvalidLogoutException
-import com.monglife.mongs.application.device.exception.NotFoundDeviceOptionException
 import com.monglife.mongs.data.device.persistence.datastore.DeviceDataStore
+import com.monglife.mongs.data.device.persistence.entity.DeviceOptionEntity
+import com.monglife.mongs.data.device.persistence.entity.StepEntity
 import com.monglife.mongs.data.device.persistence.manager.StepSensorManager
 import com.monglife.mongs.domain.device.model.DeviceOption
 import com.monglife.mongs.domain.device.model.Step
@@ -35,50 +36,105 @@ class DevicePersistenceAdapter @Inject constructor(
 ) : com.monglife.mongs.application.auth.port.persistence.DevicePersistencePort,
     com.monglife.mongs.application.battle.port.persistence.DevicePersistencePort,
     com.monglife.mongs.application.device.port.persistence.DevicePersistencePort,
-    com.monglife.mongs.application.member.feedback.port.persistence.DevicePersistencePort {
+    com.monglife.mongs.application.member.feedback.port.persistence.DevicePersistencePort,
+    com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort {
 
     companion object {
         private val DATE_FORMATER = DateTimeFormatter.ofPattern("yyyyMMddHHmm")
     }
 
     /**
+     * 현재 몽 ID 조회
+     */
+    override suspend fun getCurrentMongId(): Long? = this.getDeviceOption().currentMongId
+
+    /**
+     * 현재 몽 ID Flow 조회
+     */
+    override suspend fun getCurrentMongIdFlow(): Flow<Long?> = this.getDeviceOptionFlow().map { it.currentMongId }
+
+    /**
+     * 현재 몽 ID 수정
+     */
+    override suspend fun setCurrentMongId(mongId: Long) {
+        this.getDeviceOption().let { deviceOptionEntity ->
+            this.saveDeviceOption(
+                DeviceOption(
+                    currentMongId = mongId,
+                    backgroundMapCode = deviceOptionEntity.backgroundMapCode,
+                    notificationOption = deviceOptionEntity.notificationOption,
+                    soundVolume = deviceOptionEntity.soundVolume,
+                    initNotificationDialogOpen = deviceOptionEntity.initNotificationDialogOpen,
+                )
+            )
+        }
+    }
+
+    /**
+     * 현재 몽 ID 삭제
+     */
+    override suspend fun deleteCurrentMongId() {
+        this.getDeviceOption().let { deviceOptionEntity ->
+            this.saveDeviceOption(
+                DeviceOption(
+                    currentMongId = null,
+                    backgroundMapCode = deviceOptionEntity.backgroundMapCode,
+                    notificationOption = deviceOptionEntity.notificationOption,
+                    soundVolume = deviceOptionEntity.soundVolume,
+                    initNotificationDialogOpen = deviceOptionEntity.initNotificationDialogOpen,
+                )
+            )
+        }
+    }
+
+    /**
      * 걸음 수 조회
      */
     override suspend fun getStep(): Step {
+        val stepEntity = deviceDataStore.getStep() ?: deviceDataStore.saveStep(
+            StepEntity(
+                walkingCount = 0,
+                consumedWalkingCount = 0
+            )
+        )
+
         val totalWalkingCount = stepSensorManager.getTotalWalkingCount()
         val deviceBootedAt = this.getBootedAt()
 
-        return deviceDataStore.getStore().data.map {
-            Step(
-                totalWalkingCount = totalWalkingCount,
-                deviceBootedAt = deviceBootedAt,
-                walkingCount = it[DeviceDataStore.WALKING_COUNT] ?: 0,
-                consumedWalkingCount = it[DeviceDataStore.CONSUME_WALKING_COUNT] ?: 0,
-            )
-        }.first()
+        return Step(
+            totalWalkingCount = totalWalkingCount,
+            deviceBootedAt = deviceBootedAt,
+            walkingCount = stepEntity.walkingCount,
+            consumedWalkingCount = stepEntity.consumedWalkingCount,
+        )
     }
 
     /**
      * 걸음 수 라이브 객체 조회
      */
     override suspend fun getStepFlow(): Flow<Step> {
+        deviceDataStore.getStep() ?: run {
+            deviceDataStore.saveStep(
+                StepEntity(
+                    walkingCount = 0,
+                    consumedWalkingCount = 0
+                )
+            )
+        }
+
+        val stepEntityFlow = deviceDataStore.getStepFlow()
         val totalWalkingCountFlow = stepSensorManager.getTotalWalkingCountFlow()
         val deviceBootedAt = this.getBootedAt()
-        val walkingCountFlow =
-            deviceDataStore.getStore().data.map { it[DeviceDataStore.WALKING_COUNT] ?: 0 }
-        val consumedWalkingCountFlow =
-            deviceDataStore.getStore().data.map { it[DeviceDataStore.CONSUME_WALKING_COUNT] ?: 0 }
 
         return combine(
+            stepEntityFlow,
             totalWalkingCountFlow,
-            walkingCountFlow,
-            consumedWalkingCountFlow
-        ) { totalWalkingCount, walkingCount, consumedWalkingCount ->
+        ) { stepEntity, totalWalkingCount ->
             Step(
                 totalWalkingCount = totalWalkingCount,
                 deviceBootedAt = deviceBootedAt,
-                walkingCount = walkingCount,
-                consumedWalkingCount = consumedWalkingCount,
+                walkingCount = stepEntity?.walkingCount ?: 0,
+                consumedWalkingCount = stepEntity?.consumedWalkingCount ?: 0,
             )
         }
     }
@@ -87,74 +143,81 @@ class DevicePersistenceAdapter @Inject constructor(
      * 걸음 수 로컬 동기화
      */
     override suspend fun saveStep(step: Step): Step {
-        deviceDataStore.getStore().edit { preferences ->
-            preferences[DeviceDataStore.WALKING_COUNT] = step.walkingCount
-            preferences[DeviceDataStore.CONSUME_WALKING_COUNT] = step.consumedWalkingCount
-        }
-
         val totalWalkingCount = stepSensorManager.getTotalWalkingCount()
         val deviceBootedAt = this.getBootedAt()
 
-        return deviceDataStore.getStore().data.map {
-            Step(
-                totalWalkingCount = totalWalkingCount,
-                deviceBootedAt = deviceBootedAt,
-                walkingCount = it[DeviceDataStore.WALKING_COUNT] ?: 0,
-                consumedWalkingCount = it[DeviceDataStore.CONSUME_WALKING_COUNT] ?: 0,
+        val stepEntity = deviceDataStore.saveStep(
+            stepEntity = StepEntity(
+                walkingCount = step.walkingCount,
+                consumedWalkingCount = step.consumedWalkingCount
             )
-        }.first()
+        )
+
+        return Step(
+            totalWalkingCount = totalWalkingCount,
+            deviceBootedAt = deviceBootedAt,
+            walkingCount = stepEntity.walkingCount,
+            consumedWalkingCount = stepEntity.consumedWalkingCount,
+        )
     }
 
     /**
      * 기기 옵션 조회
      */
-    @Throws(NotFoundDeviceOptionException::class)
-    override suspend fun getDeviceOption(): DeviceOption = deviceDataStore.getStore().data.map {
-        DeviceOption(
-            backgroundMapCode = it[DeviceDataStore.BACKGROUND_MAP_CODE] ?: "",
-            notificationOption = it[DeviceDataStore.NOTIFICATION_OPTION] ?: true,
-            soundVolume = it[DeviceDataStore.SOUND_VOLUME] ?: 1f,
-            initNotificationDialogOpen = it[DeviceDataStore.INIT_NOTIFICATION_DIALOG_OPEN] ?: true,
+    override suspend fun getDeviceOption(): DeviceOption {
+        val deviceOptionEntity = deviceDataStore.getDeviceOption() ?: deviceDataStore.saveDeviceOption(
+            DeviceOptionEntity(
+                currentMongId = null,
+                backgroundMapCode = null,
+                notificationOption = false,
+                soundVolume = 1f,
+                initNotificationDialogOpen = true,
+            )
         )
-    }.first()
+
+        return deviceOptionEntity.toDomain()
+    }
 
     /**
      * 기기 옵션 라이브 객체 조회
      */
-    @Throws(NotFoundDeviceOptionException::class)
-    override suspend fun getDeviceOptionFlow(): Flow<DeviceOption> =
-        deviceDataStore.getStore().data.map {
-            DeviceOption(
-                backgroundMapCode = it[DeviceDataStore.BACKGROUND_MAP_CODE] ?: "",
-                notificationOption = it[DeviceDataStore.NOTIFICATION_OPTION] ?: true,
-                soundVolume = it[DeviceDataStore.SOUND_VOLUME] ?: 1f,
-                initNotificationDialogOpen = it[DeviceDataStore.INIT_NOTIFICATION_DIALOG_OPEN]
-                    ?: true,
+    override suspend fun getDeviceOptionFlow(): Flow<DeviceOption> {
+        deviceDataStore.getDeviceOption() ?: run {
+            deviceDataStore.saveDeviceOption(
+                DeviceOptionEntity(
+                    currentMongId = null,
+                    backgroundMapCode = null,
+                    notificationOption = false,
+                    soundVolume = 1f,
+                    initNotificationDialogOpen = true,
+                )
             )
         }
+
+        return deviceDataStore.getDeviceOptionFlow().map {
+            DeviceOption(
+                currentMongId = it?.currentMongId,
+                backgroundMapCode = it?.backgroundMapCode,
+                notificationOption = it?.notificationOption ?: false,
+                soundVolume = it?.soundVolume ?: 1f,
+                initNotificationDialogOpen = it?.initNotificationDialogOpen ?: true,
+            )
+        }
+    }
 
     /**
      * 기기 옵션 수정
      */
-    override suspend fun saveDeviceOption(deviceOption: DeviceOption): DeviceOption {
-        deviceDataStore.getStore().edit { preferences ->
-            preferences[DeviceDataStore.BACKGROUND_MAP_CODE] = deviceOption.backgroundMapCode
-            preferences[DeviceDataStore.NOTIFICATION_OPTION] = deviceOption.notificationOption
-            preferences[DeviceDataStore.SOUND_VOLUME] = deviceOption.soundVolume
-            preferences[DeviceDataStore.INIT_NOTIFICATION_DIALOG_OPEN] =
-                deviceOption.initNotificationDialogOpen
-        }
-
-        return deviceDataStore.getStore().data.map {
-            DeviceOption(
-                backgroundMapCode = it[DeviceDataStore.BACKGROUND_MAP_CODE] ?: "",
-                notificationOption = it[DeviceDataStore.NOTIFICATION_OPTION] ?: true,
-                soundVolume = it[DeviceDataStore.SOUND_VOLUME] ?: 1f,
-                initNotificationDialogOpen = it[DeviceDataStore.INIT_NOTIFICATION_DIALOG_OPEN]
-                    ?: true,
+    override suspend fun saveDeviceOption(deviceOption: DeviceOption): DeviceOption =
+        deviceDataStore.saveDeviceOption(
+            DeviceOptionEntity(
+                currentMongId = deviceOption.currentMongId,
+                backgroundMapCode = deviceOption.backgroundMapCode,
+                notificationOption = deviceOption.notificationOption,
+                soundVolume = deviceOption.soundVolume,
+                initNotificationDialogOpen = deviceOption.initNotificationDialogOpen,
             )
-        }.first()
-    }
+        ).toDomain()
 
     /**
      * 기기 ID 조회

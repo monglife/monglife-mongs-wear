@@ -1,12 +1,15 @@
 package com.monglife.mongs.domain.device.model
 
 class DeviceOption(
-    backgroundMapCode: String = DEFAULT_MAP_TYPE_CODE,
-    notificationOption: Boolean = false,
-    soundVolume: Float = 0f,
-    initNotificationDialogOpen: Boolean = true,
+    currentMongId: Long?,
+    backgroundMapCode: String?,
+    notificationOption: Boolean,
+    soundVolume: Float,
+    initNotificationDialogOpen: Boolean,
 ) {
-    var backgroundMapCode: String = backgroundMapCode
+    var currentMongId: Long? = currentMongId
+        private set
+    var backgroundMapCode: String? = backgroundMapCode
         private set
     var notificationOption: Boolean = notificationOption
         private set
@@ -15,8 +18,11 @@ class DeviceOption(
     var initNotificationDialogOpen: Boolean = initNotificationDialogOpen
         private set
 
-    companion object {
-        const val DEFAULT_MAP_TYPE_CODE = "MP000"
+    /**
+     * 맵 배경 코드 삭제
+     */
+    fun deleteBackgroundMapCode() {
+        this.backgroundMapCode = null
     }
 
     /**

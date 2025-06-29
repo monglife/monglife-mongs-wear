@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * 걸음 수 조회 UseCase
+ * 걸음 수 Flow 조회 UseCase
  */
 class ObserveCurrentWalkingCountUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,

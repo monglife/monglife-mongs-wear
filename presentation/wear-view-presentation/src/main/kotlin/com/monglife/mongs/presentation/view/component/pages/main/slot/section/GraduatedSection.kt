@@ -29,8 +29,6 @@ internal fun GraduatedSection(
     dialogOpen: Boolean,
     onClick: () -> Unit = {},
 ) {
-    val mongResourceCode = runCatching { MongResourceCode.valueOf(mongCode) }.getOrDefault(MongResourceCode.CH444)
-
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -49,7 +47,7 @@ internal fun GraduatedSection(
                 .fillMaxSize()
         ) {
             Mong(
-                mong = mongResourceCode,
+                mong = MongResourceCode.getResource(mongCode),
                 modifier = Modifier.padding(bottom = 25.dp)
             )
         }

@@ -16,4 +16,11 @@ enum class SoundResourceCode (
     BATTLE_ATTACK(R.raw.battle_attack),
     BATTLE_DEFENCE(R.raw.battle_defence),
     COIN(R.raw.coin),
+    NONE(R.raw.coin)
+    ;
+
+    companion object {
+        fun getResource(code: String) = runCatching { SoundResourceCode.valueOf(code) }.getOrDefault(NONE)
+        fun getResourceCode(code: String) = getResource(code = code).code
+    }
 }

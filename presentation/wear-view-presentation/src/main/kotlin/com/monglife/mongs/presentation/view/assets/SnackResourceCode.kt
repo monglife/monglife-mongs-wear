@@ -6,7 +6,7 @@ import com.mongs.wear.presentation.view.wear.R
  * 간식 리소스
  */
 enum class SnackResourceCode (
-    val code: Int
+    val code: Int,
 ) {
     SN000(R.drawable.snack_sn000),
     SN001(R.drawable.snack_sn001),
@@ -15,5 +15,11 @@ enum class SnackResourceCode (
     SN011(R.drawable.snack_sn011),
     SN012(R.drawable.snack_sn012),
     SN013(R.drawable.snack_sn013),
-    SN444(R.drawable.mong_none)
+    SN444(R.drawable.mong_none),
+    ;
+
+    companion object {
+        fun getResource(code: String) = runCatching { SnackResourceCode.valueOf(code) }.getOrDefault(SN444)
+        fun getResourceCode(code: String) = getResource(code = code).code
+    }
 }

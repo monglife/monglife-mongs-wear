@@ -29,10 +29,12 @@ fun LayoutView (
         } else if (uiState.value.mustUpdateApp) {
             NeedUpdateContent()
         } else {
-            if (!isLogin.value) {
-                LoginContent()
-            } else {
-                Router()
+            isLogin.value?.let {
+                if (!it) {
+                    LoginContent()
+                } else {
+                    Router()
+                }
             }
         }
     }

@@ -45,8 +45,7 @@ internal fun MainBackground(
             }
         }
 
-        val mapResourceCode =
-            runCatching { MapResourceCode.valueOf(backgroundMapCode) }.getOrDefault(MapResourceCode.MP000)
+        val mapResourceCode = MapResourceCode.getResource(code = it)
         val imageLoader = ImageLoader.Builder(LocalContext.current)
             .components { add(ImageDecoderDecoder.Factory()) }
             .build()

@@ -1,5 +1,6 @@
 package com.monglife.mongs.application.mong.usecase.management
 
+import com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.core.domain.usecase.BaseNoParamUseCase
@@ -19,11 +20,12 @@ import javax.inject.Singleton
 @Singleton
 class ObserveCurrentMongUseCase @Inject constructor(
     private val managementPersistencePort: ManagementPersistencePort,
+    private val devicePersistencePort: DevicePersistencePort,
 ) : BaseNoParamUseCase<Flow<MongVo?>>() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun execute(): Flow<MongVo?> {
-        return managementPersistencePort.getCurrentMongIdFlow()
+        return devicePersistencePort.getCurrentMongIdFlow()
             .flatMapLatest { mongId -> mongId?.let {
                 managementPersistencePort.getMongFlow(mongId = mongId)
                     .map { mong ->

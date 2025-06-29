@@ -1,5 +1,6 @@
 package com.monglife.mongs.application.mong.usecase.management
 
+import com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.core.domain.usecase.BaseNoParamUseCase
 import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
@@ -11,12 +12,12 @@ import javax.inject.Inject
  * 현재 몽 ID 설정 UseCase
  */
 class DeleteCurrentMongIdUseCase @Inject constructor(
-    private val managementPersistencePort: ManagementPersistencePort,
+    private val devicePersistencePort: DevicePersistencePort,
 ) : BaseNoParamUseCase<Unit>() {
 
     override suspend fun execute() {
         withContext(Dispatchers.IO) {
-            managementPersistencePort.deleteCurrentMongId()
+            devicePersistencePort.deleteCurrentMongId()
         }
     }
 }

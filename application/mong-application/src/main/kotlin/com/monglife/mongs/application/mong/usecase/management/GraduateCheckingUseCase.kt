@@ -1,6 +1,7 @@
 package com.monglife.mongs.application.mong.usecase.management
 
 import com.monglife.mongs.application.mong.exception.NotFoundMongOptionException
+import com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
@@ -12,16 +13,15 @@ import javax.inject.Inject
  */
 class GraduateCheckingUseCase @Inject constructor(
     private val managementPersistencePort: ManagementPersistencePort,
+    private val devicePersistencePort: DevicePersistencePort
 ) : BaseParamUseCase<GraduateCheckingUseCase.Command, Unit>() {
 
     @Throws(NotFoundMongOptionException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
-            managementPersistencePort.getCurrentMongId()?.let { currentMongId ->
-                if (currentMongId == command.mongId) {
-                    // 현재 몽 ID 삭제
-                    managementPersistencePort.deleteCurrentMongId()
-                }
+            if (devicePersistencePort.getCurrentMongId() == command.mongId) {
+                // 현재 몽 ID 삭제
+                devicePersistencePort.deleteCurrentMongId()
             }
 
             // 몽 옵션 로컬 조회

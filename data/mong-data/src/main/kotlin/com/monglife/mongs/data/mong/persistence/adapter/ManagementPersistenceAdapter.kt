@@ -1,11 +1,9 @@
 package com.monglife.mongs.data.mong.persistence.adapter
 
 import android.util.Log
-import androidx.datastore.preferences.core.edit
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.exception.NotFoundMongOptionException
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
-import com.monglife.mongs.data.mong.persistence.datastore.MongDataStore
 import com.monglife.mongs.data.mong.persistence.db.MongRoomDB
 import com.monglife.mongs.data.mong.persistence.entity.MongEntity
 import com.monglife.mongs.data.mong.persistence.entity.MongOptionEntity
@@ -17,7 +15,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -28,49 +25,10 @@ import javax.inject.Singleton
 @Singleton
 class ManagementPersistenceAdapter @Inject constructor(
     private val roomDB: MongRoomDB,
-    private val mongDataStore: MongDataStore,
 ) : ManagementPersistencePort {
 
     private val subscribeCounterMap = HashMap<Long, AtomicInteger>()
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-    /**
-     * 현재 몽 ID 조회
-     */
-    override suspend fun getCurrentMongId(): Long? =
-        mongDataStore.getStore().data.map {
-            it[MongDataStore.CURRENT_MONG_ID]?.let { currentMongId ->
-                currentMongId.takeIf { currentMongId != MongDataStore.CURRENT_MONG_ID_INIT }
-            }
-        }.first()
-
-    /**
-     * 현재 몽 ID Flow 조회
-     */
-    override suspend fun getCurrentMongIdFlow(): Flow<Long?> =
-        mongDataStore.getStore().data.map {
-            it[MongDataStore.CURRENT_MONG_ID]?.let { currentMongId ->
-                currentMongId.takeIf { currentMongId != MongDataStore.CURRENT_MONG_ID_INIT }
-            }
-        }
-
-    /**
-     * 현재 몽 ID 수정
-     */
-    override suspend fun setCurrentMongId(mongId: Long) {
-        mongDataStore.getStore().edit {
-            it[MongDataStore.CURRENT_MONG_ID] = mongId
-        }
-    }
-
-    /**
-     * 현재 몽 ID 삭제
-     */
-    override suspend fun deleteCurrentMongId() {
-        mongDataStore.getStore().edit {
-            it[MongDataStore.CURRENT_MONG_ID] = MongDataStore.CURRENT_MONG_ID_INIT
-        }
-    }
 
     /**
      * 몽 옵션 조회

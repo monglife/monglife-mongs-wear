@@ -48,9 +48,6 @@ internal fun EvolutionEffect(
     onClick: () -> Unit,
     callback: () -> Unit,
 ) {
-    val mongResourceCode =
-        runCatching { MongResourceCode.valueOf(mongCode) }.getOrDefault(MongResourceCode.CH444)
-
     if (isEvolving) {
         var nowEffectIndex by remember { mutableIntStateOf(0) }
 
@@ -67,7 +64,7 @@ internal fun EvolutionEffect(
             contentAlignment = Alignment.BottomCenter,
         ) {
             Mong(
-                mong = mongResourceCode,
+                mong = MongResourceCode.getResource(mongCode),
                 modifier = Modifier.padding(bottom = 25.dp),
                 isPng = true,
             )

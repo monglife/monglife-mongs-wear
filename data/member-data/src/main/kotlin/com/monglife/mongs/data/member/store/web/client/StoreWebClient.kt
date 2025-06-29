@@ -1,6 +1,6 @@
 package com.monglife.mongs.data.member.store.web.client
 
-import com.monglife.mongs.data.core.dto.response.ResponseDto
+import com.monglife.mongs.data.core.web.dto.response.ResponseDto
 import com.monglife.mongs.data.member.store.web.client.request.ConsumeOrderRequestDto
 import com.monglife.mongs.data.member.store.web.client.request.GetConsumedOrdersRequestDto
 import com.monglife.mongs.data.member.store.web.client.response.ConsumeOrderResponseDto

@@ -1,6 +1,7 @@
 package com.monglife.mongs.application.mong.usecase.management
 
 import com.monglife.mongs.application.mong.exception.InvalidCreateMongException
+import com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.application.mong.port.web.ManagementWebPort
 import com.monglife.mongs.application.mong.vo.MongVo
@@ -16,7 +17,8 @@ import javax.inject.Inject
  */
 class CreateMongUseCase @Inject constructor(
     private val managementWebPort: ManagementWebPort,
-    private val managementPersistencePort: ManagementPersistencePort
+    private val managementPersistencePort: ManagementPersistencePort,
+    private val devicePersistencePort: DevicePersistencePort,
 ) : BaseParamUseCase<CreateMongUseCase.Command, MongVo>() {
 
     @Throws(InvalidCreateMongException::class)
@@ -39,7 +41,7 @@ class CreateMongUseCase @Inject constructor(
                 // 몽 로컬 등록
                 managementPersistencePort.saveMong(mong = mong)
                 // 현재 몽으로 설정
-                managementPersistencePort.setCurrentMongId(mongId = mong.mongId)
+                devicePersistencePort.setCurrentMongId(mongId = mong.mongId)
                 // MongVo 반환
                 managementPersistencePort.getMongOption(mongId = mong.mongId).let {
                     MongVo.of(mong = mong, mongOption = it)

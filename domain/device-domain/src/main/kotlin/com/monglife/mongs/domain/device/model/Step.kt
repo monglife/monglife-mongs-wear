@@ -4,11 +4,15 @@ import java.time.LocalDateTime
 
 @Suppress("NewApi")
 class   Step(
-    val totalWalkingCount: Int = 0,
-    val deviceBootedAt: LocalDateTime = LocalDateTime.of(2000, 1, 1, 0, 0),
-    walkingCount: Int = 0,
-    consumedWalkingCount: Int = 0,
+    totalWalkingCount: Int,
+    deviceBootedAt: LocalDateTime,
+    walkingCount: Int,
+    consumedWalkingCount: Int,
 ) {
+    var totalWalkingCount: Int = totalWalkingCount
+        private set
+    var deviceBootedAt: LocalDateTime = deviceBootedAt
+        private set
     var walkingCount: Int = walkingCount
         private set
     var consumedWalkingCount: Int = consumedWalkingCount

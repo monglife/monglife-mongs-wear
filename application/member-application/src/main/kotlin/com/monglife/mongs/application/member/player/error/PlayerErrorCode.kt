@@ -7,8 +7,6 @@ enum class PlayerErrorCode(
     private val isMessageShow: Boolean,
 ) : ErrorCode {
 
-    INVALID_SUBSCRIBE_PLAYER("플레이어 연결 실패", false),
-    INVALID_DIS_SUBSCRIBE_PLAYER("플레이어 연결 해제 실패", false),
     INVALID_CREATE_PLAYER("플레이어 등록 실패", false),
     NOT_FOUND_PLAYER("플레이어 조회 실패", false),
     INVALID_BUY_SLOT("슬롯 구매 실패", false),

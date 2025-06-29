@@ -37,4 +37,11 @@ abstract class AdapterModule {
     @Binds
     @Singleton
     abstract fun bindDevicePersistencePortForMemberApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.member.feedback.port.persistence.DevicePersistencePort
+
+    /**
+    * Bind DevicePersistencePort for MongApplication
+    */
+    @Binds
+    @Singleton
+    abstract fun bindDevicePersistencePortForMongApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort
 }

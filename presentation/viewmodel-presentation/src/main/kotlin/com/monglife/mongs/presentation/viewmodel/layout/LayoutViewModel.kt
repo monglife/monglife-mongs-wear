@@ -41,8 +41,8 @@ class LayoutViewModel @Inject constructor(
     /**
      * 변수
      */
-    private val _isLogin = MutableStateFlow(false)
-    val isLogin: StateFlow<Boolean> = _isLogin.asStateFlow()
+    private val _isLogin = MutableStateFlow<Boolean?>(null)
+    val isLogin: StateFlow<Boolean?> = _isLogin.asStateFlow()
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
@@ -51,7 +51,7 @@ class LayoutViewModel @Inject constructor(
             // 로그인 여부 로딩
             withContext(Dispatchers.IO) {
                 getIsLoginUseCase()
-                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, false)
+                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, null)
                     .let {
                         observeForever(it, _isLogin)
                         _isLogin.value = it.first()

@@ -16,4 +16,11 @@ enum class HelpResourceCode (
     HP005(R.drawable.mong_body_ch100),
     HP006(R.drawable.btn_icon_slot_pick),
     HP007(R.drawable.point_icon_pay),
+    HP444(R.drawable.mong_none)
+    ;
+
+    companion object {
+        fun getResource(code: String) = runCatching { HelpResourceCode.valueOf(code) }.getOrDefault(HP444)
+        fun getResourceCode(code: String) = getResource(code = code).code
+    }
 }

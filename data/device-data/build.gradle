@@ -8,6 +8,7 @@ dependencies {
     implementation project(":application:battle-application")
     implementation project(":application:device-application")
     implementation project(":application:member-application")
+    implementation project(":application:mong-application")
 
     // retrofit2 & coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'

@@ -25,7 +25,6 @@ import com.monglife.mongs.presentation.view.assets.HelpResourceCode
 import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
-import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.monglife.mongs.presentation.view.component.common.chip.Chip
 import com.monglife.mongs.presentation.view.dialog.pages.help.HelpDialog
 import com.monglife.mongs.presentation.viewmodel.pages.help.HelpViewModel
@@ -95,12 +94,8 @@ fun HelpView(
             Box(modifier = Modifier.zIndex(2f)) {
                 if (uiState.value.helpDialogOpen) {
                     currentHelpVo.value?.let { helpVo ->
-                        val helpResourceCode = helpVo.helpIconCode?.let {
-                            runCatching { HelpResourceCode.valueOf(it) }.getOrNull()
-                        }?.code
-
                         HelpDialog(
-                            icon = helpResourceCode,
+                            icon = helpVo.helpIconCode?.let { HelpResourceCode.getResourceCode(it) },
                             contents = helpVo.contents,
                             cancel = helpViewModel::helpDialogClose
                         )

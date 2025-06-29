@@ -1,6 +1,6 @@
 package com.monglife.mongs.data.member.collection.web.client
 
-import com.monglife.mongs.data.core.dto.response.ResponseDto
+import com.monglife.mongs.data.core.web.dto.response.ResponseDto
 import com.monglife.mongs.data.member.collection.web.client.response.GetCollectionMapResponseDto
 import com.monglife.mongs.data.member.collection.web.client.response.GetCollectionMongResponseDto
 import retrofit2.Response

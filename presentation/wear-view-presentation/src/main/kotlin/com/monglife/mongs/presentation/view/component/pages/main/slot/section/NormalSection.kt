@@ -22,8 +22,6 @@ internal fun NormalSection(
     isEating: Boolean,
     onClick: () -> Unit,
 ) {
-    val mongResourceCode = runCatching { MongResourceCode.valueOf(mongCode) }.getOrDefault(MongResourceCode.CH444)
-
     Box(
         contentAlignment = Alignment.BottomCenter,
         modifier = modifier.fillMaxSize(),
@@ -33,7 +31,7 @@ internal fun NormalSection(
             isHappy = isHappy,
             isEating = isEating,
             isSleep = isSleep,
-            mong = mongResourceCode,
+            mong = MongResourceCode.getResource(mongCode),
             onClick = onClick,
             modifier = Modifier
                 .padding(bottom = 22.dp)

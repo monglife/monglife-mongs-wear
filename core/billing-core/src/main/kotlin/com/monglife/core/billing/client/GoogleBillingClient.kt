@@ -60,15 +60,11 @@ class GoogleBillingClient @Inject constructor(
                             }
                         } ?: run { close(InvalidBillingException()) }
                     }
-                    BillingResponseCode.USER_CANCELED -> {
-                        close(UserCancelException())
-                    }
-                    BillingResponseCode.ITEM_ALREADY_OWNED -> {
-                        close(AlreadyOwnedException())
-                    }
-                    BillingResponseCode.ERROR -> {
-                        close(InvalidBillingException())
-                    }
+                    BillingResponseCode.USER_CANCELED -> close(UserCancelException())
+                    BillingResponseCode.BILLING_UNAVAILABLE -> close(UserCancelException())
+                    BillingResponseCode.ITEM_ALREADY_OWNED -> close(AlreadyOwnedException())
+                    BillingResponseCode.ERROR -> close(InvalidBillingException())
+                    else -> close(BillingNotSupportException())
                 }
             })
 

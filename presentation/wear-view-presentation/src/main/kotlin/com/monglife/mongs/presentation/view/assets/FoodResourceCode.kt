@@ -17,4 +17,10 @@ enum class FoodResourceCode (
     FD022(R.drawable.food_fd022),
     FD030(R.drawable.food_fd030),
     FD444(R.drawable.mong_none),
+    ;
+
+    companion object {
+        fun getResource(code: String) = runCatching { FoodResourceCode.valueOf(code) }.getOrDefault(FD444)
+        fun getResourceCode(code: String) = getResource(code = code).code
+    }
 }

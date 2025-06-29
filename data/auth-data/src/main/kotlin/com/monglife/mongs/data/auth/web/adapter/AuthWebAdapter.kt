@@ -1,5 +1,6 @@
 package com.monglife.mongs.data.auth.web.adapter
 
+import android.util.Log
 import com.monglife.mongs.application.auth.exception.InvalidJoinException
 import com.monglife.mongs.application.auth.exception.InvalidLoginException
 import com.monglife.mongs.application.auth.exception.InvalidLogoutException
@@ -8,15 +9,20 @@ import com.monglife.mongs.application.auth.exception.VerifyAppVersionException
 import com.monglife.mongs.application.auth.port.web.AuthWebPort
 import com.monglife.mongs.application.auth.port.web.response.LoginResponse
 import com.monglife.mongs.application.auth.port.web.response.VerifyAppVersionResponse
-import com.monglife.mongs.data.core.client.AuthWebClient
-import com.monglife.mongs.data.core.client.request.JoinRequestDto
-import com.monglife.mongs.data.core.client.request.LoginRequestDto
-import com.monglife.mongs.data.core.client.request.LogoutRequestDto
+import com.monglife.mongs.data.core.web.client.AuthWebClient
+import com.monglife.mongs.data.core.web.client.request.JoinRequestDto
+import com.monglife.mongs.data.core.web.client.request.LoginRequestDto
+import com.monglife.mongs.data.core.web.client.request.LogoutRequestDto
+import com.monglife.mongs.data.core.web.utils.HttpUtil.getErrorResponseDto
 import javax.inject.Inject
 
 class AuthWebAdapter @Inject constructor(
     private val authWebClient: AuthWebClient,
 ): AuthWebPort {
+
+    companion object {
+        private const val NEED_JOIN_RESPONSE_CODE = "DISCOVERY-ACCOUNT-101"
+    }
 
     /**
      * 앱 버전 검증
@@ -77,11 +83,15 @@ class AuthWebAdapter @Inject constructor(
     ).let { response ->
 
         val body = response.takeIf { it.isSuccessful }?.body() ?: run {
-            if (response.code() == 404) {
-                throw NeedJoinException()
-            }
 
-            throw InvalidLoginException()
+            response.getErrorResponseDto().let { body ->
+                Log.d("TEST", "$body")
+                if (body.code == NEED_JOIN_RESPONSE_CODE) {
+                    throw NeedJoinException()
+                } else {
+                    throw InvalidLoginException()
+                }
+            }
         }
 
         LoginResponse(

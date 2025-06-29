@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * 로그인 여부 라이브 객체 조회 UseCase
+ * 로그인 여부 Flow 조회 UseCase
  */
 class GetIsLoginUseCase @Inject constructor(
     private val authPersistencePort: AuthPersistencePort,

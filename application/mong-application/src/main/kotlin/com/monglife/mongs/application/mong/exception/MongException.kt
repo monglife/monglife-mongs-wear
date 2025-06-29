@@ -131,19 +131,3 @@ class InvalidGraduateMongException(
     override val code: ErrorCode = MongErrorCode.INVALID_GRADUATE_MONG,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)
-
-/**
- * 몽 구독 실패 예외
- */
-class InvalidSubscribeMongException(
-    override val code: ErrorCode = MongErrorCode.INVALID_SUBSCRIBE_MONG,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- * 몽 구독 해제 실패 예외
- */
-class InvalidDisSubscribeMongException(
-    override val code: ErrorCode = MongErrorCode.INVALID_DIS_SUBSCRIBE_MONG,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)

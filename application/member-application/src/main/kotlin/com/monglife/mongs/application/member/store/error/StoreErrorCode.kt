@@ -8,8 +8,6 @@ enum class StoreErrorCode(
 ) : ErrorCode {
 
     INVALID_CONSUME_ORDER("주문 소비 실패", false),
-    GET_CONSUMED_ORDERS("소비 주문 조회 실패", false),
-    BILLING_NOT_SUPPORT("결제 미지원 기기", false),
     ;
 
     override fun getMessage(): String {

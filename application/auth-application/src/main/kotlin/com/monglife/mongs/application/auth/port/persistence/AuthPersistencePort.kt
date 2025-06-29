@@ -23,5 +23,5 @@ interface AuthPersistencePort {
     /**
      * 세션 삭제
      */
-    suspend fun deleteSession() : Session
+    suspend fun deleteSession()
 }

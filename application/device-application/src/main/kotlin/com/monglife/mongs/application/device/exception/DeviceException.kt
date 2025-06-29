@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.device.exception
 
-import com.monglife.mongs.application.device.error.DeviceErrorCode
 import com.monglife.core.common.error.ErrorCode
 import com.monglife.core.common.exception.ErrorException
+import com.monglife.mongs.application.device.error.DeviceErrorCode
 
 /**
  * 걸음 수 환전 실패 예외
@@ -17,13 +17,5 @@ class ExchangeWalkingCountException(
  */
 class UpdateWalkingCountException(
     override val code: ErrorCode = DeviceErrorCode.UPDATE_WALKING_COUNT,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- * DeviceOption 조회 실패 예외
- */
-class NotFoundDeviceOptionException(
-    override val code: ErrorCode = DeviceErrorCode.NOT_FOUND_DEVICE_OPTION,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)

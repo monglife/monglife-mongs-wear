@@ -29,11 +29,7 @@ enum class MapResourceCode (
     MP018(R.drawable.map_mp018),
     MP019(R.drawable.map_mp019),
     MP020(R.drawable.map_mp020),
-    //    MP021(R.drawable.mp021),
-//    MP022(R.drawable.mp022),
     MP023(R.drawable.map_mp023),
-    //    MP024(R.drawable.mp024),
-//    MP025(R.drawable.mp025),
     MP026(R.drawable.map_mp026),
     MP027(R.drawable.map_mp027),
     MP028(R.drawable.map_mp028),
@@ -41,15 +37,13 @@ enum class MapResourceCode (
     MP030(R.drawable.map_mp030),
     MP031(R.drawable.map_mp031),
     MP032(R.drawable.map_mp032),
-    //    MP033(R.drawable.mp033),
-//    MP034(R.drawable.mp034),
-//    MP035(R.drawable.mp035),
-//    MP036(R.drawable.mp036),
     MP037(R.drawable.map_mp037),
-    //    MP038(R.drawable.mp038),
-//    MP039(R.drawable.mp039),
-//    MP040(R.drawable.mp040),
-//    MP041(R.drawable.mp041),
     MP042(R.drawable.map_mp042),
-//    MP043(R.drawable.mp043),
+    MP444(R.drawable.map_mp000),
+    ;
+
+    companion object {
+        fun getResource(code: String) = runCatching { MapResourceCode.valueOf(code) }.getOrDefault(MP444)
+        fun getResourceCode(code: String) = getResource(code = code).code
+    }
 }

@@ -9,26 +9,6 @@ import kotlinx.coroutines.flow.Flow
 interface ManagementPersistencePort {
 
     /**
-     * 현재 몽 ID 조회
-     */
-    suspend fun getCurrentMongId(): Long?
-
-    /**
-     * 현재 몽 ID Flow 조회
-     */
-    suspend fun getCurrentMongIdFlow(): Flow<Long?>
-
-    /**
-     * 현재 몽 ID 수정
-     */
-    suspend fun setCurrentMongId(mongId: Long)
-
-    /**
-     * 현재 몽 ID 삭제
-     */
-    suspend fun deleteCurrentMongId()
-
-    /**
      * 몽 옵션 조회
      */
     @Throws(NotFoundMongOptionException::class)

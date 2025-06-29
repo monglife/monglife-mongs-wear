@@ -1,6 +1,7 @@
 package com.monglife.mongs.application.mong.usecase.management
 
 import com.monglife.mongs.application.mong.exception.InvalidDeleteMongException
+import com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.application.mong.port.web.ManagementWebPort
 import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
@@ -14,6 +15,7 @@ import javax.inject.Inject
 class DeleteMongUseCase @Inject constructor(
     private val managementWebPort: ManagementWebPort,
     private val managementPersistencePort: ManagementPersistencePort,
+    private val devicePersistencePort: DevicePersistencePort,
 ) : BaseParamUseCase<DeleteMongUseCase.Command, Unit>() {
 
     @Throws(InvalidDeleteMongException::class)
@@ -25,6 +27,11 @@ class DeleteMongUseCase @Inject constructor(
                 managementPersistencePort.deleteMongOption(mongId = response.mongId)
                 // 몽 로컬 삭제
                 managementPersistencePort.deleteMong(mongId = response.mongId)
+                // 몽 ID가 현재 몽 ID인 경우
+                if (devicePersistencePort.getCurrentMongId() == response.mongId) {
+                    // 현재 몽 ID 삭제
+                    devicePersistencePort.deleteCurrentMongId()
+                }
             }
         }
     }

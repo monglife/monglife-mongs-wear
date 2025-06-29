@@ -32,8 +32,8 @@ class ViewModel @Inject constructor(
     /**
      * UI 이벤트 변수
      */
-    private val _uiEvent = MutableStateFlow<UiEvent>(UiEvent.Idle)
-    val uiEvent: StateFlow<UiEvent> = _uiEvent.asStateFlow()
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
 
     /**
      * 변수

@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.viewmodel.pages.main
 
 import com.monglife.mongs.application.device.usecase.ObserveBackgroundMapCodeUseCase
+import com.monglife.mongs.application.device.usecase.SyncRemoteStepUseCase
 import com.monglife.mongs.application.member.player.usecase.SyncRemotePlayerUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.SyncRemoteMongsUseCase
@@ -21,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val syncRemotePlayerUseCase: SyncRemotePlayerUseCase,
+    private val syncRemoteStepUseCase: SyncRemoteStepUseCase,
     private val syncRemoteMongsUseCase: SyncRemoteMongsUseCase,
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val observeBackgroundMapCodeUseCase: ObserveBackgroundMapCodeUseCase,
@@ -48,8 +50,8 @@ class MainViewModel @Inject constructor(
     private val _mongVo = MutableStateFlow<MongVo?>(null)
     val mongVo: StateFlow<MongVo?> = _mongVo.asStateFlow()
 
-    private val _backgroundMapCode = MutableStateFlow("")
-    val backgroundMapCode: StateFlow<String> = _backgroundMapCode.asStateFlow()
+    private val _backgroundMapCode = MutableStateFlow<String?>(null)
+    val backgroundMapCode: StateFlow<String?> = _backgroundMapCode.asStateFlow()
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
@@ -58,6 +60,7 @@ class MainViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 syncRemotePlayerUseCase()
                 syncRemoteMongsUseCase()
+                syncRemoteStepUseCase()
 
                 observeCurrentMongUseCase()
                     .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, null)

@@ -229,11 +229,8 @@ private fun FeedFoodContent(
                             .fillMaxWidth()
                             .weight(0.7f)
                     ) {
-                        val foodResourceCode = runCatching { FoodResourceCode.valueOf(foodVo.foodCode) }
-                            .getOrDefault(FoodResourceCode.FD444)
-
                         Image(
-                            painter = painterResource(foodResourceCode.code),
+                            painter = painterResource(FoodResourceCode.getResourceCode(foodVo.foodCode)),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(50.dp)

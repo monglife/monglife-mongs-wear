@@ -1,6 +1,7 @@
 package com.monglife.mongs.data.auth.persistence.adapter
 
-import com.monglife.mongs.data.core.datastore.SessionDataStore
+import com.monglife.mongs.data.core.persistence.datastore.SessionDataStore
+import com.monglife.mongs.data.core.persistence.entity.SessionEntity
 import com.monglife.mongs.domain.auth.model.Session
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -27,17 +28,25 @@ class AuthPersistenceAdapter @Inject constructor(
     /**
      * 세션 조회
      */
-    override suspend fun getSession(): Session? = sessionDataStore.getSession()
+    override suspend fun getSession(): Session? = sessionDataStore.getSession()?.toDomain()
 
     /**
      * 세션 저장
      */
     override suspend fun saveSession(session: Session): Session =
-        sessionDataStore.saveSession(session = session)
+        sessionDataStore.saveSession(
+            sessionEntity = SessionEntity(
+                accountId = session.accountId,
+                accessToken = session.accessToken,
+                refreshToken = session.refreshToken,
+                version = session.version,
+            )
+        ).toDomain()
 
     /**
      * 세션 삭제
      */
-    override suspend fun deleteSession(): Session =
+    override suspend fun deleteSession() {
         sessionDataStore.deleteSession()
+    }
 }

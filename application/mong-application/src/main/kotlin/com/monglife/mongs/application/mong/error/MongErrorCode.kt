@@ -23,8 +23,6 @@ enum class MongErrorCode(
     INVALID_POOP_CLEAN_MONG("배변 처리 실패", false),
     INVALID_EVOLUTION_MONG("진화 실패", false),
     INVALID_GRADUATE_MONG("졸업 실패", false),
-    INVALID_SUBSCRIBE_MONG("몽 구독 실패", false),
-    INVALID_DIS_SUBSCRIBE_MONG("몽 구독 해제 실패", false),
     ;
 
     override fun getMessage(): String {

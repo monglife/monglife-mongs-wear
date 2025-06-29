@@ -1,6 +1,6 @@
 package com.monglife.mongs.data.member.player.web.client
 
-import com.monglife.mongs.data.core.dto.response.ResponseDto
+import com.monglife.mongs.data.core.web.dto.response.ResponseDto
 import com.monglife.mongs.data.member.player.web.client.request.ExchangeStartPointRequestDto
 import com.monglife.mongs.data.member.player.web.client.response.BuySlotResponseDto
 import com.monglife.mongs.data.member.player.web.client.response.ExchangeStarPointResponseDto

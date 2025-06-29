@@ -1,7 +1,7 @@
 package com.monglife.mongs.data.member.notice.web.client
 
-import com.monglife.mongs.data.core.dto.response.PageResponseDto
-import com.monglife.mongs.data.core.dto.response.ResponseDto
+import com.monglife.mongs.data.core.web.dto.response.PageResponseDto
+import com.monglife.mongs.data.core.web.dto.response.ResponseDto
 import com.monglife.mongs.data.member.notice.web.client.response.GetNoticeResponseDto
 import retrofit2.Response
 import retrofit2.http.GET

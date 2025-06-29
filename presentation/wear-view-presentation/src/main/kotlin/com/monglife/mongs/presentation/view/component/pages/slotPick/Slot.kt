@@ -87,7 +87,7 @@ fun Slot(
                 } else {
                     Mong(
                         isPng = true,
-                        mong = MongResourceCode.valueOf(mongVo.mongCode),
+                        mong = MongResourceCode.getResource(mongVo.mongCode),
                         onClick = detailDialogOpen,
                         ratio = 0.65f,
                     )
