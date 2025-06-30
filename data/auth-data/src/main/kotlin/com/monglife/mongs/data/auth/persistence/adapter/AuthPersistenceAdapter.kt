@@ -3,9 +3,28 @@ package com.monglife.mongs.data.auth.persistence.adapter
 import com.monglife.mongs.data.core.persistence.datastore.SessionDataStore
 import com.monglife.mongs.data.core.persistence.entity.SessionEntity
 import com.monglife.mongs.domain.auth.model.Session
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class AuthPersistenceAdapterModule {
+    @Binds
+    @Singleton
+    abstract fun bindAuthPersistencePortForAuthApplication(adapter: AuthPersistenceAdapter): com.monglife.mongs.application.auth.port.persistence.AuthPersistencePort
+    @Binds
+    @Singleton
+    abstract fun bindAuthPersistencePortForDeviceApplication(adapter: AuthPersistenceAdapter): com.monglife.mongs.application.device.port.persistence.AuthPersistencePort
+    @Binds
+    @Singleton
+    abstract fun bindAuthPersistencePortForPlayerApplication(adapter: AuthPersistenceAdapter): com.monglife.mongs.application.member.player.port.persistence.AuthPersistencePort
+}
 
 class AuthPersistenceAdapter @Inject constructor(
     private val sessionDataStore: SessionDataStore,

@@ -1,14 +1,22 @@
 package com.monglife.mongs.data.mong.persistence.adapter
 
+import android.content.Context
 import android.util.Log
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.exception.NotFoundMongOptionException
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
+import com.monglife.mongs.data.core.mqtt.client.MqttClient
 import com.monglife.mongs.data.mong.persistence.db.MongRoomDB
 import com.monglife.mongs.data.mong.persistence.entity.MongEntity
 import com.monglife.mongs.data.mong.persistence.entity.MongOptionEntity
 import com.monglife.mongs.domain.mong.model.Mong
 import com.monglife.mongs.domain.mong.model.MongOption
+import com.mongs.wear.data.core.R
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,17 +26,31 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttCallback
+import org.eclipse.paho.client.mqttv3.MqttMessage
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class ManagementPersistenceAdapterModule {
+    @Binds
+    @Singleton
+    abstract fun bindManagementPersistencePort(adapter: ManagementPersistenceAdapter): ManagementPersistencePort
+}
+
 @Singleton
 class ManagementPersistenceAdapter @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val roomDB: MongRoomDB,
+    private val mqttClient: MqttClient,
 ) : ManagementPersistencePort {
 
-    private val subscribeCounterMap = HashMap<Long, AtomicInteger>()
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val subscribeCounterMap = ConcurrentHashMap<Long, AtomicInteger>()
 
     /**
      * 몽 옵션 조회
@@ -77,21 +99,25 @@ class ManagementPersistenceAdapter @Inject constructor(
      */
     override suspend fun getMongFlow(mongId: Long): Flow<Mong?> = flow {
 
+        val topic = "${context.getString(R.string.mongs_mqtt_topic)}/mong/management/$mongId"
         val subscribeCount = subscribeCounterMap.getOrPut(mongId) { AtomicInteger(0) }
 
         if (subscribeCount.getAndIncrement() == 0) {
-            // TODO: MQTT 구독
-            Log.d("TEST", "subscribe mongId: $mongId")
+            mqttClient.subscribe(topic = topic, callback = object : MqttCallback {
+                override fun connectionLost(cause: Throwable?) {}
+                override fun deliveryComplete(token: IMqttDeliveryToken?) {}
+                override fun messageArrived(topic: String?, message: MqttMessage?) {
+                    // TODO: MQTT 수신 업데이트 구현
+                    Log.d("TEST", "${message}")
+                }
+            })
         }
 
         try {
-            emitAll(roomDB.mongDao().findMongFlowByMongId(mongId = mongId).map {
-                it?.toDomain()
-            })
+            emitAll(roomDB.mongDao().findMongFlowByMongId(mongId = mongId).map { it?.toDomain() })
         } finally {
-            // TODO: MQTT 구독 해제
             if (subscribeCount.decrementAndGet() == 0) {
-                Log.d("TEST", "disSubscribe mongId: $mongId")
+                mqttClient.disSubscribe(topic = topic)
                 subscribeCounterMap.remove(mongId)
             }
         }

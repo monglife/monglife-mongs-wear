@@ -2,6 +2,7 @@ buildscript {
     ext {
         retrofitVersion   = "2.9.0"
         dataStoreVersion  = "1.1.2"
+        mqttVersion       = "4.4.1"
     }
 }
 
@@ -40,13 +41,17 @@ dependencies {
     api 'com.google.code.gson:gson:2.11.0'
 
     // retrofit2 & coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
     implementation 'com.squareup.okio:okio:3.9.0'
     implementation "com.squareup.retrofit2:retrofit:${this.ext.retrofitVersion}"
     implementation "com.squareup.retrofit2:converter-gson:${this.ext.retrofitVersion}"
 
     implementation "androidx.datastore:datastore-preferences:${this.ext.dataStoreVersion}"
     api "androidx.datastore:datastore-preferences-core:${this.ext.dataStoreVersion}"
+
+    // mqtt
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    api "com.github.hannesa2:paho.mqtt.android:${this.ext.mqttVersion}"
 
     // dagger-hilt
     implementation group: "javax.inject", name: "javax.inject", version: "1"
@@ -57,5 +62,5 @@ dependencies {
     testImplementation "junit:junit:${rootProject.ext.jupiterVersion}"
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
     testImplementation "org.mockito.kotlin:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2"
 }

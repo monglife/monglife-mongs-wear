@@ -1,6 +1,5 @@
 package com.monglife.mongs.data.auth.web.adapter
 
-import android.util.Log
 import com.monglife.mongs.application.auth.exception.InvalidJoinException
 import com.monglife.mongs.application.auth.exception.InvalidLoginException
 import com.monglife.mongs.application.auth.exception.InvalidLogoutException
@@ -14,7 +13,20 @@ import com.monglife.mongs.data.core.web.client.request.JoinRequestDto
 import com.monglife.mongs.data.core.web.client.request.LoginRequestDto
 import com.monglife.mongs.data.core.web.client.request.LogoutRequestDto
 import com.monglife.mongs.data.core.web.utils.HttpUtil.getErrorResponseDto
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class AuthWebAdapterModule {
+    @Binds
+    @Singleton
+    abstract fun bindAuthWebPort(adapter: AuthWebAdapter): AuthWebPort
+}
 
 class AuthWebAdapter @Inject constructor(
     private val authWebClient: AuthWebClient,
@@ -83,14 +95,12 @@ class AuthWebAdapter @Inject constructor(
     ).let { response ->
 
         val body = response.takeIf { it.isSuccessful }?.body() ?: run {
+            val errorBody = response.getErrorResponseDto()
 
-            response.getErrorResponseDto().let { body ->
-                Log.d("TEST", "$body")
-                if (body.code == NEED_JOIN_RESPONSE_CODE) {
-                    throw NeedJoinException()
-                } else {
-                    throw InvalidLoginException()
-                }
+            if (errorBody.code == NEED_JOIN_RESPONSE_CODE) {
+                throw NeedJoinException()
+            } else {
+                throw InvalidLoginException()
             }
         }
 

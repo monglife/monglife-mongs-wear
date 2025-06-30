@@ -7,8 +7,20 @@ import com.monglife.mongs.application.device.port.web.request.ExchangeWalkingCou
 import com.monglife.mongs.application.device.port.web.request.UpdateWalkingCountRequest
 import com.monglife.mongs.application.device.port.web.response.ExchangeWalkingCountResponse
 import com.monglife.mongs.application.device.port.web.response.UpdateWalkingCountResponse
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class DeviceWebAdapterModule {
+    @Binds
+    @Singleton
+    abstract fun bindDeviceWebPort(adapter: DeviceWebAdapter): DeviceWebPort
+}
 
 @Singleton
 class DeviceWebAdapter @Inject constructor(

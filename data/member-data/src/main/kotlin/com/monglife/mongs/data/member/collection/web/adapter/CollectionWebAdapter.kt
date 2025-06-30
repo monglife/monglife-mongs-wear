@@ -4,8 +4,20 @@ import com.monglife.mongs.application.member.collection.port.web.CollectionWebPo
 import com.monglife.mongs.application.member.collection.port.web.response.GetCollectionMapResponse
 import com.monglife.mongs.application.member.collection.port.web.response.GetCollectionMongResponse
 import com.monglife.mongs.data.member.collection.web.client.CollectionWebClient
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class CollectionWebAdapterModule {
+    @Binds
+    @Singleton
+    abstract fun bindCollectionWebPort(adapter: CollectionWebAdapter): CollectionWebPort
+}
 
 @Singleton
 class CollectionWebAdapter @Inject constructor(

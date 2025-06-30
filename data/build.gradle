@@ -3,7 +3,6 @@ buildscript {
         retrofitVersion   = "2.9.0"
         dataStoreVersion  = "1.1.2"
         roomVersion       = "2.6.1"
-        mqttVersion       = "4.2.3"
     }
 }
 
@@ -49,7 +48,7 @@ subprojects {
         testImplementation "junit:junit:${rootProject.ext.jupiterVersion}"
         testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
         testImplementation "org.mockito.kotlin:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
-        testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0"
+        testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2"
         testImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
     }
 }

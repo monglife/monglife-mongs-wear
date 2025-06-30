@@ -7,8 +7,20 @@ import com.monglife.mongs.application.mong.port.web.response.GetTrainingResponse
 import com.monglife.mongs.application.mong.port.web.response.TrainingResponse
 import com.monglife.mongs.data.mong.web.client.ActivityWebClient
 import com.monglife.mongs.data.mong.web.client.request.TrainingEndRequestDto
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class ActivityWebAdapterModule {
+    @Binds
+    @Singleton
+    abstract fun bindActivityWebPort(adapter: ActivityWebAdapter): ActivityWebPort
+}
 
 @Singleton
 class ActivityWebAdapter @Inject constructor(

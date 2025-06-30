@@ -1,11 +1,19 @@
 package com.monglife.mongs.data.member.player.persistence.adapter
 
+import android.content.Context
 import android.util.Log
 import com.monglife.mongs.application.member.player.exception.NotFoundPlayerException
 import com.monglife.mongs.application.member.player.port.persistence.PlayerPersistencePort
+import com.monglife.mongs.data.core.mqtt.client.MqttClient
 import com.monglife.mongs.data.member.player.persistence.datastore.PlayerDataStore
 import com.monglife.mongs.data.member.player.persistence.entity.PlayerEntity
 import com.monglife.mongs.domain.member.player.model.Player
+import com.mongs.wear.data.core.R
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,17 +23,31 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttCallback
+import org.eclipse.paho.client.mqttv3.MqttMessage
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class PlayerPersistenceAdapterModule {
+    @Binds
+    @Singleton
+    abstract fun bindPlayerPersistencePort(adapter: PlayerPersistenceAdapter): PlayerPersistencePort
+}
+
 @Singleton
 class PlayerPersistenceAdapter @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val playerDataStore: PlayerDataStore,
+    private val mqttClient: MqttClient,
 ) : PlayerPersistencePort {
 
-    private val subscribeCount = AtomicInteger(0)
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val subscribeCounterMap = ConcurrentHashMap<Long, AtomicInteger>()
 
     /**
      * 플레이어 조회
@@ -40,19 +62,30 @@ class PlayerPersistenceAdapter @Inject constructor(
     @Throws(NotFoundPlayerException::class)
     override suspend fun getPlayerFlow(): Flow<Player> = flow {
 
+        val player = playerDataStore.getPlayer()?.toDomain() ?: throw NotFoundPlayerException()
+
+        val topic = "${context.getString(R.string.mongs_mqtt_topic)}/member/${player.accountId}/#"
+        val subscribeCount = subscribeCounterMap.getOrPut(player.accountId) { AtomicInteger(0) }
+
         if (subscribeCount.getAndIncrement() == 0) {
-            // TODO: MQTT 구독
-            Log.d("TEST", "subscribe player")
+            mqttClient.subscribe(topic = topic, callback = object : MqttCallback {
+                override fun connectionLost(cause: Throwable?) {}
+                override fun deliveryComplete(token: IMqttDeliveryToken?) {}
+                override fun messageArrived(topic: String?, message: MqttMessage?) {
+                    // TODO: MQTT 수신 업데이트 구현
+                    Log.d("TEST", "${message}")
+                }
+            })
         }
 
         try {
-            emitAll(playerDataStore.getPlayerFlow().map {
-                it?.toDomain() ?: throw NotFoundPlayerException()
-            })
+            emitAll(
+                playerDataStore.getPlayerFlow()
+                    .map { it?.toDomain() ?: throw NotFoundPlayerException() })
         } finally {
-            // TODO: MQTT 구독 해제
             if (subscribeCount.decrementAndGet() == 0) {
-                Log.d("TEST", "disSubscribe player")
+                mqttClient.disSubscribe(topic = topic)
+                subscribeCounterMap.remove(player.accountId)
             }
         }
     }.shareIn(

@@ -19,8 +19,20 @@ import com.monglife.mongs.data.mong.web.client.InteractionWebClient
 import com.monglife.mongs.data.mong.web.client.request.FeedFoodRequestDto
 import com.monglife.mongs.data.mong.web.client.request.FeedSnackRequestDto
 import com.monglife.mongs.data.mong.web.client.request.UseInventoryRequestDto
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class InteractionWebAdapterModule {
+    @Binds
+    @Singleton
+    abstract fun bindInteractionWebPort(adapter: InteractionWebAdapter): InteractionWebPort
+}
 
 @Singleton
 class InteractionWebAdapter @Inject constructor(

@@ -1,9 +1,9 @@
-package com.monglife.mongs.data.core.web.module
+package com.monglife.mongs.data.core.global.module
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.monglife.mongs.data.core.web.adapter.GsonLocalDateTimeFormatAdapter
-import com.monglife.mongs.data.core.web.adapter.GsonLocalTimeAdapter
+import com.monglife.mongs.data.core.global.adapter.GsonLocalDateTimeFormatAdapter
+import com.monglife.mongs.data.core.global.adapter.GsonLocalTimeAdapter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -21,6 +21,7 @@ class StepSensorManager @Inject constructor(
 ) {
     companion object {
         private const val STEP_SENSOR_TYPE = Sensor.TYPE_STEP_COUNTER
+//        private const val STEP_SENSOR_TYPE = Sensor.TYPE_RELATIVE_HUMIDITY
     }
 
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager

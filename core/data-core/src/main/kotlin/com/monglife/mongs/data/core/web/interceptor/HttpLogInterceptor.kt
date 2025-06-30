@@ -64,7 +64,7 @@ class HttpLogInterceptor(
             try {
                 gson.fromJson(bodyJson, ResponseDto::class.java).let { responseDto ->
                     out
-                        .append("  - http status   => ${response.code()}\n")
+                        .append("  - http status   => ${responseDto?.httpStatus}\n")
                         .append("  - response code => ${responseDto?.code}\n")
                         .append("  - message       => ${responseDto?.message}\n")
                         .append("  - result        => ${responseDto?.result}")

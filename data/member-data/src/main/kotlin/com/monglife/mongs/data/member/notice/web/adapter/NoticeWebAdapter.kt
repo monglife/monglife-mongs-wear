@@ -5,8 +5,20 @@ import com.monglife.mongs.application.member.notice.port.web.NoticeWebPort
 import com.monglife.mongs.application.member.notice.port.web.response.GetNoticeResponse
 import com.monglife.mongs.core.domain.port.response.PageResponse
 import com.monglife.mongs.data.member.notice.web.client.NoticeWebClient
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class NoticeWebAdapterModule {
+    @Binds
+    @Singleton
+    abstract fun bindNoticeWebPort(adapter: NoticeWebAdapter): NoticeWebPort
+}
 
 @Singleton
 class NoticeWebAdapter @Inject constructor(

@@ -1,4 +1,4 @@
-package com.monglife.mongs.data.core.web.adapter
+package com.monglife.mongs.data.core.global.adapter
 
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer

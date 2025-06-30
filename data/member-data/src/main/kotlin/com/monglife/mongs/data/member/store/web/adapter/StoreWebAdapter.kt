@@ -9,8 +9,20 @@ import com.monglife.mongs.application.member.store.port.web.response.GetProductR
 import com.monglife.mongs.data.member.store.web.client.StoreWebClient
 import com.monglife.mongs.data.member.store.web.client.request.ConsumeOrderRequestDto
 import com.monglife.mongs.data.member.store.web.client.request.GetConsumedOrdersRequestDto
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class StoreWebAdapterModule {
+    @Binds
+    @Singleton
+    abstract fun bindStoreWebPort(adapter: StoreWebAdapter): StoreWebPort
+}
 
 @Singleton
 class StoreWebAdapter @Inject constructor(

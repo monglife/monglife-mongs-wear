@@ -3,6 +3,7 @@ apply plugin: 'com.google.devtools.ksp'
 apply plugin: "dagger.hilt.android.plugin"
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: "com.google.gms.google-services"
+apply plugin: "org.jetbrains.kotlin.plugin.compose"
 
 android {
     namespace "${rootProject.ext.namespace}"
@@ -20,10 +21,6 @@ android {
 
     buildFeatures {
         compose true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
     }
 
     defaultConfig {
@@ -51,15 +48,24 @@ android {
 }
 
 dependencies {
-    implementation project(":presentation:wear-view-presentation")
+    // core layer
     implementation project(":core:data-core")
+
+    // presentation layer
+    implementation project(":presentation:wear-view-presentation")
+
+    // service
+    implementation "androidx.lifecycle:lifecycle-service:2.9.1"
 
     // dagger & hilt
     implementation group: "javax.inject", name: "javax.inject", version: "1"
     implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
-    implementation "androidx.hilt:hilt-work:${rootProject.ext.hiltWorkerVersion}"
     ksp "com.google.dagger:dagger-compiler:${rootProject.ext.hiltVersion}"
     ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
+
+    // worker
+    implementation "androidx.work:work-runtime-ktx:${rootProject.ext.workerVersion}"
+    implementation "androidx.hilt:hilt-work:${rootProject.ext.hiltWorkerVersion}"
 
     // fcm
     implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")

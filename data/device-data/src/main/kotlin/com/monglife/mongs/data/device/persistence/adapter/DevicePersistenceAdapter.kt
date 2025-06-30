@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.SystemClock
 import android.provider.Settings
-import androidx.datastore.preferences.core.edit
 import com.google.firebase.messaging.FirebaseMessaging
 import com.monglife.mongs.application.auth.exception.InvalidLogoutException
 import com.monglife.mongs.data.device.persistence.datastore.DeviceDataStore
@@ -13,10 +12,13 @@ import com.monglife.mongs.data.device.persistence.entity.StepEntity
 import com.monglife.mongs.data.device.persistence.manager.StepSensorManager
 import com.monglife.mongs.domain.device.model.DeviceOption
 import com.monglife.mongs.domain.device.model.Step
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.Instant
@@ -24,8 +26,29 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class DevicePersistenceAdapterModule {
+    @Binds
+    @Singleton
+    abstract fun bindDevicePersistencePortForAuthApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.auth.port.persistence.DevicePersistencePort
+    @Binds
+    @Singleton
+    abstract fun bindDevicePersistencePortForBattleApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.battle.port.persistence.DevicePersistencePort
+    @Binds
+    @Singleton
+    abstract fun bindDevicePersistencePortForDeviceApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.device.port.persistence.DevicePersistencePort
+    @Binds
+    @Singleton
+    abstract fun bindDevicePersistencePortForMemberApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.member.feedback.port.persistence.DevicePersistencePort
+    @Binds
+    @Singleton
+    abstract fun bindDevicePersistencePortForMongApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort
+}
 
 @SuppressLint("HardwareIds")
 class DevicePersistenceAdapter @Inject constructor(
@@ -110,7 +133,7 @@ class DevicePersistenceAdapter @Inject constructor(
     }
 
     /**
-     * 걸음 수 라이브 객체 조회
+     * 걸음 수 Flow 객체 조회
      */
     override suspend fun getStepFlow(): Flow<Step> {
         deviceDataStore.getStep() ?: run {

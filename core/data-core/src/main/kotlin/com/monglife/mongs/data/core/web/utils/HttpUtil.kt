@@ -2,8 +2,8 @@ package com.monglife.mongs.data.core.web.utils
 
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import com.monglife.mongs.data.core.web.adapter.GsonLocalDateTimeFormatAdapter
-import com.monglife.mongs.data.core.web.adapter.GsonLocalTimeAdapter
+import com.monglife.mongs.data.core.global.adapter.GsonLocalDateTimeFormatAdapter
+import com.monglife.mongs.data.core.global.adapter.GsonLocalTimeAdapter
 import com.monglife.mongs.data.core.web.dto.response.ResponseDto
 import okhttp3.ResponseBody
 import retrofit2.Response
