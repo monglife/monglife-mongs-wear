@@ -10,7 +10,7 @@ import javax.inject.Inject
 /**
  * 로그인 여부 Flow 조회 UseCase
  */
-class GetIsLoginUseCase @Inject constructor(
+class ObserveIsLoginUseCase @Inject constructor(
     private val authPersistencePort: AuthPersistencePort,
 ) : BaseNoParamUseCase<Flow<Boolean>>() {
 

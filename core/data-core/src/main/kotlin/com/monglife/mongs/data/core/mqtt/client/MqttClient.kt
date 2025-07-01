@@ -54,12 +54,12 @@ class MqttClient @Inject constructor(
     companion object {
         private const val TAG = "MqttClient"
 
-        private enum class MqttUserContext {
-            CONNECT,
-            DISCONNECT,
-            SUBSCRIBE,
-            DIS_SUBSCRIBE,
-            PUBLISH,
+        private sealed class MqttUserContext {
+            data object Connect : MqttUserContext()
+            data object Disconnect : MqttUserContext()
+            data class Subscribe(val topic: String) : MqttUserContext()
+            data class DisSubscribe(val topic: String) : MqttUserContext()
+            data class Publish(val topic: String, val payload: String) : MqttUserContext()
         }
     }
 
@@ -81,7 +81,7 @@ class MqttClient @Inject constructor(
             mqttAndroidClient.setCallback(mqttLogConsumer)
             mqttAndroidClient.connect(
                 options = options,
-                userContext = MqttUserContext.CONNECT,
+                userContext = MqttUserContext.Connect,
                 callback = null
             ).await()
         }
@@ -102,7 +102,7 @@ class MqttClient @Inject constructor(
             payload = payload.toByteArray(),
             qos = 2,
             retained = false,
-            userContext = MqttUserContext.PUBLISH,
+            userContext = MqttUserContext.Publish(topic = topic, payload = payload),
             callback = null
         ).await()
     }
@@ -117,7 +117,7 @@ class MqttClient @Inject constructor(
         mqttAndroidClient.subscribe(
             topic = topic,
             qos = 2,
-            userContext = MqttUserContext.SUBSCRIBE,
+            userContext = MqttUserContext.Subscribe(topic = topic),
             callback = null
         ).await()
 
@@ -132,7 +132,7 @@ class MqttClient @Inject constructor(
         this.mqttAndroidClient.takeIf { it.isConnected }?.let {
             mqttAndroidClient.unsubscribe(
                 topic = topic,
-                userContext = MqttUserContext.DIS_SUBSCRIBE,
+                userContext = MqttUserContext.DisSubscribe(topic = topic),
                 callback = null
             ).await()
         }.also {
@@ -150,7 +150,7 @@ class MqttClient @Inject constructor(
         mqttConnectionMutex.withLock {
             if (mqttAndroidClient.isConnected) {
                 mqttAndroidClient.disconnect(
-                    userContext = MqttUserContext.DISCONNECT,
+                    userContext = MqttUserContext.Disconnect,
                     callback = null
                 ).await()
             }
@@ -162,33 +162,27 @@ class MqttClient @Inject constructor(
             override fun onSuccess(asyncActionToken: IMqttToken?) {
                 asyncActionToken?.let {
                     asyncActionToken.userContext?.let {
+                        val out = StringBuilder()
+
                         when (asyncActionToken.userContext) {
-                            MqttUserContext.CONNECT -> Log.i(
-                                TAG,
-                                "연결 성공 | isConnected: ${mqttAndroidClient.isConnected}"
-                            )
+                            is MqttUserContext.Connect -> out
+                                .append("연결")
+                            is MqttUserContext.Disconnect -> out
+                                .append("연결 해제")
+                            is MqttUserContext.Subscribe -> out
+                                .append("토픽 구독\n")
+                                .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Subscribe).topic}")
+                            is MqttUserContext.DisSubscribe -> out
+                                .append("토픽 구독 해제\n")
+                                .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.DisSubscribe).topic}")
+                            is MqttUserContext.Publish -> out
+                                .append("메시지 전송\n")
+                                .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Publish).topic}")
+                                .append("  - payload       => ${(asyncActionToken.userContext as MqttUserContext.Publish).payload}")
+                        }
 
-                            MqttUserContext.DISCONNECT -> Log.i(
-                                TAG,
-                                "연결 해제 성공 | isConnected: ${mqttAndroidClient.isConnected}"
-                            )
-
-                            MqttUserContext.SUBSCRIBE -> Log.i(
-                                TAG,
-                                "구독 성공 | topic: ${asyncActionToken.topics.contentToString()}"
-                            )
-
-                            MqttUserContext.DIS_SUBSCRIBE -> Log.i(
-                                TAG,
-                                "구독 해제 성공 | topic: ${asyncActionToken.topics.contentToString()}"
-                            )
-
-                            MqttUserContext.PUBLISH -> Log.i(
-                                TAG,
-                                "전송 성공 | topic: ${asyncActionToken.topics.contentToString()}"
-                            )
-
-                            else -> {}
+                        if (out.isNotBlank()) {
+                            Log.i(TAG, "MQTT >> $out")
                         }
                     }
                 }
@@ -197,47 +191,65 @@ class MqttClient @Inject constructor(
             }
 
             override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
+
+                Log.e(TAG, exception?.stackTraceToString() ?: "")
+
                 asyncActionToken?.let {
                     asyncActionToken.userContext?.let {
+                        val out = StringBuilder()
+
                         when (asyncActionToken.userContext) {
-                            MqttUserContext.CONNECT -> {
-                                Log.i(TAG, "연결 실패 | isConnected: ${mqttAndroidClient.isConnected}")
+                            is MqttUserContext.Connect -> {
+                                out
+                                    .append("연결 실패")
+                                    .append("  - exception     => ${exception?.stackTraceToString() ?: ""}")
+
                                 cont.resumeWithException(InvalidConnectException())
                             }
+                            is MqttUserContext.Disconnect -> {
+                                out
+                                    .append("연결 해제 실패")
+                                    .append("  - exception     => ${exception?.stackTraceToString() ?: ""}")
 
-                            MqttUserContext.DISCONNECT -> {
-                                Log.i(
-                                    TAG,
-                                    "연결 해제 실패 | isConnected: ${mqttAndroidClient.isConnected}"
-                                )
                                 cont.resumeWithException(InvalidDisConnectException())
                             }
+                            is MqttUserContext.Subscribe -> {
+                                out
+                                    .append("토픽 구독 실패\n")
+                                    .append("  - exception     => ${exception?.stackTraceToString() ?: ""}")
+                                    .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Subscribe).topic}")
 
-                            MqttUserContext.SUBSCRIBE -> {
-                                Log.i(
-                                    TAG,
-                                    "구독 실패 | topic: ${asyncActionToken.topics.contentToString()}"
-                                )
                                 cont.resumeWithException(InvalidSubscribeException())
                             }
+                            is MqttUserContext.DisSubscribe -> {
+                                out
+                                    .append("토픽 구독 해제 실패\n")
+                                    .append("  - exception     => ${exception?.stackTraceToString() ?: ""}")
+                                    .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.DisSubscribe).topic}")
 
-                            MqttUserContext.DIS_SUBSCRIBE -> {
-                                Log.i(
-                                    TAG,
-                                    "구독 해제 실패 | topic: ${asyncActionToken.topics.contentToString()}"
-                                )
                                 cont.resumeWithException(InvalidDisSubscribeException())
                             }
+                            is MqttUserContext.Publish -> {
+                                out
+                                    .append("메시지 전송 실패\n")
+                                    .append("  - exception     => ${exception?.stackTraceToString() ?: ""}")
+                                    .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Publish).topic}")
+                                    .append("  - payload       => ${(asyncActionToken.userContext as MqttUserContext.Publish).payload}")
 
-                            MqttUserContext.PUBLISH -> {
-                                Log.i(
-                                    TAG,
-                                    "전송 실패 | topic: ${asyncActionToken.topics.contentToString()}"
-                                )
                                 cont.resumeWithException(InvalidPublishException())
                             }
 
-                            else -> cont.resumeWithException(exception ?: UnKnownException())
+                            else -> {
+                                out
+                                    .append("알 수 없는 예외\n")
+                                    .append("  - exception     => ${exception?.stackTraceToString() ?: ""}")
+
+                                cont.resumeWithException(exception ?: UnKnownException())
+                            }
+                        }
+
+                        if (out.isNotBlank()) {
+                            Log.e(TAG, "MQTT >> $out")
                         }
                     }
                 }

@@ -2,30 +2,24 @@ package com.monglife.mongs.presentation.viewmodel.pages.exchange
 
 import com.monglife.mongs.application.member.player.usecase.ExchangeStarPointUseCase
 import com.monglife.mongs.application.member.player.usecase.ObservePlayerUseCase
-import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class ExchangeStarPointViewModel @Inject constructor(
-    private val getCurrentMongUseCase: GetCurrentMongUseCase,
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val observeStarPointUseCase: ObservePlayerUseCase,
     private val exchangeStarPointUseCase: ExchangeStarPointUseCase,
@@ -78,27 +72,14 @@ class ExchangeStarPointViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                getCurrentMongUseCase()?.let {
-                    _mongVo.value = it
-                } ?: run {
+                observeForever(observeCurrentMongUseCase(), _mongVo)
+
+                _mongVo.value ?: run {
                     _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
                 }
 
-                observeCurrentMongUseCase()
-                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, null)
-                    .let {
-                        observeForever(it, _mongVo)
-                        _mongVo.value = it.first()
-                    }
-
-                observeStarPointUseCase()
-                    .map { it.starPoint }
-                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, 0)
-                    .let {
-                        observeForever(it, _starPoint)
-                        _starPoint.value = it.first()
-                    }
+                observeForever(observeStarPointUseCase().map { it.starPoint }, _starPoint)
             }
 
             _uiState.value = UiState.Idle
@@ -137,9 +118,6 @@ class ExchangeStarPointViewModel @Inject constructor(
                         starPoint = starPoint,
                     )
                 )
-
-                delay(1000)
-                _mongVo.value = getCurrentMongUseCase()
             }
 
             _uiEvent.emit(UiEvent.Exchange(message = "환전 완료"))

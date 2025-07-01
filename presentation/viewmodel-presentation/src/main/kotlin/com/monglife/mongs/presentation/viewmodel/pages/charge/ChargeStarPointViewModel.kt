@@ -1,7 +1,6 @@
 package com.monglife.mongs.presentation.viewmodel.pages.charge
 
 import android.app.Activity
-import android.util.Log
 import com.monglife.core.billing.client.GoogleBillingClient
 import com.monglife.core.billing.exception.BillingNotSupportException
 import com.monglife.mongs.application.member.player.usecase.ObservePlayerUseCase
@@ -16,13 +15,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -85,18 +82,9 @@ class ChargeStarPointViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
+                observeForever(observePlayerUseCase().map { it.starPoint }, _starPoint)
                 _productVos.value = getProductsUseCase()
                 _notConsumedOrderVos.value = getNotConsumedOrdersUseCase()
-
-                observePlayerUseCase()
-                    .let { playerVoFlow ->
-                        playerVoFlow.map { it.starPoint }
-                            .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, 0)
-                            .let {
-                                observeForever(it, _starPoint)
-                                _starPoint.value = it.first()
-                            }
-                    }
             }
 
             _uiState.value = UiState.Idle

@@ -1,8 +1,7 @@
 package com.monglife.mongs.data.core.mqtt.consumer
 
 import android.util.Log
-import com.google.gson.Gson
-import com.monglife.mongs.data.core.web.dto.response.ResponseDto
+import com.monglife.mongs.data.core.mqtt.utils.MqttUtil
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttMessage
@@ -11,7 +10,7 @@ import javax.inject.Singleton
 
 @Singleton
 class MqttLogConsumer @Inject constructor(
-    private val gson: Gson,
+    private val mqttUtil: MqttUtil,
 ) : MqttCallback {
 
     companion object {
@@ -26,14 +25,12 @@ class MqttLogConsumer @Inject constructor(
                         .append("%-30s".format(topic))
                         .append("\n")
 
-                    val bodyJson = message.toString()
-
-                    gson.fromJson(bodyJson, ResponseDto::class.java).let { responseDto ->
+                    mqttUtil.fromJson(mqttMessage = message, classType = String::class.java).let { responseDto ->
                         out
-                            .append("  - http status   => ${responseDto?.httpStatus}\n")
-                            .append("  - response code => ${responseDto?.code}\n")
-                            .append("  - message       => ${responseDto?.message}\n")
-                            .append("  - result        => ${responseDto?.result}")
+                            .append("  - http status   => ${responseDto.httpStatus}\n")
+                            .append("  - response code => ${responseDto.code}\n")
+                            .append("  - message       => ${responseDto.message}\n")
+                            .append("  - result        => ${responseDto.result}")
                     }
 
                     Log.i(TAG, "MQTT >> $out")

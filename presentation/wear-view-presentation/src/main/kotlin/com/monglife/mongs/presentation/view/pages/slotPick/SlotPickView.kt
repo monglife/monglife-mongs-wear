@@ -128,7 +128,7 @@ fun SlotPickView(
 
                         SlotVo.SlotType.BUY -> BuySlot(
                             modifier = Modifier.zIndex(1f),
-                            starPoint = starPoint.value,
+                            starPoint = starPoint.value ?: 0,
                             buySlotPrice = 10,
                             buySlotDialogOpen = slotPickViewModel::buySlotDialogOpen,
                         )

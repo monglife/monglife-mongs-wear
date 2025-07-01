@@ -10,12 +10,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -64,28 +61,23 @@ class SettingViewModel @Inject constructor(
      * 변수
      */
     private val _notificationOption = MutableStateFlow(false)
-    val notificationOption: StateFlow<Boolean> get() = _notificationOption
+    val notificationOption: StateFlow<Boolean> = _notificationOption.asStateFlow()
 
     private val _notificationPermission = MutableStateFlow(false)
-    val notificationPermission: StateFlow<Boolean> get() = _notificationPermission
+    val notificationPermission: StateFlow<Boolean> = _notificationPermission.asStateFlow()
 
     private val _activityPermission = MutableStateFlow(false)
-    val activityPermission: StateFlow<Boolean> get() = _activityPermission
+    val activityPermission: StateFlow<Boolean> = _activityPermission.asStateFlow()
 
     private val _locationPermission = MutableStateFlow(false)
-    val locationPermission: StateFlow<Boolean> get() = _locationPermission
+    val locationPermission: StateFlow<Boolean> = _locationPermission.asStateFlow()
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                observeNotificationOptionUseCase()
-                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, false)
-                    .let {
-                        observeForever(it, _notificationOption)
-                        _notificationOption.value = it.first()
-                    }
+                observeForever(observeNotificationOptionUseCase(), _notificationOption)
                 _notificationPermission.value = permissionUtil.verifyNotificationPermission().isEmpty()
                 _activityPermission.value = permissionUtil.verifyActivityPermission().isEmpty()
                 _locationPermission.value = permissionUtil.verifyLocationPermission().isEmpty()

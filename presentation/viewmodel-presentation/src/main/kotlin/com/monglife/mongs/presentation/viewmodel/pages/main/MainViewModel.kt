@@ -10,11 +10,8 @@ import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -62,19 +59,8 @@ class MainViewModel @Inject constructor(
                 syncRemoteMongsUseCase()
                 syncRemoteStepUseCase()
 
-                observeCurrentMongUseCase()
-                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, null)
-                    .let {
-                        observeForever(it, _mongVo)
-                        _mongVo.value = it.first()
-                    }
-
-                observeBackgroundMapCodeUseCase()
-                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, "")
-                    .let {
-                        observeForever(it, _backgroundMapCode)
-                        _backgroundMapCode.value = it.first()
-                    }
+                observeForever(observeCurrentMongUseCase(), _mongVo)
+                observeForever(observeBackgroundMapCodeUseCase(), _backgroundMapCode)
             }
 
             _uiState.value = UiState.Idle

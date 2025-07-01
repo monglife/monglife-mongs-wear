@@ -1,16 +1,13 @@
 package com.monglife.mongs.presentation.viewmodel.layout
 
-import com.monglife.mongs.application.auth.usecase.GetIsLoginUseCase
 import com.monglife.mongs.application.auth.usecase.GetMustUpdateAppUseCase
+import com.monglife.mongs.application.auth.usecase.ObserveIsLoginUseCase
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -18,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LayoutViewModel @Inject constructor(
     private val getMustUpdateAppUseCase: GetMustUpdateAppUseCase,
-    private val getIsLoginUseCase: GetIsLoginUseCase,
+    private val observeIsLoginUseCase: ObserveIsLoginUseCase,
 ) : BaseViewModel() {
 
     /**
@@ -50,12 +47,7 @@ class LayoutViewModel @Inject constructor(
 
             // 로그인 여부 로딩
             withContext(Dispatchers.IO) {
-                getIsLoginUseCase()
-                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, null)
-                    .let {
-                        observeForever(it, _isLogin)
-                        _isLogin.value = it.first()
-                    }
+                observeForever(observeIsLoginUseCase(), _isLogin)
             }
 
             // 앱 업데이트 체크

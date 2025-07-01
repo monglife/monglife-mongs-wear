@@ -2,23 +2,18 @@ package com.monglife.mongs.presentation.viewmodel.pages.exchange
 
 import com.monglife.mongs.application.device.usecase.ExchangeWalkingCountUseCase
 import com.monglife.mongs.application.device.usecase.ObserveCurrentWalkingCountUseCase
-import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.core.presentation.utils.PermissionUtil
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -26,7 +21,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ExchangeStepViewModel @Inject constructor(
     private val permissionUtil: PermissionUtil,
-    private val getCurrentMongUseCase: GetCurrentMongUseCase,
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val observeCurrentWalkingCountUseCase: ObserveCurrentWalkingCountUseCase,
     private val exchangeWalkingCountUseCase: ExchangeWalkingCountUseCase,
@@ -85,26 +79,14 @@ class ExchangeStepViewModel @Inject constructor(
                 // 활동 권한 정보 목록
                 _activityPermission.value = permissionUtil.verifyActivityPermission().isEmpty()
 
-                getCurrentMongUseCase()?.let {
-                    _mongVo.value = it
-                } ?: run {
+                observeForever(observeCurrentMongUseCase(), _mongVo)
+
+                _mongVo.value ?: run {
                     _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
                 }
 
-                observeCurrentMongUseCase()
-                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, null)
-                    .let {
-                        observeForever(it, _mongVo)
-                        _mongVo.value = it.first()
-                    }
-
-                observeCurrentWalkingCountUseCase()
-                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, 0)
-                    .let {
-                        observeForever(it, _walkingCount)
-                        _walkingCount.value = it.first()
-                    }
+                observeForever(observeCurrentWalkingCountUseCase(), _walkingCount)
             }
 
             _uiState.value = UiState.Idle
@@ -143,9 +125,6 @@ class ExchangeStepViewModel @Inject constructor(
                         walkingCount = walkingCount,
                     )
                 )
-
-                delay(1000)
-                _mongVo.value = getCurrentMongUseCase()
             }
 
             _uiEvent.emit(UiEvent.Exchange(message = "환전 완료"))

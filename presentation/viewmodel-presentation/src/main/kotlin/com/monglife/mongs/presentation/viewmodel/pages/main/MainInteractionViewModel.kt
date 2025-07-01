@@ -3,15 +3,11 @@ package com.monglife.mongs.presentation.viewmodel.pages.main
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
-import com.monglife.mongs.presentation.viewmodel.pages.main.MainSlotViewModel.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -48,12 +44,7 @@ class MainInteractionViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                observeCurrentMongUseCase()
-                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, null)
-                    .let {
-                        observeForever(it, _mongVo)
-                        _mongVo.value = it.first()
-                    }
+                observeForever(observeCurrentMongUseCase(), _mongVo)
             }
 
             _uiState.value = UiState.Idle

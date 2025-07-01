@@ -26,18 +26,18 @@ class ObserveCurrentMongUseCase @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun execute(): Flow<MongVo?> {
         return devicePersistencePort.getCurrentMongIdFlow()
-            .flatMapLatest { mongId -> mongId?.let {
-                managementPersistencePort.getMongFlow(mongId = mongId)
-                    .map { mong ->
-                        mong?.let {
-                            managementPersistencePort.getMongOption(mongId = mong.mongId)
-                                .let { mongOption ->
-                                    MongVo.of(mong = mong, mongOption = mongOption)
-                                }
+            .flatMapLatest { mongId ->
+                mongId?.let {
+                    managementPersistencePort.getMongFlow(mongId = mongId)
+                        .map { mong ->
+                            mong?.let {
+                                managementPersistencePort.getMongOption(mongId = mong.mongId)
+                                    .let { mongOption ->
+                                        MongVo.of(mong = mong, mongOption = mongOption)
+                                    }
+                            }
                         }
-                    }
                 } ?: flowOf(null)
-            }
-            .flowOn(Dispatchers.IO)
+            }.flowOn(Dispatchers.IO)
     }
 }

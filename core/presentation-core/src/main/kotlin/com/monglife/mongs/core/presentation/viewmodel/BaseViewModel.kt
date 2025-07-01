@@ -7,11 +7,11 @@ import com.monglife.core.common.exception.ErrorException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 abstract class BaseViewModel : ViewModel() {
@@ -74,9 +74,15 @@ abstract class BaseViewModel : ViewModel() {
         viewModelScope.coroutineContext + exceptionHandler
     )
 
-    protected fun <T> observeForever(flow: StateFlow<T>, state: MutableStateFlow<T>) {
-        viewModelScopeWithHandler.launch {
-            flow.drop(1).collect {
+    /**
+     * View Model 에서의 Cold Flow 구독 등록
+     */
+    protected suspend fun <T> observeForever(flow: Flow<T>, state: MutableStateFlow<T>) {
+
+        state.value = flow.first()
+
+        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+            flow.collect {
                 state.emit(it)
             }
         }

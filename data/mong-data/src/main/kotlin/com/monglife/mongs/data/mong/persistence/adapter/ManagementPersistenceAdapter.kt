@@ -6,6 +6,7 @@ import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.exception.NotFoundMongOptionException
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.data.core.mqtt.client.MqttClient
+import com.monglife.mongs.data.core.mqtt.utils.MqttUtil
 import com.monglife.mongs.data.mong.persistence.db.MongRoomDB
 import com.monglife.mongs.data.mong.persistence.entity.MongEntity
 import com.monglife.mongs.data.mong.persistence.entity.MongOptionEntity
@@ -47,6 +48,7 @@ class ManagementPersistenceAdapter @Inject constructor(
     @ApplicationContext private val context: Context,
     private val roomDB: MongRoomDB,
     private val mqttClient: MqttClient,
+    private val mqttUtil: MqttUtil,
 ) : ManagementPersistencePort {
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -107,8 +109,15 @@ class ManagementPersistenceAdapter @Inject constructor(
                 override fun connectionLost(cause: Throwable?) {}
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {}
                 override fun messageArrived(topic: String?, message: MqttMessage?) {
-                    // TODO: MQTT 수신 업데이트 구현
-                    Log.d("TEST", "${message}")
+                    message?.let {
+                        topic?.let {
+                            runCatching {
+                                mqttUtil.fromJson(mqttMessage = message, classType = String::class.java).let { responseDto ->
+                                    Log.d("TEST", "$responseDto")
+                                }
+                            }
+                        }
+                    }
                 }
             })
         }

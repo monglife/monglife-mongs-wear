@@ -75,7 +75,7 @@ fun CollectionMapView(
                                 )) {
                                     val collectionMapVo = collectionMapVos.value[index - 1]
 
-                                    if (!collectionMapVo.isIncluded) {
+                                    if (collectionMapVo.isIncluded) {
                                         CircleTextButton(
                                             text = "?",
                                             border = R.drawable.btn_border_purple_dark,

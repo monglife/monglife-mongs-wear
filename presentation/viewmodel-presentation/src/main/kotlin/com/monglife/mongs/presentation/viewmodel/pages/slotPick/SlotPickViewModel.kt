@@ -16,9 +16,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalTime
@@ -71,10 +70,10 @@ class SlotPickViewModel @Inject constructor(
     val mongVos: StateFlow<List<MongVo>> get() = _mongVos
 
     private val _slotCount = MutableStateFlow(0)
-    val slotCount: StateFlow<Int> get() = _slotCount
+    val slotCount: StateFlow<Int> = _slotCount.asStateFlow()
 
     private val _starPoint = MutableStateFlow(0)
-    val starPoint: StateFlow<Int> get() = _starPoint
+    val starPoint: StateFlow<Int> = _starPoint.asStateFlow()
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
@@ -83,27 +82,13 @@ class SlotPickViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _mongVos.value = getMongsUseCase()
 
-                observeCurrentMongUseCase()
-                    .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, null)
-                    .let {
-                        observeForever(it, _mongVo)
-                        _mongVo.value = it.first()
-                    }
+                observeForever(observeCurrentMongUseCase(), _mongVo)
 
                 observePlayerUseCase()
+                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
                     .let { playerVoFlow ->
-                        playerVoFlow.map { it.slotCount }
-                            .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, 0)
-                            .let {
-                                observeForever(it, _slotCount)
-                                _slotCount.value = it.first()
-                            }
-                        playerVoFlow.map { it.starPoint }
-                            .stateIn(viewModelScopeWithHandler, SharingStarted.Eagerly, 0)
-                            .let {
-                                observeForever(it, _starPoint)
-                                _starPoint.value = it.first()
-                            }
+                        observeForever(playerVoFlow.map { it.slotCount }, _slotCount)
+                        observeForever(playerVoFlow.map { it.starPoint }, _starPoint)
                     }
             }
 
