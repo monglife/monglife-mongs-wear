@@ -1,5 +1,26 @@
 package com.monglife.mongs.data.device.web.client
 
-// TODO: API 호출 구현
+import com.monglife.core.data.web.dto.response.ResponseDto
+import com.monglife.mongs.data.device.web.client.request.ExchangeCurrentWalkingCountRequestDto
+import com.monglife.mongs.data.device.web.client.request.UpdateTotalWalkingCountRequestDto
+import com.monglife.mongs.data.device.web.client.response.ExchangeCurrentWalkingCountResponseDto
+import com.monglife.mongs.data.device.web.client.response.UpdateTotalWalkingCountResponseDto
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.PATCH
+import retrofit2.http.POST
+
 interface DeviceWebClient {
+
+    /**
+     * 걸음 수 환전 API 요청
+     */
+    @POST("user/step/exchange/walking")
+    suspend fun exchangeCurrentWalkingCount(@Body exchangeCurrentWalkingCountRequestDto: ExchangeCurrentWalkingCountRequestDto): Response<ResponseDto<ExchangeCurrentWalkingCountResponseDto>>
+
+    /**
+     * 걸음 수 동기화 API 요청
+     */
+    @PATCH("user/step/walking")
+    suspend fun updateTotalWalkingCount(@Body updateTotalWalkingCountRequestDto: UpdateTotalWalkingCountRequestDto): Response<ResponseDto<UpdateTotalWalkingCountResponseDto>>
 }

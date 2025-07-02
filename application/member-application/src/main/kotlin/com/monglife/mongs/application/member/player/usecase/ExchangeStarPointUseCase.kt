@@ -5,7 +5,7 @@ import com.monglife.mongs.application.member.player.exception.NotFoundPlayerExce
 import com.monglife.mongs.application.member.player.port.persistence.PlayerPersistencePort
 import com.monglife.mongs.application.member.player.port.web.PlayerWebPort
 import com.monglife.mongs.application.member.player.vo.PlayerVo
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

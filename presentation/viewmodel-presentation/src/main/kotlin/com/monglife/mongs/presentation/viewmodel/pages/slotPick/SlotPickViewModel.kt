@@ -9,7 +9,7 @@ import com.monglife.mongs.application.mong.usecase.management.GraduateMongUseCas
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.SetCurrentMongIdUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -82,13 +82,15 @@ class SlotPickViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _mongVos.value = getMongsUseCase()
 
-                observeForever(observeCurrentMongUseCase(), _mongVo)
+                observeCurrentMongUseCase()
+                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
+                    .let { flow -> observeForever(flow, _mongVo) }
 
                 observePlayerUseCase()
                     .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { playerVoFlow ->
-                        observeForever(playerVoFlow.map { it.slotCount }, _slotCount)
-                        observeForever(playerVoFlow.map { it.starPoint }, _starPoint)
+                    .let { flow ->
+                        observeForever(flow.map { it.slotCount }, _slotCount)
+                        observeForever(flow.map { it.starPoint }, _starPoint)
                     }
             }
 

@@ -6,7 +6,7 @@ import com.monglife.mongs.application.battle.exception.NotFoundMatchException
 import com.monglife.mongs.application.battle.exception.NotFoundMatchPlayerException
 import com.monglife.mongs.application.battle.port.persistence.MatchPersistencePort
 import com.monglife.mongs.application.battle.port.subscribe.MatchSubscribePort
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.domain.battle.model.Match
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

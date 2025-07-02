@@ -1,7 +1,7 @@
 package com.monglife.mongs.data.mong.web.client
 
-import com.monglife.mongs.data.core.web.dto.response.PageResponseDto
-import com.monglife.mongs.data.core.web.dto.response.ResponseDto
+import com.monglife.core.data.web.dto.response.PageResponseDto
+import com.monglife.core.data.web.dto.response.ResponseDto
 import com.monglife.mongs.data.mong.web.client.request.FeedFoodRequestDto
 import com.monglife.mongs.data.mong.web.client.request.FeedSnackRequestDto
 import com.monglife.mongs.data.mong.web.client.request.UseInventoryRequestDto
@@ -13,28 +13,12 @@ import com.monglife.mongs.data.mong.web.client.response.GetInventoryResponseDto
 import com.monglife.mongs.data.mong.web.client.response.GetSnackResponseDto
 import com.monglife.mongs.data.mong.web.client.response.RandomDrawResponseDto
 import com.monglife.mongs.data.mong.web.client.response.UseInventoryResponseDto
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import retrofit2.Response
-import retrofit2.Retrofit
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import javax.inject.Named
-import javax.inject.Singleton
-
-@Module
-@InstallIn(SingletonComponent::class)
-object InteractionWebClientModule {
-    @Provides
-    @Singleton
-    fun provideInteractionWebClient(@Named("monglife-mongs") retrofit: Retrofit): InteractionWebClient =
-        retrofit.create(InteractionWebClient::class.java)
-}
 
 interface InteractionWebClient {
 

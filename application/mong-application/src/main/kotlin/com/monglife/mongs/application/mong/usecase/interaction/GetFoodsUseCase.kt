@@ -2,7 +2,7 @@ package com.monglife.mongs.application.mong.usecase.interaction
 
 import com.monglife.mongs.application.mong.port.web.InteractionWebPort
 import com.monglife.mongs.application.mong.vo.FoodVo
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

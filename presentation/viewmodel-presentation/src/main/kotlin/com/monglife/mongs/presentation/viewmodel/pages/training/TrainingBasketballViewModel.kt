@@ -3,7 +3,7 @@ package com.monglife.mongs.presentation.viewmodel.pages.training
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

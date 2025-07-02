@@ -2,7 +2,7 @@ package com.monglife.mongs.application.auth.usecase
 
 import com.monglife.mongs.application.auth.exception.InvalidJoinException
 import com.monglife.mongs.application.auth.port.web.AuthWebPort
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

@@ -4,7 +4,7 @@ import com.monglife.mongs.application.battle.exception.NotFoundMatchException
 import com.monglife.mongs.application.battle.port.persistence.MatchPersistencePort
 import com.monglife.mongs.application.battle.port.web.MatchWebPort
 import com.monglife.mongs.application.battle.vo.MatchVo
-import com.monglife.mongs.core.domain.usecase.BaseNoParamUseCase
+import com.monglife.core.application.usecase.BaseNoParamUseCase
 import com.monglife.mongs.domain.battle.model.Match
 import com.monglife.mongs.domain.battle.model.MatchPlayer
 import kotlinx.coroutines.Dispatchers

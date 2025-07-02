@@ -3,7 +3,7 @@ package com.monglife.mongs.application.mong.usecase.management
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.application.mong.port.web.ManagementWebPort
-import com.monglife.mongs.core.domain.usecase.BaseNoParamUseCase
+import com.monglife.core.application.usecase.BaseNoParamUseCase
 import com.monglife.mongs.domain.mong.model.MongOption
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -1,6 +1,6 @@
 package com.monglife.mongs.presentation.viewmodel.pages.main
 
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow

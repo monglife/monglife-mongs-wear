@@ -2,7 +2,7 @@ package com.monglife.mongs.presentation.viewmodel.pages.notice
 
 import com.monglife.mongs.application.member.notice.usecase.GetNoticesUseCase
 import com.monglife.mongs.application.member.notice.vo.NoticeVo
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.feedback.FeedbackViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.inventory.InventoryViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.inventory.InventoryViewModel.Companion

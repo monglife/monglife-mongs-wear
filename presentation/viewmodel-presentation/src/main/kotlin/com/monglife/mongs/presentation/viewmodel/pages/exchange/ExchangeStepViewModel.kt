@@ -4,16 +4,18 @@ import com.monglife.mongs.application.device.usecase.ExchangeWalkingCountUseCase
 import com.monglife.mongs.application.device.usecase.ObserveCurrentWalkingCountUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.mongs.core.presentation.utils.PermissionUtil
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.utils.PermissionUtil
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -79,14 +81,18 @@ class ExchangeStepViewModel @Inject constructor(
                 // 활동 권한 정보 목록
                 _activityPermission.value = permissionUtil.verifyActivityPermission().isEmpty()
 
-                observeForever(observeCurrentMongUseCase(), _mongVo)
+                observeCurrentMongUseCase()
+                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
+                    .let { flow -> observeForever(flow, _mongVo) }
 
                 _mongVo.value ?: run {
                     _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
                 }
 
-                observeForever(observeCurrentWalkingCountUseCase(), _walkingCount)
+                observeCurrentWalkingCountUseCase()
+                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
+                    .let { flow -> observeForever(flow, _walkingCount) }
             }
 
             _uiState.value = UiState.Idle

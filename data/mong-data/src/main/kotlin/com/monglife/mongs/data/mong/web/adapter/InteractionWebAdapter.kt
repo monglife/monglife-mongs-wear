@@ -1,5 +1,6 @@
 package com.monglife.mongs.data.mong.web.adapter
 
+import com.monglife.core.application.response.PageResponse
 import com.monglife.mongs.application.mong.exception.InvalidBuyRandomDrawTicketException
 import com.monglife.mongs.application.mong.exception.InvalidConsumeInventoryException
 import com.monglife.mongs.application.mong.exception.InvalidFeedFoodException
@@ -14,25 +15,12 @@ import com.monglife.mongs.application.mong.port.web.response.GetFoodResponse
 import com.monglife.mongs.application.mong.port.web.response.GetInventoryResponse
 import com.monglife.mongs.application.mong.port.web.response.GetSnackResponse
 import com.monglife.mongs.application.mong.port.web.response.RandomDrawResponseVo
-import com.monglife.mongs.core.domain.port.response.PageResponse
 import com.monglife.mongs.data.mong.web.client.InteractionWebClient
 import com.monglife.mongs.data.mong.web.client.request.FeedFoodRequestDto
 import com.monglife.mongs.data.mong.web.client.request.FeedSnackRequestDto
 import com.monglife.mongs.data.mong.web.client.request.UseInventoryRequestDto
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class InteractionWebAdapterModule {
-    @Binds
-    @Singleton
-    abstract fun bindInteractionWebPort(adapter: InteractionWebAdapter): InteractionWebPort
-}
 
 @Singleton
 class InteractionWebAdapter @Inject constructor(

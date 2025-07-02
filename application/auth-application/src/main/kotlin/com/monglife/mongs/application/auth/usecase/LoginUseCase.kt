@@ -8,7 +8,7 @@ import com.monglife.mongs.application.auth.port.persistence.DevicePersistencePor
 import com.monglife.mongs.application.auth.port.web.AuthWebPort
 import com.monglife.mongs.application.auth.port.web.UserDeviceWebPort
 import com.monglife.mongs.application.auth.port.web.request.CreateDeviceRequest
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.domain.auth.model.Session
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

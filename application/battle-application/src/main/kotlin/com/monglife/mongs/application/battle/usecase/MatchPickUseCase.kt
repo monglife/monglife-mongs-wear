@@ -4,7 +4,7 @@ import com.monglife.mongs.application.battle.exception.InvalidPublishMatchPickEx
 import com.monglife.mongs.application.battle.exception.NotFoundMatchException
 import com.monglife.mongs.application.battle.port.persistence.MatchPersistencePort
 import com.monglife.mongs.application.battle.port.publish.MatchPublishPort
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.domain.battle.enums.MatchPickCode
 import com.monglife.mongs.domain.battle.model.Match
 import kotlinx.coroutines.Dispatchers

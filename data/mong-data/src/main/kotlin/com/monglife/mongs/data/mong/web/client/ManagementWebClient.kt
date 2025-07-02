@@ -1,6 +1,6 @@
 package com.monglife.mongs.data.mong.web.client
 
-import com.monglife.mongs.data.core.web.dto.response.ResponseDto
+import com.monglife.core.data.web.dto.response.ResponseDto
 import com.monglife.mongs.data.mong.web.client.request.CreateMongRequestDto
 import com.monglife.mongs.data.mong.web.client.response.CreateMongResponseDto
 import com.monglife.mongs.data.mong.web.client.response.DeleteMongResponseDto
@@ -10,29 +10,13 @@ import com.monglife.mongs.data.mong.web.client.response.GraduateMongResponseDto
 import com.monglife.mongs.data.mong.web.client.response.PoopCleanMongResponseDto
 import com.monglife.mongs.data.mong.web.client.response.SleepWakeupResponseDto
 import com.monglife.mongs.data.mong.web.client.response.StrokeMongResponseDto
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import retrofit2.Response
-import retrofit2.Retrofit
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
-import javax.inject.Named
-import javax.inject.Singleton
-
-@Module
-@InstallIn(SingletonComponent::class)
-object ManagementWebClientModule {
-    @Provides
-    @Singleton
-    fun provideManagementWebClient(@Named("monglife-mongs") retrofit: Retrofit): ManagementWebClient =
-        retrofit.create(ManagementWebClient::class.java)
-}
 
 interface ManagementWebClient {
 

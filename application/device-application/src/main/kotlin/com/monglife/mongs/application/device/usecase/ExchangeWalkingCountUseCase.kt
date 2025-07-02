@@ -4,7 +4,7 @@ import com.monglife.mongs.application.device.exception.ExchangeWalkingCountExcep
 import com.monglife.mongs.application.device.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.device.port.web.DeviceWebPort
 import com.monglife.mongs.application.device.port.web.request.ExchangeWalkingCountRequest
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

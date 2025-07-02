@@ -13,7 +13,7 @@ import com.monglife.mongs.application.battle.port.subscribe.event.MatchingFailEv
 import com.monglife.mongs.application.battle.port.subscribe.event.QueueEvent
 import com.monglife.mongs.application.battle.port.web.QueueWebPort
 import com.monglife.mongs.application.battle.vo.MatchVo
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.domain.battle.model.Match
 import com.monglife.mongs.domain.battle.model.MatchPlayer
 import kotlinx.coroutines.Dispatchers

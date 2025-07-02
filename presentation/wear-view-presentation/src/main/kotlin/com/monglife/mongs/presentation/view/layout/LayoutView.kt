@@ -8,7 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.viewmodel.layout.LayoutViewModel

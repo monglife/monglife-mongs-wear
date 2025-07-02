@@ -6,12 +6,14 @@ import com.monglife.mongs.application.member.player.usecase.SyncRemotePlayerUseC
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.SyncRemoteMongsUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -59,8 +61,13 @@ class MainViewModel @Inject constructor(
                 syncRemoteMongsUseCase()
                 syncRemoteStepUseCase()
 
-                observeForever(observeCurrentMongUseCase(), _mongVo)
-                observeForever(observeBackgroundMapCodeUseCase(), _backgroundMapCode)
+                observeCurrentMongUseCase()
+                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
+                    .let { flow -> observeForever(flow, _mongVo) }
+
+                observeBackgroundMapCodeUseCase()
+                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
+                    .let { flow -> observeForever(flow, _backgroundMapCode) }
             }
 
             _uiState.value = UiState.Idle

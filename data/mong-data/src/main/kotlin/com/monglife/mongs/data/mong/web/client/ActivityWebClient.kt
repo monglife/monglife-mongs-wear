@@ -1,6 +1,6 @@
 package com.monglife.mongs.data.mong.web.client
 
-import com.monglife.mongs.data.core.web.dto.response.ResponseDto
+import com.monglife.core.data.web.dto.response.ResponseDto
 import com.monglife.mongs.data.mong.web.client.request.TrainingEndRequestDto
 import com.monglife.mongs.data.mong.web.client.response.GetTrainingResponseDto
 import com.monglife.mongs.data.mong.web.client.response.TrainingEndResponseDto
@@ -16,16 +16,6 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import javax.inject.Named
 import javax.inject.Singleton
-
-
-@Module
-@InstallIn(SingletonComponent::class)
-object ActivityWebClientModule {
-    @Provides
-    @Singleton
-    fun provideActivityWebClient(@Named("monglife-mongs") retrofit: Retrofit): ActivityWebClient =
-        retrofit.create(ActivityWebClient::class.java)
-}
 
 interface ActivityWebClient {
 

@@ -9,17 +9,19 @@ import com.monglife.mongs.application.member.store.usecase.GetNotConsumedOrdersU
 import com.monglife.mongs.application.member.store.usecase.GetProductsUseCase
 import com.monglife.mongs.application.member.store.vo.OrderVo
 import com.monglife.mongs.application.member.store.vo.ProductVo
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -82,7 +84,10 @@ class ChargeStarPointViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                observeForever(observePlayerUseCase().map { it.starPoint }, _starPoint)
+                observePlayerUseCase()
+                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
+                    .let { flow -> observeForever(flow.map { it.starPoint }, _starPoint) }
+
                 _productVos.value = getProductsUseCase()
                 _notConsumedOrderVos.value = getNotConsumedOrdersUseCase()
             }

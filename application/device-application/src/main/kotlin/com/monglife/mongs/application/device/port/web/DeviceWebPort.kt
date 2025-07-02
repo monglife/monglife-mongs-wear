@@ -21,4 +21,9 @@ interface DeviceWebPort {
      */
     @Throws(UpdateWalkingCountException::class)
     suspend fun updateWalkingCount(updateWalkingCountRequest: UpdateWalkingCountRequest): UpdateWalkingCountResponse
+
+    /**
+     * 걸음 수 동기화 스케줄 생성
+     */
+    suspend fun createUpdateWalkingCountScheduler()
 }

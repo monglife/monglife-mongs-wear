@@ -3,7 +3,7 @@ package com.monglife.mongs.application.battle.usecase
 import com.monglife.mongs.application.battle.exception.NotFoundWinnerMatchPlayerException
 import com.monglife.mongs.application.battle.port.web.MatchWebPort
 import com.monglife.mongs.application.battle.vo.WinMatchPlayerVo
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

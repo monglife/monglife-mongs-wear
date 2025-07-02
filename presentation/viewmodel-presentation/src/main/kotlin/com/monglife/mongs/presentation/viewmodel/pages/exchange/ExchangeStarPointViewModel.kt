@@ -4,16 +4,18 @@ import com.monglife.mongs.application.member.player.usecase.ExchangeStarPointUse
 import com.monglife.mongs.application.member.player.usecase.ObservePlayerUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -72,14 +74,18 @@ class ExchangeStarPointViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                observeForever(observeCurrentMongUseCase(), _mongVo)
+                observeCurrentMongUseCase()
+                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
+                    .let { flow -> observeForever(flow, _mongVo) }
 
                 _mongVo.value ?: run {
                     _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
                 }
 
-                observeForever(observeStarPointUseCase().map { it.starPoint }, _starPoint)
+                observeStarPointUseCase()
+                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
+                    .let { flow -> observeForever(flow.map { it.starPoint }, _starPoint) }
             }
 
             _uiState.value = UiState.Idle

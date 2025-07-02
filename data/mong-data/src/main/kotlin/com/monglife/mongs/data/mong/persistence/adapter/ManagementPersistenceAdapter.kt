@@ -1,23 +1,19 @@
 package com.monglife.mongs.data.mong.persistence.adapter
 
 import android.content.Context
-import android.util.Log
+import com.monglife.core.data.mqtt.client.MqttClient
+import com.monglife.core.data.mqtt.utils.MqttUtil
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.exception.NotFoundMongOptionException
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
-import com.monglife.mongs.data.core.mqtt.client.MqttClient
-import com.monglife.mongs.data.core.mqtt.utils.MqttUtil
 import com.monglife.mongs.data.mong.persistence.db.MongRoomDB
+import com.monglife.mongs.data.mong.persistence.dto.ManagementEventDto
 import com.monglife.mongs.data.mong.persistence.entity.MongEntity
 import com.monglife.mongs.data.mong.persistence.entity.MongOptionEntity
 import com.monglife.mongs.domain.mong.model.Mong
 import com.monglife.mongs.domain.mong.model.MongOption
 import com.mongs.wear.data.core.R
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,6 +23,9 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttMessage
@@ -34,14 +33,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class ManagementPersistenceAdapterModule {
-    @Binds
-    @Singleton
-    abstract fun bindManagementPersistencePort(adapter: ManagementPersistenceAdapter): ManagementPersistencePort
-}
 
 @Singleton
 class ManagementPersistenceAdapter @Inject constructor(
@@ -101,19 +92,54 @@ class ManagementPersistenceAdapter @Inject constructor(
      */
     override suspend fun getMongFlow(mongId: Long): Flow<Mong?> = flow {
 
-        val topic = "${context.getString(R.string.mongs_mqtt_topic)}/mong/management/$mongId"
         val subscribeCount = subscribeCounterMap.getOrPut(mongId) { AtomicInteger(0) }
+
+        val baseTopic = "${context.getString(R.string.mongs_mqtt_topic)}/mong/management"
+        val topic = "$baseTopic/$mongId/#"
+        val mongTopic = "$baseTopic/$mongId"
 
         if (subscribeCount.getAndIncrement() == 0) {
             mqttClient.subscribe(topic = topic, callback = object : MqttCallback {
                 override fun connectionLost(cause: Throwable?) {}
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {}
                 override fun messageArrived(topic: String?, message: MqttMessage?) {
-                    message?.let {
-                        topic?.let {
-                            runCatching {
-                                mqttUtil.fromJson(mqttMessage = message, classType = String::class.java).let { responseDto ->
-                                    Log.d("TEST", "$responseDto")
+                    if (message == null || topic == null) return
+                    applicationScope.launch {
+                        Mutex().withLock(owner = applicationScope) {
+                            if (topic == mongTopic) {
+                                mqttUtil.fromJson(
+                                    mqttMessage = message,
+                                    classType = ManagementEventDto::class.java
+                                ).let { responseDto ->
+                                    roomDB.mongDao()
+                                        .findMongByMongId(mongId = responseDto.result.mongId)
+                                        ?.let { mongEntity ->
+                                            roomDB.mongDao().save(
+                                                MongEntity(
+                                                    mongId = responseDto.result.mongId,
+                                                    name = responseDto.result.name,
+                                                    mongCode = responseDto.result.mongCode,
+                                                    mongName = responseDto.result.mongName,
+                                                    stateCode = responseDto.result.stateCode,
+                                                    statusCode = responseDto.result.statusCode,
+                                                    level = mongEntity.level,
+                                                    sleepAt = mongEntity.sleepAt,
+                                                    wakeupAt = mongEntity.wakeupAt,
+                                                    payPoint = responseDto.result.payPoint,
+                                                    isSleep = responseDto.result.isSleep,
+                                                    strengthRatio = responseDto.result.strengthRatio,
+                                                    healthyRatio = responseDto.result.healthyRatio,
+                                                    satietyRatio = responseDto.result.satietyRatio,
+                                                    fatigueRatio = responseDto.result.fatigueRatio,
+                                                    expRatio = responseDto.result.expRatio,
+                                                    weight = responseDto.result.weight,
+                                                    poopCount = responseDto.result.poopCount,
+                                                    randomDrawTicketCount = mongEntity.randomDrawTicketCount,
+                                                    createdAt = mongEntity.createdAt,
+                                                    updatedAt = mongEntity.updatedAt,
+                                                )
+                                            )
+                                        }
                                 }
                             }
                         }

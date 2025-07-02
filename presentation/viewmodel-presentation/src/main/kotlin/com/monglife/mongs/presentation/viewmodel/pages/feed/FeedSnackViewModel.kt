@@ -5,7 +5,7 @@ import com.monglife.mongs.application.mong.usecase.interaction.GetSnacksUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.application.mong.vo.SnackVo
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow

@@ -1,27 +1,10 @@
 package com.monglife.mongs.data.member.collection.web.client
 
-import com.monglife.mongs.data.core.web.dto.response.ResponseDto
+import com.monglife.core.data.web.dto.response.ResponseDto
 import com.monglife.mongs.data.member.collection.web.client.response.GetCollectionMapResponseDto
 import com.monglife.mongs.data.member.collection.web.client.response.GetCollectionMongResponseDto
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import retrofit2.Response
-import retrofit2.Retrofit
 import retrofit2.http.GET
-import javax.inject.Named
-import javax.inject.Singleton
-
-@Module
-@InstallIn(SingletonComponent::class)
-object CollectionWebClientModule {
-    @Provides
-    @Singleton
-    fun provideCollectionWebClient(
-        @Named("monglife-mongs") retrofit: Retrofit
-    ): CollectionWebClient = retrofit.create(CollectionWebClient::class.java)
-}
 
 interface CollectionWebClient {
 

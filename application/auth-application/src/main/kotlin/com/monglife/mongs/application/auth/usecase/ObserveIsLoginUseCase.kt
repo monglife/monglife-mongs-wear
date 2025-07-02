@@ -1,7 +1,7 @@
 package com.monglife.mongs.application.auth.usecase
 
 import com.monglife.mongs.application.auth.port.persistence.AuthPersistencePort
-import com.monglife.mongs.core.domain.usecase.BaseNoParamUseCase
+import com.monglife.core.application.usecase.BaseNoParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext

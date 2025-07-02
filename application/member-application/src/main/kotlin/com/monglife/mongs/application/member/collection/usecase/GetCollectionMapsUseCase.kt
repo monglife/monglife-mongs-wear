@@ -2,7 +2,7 @@ package com.monglife.mongs.application.member.collection.usecase
 
 import com.monglife.mongs.application.member.collection.port.web.CollectionWebPort
 import com.monglife.mongs.application.member.collection.vo.CollectionMapVo
-import com.monglife.mongs.core.domain.usecase.BaseNoParamUseCase
+import com.monglife.core.application.usecase.BaseNoParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

@@ -5,66 +5,63 @@ import android.content.Context
 import android.os.SystemClock
 import android.provider.Settings
 import com.google.firebase.messaging.FirebaseMessaging
+import com.monglife.core.data.mqtt.client.MqttClient
+import com.monglife.core.data.mqtt.utils.MqttUtil
 import com.monglife.mongs.application.auth.exception.InvalidLogoutException
 import com.monglife.mongs.data.device.persistence.datastore.DeviceDataStore
+import com.monglife.mongs.data.device.persistence.dto.DeviceEventDto
 import com.monglife.mongs.data.device.persistence.entity.DeviceOptionEntity
 import com.monglife.mongs.data.device.persistence.entity.StepEntity
 import com.monglife.mongs.data.device.persistence.manager.StepSensorManager
 import com.monglife.mongs.domain.device.model.DeviceOption
 import com.monglife.mongs.domain.device.model.Step
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
+import com.mongs.wear.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttCallback
+import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class DevicePersistenceAdapterModule {
-    @Binds
-    @Singleton
-    abstract fun bindDevicePersistencePortForAuthApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.auth.port.persistence.DevicePersistencePort
-    @Binds
-    @Singleton
-    abstract fun bindDevicePersistencePortForBattleApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.battle.port.persistence.DevicePersistencePort
-    @Binds
-    @Singleton
-    abstract fun bindDevicePersistencePortForDeviceApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.device.port.persistence.DevicePersistencePort
-    @Binds
-    @Singleton
-    abstract fun bindDevicePersistencePortForMemberApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.member.feedback.port.persistence.DevicePersistencePort
-    @Binds
-    @Singleton
-    abstract fun bindDevicePersistencePortForMongApplication(adapter: DevicePersistenceAdapter): com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort
-}
-
 @SuppressLint("HardwareIds")
+@Singleton
 class DevicePersistenceAdapter @Inject constructor(
     @ApplicationContext private val context: Context,
     private val firebaseMessaging: FirebaseMessaging,
     private val stepSensorManager: StepSensorManager,
-    private val deviceDataStore: DeviceDataStore
+    private val deviceDataStore: DeviceDataStore,
+    private val mqttClient: MqttClient,
+    private val mqttUtil: MqttUtil,
 ) : com.monglife.mongs.application.auth.port.persistence.DevicePersistencePort,
     com.monglife.mongs.application.battle.port.persistence.DevicePersistencePort,
     com.monglife.mongs.application.device.port.persistence.DevicePersistencePort,
     com.monglife.mongs.application.member.feedback.port.persistence.DevicePersistencePort,
     com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort {
 
-    companion object {
-        private val DATE_FORMATER = DateTimeFormatter.ofPattern("yyyyMMddHHmm")
-    }
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val subscribeCounterMap = ConcurrentHashMap<String, AtomicInteger>()
 
     /**
      * 현재 몽 ID 조회
@@ -135,7 +132,9 @@ class DevicePersistenceAdapter @Inject constructor(
     /**
      * 걸음 수 Flow 객체 조회
      */
-    override suspend fun getStepFlow(): Flow<Step> {
+    override suspend fun getStepFlow(): Flow<Step> = flow {
+        val deviceId = this@DevicePersistenceAdapter.getDeviceId()
+
         deviceDataStore.getStep() ?: run {
             deviceDataStore.saveStep(
                 StepEntity(
@@ -145,22 +144,65 @@ class DevicePersistenceAdapter @Inject constructor(
             )
         }
 
-        val stepEntityFlow = deviceDataStore.getStepFlow()
-        val totalWalkingCountFlow = stepSensorManager.getTotalWalkingCountFlow()
-        val deviceBootedAt = this.getBootedAt()
+        val subscribeCount = subscribeCounterMap.getOrPut(deviceId) { AtomicInteger(0) }
 
-        return combine(
-            stepEntityFlow,
-            totalWalkingCountFlow,
-        ) { stepEntity, totalWalkingCount ->
-            Step(
-                totalWalkingCount = totalWalkingCount,
-                deviceBootedAt = deviceBootedAt,
-                walkingCount = stepEntity?.walkingCount ?: 0,
-                consumedWalkingCount = stepEntity?.consumedWalkingCount ?: 0,
-            )
+        val baseTopic = "${context.getString(R.string.mongs_mqtt_topic)}/device"
+        val topic = "$baseTopic/$deviceId/#"
+        val deviceTopic = "$baseTopic/$deviceId"
+
+        if (subscribeCount.getAndIncrement() == 0) {
+            mqttClient.subscribe(topic = topic, callback = object : MqttCallback {
+                override fun connectionLost(cause: Throwable?) {}
+                override fun deliveryComplete(token: IMqttDeliveryToken?) {}
+                override fun messageArrived(topic: String?, message: MqttMessage?) {
+                    if (message == null || topic == null) return
+                    applicationScope.launch {
+                        Mutex().withLock(owner = applicationScope) {
+                            if (topic == deviceTopic) {
+                                mqttUtil.fromJson(
+                                    mqttMessage = message,
+                                    classType = DeviceEventDto::class.java
+                                ).let { responseDto ->
+                                    deviceDataStore.getStep() ?: run {
+                                        deviceDataStore.saveStep(
+                                            StepEntity(
+                                                walkingCount = responseDto.result.walkingCount,
+                                                consumedWalkingCount = responseDto.result.consumeWalkingCount,
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            })
         }
-    }
+
+        try {
+            emitAll(
+                combine(
+                    deviceDataStore.getStepFlow(),
+                    stepSensorManager.getTotalWalkingCountFlow(),
+                ) { stepEntity, totalWalkingCount ->
+                    Step(
+                        totalWalkingCount = totalWalkingCount,
+                        deviceBootedAt = this@DevicePersistenceAdapter.getBootedAt(),
+                        walkingCount = stepEntity?.walkingCount ?: 0,
+                        consumedWalkingCount = stepEntity?.consumedWalkingCount ?: 0,
+                    )
+                })
+        } finally {
+            if (subscribeCount.decrementAndGet() == 0) {
+                mqttClient.disSubscribe(topic = topic)
+                subscribeCounterMap.remove(deviceId)
+            }
+        }
+    }.shareIn(
+        scope = applicationScope,
+        started = SharingStarted.WhileSubscribed(),
+        replay = 1,
+    )
 
     /**
      * 걸음 수 로컬 동기화
@@ -281,10 +323,11 @@ class DevicePersistenceAdapter @Inject constructor(
      * 기기 부팅 시간 조회
      */
     private fun getBootedAt(): LocalDateTime {
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm")
         val uptimeMillis = System.currentTimeMillis() - SystemClock.elapsedRealtime()
         val deviceBootedDt =
             Instant.ofEpochMilli(uptimeMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
-        return LocalDateTime.parse(deviceBootedDt.format(DATE_FORMATER), DATE_FORMATER)
+        return LocalDateTime.parse(deviceBootedDt.format(dateFormatter), dateFormatter)
     }
 
     /**

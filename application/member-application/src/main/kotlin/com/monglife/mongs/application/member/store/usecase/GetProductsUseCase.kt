@@ -2,7 +2,7 @@ package com.monglife.mongs.application.member.store.usecase
 
 import com.monglife.mongs.application.member.store.port.web.StoreWebPort
 import com.monglife.mongs.application.member.store.vo.ProductVo
-import com.monglife.mongs.core.domain.usecase.BaseNoParamUseCase
+import com.monglife.core.application.usecase.BaseNoParamUseCase
 import com.monglife.mongs.domain.member.store.model.Product
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

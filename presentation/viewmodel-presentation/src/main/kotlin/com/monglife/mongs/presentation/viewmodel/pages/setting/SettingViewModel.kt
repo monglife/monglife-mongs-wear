@@ -3,16 +3,18 @@ package com.monglife.mongs.presentation.viewmodel.pages.setting
 import com.monglife.mongs.application.auth.usecase.LogoutUseCase
 import com.monglife.mongs.application.device.usecase.ObserveNotificationOptionUseCase
 import com.monglife.mongs.application.device.usecase.SetNotificationOptionUseCase
-import com.monglife.mongs.core.presentation.utils.PermissionUtil
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.utils.PermissionUtil
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -77,7 +79,9 @@ class SettingViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                observeForever(observeNotificationOptionUseCase(), _notificationOption)
+                observeNotificationOptionUseCase()
+                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
+                    .let { flow -> observeForever(flow, _notificationOption) }
                 _notificationPermission.value = permissionUtil.verifyNotificationPermission().isEmpty()
                 _activityPermission.value = permissionUtil.verifyActivityPermission().isEmpty()
                 _locationPermission.value = permissionUtil.verifyLocationPermission().isEmpty()

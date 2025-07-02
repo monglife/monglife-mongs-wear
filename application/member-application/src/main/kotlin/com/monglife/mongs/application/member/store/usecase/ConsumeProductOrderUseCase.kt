@@ -3,7 +3,7 @@ package com.monglife.mongs.application.member.store.usecase
 import com.monglife.mongs.application.member.player.port.persistence.PlayerPersistencePort
 import com.monglife.mongs.application.member.store.exception.InvalidConsumeOrderException
 import com.monglife.mongs.application.member.store.port.web.StoreWebPort
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.domain.member.player.model.Player
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

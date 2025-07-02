@@ -1,7 +1,7 @@
 package com.monglife.mongs.application.device.usecase
 
 import com.monglife.mongs.application.device.port.persistence.DevicePersistencePort
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.domain.device.model.DeviceOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

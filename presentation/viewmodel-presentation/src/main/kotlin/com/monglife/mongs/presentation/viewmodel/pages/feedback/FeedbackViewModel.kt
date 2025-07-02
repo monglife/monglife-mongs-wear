@@ -3,7 +3,7 @@ package com.monglife.mongs.presentation.viewmodel.pages.feedback
 import com.monglife.mongs.application.member.feedback.usecase.CreateFeedbackUseCase
 import com.monglife.mongs.application.member.feedback.usecase.GetFeedbackTypesUseCase
 import com.monglife.mongs.application.member.feedback.vo.FeedbackTypeVo
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

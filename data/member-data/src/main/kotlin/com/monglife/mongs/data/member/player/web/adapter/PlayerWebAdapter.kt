@@ -10,20 +10,8 @@ import com.monglife.mongs.application.member.player.port.web.response.ExchangeSt
 import com.monglife.mongs.application.member.player.port.web.response.GetPlayerResponse
 import com.monglife.mongs.data.member.player.web.client.PlayerWebClient
 import com.monglife.mongs.data.member.player.web.client.request.ExchangeStartPointRequestDto
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class PlayerWebAdapterModule {
-    @Binds
-    @Singleton
-    abstract fun bindPlayerWebPort(adapter: PlayerWebAdapter): PlayerWebPort
-}
 
 @Singleton
 class PlayerWebAdapter @Inject constructor(

@@ -6,20 +6,8 @@ import com.monglife.mongs.application.member.feedback.port.web.response.GetFeedb
 import com.monglife.mongs.data.member.feedback.web.client.FeedbackWebClient
 import com.monglife.mongs.data.member.feedback.web.client.request.CreateFeedbackRequestDto
 import com.monglife.mongs.data.member.feedback.web.enums.FeedbackTypeCode
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class FeedbackWebAdapterModule {
-    @Binds
-    @Singleton
-    abstract fun bindFeedbackWebPort(adapter: FeedbackWebAdapter): FeedbackWebPort
-}
 
 @Singleton
 class FeedbackWebAdapter @Inject constructor(

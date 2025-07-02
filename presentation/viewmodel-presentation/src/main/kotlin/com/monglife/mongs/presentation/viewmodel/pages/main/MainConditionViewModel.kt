@@ -2,12 +2,14 @@ package com.monglife.mongs.presentation.viewmodel.pages.main
 
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -45,7 +47,9 @@ class MainConditionViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                observeForever(observeCurrentMongUseCase(), _mongVo)
+                observeCurrentMongUseCase()
+                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
+                    .let { flow -> observeForever(flow, _mongVo) }
             }
 
             _uiState.value = UiState.Idle

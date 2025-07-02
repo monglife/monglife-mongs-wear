@@ -4,7 +4,7 @@ import com.monglife.mongs.application.mong.port.persistence.DevicePersistencePor
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.application.mong.port.web.ManagementWebPort
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.mongs.core.domain.usecase.BaseNoParamUseCase
+import com.monglife.core.application.usecase.BaseNoParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

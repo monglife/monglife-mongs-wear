@@ -5,7 +5,7 @@ import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.application.mong.port.web.ManagementWebPort
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

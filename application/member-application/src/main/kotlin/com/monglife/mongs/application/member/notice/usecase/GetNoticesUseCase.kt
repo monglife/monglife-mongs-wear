@@ -2,8 +2,8 @@ package com.monglife.mongs.application.member.notice.usecase
 
 import com.monglife.mongs.application.member.notice.port.web.NoticeWebPort
 import com.monglife.mongs.application.member.notice.vo.NoticeVo
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
-import com.monglife.mongs.core.domain.wrapper.Page
+import com.monglife.core.application.usecase.BaseParamUseCase
+import com.monglife.core.application.wrapper.Page
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

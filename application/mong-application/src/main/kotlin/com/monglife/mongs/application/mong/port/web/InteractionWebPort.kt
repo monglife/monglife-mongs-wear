@@ -13,7 +13,7 @@ import com.monglife.mongs.application.mong.port.web.response.GetFoodResponse
 import com.monglife.mongs.application.mong.port.web.response.GetInventoryResponse
 import com.monglife.mongs.application.mong.port.web.response.GetSnackResponse
 import com.monglife.mongs.application.mong.port.web.response.RandomDrawResponseVo
-import com.monglife.mongs.core.domain.port.response.PageResponse
+import com.monglife.core.application.response.PageResponse
 
 interface InteractionWebPort {
 

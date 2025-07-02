@@ -1,5 +1,10 @@
 package com.monglife.mongs.data.auth.web.adapter
 
+import com.monglife.core.data.web.client.AuthWebClient
+import com.monglife.core.data.web.client.request.JoinRequestDto
+import com.monglife.core.data.web.client.request.LoginRequestDto
+import com.monglife.core.data.web.client.request.LogoutRequestDto
+import com.monglife.core.data.web.utils.HttpUtil.getErrorResponseDto
 import com.monglife.mongs.application.auth.exception.InvalidJoinException
 import com.monglife.mongs.application.auth.exception.InvalidLoginException
 import com.monglife.mongs.application.auth.exception.InvalidLogoutException
@@ -8,25 +13,12 @@ import com.monglife.mongs.application.auth.exception.VerifyAppVersionException
 import com.monglife.mongs.application.auth.port.web.AuthWebPort
 import com.monglife.mongs.application.auth.port.web.response.LoginResponse
 import com.monglife.mongs.application.auth.port.web.response.VerifyAppVersionResponse
-import com.monglife.mongs.data.core.web.client.AuthWebClient
-import com.monglife.mongs.data.core.web.client.request.JoinRequestDto
-import com.monglife.mongs.data.core.web.client.request.LoginRequestDto
-import com.monglife.mongs.data.core.web.client.request.LogoutRequestDto
-import com.monglife.mongs.data.core.web.utils.HttpUtil.getErrorResponseDto
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class AuthWebAdapterModule {
-    @Binds
-    @Singleton
-    abstract fun bindAuthWebPort(adapter: AuthWebAdapter): AuthWebPort
-}
 
 class AuthWebAdapter @Inject constructor(
     private val authWebClient: AuthWebClient,

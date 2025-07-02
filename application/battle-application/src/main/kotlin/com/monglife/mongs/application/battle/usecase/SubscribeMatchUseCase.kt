@@ -10,7 +10,7 @@ import com.monglife.mongs.application.battle.port.subscribe.event.MatchEndEvent
 import com.monglife.mongs.application.battle.port.subscribe.event.MatchEvent
 import com.monglife.mongs.application.battle.port.subscribe.event.MatchRoundOverEvent
 import com.monglife.mongs.application.battle.port.subscribe.event.MatchStartEvent
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.domain.battle.model.Match
 import com.monglife.mongs.domain.battle.model.MatchPlayer
 import kotlinx.coroutines.Dispatchers

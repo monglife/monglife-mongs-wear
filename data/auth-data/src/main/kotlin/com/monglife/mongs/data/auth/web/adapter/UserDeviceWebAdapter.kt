@@ -5,20 +5,7 @@ import com.monglife.mongs.application.auth.port.web.UserDeviceWebPort
 import com.monglife.mongs.application.auth.port.web.request.CreateDeviceRequest
 import com.monglife.mongs.data.auth.web.client.UserDeviceWebClient
 import com.monglife.mongs.data.auth.web.client.request.CreateDeviceRequestDto
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
-import javax.inject.Singleton
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class UserDeviceWebAdapterModule {
-    @Binds
-    @Singleton
-    abstract fun bindUserDeviceWebPort(adapter: UserDeviceWebAdapter): UserDeviceWebPort
-}
 
 class UserDeviceWebAdapter @Inject constructor(
     private val userDeviceWebClient: UserDeviceWebClient,

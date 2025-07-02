@@ -5,7 +5,7 @@ import com.monglife.mongs.application.battle.port.persistence.DevicePersistenceP
 import com.monglife.mongs.application.battle.port.persistence.MatchPersistencePort
 import com.monglife.mongs.application.battle.port.subscribe.QueueSubscribePort
 import com.monglife.mongs.application.battle.port.web.QueueWebPort
-import com.monglife.mongs.core.domain.usecase.BaseParamUseCase
+import com.monglife.core.application.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

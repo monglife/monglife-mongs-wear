@@ -66,6 +66,7 @@ dependencies {
     // worker
     implementation "androidx.work:work-runtime-ktx:${rootProject.ext.workerVersion}"
     implementation "androidx.hilt:hilt-work:${rootProject.ext.hiltWorkerVersion}"
+    ksp "androidx.hilt:hilt-compiler:${rootProject.ext.hiltWorkerVersion}"
 
     // fcm
     implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")

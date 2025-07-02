@@ -8,8 +8,6 @@ import com.monglife.mongs.application.mong.exception.InvalidPoopCleanMongExcepti
 import com.monglife.mongs.application.mong.exception.InvalidSleepingMongException
 import com.monglife.mongs.application.mong.exception.InvalidStrokeMongException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
-import com.monglife.mongs.application.mong.port.web.ActivityWebPort
-import com.monglife.mongs.application.mong.port.web.InteractionWebPort
 import com.monglife.mongs.application.mong.port.web.ManagementWebPort
 import com.monglife.mongs.application.mong.port.web.response.CreateMongResponse
 import com.monglife.mongs.application.mong.port.web.response.DeleteMongResponse
@@ -21,21 +19,9 @@ import com.monglife.mongs.application.mong.port.web.response.SleepingMongRespons
 import com.monglife.mongs.application.mong.port.web.response.StrokeMongResponse
 import com.monglife.mongs.data.mong.web.client.ManagementWebClient
 import com.monglife.mongs.data.mong.web.client.request.CreateMongRequestDto
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import java.time.LocalTime
 import javax.inject.Inject
 import javax.inject.Singleton
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class ManagementWebAdapterModule {
-    @Binds
-    @Singleton
-    abstract fun bindManagementWebPort(adapter: ManagementWebAdapter): ManagementWebPort
-}
 
 @Singleton
 class ManagementWebAdapter @Inject constructor(

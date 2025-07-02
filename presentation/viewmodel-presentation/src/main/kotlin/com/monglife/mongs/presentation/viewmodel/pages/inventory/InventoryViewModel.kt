@@ -3,7 +3,7 @@ package com.monglife.mongs.presentation.viewmodel.pages.inventory
 import com.monglife.mongs.application.mong.usecase.interaction.GetInventoriesUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.InventoryVo
-import com.monglife.mongs.core.presentation.viewmodel.BaseViewModel
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
