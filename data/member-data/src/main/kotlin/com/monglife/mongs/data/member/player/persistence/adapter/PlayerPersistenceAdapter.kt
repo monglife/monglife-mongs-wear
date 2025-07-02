@@ -3,6 +3,7 @@ package com.monglife.mongs.data.member.player.persistence.adapter
 import android.content.Context
 import com.monglife.core.data.mqtt.client.MqttClient
 import com.monglife.core.data.mqtt.utils.MqttUtil
+import com.monglife.core.data.persistence.datastore.SessionDataStore
 import com.monglife.mongs.application.member.player.exception.NotFoundPlayerException
 import com.monglife.mongs.application.member.player.port.persistence.PlayerPersistencePort
 import com.monglife.mongs.data.member.player.persistence.datastore.PlayerDataStore
@@ -35,6 +36,7 @@ import javax.inject.Singleton
 @Singleton
 class PlayerPersistenceAdapter @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val sessionDataStore: SessionDataStore,
     private val playerDataStore: PlayerDataStore,
     private val mqttClient: MqttClient,
     private val mqttUtil: MqttUtil,
@@ -47,8 +49,16 @@ class PlayerPersistenceAdapter @Inject constructor(
      * 플레이어 조회
      */
     @Throws(NotFoundPlayerException::class)
-    override suspend fun getPlayer(): Player =
-        playerDataStore.getPlayer()?.toDomain() ?: throw NotFoundPlayerException()
+    override suspend fun getPlayer(): Player = playerDataStore.getPlayer()?.toDomain()
+        ?: sessionDataStore.getSession()?.let {
+            playerDataStore.savePlayer(
+                playerEntity = PlayerEntity(
+                    accountId = it.accountId,
+                    slotCount = 0,
+                    starPoint = 0,
+                )
+            ).toDomain()
+        } ?: throw NotFoundPlayerException()
 
     /**
      * 플레이어 Flow 객체 조회
@@ -56,7 +66,16 @@ class PlayerPersistenceAdapter @Inject constructor(
     @Throws(NotFoundPlayerException::class)
     override suspend fun getPlayerFlow(): Flow<Player> = flow {
 
-        val player = playerDataStore.getPlayer()?.toDomain() ?: throw NotFoundPlayerException()
+        val player = playerDataStore.getPlayer()?.toDomain()
+            ?: sessionDataStore.getSession()?.let {
+                playerDataStore.savePlayer(
+                    playerEntity = PlayerEntity(
+                        accountId = it.accountId,
+                        slotCount = 0,
+                        starPoint = 0,
+                    )
+                ).toDomain()
+            } ?: throw NotFoundPlayerException()
 
         val subscribeCount = subscribeCounterMap.getOrPut(player.accountId) { AtomicInteger(0) }
 

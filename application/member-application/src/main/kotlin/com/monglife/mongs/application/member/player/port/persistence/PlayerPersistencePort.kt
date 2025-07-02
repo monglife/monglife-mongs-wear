@@ -9,7 +9,6 @@ interface PlayerPersistencePort {
     /**
      * 플레이어 조회
      */
-    @Throws(NotFoundPlayerException::class)
     suspend fun getPlayer(): Player
 
     /**

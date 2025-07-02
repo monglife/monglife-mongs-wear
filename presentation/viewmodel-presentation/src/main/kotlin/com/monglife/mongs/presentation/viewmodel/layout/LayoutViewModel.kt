@@ -1,8 +1,8 @@
 package com.monglife.mongs.presentation.viewmodel.layout
 
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.auth.usecase.GetMustUpdateAppUseCase
 import com.monglife.mongs.application.auth.usecase.ObserveIsLoginUseCase
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,9 +51,7 @@ class LayoutViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 observeIsLoginUseCase()
                     .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow ->
-                        observeForever(flow, _isLogin)
-                    }
+                    .let { flow -> observeForever(flow, _isLogin) }
             }
 
             // 앱 업데이트 체크
