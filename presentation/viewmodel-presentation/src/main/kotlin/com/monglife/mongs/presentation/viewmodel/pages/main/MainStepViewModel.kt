@@ -1,10 +1,10 @@
 package com.monglife.mongs.presentation.viewmodel.pages.main
 
+import com.monglife.core.presentation.utils.PermissionUtil
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.device.usecase.ObserveCurrentWalkingCountUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.core.presentation.utils.PermissionUtil
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,9 +18,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainStepViewModel @Inject constructor(
-    private val permissionUtil: PermissionUtil,
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val observeCurrentWalkingCountUseCase: ObserveCurrentWalkingCountUseCase,
+    private val permissionUtil: PermissionUtil,
 ) : BaseViewModel() {
 
     /**
@@ -45,8 +45,8 @@ class MainStepViewModel @Inject constructor(
     private val _activityPermission = MutableStateFlow(false)
     val activityPermission: StateFlow<Boolean> = _activityPermission.asStateFlow()
 
-    private val _mongVo = MutableStateFlow<MongVo?>(null)
-    val mongVo: StateFlow<MongVo?> = _mongVo.asStateFlow()
+    private val _currentMongVo = MutableStateFlow<MongVo?>(null)
+    val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
 
     private val _currentWalkingCount = MutableStateFlow(0)
     val currentWalkingCount: StateFlow<Int> = _currentWalkingCount.asStateFlow()
@@ -61,7 +61,7 @@ class MainStepViewModel @Inject constructor(
 
                 observeCurrentMongUseCase()
                     .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow -> observeForever(flow, _mongVo) }
+                    .let { flow -> observeForever(flow, _currentMongVo) }
 
                 observeCurrentWalkingCountUseCase()
                     .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)

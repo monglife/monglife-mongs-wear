@@ -1,10 +1,10 @@
 package com.monglife.mongs.presentation.viewmodel.pages.exchange
 
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.member.player.usecase.ExchangeStarPointUseCase
 import com.monglife.mongs.application.member.player.usecase.ObservePlayerUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -63,8 +63,8 @@ class ExchangeStarPointViewModel @Inject constructor(
     /**
      * 변수
      */
-    private val _mongVo = MutableStateFlow<MongVo?>(null)
-    val mongVo: StateFlow<MongVo?> = _mongVo.asStateFlow()
+    private val _currentMongVo = MutableStateFlow<MongVo?>(null)
+    val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
 
     private val _starPoint = MutableStateFlow(0)
     val starPoint: StateFlow<Int> = _starPoint.asStateFlow()
@@ -76,9 +76,9 @@ class ExchangeStarPointViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 observeCurrentMongUseCase()
                     .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow -> observeForever(flow, _mongVo) }
+                    .let { flow -> observeForever(flow, _currentMongVo) }
 
-                _mongVo.value ?: run {
+                _currentMongVo.value ?: run {
                     _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
                 }

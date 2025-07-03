@@ -54,7 +54,7 @@ fun ExchangeStepView(
     context: Context = LocalContext.current,
 ) {
     val uiState = exchangeStepViewModel.uiState.collectAsState()
-    val mongVo = exchangeStepViewModel.mongVo.collectAsState()
+    val currentMongVo = exchangeStepViewModel.currentMongVo.collectAsState()
     val walkingCount = exchangeStepViewModel.walkingCount.collectAsState()
     val activityPermission = exchangeStepViewModel.activityPermission.collectAsState()
 
@@ -68,7 +68,7 @@ fun ExchangeStepView(
         if (uiState.value.loadingBar) {
              LoadingBar()
         } else {
-            mongVo.value?.let {
+            currentMongVo.value?.let {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize().zIndex(1f),

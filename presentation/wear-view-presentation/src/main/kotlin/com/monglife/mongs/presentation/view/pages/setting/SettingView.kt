@@ -107,7 +107,7 @@ fun SettingView(
                             backgroundColor = Color.Black,
                             label = "로그아웃",
                             secondaryLabel = "구글 계정 로그아웃",
-                            onClick = settingViewModel::logoutDialogOpen,
+                            onClick = settingViewModel::logoutConfirmDialogOpen,
                         )
                     }
 
@@ -166,11 +166,11 @@ fun SettingView(
             }
 
             Box(modifier = Modifier.zIndex(2f)) {
-                if (uiState.value.logoutDialogOpen) {
+                if (uiState.value.logoutConfirmDialogOpen) {
                     ConfirmAndCancelDialog(
                         text = "로그아웃하시겠습니까?",
                         confirm = settingViewModel::logout,
-                        cancel = settingViewModel::logoutDialogClose
+                        cancel = settingViewModel::logoutConfirmDialogClose
                     )
                 }
             }

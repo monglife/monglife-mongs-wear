@@ -1,11 +1,11 @@
 package com.monglife.mongs.presentation.viewmodel.pages.feed
 
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.mong.usecase.interaction.FeedFoodMongUseCase
 import com.monglife.mongs.application.mong.usecase.interaction.GetFoodsUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.FoodVo
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,12 +31,12 @@ class FeedFoodViewModel @Inject constructor(
     sealed class UiState(
         val loadingBar: Boolean = false,
         val detailDialogOpen: Boolean = false,
-        val buyDialogOpen: Boolean = false,
+        val confirmDialogOpen: Boolean = false,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
         data object Detail: UiState(detailDialogOpen = true)
-        data object Buy: UiState(buyDialogOpen = true)
+        data object Confirm: UiState(confirmDialogOpen = true)
     }
 
     /**
@@ -45,7 +45,7 @@ class FeedFoodViewModel @Inject constructor(
     sealed class UiEvent {
         data object Idle: UiEvent()
         data class NavMenu(val message: String): UiEvent()
-        data object Feed: UiEvent()
+        data object Buy: UiEvent()
     }
 
     /**
@@ -63,8 +63,8 @@ class FeedFoodViewModel @Inject constructor(
     /**
      * 변수
      */
-    private val _mongVo = MutableStateFlow<MongVo?>(null)
-    val mongVo: StateFlow<MongVo?> = _mongVo.asStateFlow()
+    private val _currentMongVo = MutableStateFlow<MongVo?>(null)
+    val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
 
     private val _foodVos = MutableStateFlow<List<FoodVo>>(emptyList())
     val foodVos: StateFlow<List<FoodVo>> = _foodVos.asStateFlow()
@@ -75,7 +75,7 @@ class FeedFoodViewModel @Inject constructor(
 
             withContext(Dispatchers.IO) {
                 getCurrentMongUseCase()?.let {
-                    _mongVo.value = it
+                    _currentMongVo.value = it
 
                     // 음식 목록 조회
                     _foodVos.value = getFoodsUseCase(
@@ -83,7 +83,10 @@ class FeedFoodViewModel @Inject constructor(
                             mongId = it.mongId,
                         )
                     )
-                } ?: _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
+                } ?: run {
+                    _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
+                    return@withContext
+                }
             }
 
             _uiState.value = UiState.Idle
@@ -91,9 +94,9 @@ class FeedFoodViewModel @Inject constructor(
     }
 
     /**
-     * 먹이 섭취
+     * 간식 섭취
      */
-    fun buyFood(mongId: Long, foodCode: String) {
+    fun buy(mongId: Long, foodCode: String) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
@@ -105,7 +108,7 @@ class FeedFoodViewModel @Inject constructor(
                     )
                 )
 
-                _uiEvent.emit(UiEvent.Feed)
+                _uiEvent.emit(UiEvent.Buy)
             }
 
             _uiState.value = UiState.Idle
@@ -133,16 +136,16 @@ class FeedFoodViewModel @Inject constructor(
     /**
      * 구매 확인 다이얼로그 오픈
      */
-    fun buyDialogOpen() {
+    fun buyConfirmDialogOpen() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Buy
+            _uiState.value = UiState.Confirm
         }
     }
 
     /**
      * 구매 확인 다이얼로그 닫기
      */
-    fun buyDialogClose() {
+    fun buyConfirmDialogClose() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Idle
         }

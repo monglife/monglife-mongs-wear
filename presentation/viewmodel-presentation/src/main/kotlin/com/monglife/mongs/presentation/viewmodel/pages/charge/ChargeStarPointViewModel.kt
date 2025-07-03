@@ -3,13 +3,12 @@ package com.monglife.mongs.presentation.viewmodel.pages.charge
 import android.app.Activity
 import com.monglife.core.billing.client.GoogleBillingClient
 import com.monglife.core.billing.exception.BillingNotSupportException
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.member.player.usecase.ObservePlayerUseCase
 import com.monglife.mongs.application.member.store.usecase.ConsumeProductOrderUseCase
-import com.monglife.mongs.application.member.store.usecase.GetNotConsumedOrdersUseCase
 import com.monglife.mongs.application.member.store.usecase.GetProductsUseCase
 import com.monglife.mongs.application.member.store.vo.OrderVo
 import com.monglife.mongs.application.member.store.vo.ProductVo
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -30,7 +29,6 @@ import javax.inject.Inject
 class ChargeStarPointViewModel @Inject constructor(
     private val observePlayerUseCase: ObservePlayerUseCase,
     private val getProductsUseCase: GetProductsUseCase,
-    private val getNotConsumedOrdersUseCase: GetNotConsumedOrdersUseCase,
     private val consumeProductOrderUseCase: ConsumeProductOrderUseCase,
     private val billingClient: GoogleBillingClient,
 ): BaseViewModel() {
@@ -76,9 +74,6 @@ class ChargeStarPointViewModel @Inject constructor(
     private val _productVos = MutableStateFlow<List<ProductVo>>(emptyList())
     val productVos: StateFlow<List<ProductVo>> = _productVos.asStateFlow()
 
-    private val _notConsumedOrderVos = MutableStateFlow<List<OrderVo>>(emptyList())
-    val notConsumedOrderVos: StateFlow<List<OrderVo>> = _notConsumedOrderVos.asStateFlow()
-
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
@@ -88,8 +83,7 @@ class ChargeStarPointViewModel @Inject constructor(
                     .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
                     .let { flow -> observeForever(flow.map { it.starPoint }, _starPoint) }
 
-                _productVos.value = getProductsUseCase()
-                _notConsumedOrderVos.value = getNotConsumedOrdersUseCase()
+                updateProductVos()
             }
 
             _uiState.value = UiState.Idle
@@ -116,8 +110,7 @@ class ChargeStarPointViewModel @Inject constructor(
                 )
 
                 _uiEvent.emit(UiEvent.Buy("충전 완료"))
-                _productVos.value = getProductsUseCase()
-                _notConsumedOrderVos.value = getNotConsumedOrdersUseCase()
+                updateProductVos()
             }
 
             _uiState.value = UiState.Idle
@@ -141,12 +134,18 @@ class ChargeStarPointViewModel @Inject constructor(
                 )
 
                 _uiEvent.emit(UiEvent.Consume("소비 완료"))
-                _productVos.value = getProductsUseCase()
-                _notConsumedOrderVos.value = getNotConsumedOrdersUseCase()
+                updateProductVos()
             }
 
             _uiState.value = UiState.Idle
         }
+    }
+
+    /**
+     * 상품 목록 조회
+     */
+    private suspend fun updateProductVos() {
+        _productVos.value = getProductsUseCase()
     }
 
     /**
@@ -156,10 +155,7 @@ class ChargeStarPointViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
-            withContext(Dispatchers.IO) {
-                _productVos.value = getProductsUseCase()
-                _notConsumedOrderVos.value = getNotConsumedOrdersUseCase()
-            }
+            withContext(Dispatchers.IO) { updateProductVos() }
 
             _uiState.value = UiState.Idle
         }

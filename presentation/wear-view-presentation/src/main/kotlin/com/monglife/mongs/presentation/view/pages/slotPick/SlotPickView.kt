@@ -29,7 +29,7 @@ import com.monglife.mongs.presentation.view.dialog.pages.slotPick.CreateSlotDial
 import com.monglife.mongs.presentation.view.dialog.pages.slotPick.SlotDetailDialog
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainPagerViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.slotPick.SlotPickViewModel
-import com.monglife.mongs.presentation.viewmodel.pages.slotPick.SlotPickViewModel.SlotVo
+import com.monglife.mongs.presentation.viewmodel.pages.slotPick.SlotVo
 import kotlin.math.max
 import kotlin.math.min
 
@@ -45,7 +45,7 @@ fun SlotPickView(
     val uiState = slotPickViewModel.uiState.collectAsState()
     val slotCount = slotPickViewModel.slotCount.collectAsState()
     val starPoint = slotPickViewModel.starPoint.collectAsState()
-    val currentMongVo = slotPickViewModel.mongVo.collectAsState()
+    val currentMongVo = slotPickViewModel.currentMongVo.collectAsState()
     val mongVos = slotPickViewModel.mongVos.collectAsState()
     val slotIndex = remember { mutableIntStateOf(0) }
     val slotVos = remember {
@@ -69,7 +69,7 @@ fun SlotPickView(
             slotVos
         }
     }
-    val slotVo = remember {
+    val currentSlotVo = remember {
         derivedStateOf {
             if (slotIndex.intValue < slotVos.value.size) {
                 slotVos.value[slotIndex.intValue]
@@ -105,7 +105,7 @@ fun SlotPickView(
                         .zIndex(1f)
                 )
 
-                slotVo.value?.let { slotVo ->
+                currentSlotVo.value?.let { slotVo ->
                     when (slotVo.type) {
                         SlotVo.SlotType.EXISTS -> {
                             slotVo.mongVo?.let {
@@ -114,9 +114,9 @@ fun SlotPickView(
                                     currentMongId = currentMongVo.value?.mongId,
                                     mongVo = it,
                                     detailDialogOpen = slotPickViewModel::detailDialogOpen,
-                                    graduateDialogOpen = slotPickViewModel::graduateDialogOpen,
-                                    deleteDialogOpen = slotPickViewModel::deleteDialogOpen,
-                                    pickDialogOpen = slotPickViewModel::pickDialogOpen,
+                                    graduateDialogOpen = slotPickViewModel::graduateConfirmDialogOpen,
+                                    deleteDialogOpen = slotPickViewModel::deleteConfirmDialogOpen,
+                                    pickDialogOpen = slotPickViewModel::pickConfirmDialogOpen,
                                 )
                             }
                         }
@@ -128,9 +128,9 @@ fun SlotPickView(
 
                         SlotVo.SlotType.BUY -> BuySlot(
                             modifier = Modifier.zIndex(1f),
-                            starPoint = starPoint.value ?: 0,
+                            starPoint = starPoint.value,
                             buySlotPrice = 10,
-                            buySlotDialogOpen = slotPickViewModel::buySlotDialogOpen,
+                            buySlotDialogOpen = slotPickViewModel::buySlotConfirmDialogOpen,
                         )
                     }
                 }
@@ -151,7 +151,7 @@ fun SlotPickView(
                         onCreateClick = { name, sleepAt, wakeupAt -> slotPickViewModel.createMong(name, sleepAt, wakeupAt) },
                         onCloseClick = slotPickViewModel::initialize,
                     )
-                } else if (uiState.value.buySlotDialogOpen) {
+                } else if (uiState.value.buySlotConfirmDialogOpen) {
                     ConfirmAndCancelDialog(
                         modifier = Modifier.zIndex(2f),
                         text = "새로운 슬롯을\n구매하시겠습니까?",
@@ -160,7 +160,7 @@ fun SlotPickView(
                     )
                 }
 
-                slotVo.value?.mongVo?.let {
+                currentSlotVo.value?.mongVo?.let {
                     if (uiState.value.detailDialogOpen) {
                         SlotDetailDialog(
                             modifier = Modifier.zIndex(3f),
@@ -177,14 +177,14 @@ fun SlotPickView(
                             born = it.createdAt,
                             onClick = slotPickViewModel::initialize,
                         )
-                    } else if (uiState.value.deleteDialogOpen) {
+                    } else if (uiState.value.deleteConfirmDialogOpen) {
                         ConfirmAndCancelDialog(
                             modifier = Modifier.zIndex(3f),
                             text = "현재 몽을\n삭제하시겠습니까?",
                             confirm = { slotPickViewModel.deleteMong(mongId = it.mongId) },
                             cancel = slotPickViewModel::initialize
                         )
-                    } else if (uiState.value.pickDialogOpen) {
+                    } else if (uiState.value.pickConfirmDialogOpen) {
                         ConfirmAndCancelDialog(
                             modifier = Modifier.zIndex(3f),
                             text = "현재 몽을\n선택하시겠습니까?",
@@ -199,7 +199,7 @@ fun SlotPickView(
                             },
                             cancel = slotPickViewModel::initialize
                         )
-                    } else if (uiState.value.graduateDialogOpen) {
+                    } else if (uiState.value.graduateConfirmDialogOpen) {
                         ConfirmAndCancelDialog(
                             modifier = Modifier.zIndex(3f),
                             text = "현재 몽을\n졸업시키시겠습니까?",

@@ -39,7 +39,7 @@ internal fun ConditionContent(
     val isPagerChange = mainPagerViewModel.isPagerChange.collectAsState()
 
     val uiState = mainConditionViewModel.uiState.collectAsState()
-    val mongVo = mainConditionViewModel.mongVo.collectAsState()
+    val currentMongVo = mainConditionViewModel.currentMongVo.collectAsState()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -48,7 +48,7 @@ internal fun ConditionContent(
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            mongVo.value?.let {
+            currentMongVo.value?.let {
                 if (!isPagerChange.value) {
                     ProgressIndicator(
                         modifier = Modifier.zIndex(1f),

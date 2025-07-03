@@ -1,9 +1,9 @@
 package com.monglife.mongs.presentation.viewmodel.pages.feedback
 
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.member.feedback.usecase.CreateFeedbackUseCase
 import com.monglife.mongs.application.member.feedback.usecase.GetFeedbackTypesUseCase
 import com.monglife.mongs.application.member.feedback.vo.FeedbackTypeVo
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,14 +25,14 @@ class FeedbackViewModel @Inject constructor(
     sealed class UiState(
         val loadingBar: Boolean = false,
         val createDialogOpen: Boolean = false,
-        val createConfirmDialogOpen: Boolean = false,
-        val createSuccessDialogOpen: Boolean = false,
+        val confirmDialogOpen: Boolean = false,
+        val doneDialogOpen: Boolean = false,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
         data object Create: UiState(createDialogOpen = true)
-        data object CreateConfirm: UiState(createDialogOpen = true, createConfirmDialogOpen = true)
-        data object CreateSuccess: UiState(createSuccessDialogOpen = true)
+        data object Confirm: UiState(createDialogOpen = true, confirmDialogOpen = true)
+        data object Done: UiState(doneDialogOpen = true)
     }
 
     /**
@@ -90,7 +90,7 @@ class FeedbackViewModel @Inject constructor(
                 )
             }
 
-            _uiState.value = UiState.CreateSuccess
+            _uiState.value = UiState.Done
         }
     }
 
@@ -119,7 +119,7 @@ class FeedbackViewModel @Inject constructor(
      */
     fun createFeedbackConfirmDialogOpen() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.CreateConfirm
+            _uiState.value = UiState.Confirm
         }
     }
 

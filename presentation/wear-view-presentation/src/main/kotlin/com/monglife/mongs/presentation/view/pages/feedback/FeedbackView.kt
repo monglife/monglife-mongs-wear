@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.PositionIndicator
@@ -110,7 +107,7 @@ fun FeedbackView(
             }
 
             Box(modifier = Modifier.zIndex(3f)) {
-                if (uiState.value.createConfirmDialogOpen) {
+                if (uiState.value.confirmDialogOpen) {
                     ConfirmAndCancelDialog(
                         text = "오류를\n전송 하시겠습니까?",
                         cancel = feedbackViewModel::createFeedbackConfirmDialogClose,
@@ -121,7 +118,7 @@ fun FeedbackView(
                             )
                         },
                     )
-                } else if (uiState.value.createSuccessDialogOpen) {
+                } else if (uiState.value.doneDialogOpen) {
                     ConfirmDialog(
                         text = "오류 전송 완료!\n처리결과는 메일로\n전달드리겠습니다.",
                         confirm = feedbackViewModel::createFeedbackSuccessDialogClose,

@@ -1,11 +1,11 @@
 package com.monglife.mongs.presentation.viewmodel.pages.exchange
 
+import com.monglife.core.presentation.utils.PermissionUtil
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.device.usecase.ExchangeWalkingCountUseCase
 import com.monglife.mongs.application.device.usecase.ObserveCurrentWalkingCountUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.core.presentation.utils.PermissionUtil
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -67,8 +67,8 @@ class ExchangeStepViewModel @Inject constructor(
     private val _activityPermission = MutableStateFlow(false)
     val activityPermission: StateFlow<Boolean> = _activityPermission.asStateFlow()
 
-    private val _mongVo = MutableStateFlow<MongVo?>(null)
-    val mongVo: StateFlow<MongVo?> = _mongVo.asStateFlow()
+    private val _currentMongVo = MutableStateFlow<MongVo?>(null)
+    val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
 
     private val _walkingCount = MutableStateFlow(0)
     val walkingCount: StateFlow<Int> = _walkingCount.asStateFlow()
@@ -83,9 +83,9 @@ class ExchangeStepViewModel @Inject constructor(
 
                 observeCurrentMongUseCase()
                     .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow -> observeForever(flow, _mongVo) }
+                    .let { flow -> observeForever(flow, _currentMongVo) }
 
-                _mongVo.value ?: run {
+                _currentMongVo.value ?: run {
                     _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
                 }

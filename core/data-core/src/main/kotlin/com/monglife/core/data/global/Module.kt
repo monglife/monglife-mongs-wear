@@ -97,8 +97,8 @@ object RetrofitModule {
         )
         .readTimeout(context.getString(R.string.mongs_gateway_api_read_time_out).toLong(), TimeUnit.SECONDS)
         .writeTimeout(context.getString(R.string.mongs_gateway_api_write_time_out).toLong(), TimeUnit.SECONDS)
-        .addInterceptor(httpLogInterceptor)
         .addInterceptor(authorizationInterceptor)
+        .addInterceptor(httpLogInterceptor)
         .build()
 
     /**

@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.PositionIndicator
@@ -33,7 +32,6 @@ import com.monglife.mongs.presentation.view.utils.TimeUtil
 import com.monglife.mongs.presentation.viewmodel.pages.notice.NoticeViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun NoticeView(
@@ -129,7 +127,7 @@ fun NoticeView(
         .collect {
             // 마지막 페이지 아닌 경우만 재조회
             if (!isLastPage.value) {
-                noticeViewModel.updatePage(page = page.value + 1)
+                noticeViewModel.changePage(page = page.value + 1)
             }
         }
     }

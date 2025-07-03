@@ -44,7 +44,7 @@ internal fun SlotContent(
 
     val mainSlotViewModel: MainSlotViewModel = hiltViewModel<MainSlotViewModel>(parentEntry)
     val uiState = mainSlotViewModel.uiState.collectAsState()
-    val mongVo = mainSlotViewModel.mongVo.collectAsState()
+    val currentMongVo = mainSlotViewModel.currentMongVo.collectAsState()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -55,7 +55,7 @@ internal fun SlotContent(
         } else {
             // content layer
             Box(modifier = Modifier.zIndex(1f)) {
-                mongVo.value?.let {
+                currentMongVo.value?.let {
                     when (it.stateCode) {
                         MongStateCode.DEAD -> DeadSection(onClick = mainSlotViewModel::interactionDialogOpen)
                         MongStateCode.DELETE -> DeleteSection(
@@ -92,7 +92,7 @@ internal fun SlotContent(
             }
             // effect layer
             Box(modifier = Modifier.zIndex(2f)) {
-                mongVo.value?.let {
+                currentMongVo.value?.let {
                     when (it.stateCode) {
                         MongStateCode.NORMAL -> {
                             if (uiState.value.effectLoadingBar) {
@@ -132,7 +132,7 @@ internal fun SlotContent(
             }
             // dialog layer
             Box(modifier = Modifier.zIndex(3f)) {
-                mongVo.value?.let {
+                currentMongVo.value?.let {
                     if (uiState.value.interactionDialogOpen) {
                         InteractionDialog(
                             payPoint = it.payPoint,

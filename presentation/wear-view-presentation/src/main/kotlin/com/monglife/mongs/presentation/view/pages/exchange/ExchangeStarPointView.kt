@@ -43,7 +43,6 @@ import com.monglife.mongs.presentation.view.component.common.button.YellowButton
 import com.monglife.mongs.presentation.view.component.common.textbox.PayPoint
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.viewmodel.pages.exchange.ExchangeStarPointViewModel
-import com.monglife.mongs.presentation.viewmodel.pages.exchange.ExchangeStepViewModel
 import com.mongs.wear.presentation.view.wear.R
 import kotlin.math.max
 import kotlin.math.min
@@ -55,7 +54,7 @@ fun ExchangeStarPointView(
     context: Context = LocalContext.current,
 ) {
     val uiState = exchangeStarPointViewModel.uiState.collectAsState()
-    val mongVo = exchangeStarPointViewModel.mongVo.collectAsState()
+    val currentMongVo = exchangeStarPointViewModel.currentMongVo.collectAsState()
     val starPoint = exchangeStarPointViewModel.starPoint.collectAsState()
 
     val exchangeStarPoint = remember { mutableIntStateOf(0) }
@@ -68,7 +67,7 @@ fun ExchangeStarPointView(
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            mongVo.value?.let {
+            currentMongVo.value?.let {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize().zIndex(1f),

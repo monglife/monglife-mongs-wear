@@ -1,10 +1,10 @@
 package com.monglife.mongs.presentation.viewmodel.pages.setting
 
+import com.monglife.core.presentation.utils.PermissionUtil
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.auth.usecase.LogoutUseCase
 import com.monglife.mongs.application.device.usecase.ObserveNotificationOptionUseCase
 import com.monglife.mongs.application.device.usecase.SetNotificationOptionUseCase
-import com.monglife.core.presentation.utils.PermissionUtil
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,8 +23,8 @@ import javax.inject.Inject
 class SettingViewModel @Inject constructor(
     private val permissionUtil: PermissionUtil,
     private val observeNotificationOptionUseCase: ObserveNotificationOptionUseCase,
-    private val logoutUseCase: LogoutUseCase,
     private val setNotificationOptionUseCase: SetNotificationOptionUseCase,
+    private val logoutUseCase: LogoutUseCase,
 ): BaseViewModel() {
 
     /**
@@ -32,11 +32,11 @@ class SettingViewModel @Inject constructor(
      */
     sealed class UiState(
         val loadingBar: Boolean = false,
-        val logoutDialogOpen: Boolean = false
+        val logoutConfirmDialogOpen: Boolean = false
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
-        data object Logout : UiState(logoutDialogOpen = true)
+        data object LogoutConfirm : UiState(logoutConfirmDialogOpen = true)
     }
 
     /**
@@ -82,6 +82,7 @@ class SettingViewModel @Inject constructor(
                 observeNotificationOptionUseCase()
                     .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
                     .let { flow -> observeForever(flow, _notificationOption) }
+
                 _notificationPermission.value = permissionUtil.verifyNotificationPermission().isEmpty()
                 _activityPermission.value = permissionUtil.verifyActivityPermission().isEmpty()
                 _locationPermission.value = permissionUtil.verifyLocationPermission().isEmpty()
@@ -107,16 +108,16 @@ class SettingViewModel @Inject constructor(
     /**
      * 로그아웃 다이얼로그 오픈
      */
-    fun logoutDialogOpen() {
+    fun logoutConfirmDialogOpen() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Logout
+            _uiState.value = UiState.LogoutConfirm
         }
     }
 
     /**
      * 로그아웃 다이얼로그 닫기
      */
-    fun logoutDialogClose() {
+    fun logoutConfirmDialogClose() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Idle
         }
@@ -129,9 +130,7 @@ class SettingViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
-            withContext(Dispatchers.IO) {
-                logoutUseCase()
-            }
+            withContext(Dispatchers.IO) { logoutUseCase() }
 
             _uiState.value = UiState.Idle
         }

@@ -1,8 +1,8 @@
 package com.monglife.mongs.presentation.viewmodel.pages.collection
 
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.member.collection.usecase.GetCollectionMongsUseCase
 import com.monglife.mongs.application.member.collection.vo.CollectionMongVo
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

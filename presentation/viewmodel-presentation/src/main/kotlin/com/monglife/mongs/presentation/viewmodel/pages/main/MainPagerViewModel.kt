@@ -71,6 +71,4 @@ class MainPagerViewModel @Inject constructor(
             _normalPagerEvent.emit(NORMAL_PAGER_STATE_INIT)
         }
     }
-
-    override suspend fun exceptionHandler(exception: Throwable) {}
 }

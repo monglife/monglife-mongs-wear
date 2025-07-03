@@ -66,7 +66,7 @@ fun FeedSnackView(
     val mainSlotViewModel: MainSlotViewModel = hiltViewModel<MainSlotViewModel>(parentEntry)
 
     val uiState = feedSnackViewModel.uiState.collectAsState()
-    val mongVo = feedSnackViewModel.mongVo.collectAsState()
+    val currentMongVo = feedSnackViewModel.currentMongVo.collectAsState()
     val snackVos = feedSnackViewModel.snackVos.collectAsState()
     val snackIndex = remember { mutableIntStateOf(0) }
     val currentSnackVo = remember {
@@ -93,14 +93,14 @@ fun FeedSnackView(
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            mongVo.value?.let { mongVo ->
+            currentMongVo.value?.let { mongVo ->
                 currentSnackVo.value?.let { snackVo ->
                     FeedSnackContent(
                         modifier = Modifier.zIndex(1f),
                         mongVo = mongVo,
                         snackVo = snackVo,
                         detailDialogOpen = feedSnackViewModel::detailDialogOpen,
-                        buyDialogOpen = feedSnackViewModel::buyDialogOpen,
+                        buyDialogOpen = feedSnackViewModel::buyConfirmDialogOpen,
                     )
 
                     PageIndicator(
@@ -123,11 +123,11 @@ fun FeedSnackView(
                                 fatigue = snackVo.fatigue,
                                 onClick = feedSnackViewModel::detailDialogClose,
                             )
-                        } else if (uiState.value.buyDialogOpen) {
+                        } else if (uiState.value.confirmDialogOpen) {
                             ConfirmAndCancelDialog(
                                 text = "구매하시겠습니까?",
-                                cancel = feedSnackViewModel::buyDialogClose,
-                                confirm = { feedSnackViewModel.buySnack(mongId = mongVo.mongId, snackCode = snackVo.snackCode) },
+                                cancel = feedSnackViewModel::buyConfirmDialogClose,
+                                confirm = { feedSnackViewModel.buy(mongId = mongVo.mongId, snackCode = snackVo.snackCode) },
                             )
                         }
                     }
@@ -152,7 +152,7 @@ fun FeedSnackView(
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                     navController.popBackStack(RouterPath.FeedMenu.route, inclusive = false)
                 }
-                is FeedSnackViewModel.UiEvent.Feed -> {
+                is FeedSnackViewModel.UiEvent.Buy -> {
                     mainSlotViewModel.eatingEvent()
                     navController.popBackStack(RouterPath.Main.route, inclusive = false)
                 }

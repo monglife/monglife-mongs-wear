@@ -51,16 +51,22 @@ abstract class BaseViewModel : ViewModel() {
      */
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
         CoroutineScope(Dispatchers.IO).launch {
+            val out = StringBuilder()
+                .append("${exception::class.qualifiedName}\n")
+                .append("  - message       => ${exception.message ?: ""}\n")
+
             if (exception is ErrorException) {
-                Log.e(exception.javaClass.simpleName, "[Exception] ${exception.javaClass.name} ${exception.message} ===> ${exception.result}")
+                out.append("  - result        => ${exception.result}\n")
 
                 // 오류 메시지 표출 이벤트 발생
                 if (exception.code.isMessageShow()) {
                     errorToast(exception.message)
                 }
-            } else {
-                Log.e(exception.javaClass.simpleName, "[Exception] ${exception.javaClass.name} ${exception.message ?: ""}\n${exception.stackTraceToString()}")
             }
+
+            out.append("  - exception     => ${exception.stackTraceToString()}")
+
+            Log.e(this@BaseViewModel::class.simpleName ?: "Anonymous", "EXCEPTION >> $out")
 
             // 자식 클래스 exception handler 실행
             exceptionHandler(exception = exception)

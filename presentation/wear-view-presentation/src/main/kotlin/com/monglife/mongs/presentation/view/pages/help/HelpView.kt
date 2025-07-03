@@ -92,7 +92,7 @@ fun HelpView(
             }
 
             Box(modifier = Modifier.zIndex(2f)) {
-                if (uiState.value.helpDialogOpen) {
+                if (uiState.value.detailDialogOpen) {
                     currentHelpVo.value?.let { helpVo ->
                         HelpDialog(
                             icon = helpVo.helpIconCode?.let { HelpResourceCode.getResourceCode(it) },

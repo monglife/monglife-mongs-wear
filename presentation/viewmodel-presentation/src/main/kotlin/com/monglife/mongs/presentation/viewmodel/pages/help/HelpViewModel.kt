@@ -20,11 +20,11 @@ class HelpViewModel @Inject constructor(
      */
     sealed class UiState(
         val loadingBar: Boolean = false,
-        val helpDialogOpen: Boolean = false,
+        val detailDialogOpen: Boolean = false,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
-        data object HelpDialog: UiState(helpDialogOpen = true)
+        data object Detail: UiState(detailDialogOpen = true)
     }
 
     /**
@@ -277,7 +277,7 @@ class HelpViewModel @Inject constructor(
     fun helpDialogOpen(helpVo: HelpVo) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _currentHelpVo.value = helpVo
-            _uiState.value = UiState.HelpDialog
+            _uiState.value = UiState.Detail
         }
     }
 

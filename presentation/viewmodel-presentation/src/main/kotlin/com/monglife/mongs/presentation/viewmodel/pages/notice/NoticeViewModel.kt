@@ -3,12 +3,8 @@ package com.monglife.mongs.presentation.viewmodel.pages.notice
 import com.monglife.mongs.application.member.notice.usecase.GetNoticesUseCase
 import com.monglife.mongs.application.member.notice.vo.NoticeVo
 import com.monglife.core.presentation.viewmodel.BaseViewModel
-import com.monglife.mongs.presentation.viewmodel.pages.feedback.FeedbackViewModel
-import com.monglife.mongs.presentation.viewmodel.pages.inventory.InventoryViewModel
-import com.monglife.mongs.presentation.viewmodel.pages.inventory.InventoryViewModel.Companion
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -65,18 +61,7 @@ class NoticeViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
-            withContext(Dispatchers.IO) {
-                getNoticesUseCase(
-                    command = GetNoticesUseCase.Command(
-                        page = INIT_PAGE,
-                        size = INIT_SIZE,
-                    )
-                ).let { noticeVosPage ->
-                    _page.value = noticeVosPage.page
-                    _isLastPage.value = noticeVosPage.isLastPage
-                    _noticeVos.value = noticeVosPage.result
-                }
-            }
+            withContext(Dispatchers.IO) { updateNoticeVos() }
 
             _uiState.value = UiState.Idle
         }
@@ -85,26 +70,16 @@ class NoticeViewModel @Inject constructor(
     /**
      * 페이지 변경
      */
-    fun updatePage(page: Int) {
+    fun changePage(page: Int) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             if (_uiState.value == UiState.ListLoading) {
                 return@launch
             }
 
             _uiState.value = UiState.ListLoading
+            _page.value = page
 
-            withContext(Dispatchers.IO) {
-                getNoticesUseCase(
-                    command = GetNoticesUseCase.Command(
-                        page = page,
-                        size = INIT_SIZE,
-                    )
-                ).let { noticeVosPage ->
-                    _page.value = noticeVosPage.page
-                    _isLastPage.value = noticeVosPage.isLastPage
-                    _noticeVos.value += noticeVosPage.result
-                }
-            }
+            withContext(Dispatchers.IO) { updateNoticeVos() }
 
             _uiState.value = UiState.Idle
         }
@@ -126,6 +101,23 @@ class NoticeViewModel @Inject constructor(
     fun noticeDetailDialogClose() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Idle
+            _content.value = ""
+        }
+    }
+
+    /**
+     * 공지사항 목록 조회
+     */
+    private suspend fun updateNoticeVos() {
+        getNoticesUseCase(
+            command = GetNoticesUseCase.Command(
+                page = _page.value,
+                size = INIT_SIZE,
+            )
+        ).let { noticeVosPage ->
+            _page.value = noticeVosPage.page
+            _isLastPage.value = noticeVosPage.isLastPage
+            _noticeVos.value += noticeVosPage.result
         }
     }
 

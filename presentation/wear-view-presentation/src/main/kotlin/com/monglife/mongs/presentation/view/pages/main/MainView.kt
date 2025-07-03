@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.monglife.mongs.presentation.view.assets.MapResourceCode
 import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.background.MainBackground
@@ -39,7 +38,7 @@ fun MainView(
     val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
 
     val uiState = mainViewModel.uiState.collectAsState()
-    val mongVo = mainViewModel.mongVo.collectAsState()
+    val currentMongVo = mainViewModel.currentMongVo.collectAsState()
     val backgroundMapCode = mainViewModel.backgroundMapCode.collectAsState()
 
     val emptyPagerState = rememberPagerState(MainPagerViewModel.EMPTY_PAGER_STATE_INIT, 0f) { MainPagerViewModel.EMPTY_PAGER_STATE_SIZE }
@@ -50,7 +49,7 @@ fun MainView(
             DefaultBackground()
             LoadingBar()
         } else {
-            mongVo.value?.let {
+            currentMongVo.value?.let {
                 MainBackground(
                     backgroundMapCode = backgroundMapCode.value,
                     pagerState = normalPagerState,

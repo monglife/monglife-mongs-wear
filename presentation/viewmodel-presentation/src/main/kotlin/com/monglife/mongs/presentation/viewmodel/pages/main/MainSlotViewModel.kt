@@ -1,5 +1,6 @@
 package com.monglife.mongs.presentation.viewmodel.pages.main
 
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.device.usecase.GetInitNotificationDialogOpenOptionUseCase
 import com.monglife.mongs.application.device.usecase.SetInitNotificationDialogOpenOptionUseCase
 import com.monglife.mongs.application.mong.usecase.management.EvolutionMongUseCase
@@ -9,7 +10,6 @@ import com.monglife.mongs.application.mong.usecase.management.PoopCleanMongUseCa
 import com.monglife.mongs.application.mong.usecase.management.SleepingMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.StrokeMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -71,8 +71,8 @@ class MainSlotViewModel @Inject constructor(
     /**
      * 변수
      */
-    private val _mongVo = MutableStateFlow<MongVo?>(null)
-    val mongVo: StateFlow<MongVo?> = _mongVo.asStateFlow()
+    private val _currentMongVo = MutableStateFlow<MongVo?>(null)
+    val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
@@ -81,11 +81,13 @@ class MainSlotViewModel @Inject constructor(
             val initNotificationDialogOpen = withContext(Dispatchers.IO) {
                 observeCurrentMongUseCase()
                     .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow -> observeForever(flow, _mongVo) }
+                    .let { flow -> observeForever(flow, _currentMongVo) }
+
                 getInitNotificationDialogOpenOptionUseCase()
             }
 
-            _uiState.value = if (initNotificationDialogOpen) UiState.InitNotification else UiState.Idle
+            _uiState.value =
+                if (initNotificationDialogOpen) UiState.InitNotification else UiState.Idle
         }
     }
 
@@ -150,8 +152,12 @@ class MainSlotViewModel @Inject constructor(
                 }
 
                 _uiState.value = UiState.Happy
+
                 delay(EFFECT_DELAY)
-                _uiState.value = UiState.Idle
+
+                if (_uiState.value == UiState.Happy) {
+                    _uiState.value = UiState.Idle
+                }
             }
         }
     }
@@ -171,7 +177,9 @@ class MainSlotViewModel @Inject constructor(
                 )
             }
 
-            _uiState.value = UiState.Idle
+            if (_uiState.value == UiState.EffectLoading) {
+                _uiState.value = UiState.Idle
+            }
         }
     }
 
@@ -192,8 +200,12 @@ class MainSlotViewModel @Inject constructor(
                 }
 
                 _uiState.value = UiState.PoopClean
+
                 delay(EFFECT_DELAY)
-                _uiState.value = UiState.Idle
+
+                if (_uiState.value == UiState.PoopClean) {
+                    _uiState.value = UiState.Idle
+                }
             }
         }
     }
@@ -230,14 +242,12 @@ class MainSlotViewModel @Inject constructor(
      * 졸업 준비 여부 사용자 확인
      */
     fun graduateMongCheck(mongId: Long) {
-        viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            withContext(Dispatchers.IO) {
-                graduateCheckingUseCase(
-                    command = GraduateCheckingUseCase.Command(
-                        mongId = mongId
-                    )
+        viewModelScopeWithHandler.launch(Dispatchers.IO) {
+            graduateCheckingUseCase(
+                command = GraduateCheckingUseCase.Command(
+                    mongId = mongId
                 )
-            }
+            )
         }
     }
 
@@ -248,8 +258,12 @@ class MainSlotViewModel @Inject constructor(
     fun eatingEvent() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Eating
+
             delay(EFFECT_DELAY)
-            _uiState.value = UiState.Idle
+
+            if (_uiState.value == UiState.Eating) {
+                _uiState.value = UiState.Idle
+            }
         }
     }
 

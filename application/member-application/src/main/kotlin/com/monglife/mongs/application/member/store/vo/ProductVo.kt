@@ -6,16 +6,18 @@ data class ProductVo(
     val productId: String,
     val productName: String,
     val price: Double,
+    val orderVos: List<OrderVo>,
 ) {
     companion object {
 
         /**
          * 도메인 Vo 변환
          */
-        fun of(product: Product) = ProductVo(
+        fun of(product: Product, orderVos: List<OrderVo> = emptyList()) = ProductVo(
             productId = product.productId,
             productName = product.productName,
             price = product.price,
+            orderVos = orderVos,
         )
     }
 }

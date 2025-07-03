@@ -179,14 +179,14 @@ class MqttClient @Inject constructor(
                         when (asyncActionToken.userContext) {
                             is MqttUserContext.Connect -> {
                                 out
-                                    .append("연결 실패")
+                                    .append("연결 실패\n")
                                     .append("  - exception     => ${exception?.stackTraceToString() ?: ""}")
 
                                 cont.resumeWithException(InvalidConnectException())
                             }
                             is MqttUserContext.Disconnect -> {
                                 out
-                                    .append("연결 해제 실패")
+                                    .append("연결 해제 실패\n")
                                     .append("  - exception     => ${exception?.stackTraceToString() ?: ""}")
 
                                 cont.resumeWithException(InvalidDisConnectException())
@@ -194,7 +194,7 @@ class MqttClient @Inject constructor(
                             is MqttUserContext.Subscribe -> {
                                 out
                                     .append("토픽 구독 실패\n")
-                                    .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Subscribe).topic}")
+                                    .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Subscribe).topic}\n")
                                     .append("  - exception     => ${exception?.stackTraceToString() ?: ""}")
 
                                 cont.resumeWithException(InvalidSubscribeException())
@@ -202,7 +202,7 @@ class MqttClient @Inject constructor(
                             is MqttUserContext.DisSubscribe -> {
                                 out
                                     .append("토픽 구독 해제 실패\n")
-                                    .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.DisSubscribe).topic}")
+                                    .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.DisSubscribe).topic}\n")
                                     .append("  - exception     => ${exception?.stackTraceToString() ?: ""}")
 
                                 cont.resumeWithException(InvalidDisSubscribeException())
@@ -210,8 +210,8 @@ class MqttClient @Inject constructor(
                             is MqttUserContext.Publish -> {
                                 out
                                     .append("메시지 전송 실패\n")
-                                    .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Publish).topic}")
-                                    .append("  - payload       => ${(asyncActionToken.userContext as MqttUserContext.Publish).payload}")
+                                    .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Publish).topic}\n")
+                                    .append("  - payload       => ${(asyncActionToken.userContext as MqttUserContext.Publish).payload}\n")
                                     .append("  - exception     => ${exception?.stackTraceToString() ?: ""}")
 
                                 cont.resumeWithException(InvalidPublishException())

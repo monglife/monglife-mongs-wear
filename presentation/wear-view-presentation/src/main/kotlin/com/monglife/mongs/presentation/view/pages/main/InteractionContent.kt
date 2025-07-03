@@ -31,7 +31,7 @@ internal fun InteractionContent(
     mainInteractionViewModel: MainInteractionViewModel = hiltViewModel()
 ) {
     val uiState = mainInteractionViewModel.uiState.collectAsState()
-    val mongVo = mainInteractionViewModel.mongVo.collectAsState()
+    val currentMongVo = mainInteractionViewModel.currentMongVo.collectAsState()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -62,7 +62,7 @@ internal fun InteractionContent(
                     CircleImageButton(
                         icon = R.drawable.point_icon_pay,
                         border = R.drawable.btn_border_purple_dark,
-                        disable = mongVo.value?.let {
+                        disable = currentMongVo.value?.let {
                             it.stateCode == MongStateCode.DEAD || it.stateCode == MongStateCode.DELETE
                         } ?: true,
                     ) {
@@ -97,7 +97,7 @@ internal fun InteractionContent(
                     CircleImageButton(
                         icon = R.drawable.btn_icon_luck_draw,
                         border = R.drawable.btn_border_purple,
-                        disable = mongVo.value?.let {
+                        disable = currentMongVo.value?.let {
                             it.stateCode == MongStateCode.DEAD || it.stateCode == MongStateCode.DELETE
                         } ?: true,
                         iconSize = 34f,
@@ -114,7 +114,7 @@ internal fun InteractionContent(
                         icon = R.drawable.btn_icon_activity,
                         border = R.drawable.btn_border_green,
                         iconSize = 34f,
-                        disable = mongVo.value?.let {
+                        disable = currentMongVo.value?.let {
                             it.level == 0 || it.stateCode == MongStateCode.DEAD || it.isSleep
                         } ?: true,
                     ) {
@@ -127,7 +127,7 @@ internal fun InteractionContent(
                         icon = R.drawable.btn_icon_battle,
                         border = R.drawable.btn_border_pink,
                         iconSize = 30f,
-                        disable = mongVo.value?.let {
+                        disable = currentMongVo.value?.let {
                             it.level == 0 || it.stateCode == MongStateCode.DEAD || it.isSleep
                         } ?: true,
                     ) {

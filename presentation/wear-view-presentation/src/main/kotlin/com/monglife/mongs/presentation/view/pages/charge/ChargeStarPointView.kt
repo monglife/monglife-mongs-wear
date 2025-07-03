@@ -46,7 +46,6 @@ import com.monglife.mongs.presentation.view.component.common.pagenation.PageIndi
 import com.monglife.mongs.presentation.view.component.common.textbox.StarPoint
 import com.monglife.mongs.presentation.view.utils.NumberUtil
 import com.monglife.mongs.presentation.viewmodel.pages.charge.ChargeStarPointViewModel
-import com.monglife.mongs.presentation.viewmodel.pages.feed.FeedFoodViewModel
 import com.mongs.wear.presentation.view.wear.R
 import kotlin.math.ceil
 import kotlin.math.max
@@ -60,7 +59,6 @@ fun ChargeStarPointView(
 ) {
     val uiState = chargeStarPointViewModel.uiState.collectAsState()
     val starPoint = chargeStarPointViewModel.starPoint.collectAsState()
-    val notConsumedOrderVos = chargeStarPointViewModel.notConsumedOrderVos.collectAsState()
     val productVos = chargeStarPointViewModel.productVos.collectAsState()
     val productIndex = remember { mutableIntStateOf(0) }
     val productVo = remember {
@@ -171,17 +169,15 @@ fun ChargeStarPointView(
                                 .fillMaxWidth()
                                 .weight(0.3f)
                         ) {
-                            notConsumedOrderVos.value.findLast {
-                                it.productId == productVo.value?.productId
-                            }?.let {
+                            if (it.orderVos.isNotEmpty()) {
                                 BlueButton(
                                     text = "소비",
                                     height = 37,
                                     width = 90,
                                     fontSize = 16,
-                                    onClick = { chargeStarPointViewModel.consume(it) },
+                                    onClick = { chargeStarPointViewModel.consume(orderVo = it.orderVos.first()) },
                                 )
-                            } ?: run {
+                            } else {
                                 YellowButton(
                                     text = "${NumberUtil.formatAsCurrency(ceil(it.price).toInt())}원",
                                     height = 37,

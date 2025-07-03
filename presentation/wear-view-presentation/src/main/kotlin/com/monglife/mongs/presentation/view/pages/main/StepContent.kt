@@ -45,7 +45,7 @@ internal fun StepContent(
     val isPagerChange = mainPagerViewModel.isPagerChange.collectAsState()
 
     val uiState = mainStepViewModel.uiState.collectAsState()
-    val mongVo = mainStepViewModel.mongVo.collectAsState()
+    val currentMongVo = mainStepViewModel.currentMongVo.collectAsState()
     val currentWalkingCount = mainStepViewModel.currentWalkingCount.collectAsState()
     val activityPermission = mainStepViewModel.activityPermission.collectAsState()
 
@@ -70,8 +70,8 @@ internal fun StepContent(
                         .fillMaxWidth()
                         .weight(0.2f),
                 ) {
-                    mongVo.value?.let {
-                        PayPoint(payPoint = mongVo.value?.payPoint ?: 0)
+                    currentMongVo.value?.let {
+                        PayPoint(payPoint = currentMongVo.value?.payPoint ?: 0)
                     }
                 }
                 Row(
@@ -98,13 +98,13 @@ internal fun StepContent(
                         .fillMaxWidth()
                         .weight(0.3f)
                 ) {
-                    mongVo.value?.let {
+                    currentMongVo.value?.let {
                         if (activityPermission.value) {
                             BlueButton(
                                 text = "환전",
                                 width = 70,
                                 onClick = { navController.navigate(RouterPath.ExchangeStep.route) },
-                                disable = mongVo.value?.let {
+                                disable = currentMongVo.value?.let {
                                     it.stateCode in arrayOf(
                                         MongStateCode.DEAD,
                                         MongStateCode.DELETE

@@ -1,13 +1,18 @@
 package com.monglife.mongs.presentation.viewmodel.pages.inventory
 
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.mong.usecase.interaction.GetInventoriesUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.InventoryVo
-import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.mong.vo.MongVo
+import com.monglife.mongs.presentation.viewmodel.pages.feed.FeedFoodViewModel.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,10 +40,24 @@ class InventoryViewModel @Inject constructor(
     }
 
     /**
+     * UI 이벤트 정의
+     */
+    sealed class UiEvent {
+        data object Idle: UiEvent()
+        data class NavMenu(val message: String): UiEvent()
+    }
+
+    /**
      * UI 상태 변수
      */
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    /**
+     * UI 이벤트 변수
+     */
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
 
     /**
      * 변수
@@ -58,26 +77,21 @@ class InventoryViewModel @Inject constructor(
     private val _inventoryVos = MutableStateFlow<List<InventoryVo>>(emptyList())
     val inventoryVos: StateFlow<List<InventoryVo>> = _inventoryVos.asStateFlow()
 
+    private val _mongVo = MutableStateFlow<MongVo?>(null)
+
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
                 getCurrentMongUseCase()?.let {
-                    getInventoriesUseCase(
-                        command = GetInventoriesUseCase.Command(
-                            mongId = it.mongId,
-                            page = INIT_PAGE,
-                            size = INIT_SIZE,
-                        )
-                    ).let { inventoryVosPage ->
-                        _page.value = inventoryVosPage.page
-                        _size.value = inventoryVosPage.size
-                        _totalPage.value = inventoryVosPage.totalPage
-                        _isLastPage.value = inventoryVosPage.isLastPage
-                        _inventoryVos.value = inventoryVosPage.result
-                    }
+                    _mongVo.value = it
+                } ?: run {
+                    _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
+                    return@withContext
                 }
+
+                updateInventoryVos()
             }
 
             _uiState.value = UiState.Idle
@@ -90,26 +104,32 @@ class InventoryViewModel @Inject constructor(
     fun changePage(page: Int) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
+            _page.value = page
 
-            withContext(Dispatchers.IO) {
-                getCurrentMongUseCase()?.let {
-                    getInventoriesUseCase(
-                        command = GetInventoriesUseCase.Command(
-                            mongId = it.mongId,
-                            page = page,
-                            size = INIT_SIZE,
-                        )
-                    ).let { inventoryVosPage ->
-                        _page.value = inventoryVosPage.page
-                        _size.value = inventoryVosPage.size
-                        _totalPage.value = inventoryVosPage.totalPage
-                        _isLastPage.value = inventoryVosPage.isLastPage
-                        _inventoryVos.value = inventoryVosPage.result
-                    }
-                }
-            }
+            withContext(Dispatchers.IO) { updateInventoryVos() }
 
             _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
+     * 인벤토리 목록 조회
+     */
+    private suspend fun updateInventoryVos() {
+        _mongVo.value?.let {
+            getInventoriesUseCase(
+                command = GetInventoriesUseCase.Command(
+                    mongId = it.mongId,
+                    page = _page.value,
+                    size = INIT_SIZE,
+                )
+            ).let { inventoryVosPage ->
+                _page.value = inventoryVosPage.page
+                _size.value = inventoryVosPage.size
+                _totalPage.value = inventoryVosPage.totalPage
+                _isLastPage.value = inventoryVosPage.isLastPage
+                _inventoryVos.value = inventoryVosPage.result
+            }
         }
     }
 
