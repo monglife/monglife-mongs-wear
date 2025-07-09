@@ -63,6 +63,9 @@ class SlotPickViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    /**
+     * 변수
+     */
     private val _currentMongVo = MutableStateFlow<MongVo?>(null)
     val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
 

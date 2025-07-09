@@ -2,9 +2,8 @@ package com.monglife.mongs.data.member.player.persistence.adapter
 
 import android.content.Context
 import com.monglife.core.data.mqtt.client.MqttClient
-import com.monglife.core.data.mqtt.utils.MqttUtil
 import com.monglife.core.data.persistence.datastore.SessionDataStore
-import com.monglife.mongs.application.member.player.exception.NotFoundPlayerException
+import com.monglife.core.data.web.dto.response.ResponseDto
 import com.monglife.mongs.application.member.player.port.persistence.PlayerPersistencePort
 import com.monglife.mongs.data.member.player.persistence.datastore.PlayerDataStore
 import com.monglife.mongs.data.member.player.persistence.dto.PlayerSlotCountEventDto
@@ -22,12 +21,6 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -39,7 +32,6 @@ class PlayerPersistenceAdapter @Inject constructor(
     private val sessionDataStore: SessionDataStore,
     private val playerDataStore: PlayerDataStore,
     private val mqttClient: MqttClient,
-    private val mqttUtil: MqttUtil,
 ) : PlayerPersistencePort {
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -48,8 +40,7 @@ class PlayerPersistenceAdapter @Inject constructor(
     /**
      * 플레이어 조회
      */
-    @Throws(NotFoundPlayerException::class)
-    override suspend fun getPlayer(): Player = playerDataStore.getPlayer()?.toDomain()
+    override suspend fun getPlayer(): Player? = playerDataStore.getPlayer()?.toDomain()
         ?: sessionDataStore.getSession()?.let {
             playerDataStore.savePlayer(
                 playerEntity = PlayerEntity(
@@ -58,87 +49,67 @@ class PlayerPersistenceAdapter @Inject constructor(
                     starPoint = 0,
                 )
             ).toDomain()
-        } ?: throw NotFoundPlayerException()
+        }
 
     /**
      * 플레이어 Flow 객체 조회
      */
-    @Throws(NotFoundPlayerException::class)
-    override suspend fun getPlayerFlow(): Flow<Player> = flow {
-
-        val player = playerDataStore.getPlayer()?.toDomain()
-            ?: sessionDataStore.getSession()?.let {
-                playerDataStore.savePlayer(
-                    playerEntity = PlayerEntity(
-                        accountId = it.accountId,
-                        slotCount = 0,
-                        starPoint = 0,
-                    )
-                ).toDomain()
-            } ?: throw NotFoundPlayerException()
-
-        val subscribeCount = subscribeCounterMap.getOrPut(player.accountId) { AtomicInteger(0) }
-
-        val baseTopic = "${context.getString(R.string.mongs_mqtt_topic)}/member"
-        val topic = "$baseTopic/${player.accountId}/#"
-        val starPointTopic = "$baseTopic/${player.accountId}/starPoint"
-        val slotCountTopic = "$baseTopic/${player.accountId}/slotCount"
-
-        if (subscribeCount.getAndIncrement() == 0) {
-            mqttClient.subscribe(topic = topic, callback = object : MqttCallback {
-                override fun connectionLost(cause: Throwable?) {}
-                override fun deliveryComplete(token: IMqttDeliveryToken?) {}
-                override fun messageArrived(topic: String?, message: MqttMessage?) {
-                    if (message == null || topic == null) return
-                    applicationScope.launch {
-                        Mutex().withLock(owner = applicationScope) {
-                            when (topic) {
-                                starPointTopic -> mqttUtil.fromJson(
-                                    mqttMessage = message,
-                                    classType = PlayerStarPointEventDto::class.java
-                                ).let { responseDto ->
-                                    playerDataStore.getPlayer()?.let {
-                                        playerDataStore.savePlayer(
-                                            playerEntity = PlayerEntity(
-                                                accountId = responseDto.result.accountId,
-                                                slotCount = it.slotCount,
-                                                starPoint = responseDto.result.starPoint,
-                                            )
-                                        )
-                                    }
-                                }
-
-                                slotCountTopic -> mqttUtil.fromJson(
-                                    mqttMessage = message,
-                                    classType = PlayerSlotCountEventDto::class.java
-                                ).let { responseDto ->
-                                    playerDataStore.getPlayer()?.let {
-                                        playerDataStore.savePlayer(
-                                            playerEntity = PlayerEntity(
-                                                accountId = responseDto.result.accountId,
-                                                slotCount = responseDto.result.slotCount,
-                                                starPoint = it.starPoint,
-                                            )
-                                        )
-                                    }
-                                }
-
-                                else -> {}
-                            }
-                        }
-                    }
-                }
-            })
+    override suspend fun getPlayerFlow(): Flow<Player?> = flow {
+        val playerEntity = playerDataStore.getPlayer() ?: sessionDataStore.getSession()?.let {
+            playerDataStore.savePlayer(
+                playerEntity = PlayerEntity(
+                    accountId = it.accountId,
+                    slotCount = 0,
+                    starPoint = 0,
+                )
+            )
         }
 
-        try {
-            emitAll(
-                playerDataStore.getPlayerFlow()
-                    .map { it?.toDomain() ?: throw NotFoundPlayerException() })
-        } finally {
-            if (subscribeCount.decrementAndGet() == 0) {
-                mqttClient.disSubscribe(topic = topic)
-                subscribeCounterMap.remove(player.accountId)
+        playerEntity?.let {
+            val subscribeCount =
+                subscribeCounterMap.getOrPut(it.accountId) { AtomicInteger(0) }
+            val starPointSubscribeTopic =
+                "${context.getString(R.string.mongs_mqtt_topic)}/member/${it.accountId}/starPoint"
+            val slotCountSubscribeTopic =
+                "${context.getString(R.string.mongs_mqtt_topic)}/member/${it.accountId}/slotCount"
+
+            if (subscribeCount.getAndIncrement() == 0) {
+                mqttClient.subscribe(
+                    topic = starPointSubscribeTopic,
+                    classType = PlayerStarPointEventDto::class.java,
+                    onReceive = { responseDto: ResponseDto<PlayerStarPointEventDto> ->
+                        playerDataStore.savePlayer(
+                            playerEntity = PlayerEntity(
+                                accountId = responseDto.result.accountId,
+                                slotCount = it.slotCount,
+                                starPoint = responseDto.result.starPoint,
+                            )
+                        )
+                    }
+                )
+                mqttClient.subscribe(
+                    topic = slotCountSubscribeTopic,
+                    classType = PlayerSlotCountEventDto::class.java,
+                    onReceive = { responseDto: ResponseDto<PlayerSlotCountEventDto> ->
+                        playerDataStore.savePlayer(
+                            playerEntity = PlayerEntity(
+                                accountId = responseDto.result.accountId,
+                                slotCount = responseDto.result.slotCount,
+                                starPoint = it.starPoint,
+                            )
+                        )
+                    }
+                )
+            }
+
+            try {
+                emitAll(playerDataStore.getPlayerFlow().map { it?.toDomain() })
+            } finally {
+                if (subscribeCount.decrementAndGet() == 0) {
+                    mqttClient.disSubscribe(topic = starPointSubscribeTopic)
+                    mqttClient.disSubscribe(topic = slotCountSubscribeTopic)
+                    subscribeCounterMap.remove(it.accountId)
+                }
             }
         }
     }.shareIn(

@@ -7,12 +7,15 @@ import com.monglife.core.common.exception.ErrorException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 abstract class BaseViewModel : ViewModel() {
     companion object {
@@ -81,16 +84,31 @@ abstract class BaseViewModel : ViewModel() {
     )
 
     /**
-     * View Model 에서의 Cold Flow 구독 등록
+     * ObserveForever Coroutine Job Map
      */
-    protected suspend fun <T> observeForever(flow: Flow<T>, state: MutableStateFlow<T>) {
+    private val observeForeverJobMap = ConcurrentHashMap<String, Job>()
 
-        state.value = flow.first()
-
-        viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            flow.collect {
-                state.emit(it)
+    /**
+     * View Model 에서의 Flow 구독 등록
+     */
+    protected suspend fun <T> observeForever(flow: Flow<T>, state: MutableStateFlow<T>) =
+        UUID.randomUUID().toString().also { key ->
+            observeForeverJobMap[key] = viewModelScopeWithHandler.launch(Dispatchers.IO) {
+                flow.collect {
+                    state.emit(it)
+                }
             }
+
+            state.value = flow.first()
+        }
+
+    /**
+     * View Model 에서의 Flow 구독 해제
+     */
+    protected fun observeStop(key: String) {
+        observeForeverJobMap[key]?.let {
+            it.cancel()
+            observeForeverJobMap.remove(key)
         }
     }
 }

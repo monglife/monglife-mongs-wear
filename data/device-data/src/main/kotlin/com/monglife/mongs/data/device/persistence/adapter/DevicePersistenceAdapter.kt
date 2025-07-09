@@ -6,7 +6,6 @@ import android.os.SystemClock
 import android.provider.Settings
 import com.google.firebase.messaging.FirebaseMessaging
 import com.monglife.core.data.mqtt.client.MqttClient
-import com.monglife.core.data.mqtt.utils.MqttUtil
 import com.monglife.mongs.application.auth.exception.InvalidLogoutException
 import com.monglife.mongs.data.device.persistence.datastore.DeviceDataStore
 import com.monglife.mongs.data.device.persistence.dto.DeviceEventDto
@@ -27,13 +26,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -53,7 +46,6 @@ class DevicePersistenceAdapter @Inject constructor(
     private val stepSensorManager: StepSensorManager,
     private val deviceDataStore: DeviceDataStore,
     private val mqttClient: MqttClient,
-    private val mqttUtil: MqttUtil,
 ) : com.monglife.mongs.application.auth.port.persistence.DevicePersistencePort,
     com.monglife.mongs.application.battle.port.persistence.DevicePersistencePort,
     com.monglife.mongs.application.device.port.persistence.DevicePersistencePort,
@@ -145,38 +137,22 @@ class DevicePersistenceAdapter @Inject constructor(
         }
 
         val subscribeCount = subscribeCounterMap.getOrPut(deviceId) { AtomicInteger(0) }
-
-        val baseTopic = "${context.getString(R.string.mongs_mqtt_topic)}/device"
-        val topic = "$baseTopic/$deviceId/#"
-        val deviceTopic = "$baseTopic/$deviceId"
+        val topic = "${context.getString(R.string.mongs_mqtt_topic)}/device/$deviceId"
 
         if (subscribeCount.getAndIncrement() == 0) {
-            mqttClient.subscribe(topic = topic, callback = object : MqttCallback {
-                override fun connectionLost(cause: Throwable?) {}
-                override fun deliveryComplete(token: IMqttDeliveryToken?) {}
-                override fun messageArrived(topic: String?, message: MqttMessage?) {
-                    if (message == null || topic == null) return
-                    applicationScope.launch {
-                        Mutex().withLock(owner = applicationScope) {
-                            if (topic == deviceTopic) {
-                                mqttUtil.fromJson(
-                                    mqttMessage = message,
-                                    classType = DeviceEventDto::class.java
-                                ).let { responseDto ->
-                                    deviceDataStore.getStep() ?: run {
-                                        deviceDataStore.saveStep(
-                                            StepEntity(
-                                                walkingCount = responseDto.result.walkingCount,
-                                                consumedWalkingCount = responseDto.result.consumeWalkingCount,
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
+            mqttClient.subscribe(topic = topic,
+                classType = DeviceEventDto::class.java,
+                onReceive = { responseDto ->
+                    deviceDataStore.getStep() ?: run {
+                        deviceDataStore.saveStep(
+                            StepEntity(
+                                walkingCount = responseDto.result.walkingCount,
+                                consumedWalkingCount = responseDto.result.consumeWalkingCount,
+                            )
+                        )
                     }
                 }
-            })
+            )
         }
 
         try {

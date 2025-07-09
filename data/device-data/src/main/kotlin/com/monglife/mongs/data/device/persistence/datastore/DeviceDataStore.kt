@@ -79,25 +79,6 @@ class DeviceDataStore @Inject constructor(
     }
 
     /**
-     * Step 삭제
-     */
-    suspend fun deleteStep(): StepEntity = context.store.let { store ->
-        val stepEntity = store.data.map {
-            StepEntity(
-                walkingCount = it[WALKING_COUNT]!!,
-                consumedWalkingCount = it[CONSUME_WALKING_COUNT]!!
-            )
-        }
-
-        store.edit { preferences ->
-            if (preferences.contains(WALKING_COUNT)) preferences.remove(WALKING_COUNT)
-            if (preferences.contains(CONSUME_WALKING_COUNT)) preferences.remove(CONSUME_WALKING_COUNT)
-        }
-
-        stepEntity.first()
-    }
-
-    /**
      * DeviceOption 조회
      */
     suspend fun getDeviceOption(): DeviceOptionEntity? = context.store.data.map {
@@ -168,30 +149,5 @@ class DeviceDataStore @Inject constructor(
                 initNotificationDialogOpen = it[INIT_NOTIFICATION_DIALOG_OPEN]!!,
             )
         }.first()
-    }
-
-    /**
-     * DeviceOption 삭제
-     */
-    suspend fun deleteDeviceOption(): DeviceOptionEntity = context.store.let { store ->
-        val deviceOptionEntity = store.data.map {
-            DeviceOptionEntity(
-                currentMongId = if (it[CURRENT_MONG_ID]!! == -1L) null else it[CURRENT_MONG_ID]!!,
-                backgroundMapCode = it[BACKGROUND_MAP_CODE]!!.ifBlank { null },
-                notificationOption = it[NOTIFICATION_OPTION]!!,
-                soundVolume = it[SOUND_VOLUME]!!,
-                initNotificationDialogOpen = it[INIT_NOTIFICATION_DIALOG_OPEN]!!,
-            )
-        }
-
-        store.edit { preferences ->
-            preferences[CURRENT_MONG_ID] = -1
-            preferences[BACKGROUND_MAP_CODE] = ""
-            preferences[NOTIFICATION_OPTION] = true
-            preferences[SOUND_VOLUME] = 1f
-            preferences[INIT_NOTIFICATION_DIALOG_OPEN] = true
-        }
-
-        deviceOptionEntity.first()
     }
 }

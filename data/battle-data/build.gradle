@@ -14,6 +14,9 @@ dependencies {
     implementation 'com.squareup.okio:okio:3.9.0'
     implementation "com.squareup.retrofit2:retrofit:${parent.ext.retrofitVersion}"
     implementation "com.squareup.retrofit2:converter-gson:${parent.ext.retrofitVersion}"
+    // data store
+    implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
+    implementation "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
 
     // room
     implementation "androidx.room:room-runtime:${parent.ext.roomVersion}"

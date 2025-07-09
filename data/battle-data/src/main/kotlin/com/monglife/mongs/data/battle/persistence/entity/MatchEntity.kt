@@ -9,7 +9,6 @@ import java.time.LocalDateTime
 @Entity("match")
 data class MatchEntity(
     @PrimaryKey
-    val queueId: String,
     val matchId: Long,
     val round: Int,
     val isLastRound: Boolean,
@@ -21,7 +20,6 @@ data class MatchEntity(
      */
     fun toDomain(): Match {
         return Match(
-            queueId = this.queueId,
             matchId = this.matchId,
             round = this.round,
             isLastRound = this.isLastRound,

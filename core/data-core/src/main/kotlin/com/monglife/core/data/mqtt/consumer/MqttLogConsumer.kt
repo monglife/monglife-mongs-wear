@@ -1,7 +1,8 @@
 package com.monglife.core.data.mqtt.consumer
 
 import android.util.Log
-import com.monglife.core.data.mqtt.utils.MqttUtil
+import com.google.gson.Gson
+import com.monglife.core.data.web.dto.response.ResponseDto
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttMessage
@@ -10,12 +11,14 @@ import javax.inject.Singleton
 
 @Singleton
 class MqttLogConsumer @Inject constructor(
-    private val mqttUtil: MqttUtil,
+    private val gson: Gson,
 ) : MqttCallback {
 
     companion object {
         private const val TAG = "MqttLogConsumer"
     }
+
+    override fun connectionLost(cause: Throwable?) {}
 
     override fun messageArrived(topic: String?, message: MqttMessage?) {
         message?.let {
@@ -25,7 +28,7 @@ class MqttLogConsumer @Inject constructor(
                         .append("%-30s".format(topic))
                         .append("\n")
 
-                    mqttUtil.fromJson(mqttMessage = message, classType = Map::class.java)
+                    message.fromJson(classType = Map::class.java)
                         .let { responseDto ->
                             out
                                 .append("  - http status   => ${responseDto.httpStatus}\n")
@@ -42,7 +45,15 @@ class MqttLogConsumer @Inject constructor(
         }
     }
 
-    override fun connectionLost(cause: Throwable?) {}
-
     override fun deliveryComplete(token: IMqttDeliveryToken?) {}
+
+    private fun <T> MqttMessage.fromJson(classType: Class<T>): ResponseDto<T> =
+        gson.fromJson(this.toString(), ResponseDto::class.java).let { responseDto ->
+            ResponseDto(
+                httpStatus = responseDto.httpStatus,
+                code = responseDto.code,
+                message = responseDto.message,
+                result = gson.fromJson(gson.toJson(responseDto.result), classType),
+            )
+        }
 }

@@ -8,7 +8,7 @@ import com.monglife.mongs.data.battle.persistence.dao.MatchPlayerDao
 import com.monglife.mongs.data.battle.persistence.entity.MatchEntity
 import com.monglife.mongs.data.battle.persistence.entity.MatchPlayerEntity
 
-@Database(entities = [ MatchEntity::class, MatchPlayerEntity::class ], version = 1)
+@Database(entities = [ MatchEntity::class, MatchPlayerEntity::class ], version = 2)
 @TypeConverters(RoomConverters::class)
 abstract class BattleRoomDB : RoomDatabase() {
 

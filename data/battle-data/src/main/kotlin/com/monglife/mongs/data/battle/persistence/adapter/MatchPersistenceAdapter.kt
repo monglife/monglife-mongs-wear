@@ -20,14 +20,6 @@ class MatchPersistenceAdapter @Inject constructor(
      * 매치 객체 조회
      */
     @Throws(NotFoundMatchException::class)
-    override suspend fun getMatch(queueId: String): Match  =
-        roomDB.matchDao().findMatchByQueueId(queueId = queueId)?.toDomain()
-            ?: throw NotFoundMatchException()
-
-    /**
-     * 매치 객체 조회
-     */
-    @Throws(NotFoundMatchException::class)
     override suspend fun getMatch(matchId: Long): Match =
         roomDB.matchDao().findMatchByMatchId(matchId = matchId)?.toDomain()
             ?: throw NotFoundMatchException()
@@ -39,14 +31,6 @@ class MatchPersistenceAdapter @Inject constructor(
     override suspend fun getLeastMatch(): Match =
         roomDB.matchDao().findTopMatch()?.toDomain()
             ?: throw NotFoundMatchException()
-
-    /**
-     * 매치 라이브 객체 조회
-     */
-    override suspend fun getMatchFlow(queueId: String): Flow<Match?> =
-        roomDB.matchDao().findMatchLiveByQueueId(queueId = queueId).map { matchEntity ->
-            matchEntity?.toDomain()
-        }
 
     /**
      * 매치 라이브 객체 조회
@@ -85,7 +69,6 @@ class MatchPersistenceAdapter @Inject constructor(
     override suspend fun saveMatch(match: Match): Match =
         roomDB.matchDao().save(
             matchEntity = MatchEntity(
-                queueId = match.queueId,
                 matchId = match.matchId,
                 round = match.round,
                 isLastRound = match.isLastRound,

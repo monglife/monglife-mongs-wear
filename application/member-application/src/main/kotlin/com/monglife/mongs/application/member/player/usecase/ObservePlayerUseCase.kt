@@ -1,11 +1,10 @@
 package com.monglife.mongs.application.member.player.usecase
 
+import com.monglife.core.application.usecase.BaseNoParamUseCase
 import com.monglife.mongs.application.member.player.exception.NotFoundPlayerException
 import com.monglife.mongs.application.member.player.port.persistence.PlayerPersistencePort
 import com.monglife.mongs.application.member.player.port.web.PlayerWebPort
 import com.monglife.mongs.application.member.player.vo.PlayerVo
-import com.monglife.core.application.usecase.BaseNoParamUseCase
-import com.monglife.mongs.domain.member.player.model.Player
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -22,20 +21,11 @@ class ObservePlayerUseCase @Inject constructor(
 
     @Throws(NotFoundPlayerException::class)
     override suspend fun execute(): Flow<PlayerVo> {
-        return runCatching {
-            // 플레이어 조회 요청
-            playerWebPort.getPlayer().let { response ->
-                // 플레이어 로컬 등록
-                playerPersistencePort.savePlayer(player = response.toDomain())
-                // 플레이어 Flow 로컬 조회
-                playerPersistencePort.getPlayerFlow()
-            }
-        }.getOrElse {
-            // 플레이어 Flow 로컬 조회
+        return playerWebPort.getPlayer().let { response ->
+            playerPersistencePort.savePlayer(player = response.toDomain())
             playerPersistencePort.getPlayerFlow()
-        }.map { player: Player ->
-            // PlayerVo 반환
-            PlayerVo.of(player = player)
+        }.map { player ->
+            player?.let { PlayerVo.of(player = player) } ?: throw NotFoundPlayerException()
         }.flowOn(Dispatchers.IO)
     }
 }

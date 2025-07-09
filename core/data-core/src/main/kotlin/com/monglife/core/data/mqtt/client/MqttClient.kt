@@ -3,6 +3,7 @@ package com.monglife.core.data.mqtt.client
 import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
+import com.monglife.core.data.mqtt.consumer.MqttConsumer
 import com.monglife.core.data.mqtt.consumer.MqttLogConsumer
 import com.monglife.core.data.mqtt.exception.InvalidConnectException
 import com.monglife.core.data.mqtt.exception.InvalidDisConnectException
@@ -10,6 +11,7 @@ import com.monglife.core.data.mqtt.exception.InvalidDisSubscribeException
 import com.monglife.core.data.mqtt.exception.InvalidPublishException
 import com.monglife.core.data.mqtt.exception.InvalidSubscribeException
 import com.monglife.core.data.mqtt.exception.UnKnownException
+import com.monglife.core.data.web.dto.response.ResponseDto
 import com.mongs.wear.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import info.mqtt.android.service.MqttAndroidClient
@@ -91,8 +93,18 @@ class MqttClient @Inject constructor(
     /**
      * Mqtt 구독
      */
-    suspend fun subscribe(topic: String, callback: MqttCallback) {
+    suspend fun <T> subscribe(
+        topic: String,
+        classType: Class<T>,
+        onReceive: suspend (ResponseDto<T>) -> Unit
+    ) {
         val mqttAndroidClient = connect()
+
+        val callback = MqttConsumer(
+            topic = topic,
+            onReceive = onReceive,
+            classType = classType,
+        )
 
         mqttAndroidClient.addCallback(callback = callback)
         mqttAndroidClient.subscribe(
@@ -109,8 +121,8 @@ class MqttClient @Inject constructor(
      * Mqtt 구독 해제
      */
     suspend fun disSubscribe(topic: String) {
-        // 연결 중인 경우만 구독 해제
         runCatching {
+            // 연결 중인 경우만 구독 해제
             this.mqttAndroidClient.takeIf { it.isConnected }?.let {
                 mqttAndroidClient.unsubscribe(
                     topic = topic,
@@ -129,12 +141,14 @@ class MqttClient @Inject constructor(
     /**
      * Mqtt 연결 해제
      */
-    fun disconnect() {
-        if (mqttAndroidClient.isConnected) {
-            mqttAndroidClient.disconnect(
-                userContext = MqttUserContext.Disconnect,
-                callback = null
-            )
+    suspend fun disconnect() {
+        runCatching {
+            if (mqttAndroidClient.isConnected) {
+                mqttAndroidClient.disconnect(
+                    userContext = MqttUserContext.Disconnect,
+                    callback = null
+                ).await()
+            }
         }
     }
 
@@ -148,14 +162,18 @@ class MqttClient @Inject constructor(
                         when (asyncActionToken.userContext) {
                             is MqttUserContext.Connect -> out
                                 .append("연결")
+
                             is MqttUserContext.Disconnect -> out
                                 .append("연결 해제")
+
                             is MqttUserContext.Subscribe -> out
                                 .append("토픽 구독\n")
                                 .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Subscribe).topic}")
+
                             is MqttUserContext.DisSubscribe -> out
                                 .append("토픽 구독 해제\n")
                                 .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.DisSubscribe).topic}")
+
                             is MqttUserContext.Publish -> out
                                 .append("메시지 전송\n")
                                 .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Publish).topic}")
@@ -184,6 +202,7 @@ class MqttClient @Inject constructor(
 
                                 cont.resumeWithException(InvalidConnectException())
                             }
+
                             is MqttUserContext.Disconnect -> {
                                 out
                                     .append("연결 해제 실패\n")
@@ -191,6 +210,7 @@ class MqttClient @Inject constructor(
 
                                 cont.resumeWithException(InvalidDisConnectException())
                             }
+
                             is MqttUserContext.Subscribe -> {
                                 out
                                     .append("토픽 구독 실패\n")
@@ -199,6 +219,7 @@ class MqttClient @Inject constructor(
 
                                 cont.resumeWithException(InvalidSubscribeException())
                             }
+
                             is MqttUserContext.DisSubscribe -> {
                                 out
                                     .append("토픽 구독 해제 실패\n")
@@ -207,6 +228,7 @@ class MqttClient @Inject constructor(
 
                                 cont.resumeWithException(InvalidDisSubscribeException())
                             }
+
                             is MqttUserContext.Publish -> {
                                 out
                                     .append("메시지 전송 실패\n")

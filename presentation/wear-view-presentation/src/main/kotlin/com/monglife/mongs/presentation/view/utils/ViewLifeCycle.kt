@@ -16,6 +16,7 @@ fun ViewLifeCycle(
     onResume: () -> Unit = {},
     onPause: () -> Unit = {},
     onDestroy: () -> Unit = {},
+    onStop: () -> Unit = {},
 ) {
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -24,6 +25,7 @@ fun ViewLifeCycle(
                 Lifecycle.Event.ON_RESUME -> onResume()
                 Lifecycle.Event.ON_PAUSE -> onPause()
                 Lifecycle.Event.ON_DESTROY -> onDestroy()
+                Lifecycle.Event.ON_STOP -> onStop()
                 else -> {}
             }
         }

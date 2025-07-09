@@ -7,6 +7,10 @@ import com.monglife.core.data.mqtt.client.MqttClient
 import com.monglife.mongs.presentation.view.assets.MongsTheme
 import com.monglife.mongs.presentation.view.layout.LayoutView
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -29,7 +33,9 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        mqttClient.disconnect()
+        CoroutineScope(Dispatchers.Main).launch {
+            mqttClient.disconnect()
+        }
         super.onDestroy()
     }
 }

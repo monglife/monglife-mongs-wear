@@ -7,21 +7,30 @@ import com.monglife.mongs.application.battle.port.web.MatchWebPort
 import com.monglife.mongs.application.battle.port.web.response.GetBattleRewardResponse
 import com.monglife.mongs.application.battle.port.web.response.GetMatchResponse
 import com.monglife.mongs.application.battle.port.web.response.GetWinnerMatchPlayerResponse
+import com.monglife.mongs.data.battle.web.client.MatchWebClient
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class MatchWebAdapter @Inject constructor(
-
+    private val matchWebClient: MatchWebClient,
 ) : MatchWebPort {
 
     /**
      * 배틀 보상 정보 조회
      */
     @Throws(NotFoundMatchRewardException::class)
-    override suspend fun getBattleReward(): GetBattleRewardResponse {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getBattleReward(): GetBattleRewardResponse =
+        matchWebClient.getMatchOutcome().let { response ->
+
+            val body =
+                response.takeIf { it.isSuccessful }?.body() ?: throw NotFoundMatchRewardException()
+
+            GetBattleRewardResponse(
+                rewardPayPoint = body.result.rewardPayPoint,
+                battlePayPoint = body.result.battingPayPoint,
+            )
+        }
 
     /**
      * 매치 조회

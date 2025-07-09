@@ -2,7 +2,6 @@ package com.monglife.mongs.data.mong.persistence.adapter
 
 import android.content.Context
 import com.monglife.core.data.mqtt.client.MqttClient
-import com.monglife.core.data.mqtt.utils.MqttUtil
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.exception.NotFoundMongOptionException
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
@@ -23,12 +22,6 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -39,7 +32,6 @@ class ManagementPersistenceAdapter @Inject constructor(
     @ApplicationContext private val context: Context,
     private val roomDB: MongRoomDB,
     private val mqttClient: MqttClient,
-    private val mqttUtil: MqttUtil,
 ) : ManagementPersistencePort {
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -93,59 +85,43 @@ class ManagementPersistenceAdapter @Inject constructor(
     override suspend fun getMongFlow(mongId: Long): Flow<Mong?> = flow {
 
         val subscribeCount = subscribeCounterMap.getOrPut(mongId) { AtomicInteger(0) }
-
-        val baseTopic = "${context.getString(R.string.mongs_mqtt_topic)}/mong/management"
-        val topic = "$baseTopic/$mongId/#"
-        val mongTopic = "$baseTopic/$mongId"
+        val topic = "${context.getString(R.string.mongs_mqtt_topic)}/mong/management/$mongId"
 
         if (subscribeCount.getAndIncrement() == 0) {
-            mqttClient.subscribe(topic = topic, callback = object : MqttCallback {
-                override fun connectionLost(cause: Throwable?) {}
-                override fun deliveryComplete(token: IMqttDeliveryToken?) {}
-                override fun messageArrived(topic: String?, message: MqttMessage?) {
-                    if (message == null || topic == null) return
-                    applicationScope.launch {
-                        Mutex().withLock(owner = applicationScope) {
-                            if (topic == mongTopic) {
-                                mqttUtil.fromJson(
-                                    mqttMessage = message,
-                                    classType = ManagementEventDto::class.java
-                                ).let { responseDto ->
-                                    roomDB.mongDao()
-                                        .findMongByMongId(mongId = responseDto.result.mongId)
-                                        ?.let { mongEntity ->
-                                            roomDB.mongDao().save(
-                                                MongEntity(
-                                                    mongId = responseDto.result.mongId,
-                                                    name = responseDto.result.name,
-                                                    mongCode = responseDto.result.mongCode,
-                                                    mongName = responseDto.result.mongName,
-                                                    stateCode = responseDto.result.stateCode,
-                                                    statusCode = responseDto.result.statusCode,
-                                                    level = mongEntity.level,
-                                                    sleepAt = mongEntity.sleepAt,
-                                                    wakeupAt = mongEntity.wakeupAt,
-                                                    payPoint = responseDto.result.payPoint,
-                                                    isSleep = responseDto.result.isSleep,
-                                                    strengthRatio = responseDto.result.strengthRatio,
-                                                    healthyRatio = responseDto.result.healthyRatio,
-                                                    satietyRatio = responseDto.result.satietyRatio,
-                                                    fatigueRatio = responseDto.result.fatigueRatio,
-                                                    expRatio = responseDto.result.expRatio,
-                                                    weight = responseDto.result.weight,
-                                                    poopCount = responseDto.result.poopCount,
-                                                    randomDrawTicketCount = mongEntity.randomDrawTicketCount,
-                                                    createdAt = mongEntity.createdAt,
-                                                    updatedAt = mongEntity.updatedAt,
-                                                )
-                                            )
-                                        }
-                                }
-                            }
+            mqttClient.subscribe(
+                topic = topic,
+                classType = ManagementEventDto::class.java,
+                onReceive = { responseDto ->
+                    roomDB.mongDao().findMongByMongId(mongId = responseDto.result.mongId)
+                        ?.let { mongEntity ->
+                            roomDB.mongDao().save(
+                                mongEntity = MongEntity(
+                                    mongId = responseDto.result.mongId,
+                                    name = responseDto.result.name,
+                                    mongCode = responseDto.result.mongCode,
+                                    mongName = responseDto.result.mongName,
+                                    stateCode = responseDto.result.stateCode,
+                                    statusCode = responseDto.result.statusCode,
+                                    level = mongEntity.level,
+                                    sleepAt = mongEntity.sleepAt,
+                                    wakeupAt = mongEntity.wakeupAt,
+                                    payPoint = responseDto.result.payPoint,
+                                    isSleep = responseDto.result.isSleep,
+                                    strengthRatio = responseDto.result.strengthRatio,
+                                    healthyRatio = responseDto.result.healthyRatio,
+                                    satietyRatio = responseDto.result.satietyRatio,
+                                    fatigueRatio = responseDto.result.fatigueRatio,
+                                    expRatio = responseDto.result.expRatio,
+                                    weight = responseDto.result.weight,
+                                    poopCount = responseDto.result.poopCount,
+                                    randomDrawTicketCount = mongEntity.randomDrawTicketCount,
+                                    createdAt = mongEntity.createdAt,
+                                    updatedAt = mongEntity.updatedAt,
+                                )
+                            )
                         }
-                    }
                 }
-            })
+            )
         }
 
         try {
