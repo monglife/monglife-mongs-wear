@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalContext
  * 화면 켜짐 유지
  */
 @Composable
-fun AlwaysOnScreen(
+internal fun AlwaysOnScreen(
     context: Context = LocalContext.current,
     content: @Composable () -> Unit
 ) {

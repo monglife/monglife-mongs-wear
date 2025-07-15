@@ -26,7 +26,7 @@ import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun EmptySlot(
+internal fun EmptySlot(
     modifier: Modifier = Modifier,
     createDialogOpen: () -> Unit,
 ) {

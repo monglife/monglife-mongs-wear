@@ -17,7 +17,7 @@ import androidx.compose.ui.zIndex
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun RightButton(
+internal fun RightButton(
     modifier: Modifier = Modifier,
     height: Int = 35,
     width: Int = 18,

@@ -2,7 +2,7 @@ package com.monglife.mongs.presentation.view.utils
 
 import android.annotation.SuppressLint
 
-object NumberUtil {
+internal object NumberUtil {
 
     @SuppressLint("DefaultLocale")
     fun formatAsCurrency(value: Int): String {

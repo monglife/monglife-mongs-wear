@@ -34,7 +34,7 @@ import com.mongs.wear.presentation.view.wear.R
  */
 @SuppressLint("QueryPermissionsNeeded")
 @Composable
-fun NeedUpdateContent (
+internal fun NeedUpdateContent (
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
 ) {

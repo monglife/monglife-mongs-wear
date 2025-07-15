@@ -9,6 +9,9 @@ data class DeviceOptionEntity(
     val soundVolume: Float,
     val initNotificationDialogOpen: Boolean,
 ) {
+    /**
+     * 엔티티 도메인 변환
+     */
     fun toDomain(): DeviceOption = DeviceOption(
         currentMongId = this.currentMongId,
         backgroundMapCode = this.backgroundMapCode,

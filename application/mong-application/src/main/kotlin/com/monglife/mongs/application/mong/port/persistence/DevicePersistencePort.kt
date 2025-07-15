@@ -17,7 +17,7 @@ interface DevicePersistencePort {
     /**
      * 현재 몽 ID 수정
      */
-    suspend fun setCurrentMongId(mongId: Long)
+    suspend fun setCurrentMongId(mongId: Long): Long
 
     /**
      * 현재 몽 ID 삭제

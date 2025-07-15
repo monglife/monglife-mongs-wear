@@ -2,10 +2,12 @@ package com.monglife.mongs.data.battle
 
 import com.monglife.mongs.application.battle.port.persistence.MatchPersistencePort
 import com.monglife.mongs.application.battle.port.persistence.MatchQueuePersistencePort
+import com.monglife.mongs.application.battle.port.publish.MatchPublishPort
 import com.monglife.mongs.application.battle.port.web.MatchWebPort
 import com.monglife.mongs.application.battle.port.web.MatchQueueWebPort
 import com.monglife.mongs.data.battle.persistence.adapter.MatchPersistenceAdapter
 import com.monglife.mongs.data.battle.persistence.adapter.MatchQueuePersistenceAdapter
+import com.monglife.mongs.data.battle.publish.adapter.MatchPublishAdapter
 import com.monglife.mongs.data.battle.web.adapter.MatchWebAdapter
 import com.monglife.mongs.data.battle.web.adapter.MatchQueueWebAdapter
 import com.monglife.mongs.data.battle.web.client.MatchWebClient
@@ -51,6 +53,13 @@ abstract class AdapterModule {
     @Binds
     @Singleton
     abstract fun bindMatchQueuePersistencePort(adapter: MatchQueuePersistenceAdapter): MatchQueuePersistencePort
+
+    /**
+     * Bind MatchPublishPort for BattleApplication
+     */
+    @Binds
+    @Singleton
+    abstract fun bindMatchPublishPort(adapter: MatchPublishAdapter): MatchPublishPort
 }
 
 @Module

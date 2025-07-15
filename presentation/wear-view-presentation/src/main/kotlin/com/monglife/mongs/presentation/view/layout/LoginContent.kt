@@ -28,7 +28,7 @@ import com.monglife.mongs.presentation.viewmodel.layout.LoginViewModel
  * 로그인 화면
  */
 @Composable
-fun LoginContent(
+internal fun LoginContent(
     modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,

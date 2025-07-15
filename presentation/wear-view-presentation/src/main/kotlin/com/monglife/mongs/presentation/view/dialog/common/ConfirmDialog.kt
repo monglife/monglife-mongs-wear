@@ -23,7 +23,7 @@ import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 
 @Composable
-fun ConfirmDialog(
+internal fun ConfirmDialog(
     modifier: Modifier = Modifier,
     text: String,
     confirm: () -> Unit,

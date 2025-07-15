@@ -39,7 +39,6 @@ class MqttConsumer<T>(
             runCatching {
                 if (message == null || topic == null) return@launch
                 if (topic != this@MqttConsumer.topic) return@launch
-
                 mutex.withLock {
                     onReceive(message.fromJson(type = classType))
                 }

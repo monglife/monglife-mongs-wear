@@ -33,7 +33,7 @@ import com.mongs.wear.presentation.view.wear.R
 
 
 @Composable
-fun Slot(
+internal fun Slot(
     modifier: Modifier = Modifier,
     currentMongId: Long?,
     mongVo: MongVo,

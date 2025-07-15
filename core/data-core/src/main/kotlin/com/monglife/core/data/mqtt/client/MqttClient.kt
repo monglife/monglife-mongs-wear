@@ -46,13 +46,14 @@ class MqttClient @Inject constructor(
         }
     }
 
-    private val mqttConnectionMutex = Mutex()
+    private val mutex = Mutex()
     private val callbackMap = ConcurrentHashMap<String, MqttCallback>()
 
     /**
      * Mqtt 브로커 연결
      */
-    private suspend fun connect(): MqttAndroidClient = mqttConnectionMutex.withLock {
+    @Throws(InvalidConnectException::class)
+    private suspend fun connect(): MqttAndroidClient = mutex.withLock {
         if (!mqttAndroidClient.isConnected) {
             val options = MqttConnectOptions().apply {
                 this.userName = context.getString(R.string.mongs_mqtt_username)
@@ -76,18 +77,20 @@ class MqttClient @Inject constructor(
      * Mqtt 메시지 전송
      */
     suspend fun <T> publish(topic: String, requestDto: T) {
-        val mqttAndroidClient = connect()
+        runCatching {
+            val mqttAndroidClient = connect()
 
-        val payload = gson.toJson(requestDto)
+            val payload = gson.toJson(requestDto)
 
-        mqttAndroidClient.publish(
-            topic = topic,
-            payload = payload.toByteArray(),
-            qos = 2,
-            retained = false,
-            userContext = MqttUserContext.Publish(topic = topic, payload = payload),
-            callback = null
-        ).await()
+            mqttAndroidClient.publish(
+                topic = topic,
+                payload = payload.toByteArray(),
+                qos = 2,
+                retained = false,
+                userContext = MqttUserContext.Publish(topic = topic, payload = payload),
+                callback = null
+            ).await()
+        }
     }
 
     /**
@@ -98,23 +101,25 @@ class MqttClient @Inject constructor(
         classType: Class<T>,
         onReceive: suspend (ResponseDto<T>) -> Unit
     ) {
-        val mqttAndroidClient = connect()
+        runCatching {
+            val mqttAndroidClient = connect()
 
-        val callback = MqttConsumer(
-            topic = topic,
-            onReceive = onReceive,
-            classType = classType,
-        )
+            val callback = MqttConsumer(
+                topic = topic,
+                onReceive = onReceive,
+                classType = classType,
+            )
 
-        mqttAndroidClient.addCallback(callback = callback)
-        mqttAndroidClient.subscribe(
-            topic = topic,
-            qos = 2,
-            userContext = MqttUserContext.Subscribe(topic = topic),
-            callback = null
-        ).await()
+            mqttAndroidClient.addCallback(callback = callback)
+            mqttAndroidClient.subscribe(
+                topic = topic,
+                qos = 2,
+                userContext = MqttUserContext.Subscribe(topic = topic),
+                callback = null
+            ).await()
 
-        callbackMap[topic] = callback
+            callbackMap[topic] = callback
+        }
     }
 
     /**
@@ -176,7 +181,7 @@ class MqttClient @Inject constructor(
 
                             is MqttUserContext.Publish -> out
                                 .append("메시지 전송\n")
-                                .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Publish).topic}")
+                                .append("  - topic         => ${(asyncActionToken.userContext as MqttUserContext.Publish).topic}\n")
                                 .append("  - payload       => ${(asyncActionToken.userContext as MqttUserContext.Publish).payload}")
                         }
 

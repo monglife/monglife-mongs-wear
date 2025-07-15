@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.mong.usecase.interaction
 
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.application.mong.port.web.InteractionWebPort
 import com.monglife.mongs.application.mong.vo.SnackVo
-import com.monglife.core.application.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -17,9 +17,9 @@ class GetSnacksUseCase @Inject constructor(
     override suspend fun execute(command: Command): List<SnackVo> {
         return withContext(Dispatchers.IO) {
             // 간식 목록 조회
-            interactionWebPort.getSnacks(mongId = command.mongId).map { response ->
+            interactionWebPort.getSnacks(mongId = command.mongId).map {
                 // SnackVo 반환
-                SnackVo.of(snack = response.toDomain())
+                SnackVo.of(snack = it.toDomain())
             }
         }
     }

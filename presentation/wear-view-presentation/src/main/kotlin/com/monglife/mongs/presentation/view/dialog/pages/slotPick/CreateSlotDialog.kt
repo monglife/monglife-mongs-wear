@@ -37,16 +37,16 @@ import com.monglife.mongs.presentation.view.component.common.textbox.InputTextBo
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.view.dialog.common.TimePickerDialog
 
-const val SLOT_ADD_ROUND_SIZE = 10
-const val SLOT_ADD_WIDTH = 144
-const val SLOT_ADD_HEIGHT = 130
-const val SLOT_ADD_TAB_WIDTH = 144
-const val SLOT_ADD_TAB_HEIGHT = 95
-const val SLOT_ADD_BAR_WIDTH = 48
-const val SLOT_ADD_BAR_HEIGHT = 32
+private const val SLOT_ADD_ROUND_SIZE = 10
+private const val SLOT_ADD_WIDTH = 144
+private const val SLOT_ADD_HEIGHT = 130
+private const val SLOT_ADD_TAB_WIDTH = 144
+private const val SLOT_ADD_TAB_HEIGHT = 95
+private const val SLOT_ADD_BAR_WIDTH = 48
+private const val SLOT_ADD_BAR_HEIGHT = 32
 
 @Composable
-fun CreateSlotDialog(
+internal fun CreateSlotDialog(
     modifier: Modifier = Modifier,
     onCreateClick: (String, String, String) -> Unit,
     onCloseClick: () -> Unit,

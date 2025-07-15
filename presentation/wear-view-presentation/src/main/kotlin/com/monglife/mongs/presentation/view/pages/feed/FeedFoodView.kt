@@ -57,7 +57,7 @@ import kotlin.math.min
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
-fun FeedFoodView(
+internal fun FeedFoodView(
     navController: NavController,
     feedFoodViewModel: FeedFoodViewModel = hiltViewModel(),
     context: Context = LocalContext.current,

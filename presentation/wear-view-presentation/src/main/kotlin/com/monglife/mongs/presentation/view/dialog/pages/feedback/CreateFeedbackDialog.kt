@@ -31,7 +31,7 @@ import com.monglife.mongs.presentation.view.component.common.textbox.InputTextBo
 
 
 @Composable
-fun CreateFeedbackDialog(
+internal fun CreateFeedbackDialog(
     modifier: Modifier = Modifier,
     title: String,
     content: String,

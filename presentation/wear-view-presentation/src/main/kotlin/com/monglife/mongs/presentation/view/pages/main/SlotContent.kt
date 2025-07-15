@@ -53,9 +53,9 @@ internal fun SlotContent(
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            // content layer
-            Box(modifier = Modifier.zIndex(1f)) {
-                currentMongVo.value?.let {
+            currentMongVo.value?.let {
+                // content layer
+                Box(modifier = Modifier.zIndex(1f)) {
                     when (it.stateCode) {
                         MongStateCode.DEAD -> DeadSection(onClick = mainSlotViewModel::interactionDialogOpen)
                         MongStateCode.DELETE -> DeleteSection(
@@ -82,11 +82,12 @@ internal fun SlotContent(
                             }
                         }
                     }
-                } ?: run {
-                    Box(modifier = Modifier.zIndex(1f)) {
-                        EmptySection {
-                            navController.navigate(RouterPath.SlotPick.route)
-                        }
+
+                }
+            } ?: run {
+                Box(modifier = Modifier.zIndex(1f)) {
+                    EmptySection {
+                        navController.navigate(RouterPath.SlotPick.route)
                     }
                 }
             }

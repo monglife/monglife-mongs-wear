@@ -3,7 +3,7 @@ package com.monglife.mongs.data.battle.persistence.adapter
 import android.content.Context
 import com.monglife.core.data.mqtt.client.MqttClient
 import com.monglife.mongs.application.battle.port.persistence.MatchQueuePersistencePort
-import com.monglife.mongs.data.battle.web.dto.MatchQueueEventDto
+import com.monglife.mongs.data.battle.persistence.dto.MatchQueueEventDto
 import com.monglife.mongs.domain.battle.model.MatchQueue
 import com.mongs.wear.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,37 +31,40 @@ class MatchQueuePersistenceAdapter @Inject constructor(
     /**
      * 매치 큐 Flow 조회
      */
-    override suspend fun createMatchQueue(mongId: Long, deviceId: String): Flow<MatchQueue?> = flow {
+    override suspend fun createMatchQueue(mongId: Long, deviceId: String): Flow<MatchQueue?> =
+        flow {
 
-        val matchQueue = MutableStateFlow<MatchQueue?>(null)
-        val subscribeCount = subscribeCounterMap.getOrPut(mongId) { AtomicInteger(0) }
-        val topic = "${context.getString(R.string.mongs_mqtt_topic)}/battle/queue/$deviceId"
+            val matchQueue = MutableStateFlow<MatchQueue?>(null)
+            val subscribeCount = subscribeCounterMap.getOrPut(mongId) { AtomicInteger(0) }
+            val topic = "${context.getString(R.string.mongs_mqtt_topic)}/battle/queue/$deviceId"
 
-        if (subscribeCount.getAndIncrement() == 0) {
-            mqttClient.subscribe(
-                topic = topic,
-                classType = MatchQueueEventDto::class.java,
-                onReceive = { responseDto ->
-                    matchQueue.value = MatchQueue(
-                        deviceId = deviceId,
-                        mongId = mongId,
-                        matchId = responseDto.result.matchId,
-                    )
-                }
-            )
-        }
-
-        try {
-            emitAll(matchQueue)
-        } finally {
-            if (subscribeCount.decrementAndGet() == 0) {
-                mqttClient.disSubscribe(topic = topic)
-                subscribeCounterMap.remove(mongId)
+            if (subscribeCount.getAndIncrement() == 0) {
+                mqttClient.subscribe(
+                    topic = topic,
+                    classType = MatchQueueEventDto::class.java,
+                    onReceive = { responseDto ->
+                        matchQueue.value = MatchQueue(
+                            deviceId = deviceId,
+                            mongId = mongId,
+                            matchId = responseDto.result.matchId,
+                            playerId = responseDto.result.matchPlayers.find { it.deviceId == deviceId }?.playerId
+                                ?: "",
+                        )
+                    }
+                )
             }
-        }
-    }.shareIn(
-        scope = applicationScope,
-        started = SharingStarted.WhileSubscribed(),
-        replay = 1,
-    )
+
+            try {
+                emitAll(matchQueue)
+            } finally {
+                if (subscribeCount.decrementAndGet() == 0) {
+                    mqttClient.disSubscribe(topic = topic)
+                    subscribeCounterMap.remove(mongId)
+                }
+            }
+        }.shareIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            replay = 1,
+        )
 }

@@ -28,7 +28,7 @@ import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 
 @Composable
-fun CollectionMenuView(
+internal fun CollectionMenuView(
     navController: NavController,
 ) {
 

@@ -20,7 +20,7 @@ import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
 
 @Composable
-fun Chip(
+internal fun Chip(
     modifier: Modifier = Modifier,
     fontColor: Color,
     backgroundColor: Color,

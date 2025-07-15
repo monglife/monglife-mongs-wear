@@ -27,7 +27,7 @@ import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 
 @Composable
-fun ConfirmAndCancelDialog(
+internal fun ConfirmAndCancelDialog(
     modifier: Modifier = Modifier,
     text: String,
     confirm: () -> Unit,

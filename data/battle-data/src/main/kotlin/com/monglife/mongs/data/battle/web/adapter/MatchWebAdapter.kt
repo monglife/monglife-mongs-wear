@@ -1,11 +1,9 @@
 package com.monglife.mongs.data.battle.web.adapter
 
-import com.monglife.mongs.application.battle.exception.NotFoundMatchException
 import com.monglife.mongs.application.battle.exception.NotFoundMatchRewardException
 import com.monglife.mongs.application.battle.exception.NotFoundWinnerMatchPlayerException
 import com.monglife.mongs.application.battle.port.web.MatchWebPort
 import com.monglife.mongs.application.battle.port.web.response.GetBattleRewardResponse
-import com.monglife.mongs.application.battle.port.web.response.GetMatchResponse
 import com.monglife.mongs.application.battle.port.web.response.GetWinnerMatchPlayerResponse
 import com.monglife.mongs.data.battle.web.client.MatchWebClient
 import javax.inject.Inject
@@ -33,18 +31,20 @@ class MatchWebAdapter @Inject constructor(
         }
 
     /**
-     * 매치 조회
-     */
-    @Throws(NotFoundMatchException::class)
-    override suspend fun getMatch(matchId: Long): GetMatchResponse {
-        TODO("Not yet implemented")
-    }
-
-    /**
      * 승리 매치 플레이어 조회
      */
     @Throws(NotFoundWinnerMatchPlayerException::class)
-    override suspend fun getWinnerMatchPlayer(matchId: Long): GetWinnerMatchPlayerResponse {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getWinnerMatchPlayer(matchId: Long): GetWinnerMatchPlayerResponse =
+        matchWebClient.getOverMatch(matchId = matchId).let { response ->
+
+            val body = response.takeIf { it.isSuccessful }?.body()
+                ?: throw NotFoundWinnerMatchPlayerException()
+
+            GetWinnerMatchPlayerResponse(
+                playerId = body.result.playerId,
+                mongCode = body.result.mongCode,
+                mongName = body.result.mongName,
+                name = body.result.name,
+            )
+        }
 }

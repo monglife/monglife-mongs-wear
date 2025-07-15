@@ -6,7 +6,6 @@ import com.monglife.mongs.application.device.port.web.request.ExchangeWalkingCou
 import com.monglife.mongs.application.device.port.web.request.UpdateWalkingCountRequest
 import com.monglife.mongs.application.device.port.web.response.ExchangeWalkingCountResponse
 import com.monglife.mongs.application.device.port.web.response.UpdateWalkingCountResponse
-import com.monglife.mongs.domain.device.model.Step
 
 interface DeviceWebPort {
 

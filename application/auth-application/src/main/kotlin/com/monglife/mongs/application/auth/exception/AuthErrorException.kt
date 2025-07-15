@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.auth.exception
 
-import com.monglife.mongs.application.auth.error.AuthErrorCode
 import com.monglife.core.common.error.ErrorCode
 import com.monglife.core.common.exception.ErrorException
+import com.monglife.mongs.application.auth.error.AuthErrorCode
 
 /**
  * 앱 버전 검증 실패 예외

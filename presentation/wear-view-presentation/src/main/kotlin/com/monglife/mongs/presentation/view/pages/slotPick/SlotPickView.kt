@@ -35,7 +35,7 @@ import kotlin.math.min
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
-fun SlotPickView(
+internal fun SlotPickView(
     navController: NavController,
     slotPickViewModel: SlotPickViewModel = hiltViewModel(),
 ) {

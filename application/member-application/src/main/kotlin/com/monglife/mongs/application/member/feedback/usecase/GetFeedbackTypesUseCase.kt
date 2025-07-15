@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.member.feedback.usecase
 
+import com.monglife.core.application.usecase.BaseNoParamUseCase
 import com.monglife.mongs.application.member.feedback.port.web.FeedbackWebPort
 import com.monglife.mongs.application.member.feedback.vo.FeedbackTypeVo
-import com.monglife.core.application.usecase.BaseNoParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

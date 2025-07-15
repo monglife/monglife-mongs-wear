@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.first
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
-fun MainView(
+internal fun MainView(
     navController: NavController,
     mainViewModel: MainViewModel = hiltViewModel(),
 ) {

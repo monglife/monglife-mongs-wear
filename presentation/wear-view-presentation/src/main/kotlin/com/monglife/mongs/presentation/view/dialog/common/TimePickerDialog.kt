@@ -29,7 +29,7 @@ import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.monglife.mongs.presentation.view.component.common.textbox.TimePicker
 
 @Composable
-fun TimePickerDialog(
+internal fun TimePickerDialog(
     modifier: Modifier = Modifier,
     initHour: Int = 0,
     initMinute: Int = 0,

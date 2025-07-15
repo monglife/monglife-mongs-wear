@@ -2,8 +2,6 @@ package com.monglife.mongs.data.mong.persistence.adapter
 
 import android.content.Context
 import com.monglife.core.data.mqtt.client.MqttClient
-import com.monglife.mongs.application.mong.exception.NotFoundMongException
-import com.monglife.mongs.application.mong.exception.NotFoundMongOptionException
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.data.mong.persistence.db.MongRoomDB
 import com.monglife.mongs.data.mong.persistence.dto.ManagementEventDto
@@ -40,10 +38,8 @@ class ManagementPersistenceAdapter @Inject constructor(
     /**
      * 몽 옵션 조회
      */
-    @Throws(NotFoundMongOptionException::class)
-    override suspend fun getMongOption(mongId: Long): MongOption =
+    override suspend fun getMongOption(mongId: Long): MongOption? =
         roomDB.mongDao().findMongOptionByMongId(mongId = mongId)?.toDomain()
-            ?: throw NotFoundMongOptionException()
 
     /**
      * 몽 옵션 Flow 객체 조회
@@ -74,10 +70,8 @@ class ManagementPersistenceAdapter @Inject constructor(
     /**
      * 몽 조회
      */
-    @Throws(NotFoundMongException::class)
-    override suspend fun getMong(mongId: Long): Mong =
+    override suspend fun getMong(mongId: Long): Mong? =
         roomDB.mongDao().findMongByMongId(mongId = mongId)?.toDomain()
-            ?: throw NotFoundMongException()
 
     /**
      * 몽 Flow 객체 조회

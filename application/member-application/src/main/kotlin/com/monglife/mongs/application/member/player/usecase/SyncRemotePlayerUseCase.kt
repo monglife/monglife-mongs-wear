@@ -15,15 +15,14 @@ import javax.inject.Inject
  * 플레이어 정보 갱신 UseCase
  */
 class SyncRemotePlayerUseCase @Inject constructor(
-    private val authPersistencePort: AuthPersistencePort,
     private val playerWebPort: PlayerWebPort,
+    private val authPersistencePort: AuthPersistencePort,
     private val playerPersistencePort: PlayerPersistencePort,
 ) : BaseNoParamUseCase<Unit>() {
 
-    @Throws(InvalidCreatePlayerException::class)
+    @Throws(NotFoundPlayerException::class, InvalidCreatePlayerException::class)
     override suspend fun execute() {
         withContext(Dispatchers.IO) {
-            // 플레이어 조회 요청
             try {
                 playerWebPort.getPlayer().let { response ->
                     // 플레이어 로컬 조회

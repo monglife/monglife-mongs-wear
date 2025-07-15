@@ -17,7 +17,7 @@ import androidx.compose.ui.zIndex
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun LeftButton(
+internal fun LeftButton(
     modifier: Modifier = Modifier,
     height: Int = 35,
     width: Int = 18,

@@ -37,7 +37,7 @@ import com.monglife.mongs.presentation.view.component.common.charactor.Mong
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun CollectionMongDetailDialog(
+internal fun CollectionMongDetailDialog(
     modifier: Modifier = Modifier,
     collectionMongVo: CollectionMongVo,
     onClick: () -> Unit,

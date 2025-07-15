@@ -1,9 +1,10 @@
 package com.monglife.mongs.application.auth.usecase
 
+import com.monglife.core.application.usecase.BaseNoParamUseCase
+import com.monglife.mongs.application.auth.exception.VerifyAppVersionException
 import com.monglife.mongs.application.auth.port.persistence.AuthPersistencePort
 import com.monglife.mongs.application.auth.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.auth.port.web.AuthWebPort
-import com.monglife.core.application.usecase.BaseNoParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -17,6 +18,7 @@ class GetMustUpdateAppUseCase @Inject constructor(
     private val authPersistencePort: AuthPersistencePort,
 ) : BaseNoParamUseCase<Boolean>() {
 
+    @Throws(VerifyAppVersionException::class)
     override suspend fun execute(): Boolean {
         return withContext(Dispatchers.IO) {
             val appPackageName = devicePersistencePort.getAppPackageName()

@@ -19,7 +19,7 @@ import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.viewmodel.pages.inventory.InventoryViewModel
 
 @Composable
-fun InventoryView(
+internal fun InventoryView(
     navController: NavController,
     inventoryViewModel: InventoryViewModel = hiltViewModel(),
     context: Context = LocalContext.current,

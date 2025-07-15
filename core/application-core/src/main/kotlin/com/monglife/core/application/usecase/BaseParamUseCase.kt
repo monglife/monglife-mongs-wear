@@ -6,7 +6,6 @@ abstract class BaseParamUseCase<P, R> {
 
     suspend operator fun invoke(command: P): R {
         return try {
-            // 메서드 실행
             this.execute(command = command)
         } catch (exception: Exception) {
             throw exception

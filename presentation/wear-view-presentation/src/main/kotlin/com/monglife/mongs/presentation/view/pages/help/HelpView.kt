@@ -30,7 +30,7 @@ import com.monglife.mongs.presentation.view.dialog.pages.help.HelpDialog
 import com.monglife.mongs.presentation.viewmodel.pages.help.HelpViewModel
 
 @Composable
-fun HelpView(
+internal fun HelpView(
     helpViewModel: HelpViewModel = hiltViewModel(),
 ) {
     val uiState = helpViewModel.uiState.collectAsState()

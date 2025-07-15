@@ -13,11 +13,9 @@ import com.monglife.mongs.application.mong.vo.MongVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalTime
@@ -86,12 +84,9 @@ class SlotPickViewModel @Inject constructor(
                 // 몽 목록 정보 조회
                 updateMongVos()
 
-                observeCurrentMongUseCase()
-                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow -> observeForever(flow, _currentMongVo) }
+                observeForever(observeCurrentMongUseCase(), _currentMongVo)
 
                 observePlayerUseCase()
-                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
                     .let { flow ->
                         observeForever(flow.map { it.slotCount }, _slotCount)
                         observeForever(flow.map { it.starPoint }, _starPoint)

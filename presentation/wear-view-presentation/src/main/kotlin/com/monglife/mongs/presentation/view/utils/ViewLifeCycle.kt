@@ -10,7 +10,7 @@ import androidx.lifecycle.LifecycleOwner
  * 화면 라이프 사이클
  */
 @Composable
-fun ViewLifeCycle(
+internal fun ViewLifeCycle(
     lifecycleOwner: LifecycleOwner,
     onCreate: () -> Unit = {},
     onResume: () -> Unit = {},

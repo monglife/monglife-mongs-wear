@@ -48,7 +48,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-fun ExchangeStepView(
+internal fun ExchangeStepView(
     navController: NavController,
     exchangeStepViewModel: ExchangeStepViewModel = hiltViewModel(),
     context: Context = LocalContext.current,

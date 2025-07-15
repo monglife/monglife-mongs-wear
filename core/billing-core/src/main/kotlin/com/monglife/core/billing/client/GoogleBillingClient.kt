@@ -3,7 +3,6 @@ package com.monglife.core.billing.client
 import android.app.Activity
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.BillingClient.ConnectionState

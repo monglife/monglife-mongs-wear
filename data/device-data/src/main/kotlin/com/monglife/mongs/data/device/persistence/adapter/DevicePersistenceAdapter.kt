@@ -68,7 +68,7 @@ class DevicePersistenceAdapter @Inject constructor(
     /**
      * 현재 몽 ID 수정
      */
-    override suspend fun setCurrentMongId(mongId: Long) {
+    override suspend fun setCurrentMongId(mongId: Long): Long {
         this.getDeviceOption().let { deviceOptionEntity ->
             this.saveDeviceOption(
                 DeviceOption(
@@ -80,6 +80,8 @@ class DevicePersistenceAdapter @Inject constructor(
                 )
             )
         }
+
+        return mongId
     }
 
     /**
@@ -127,15 +129,6 @@ class DevicePersistenceAdapter @Inject constructor(
     override suspend fun getStepFlow(): Flow<Step> = flow {
         val deviceId = this@DevicePersistenceAdapter.getDeviceId()
 
-        deviceDataStore.getStep() ?: run {
-            deviceDataStore.saveStep(
-                StepEntity(
-                    walkingCount = 0,
-                    consumedWalkingCount = 0
-                )
-            )
-        }
-
         val subscribeCount = subscribeCounterMap.getOrPut(deviceId) { AtomicInteger(0) }
         val topic = "${context.getString(R.string.mongs_mqtt_topic)}/device/$deviceId"
 
@@ -167,7 +160,8 @@ class DevicePersistenceAdapter @Inject constructor(
                         walkingCount = stepEntity?.walkingCount ?: 0,
                         consumedWalkingCount = stepEntity?.consumedWalkingCount ?: 0,
                     )
-                })
+                }
+            )
         } finally {
             if (subscribeCount.decrementAndGet() == 0) {
                 mqttClient.disSubscribe(topic = topic)

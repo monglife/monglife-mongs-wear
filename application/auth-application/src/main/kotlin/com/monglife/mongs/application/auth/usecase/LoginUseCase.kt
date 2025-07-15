@@ -1,5 +1,6 @@
 package com.monglife.mongs.application.auth.usecase
 
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.application.auth.exception.InvalidCreateUserDeviceException
 import com.monglife.mongs.application.auth.exception.InvalidLoginException
 import com.monglife.mongs.application.auth.exception.NeedJoinException
@@ -8,7 +9,6 @@ import com.monglife.mongs.application.auth.port.persistence.DevicePersistencePor
 import com.monglife.mongs.application.auth.port.web.AuthWebPort
 import com.monglife.mongs.application.auth.port.web.UserDeviceWebPort
 import com.monglife.mongs.application.auth.port.web.request.CreateDeviceRequest
-import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.domain.auth.model.Session
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

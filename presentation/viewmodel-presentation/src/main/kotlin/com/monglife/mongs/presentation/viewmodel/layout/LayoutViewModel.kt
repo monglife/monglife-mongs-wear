@@ -6,10 +6,8 @@ import com.monglife.mongs.application.auth.usecase.ObserveIsLoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -49,9 +47,7 @@ class LayoutViewModel @Inject constructor(
 
             // 로그인 여부 로딩
             withContext(Dispatchers.IO) {
-                observeIsLoginUseCase()
-                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow -> observeForever(flow, _isLogin) }
+                observeForever(observeIsLoginUseCase(), _isLogin)
             }
 
             // 앱 업데이트 체크

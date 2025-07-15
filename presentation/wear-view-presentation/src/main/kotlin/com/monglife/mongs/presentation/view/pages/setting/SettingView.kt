@@ -38,7 +38,7 @@ import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.viewmodel.pages.setting.SettingViewModel
 
 @Composable
-fun SettingView(
+internal fun SettingView(
     settingViewModel: SettingViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {

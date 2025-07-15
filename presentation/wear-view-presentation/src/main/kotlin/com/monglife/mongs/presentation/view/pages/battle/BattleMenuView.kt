@@ -1,7 +1,5 @@
 package com.monglife.mongs.presentation.view.pages.battle
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -22,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,10 +41,9 @@ import com.monglife.mongs.presentation.viewmodel.pages.battle.BattleMenuViewMode
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun BattleMenuView(
+internal fun BattleMenuView(
     navController: NavController,
     battleMenuViewModel: BattleMenuViewModel = hiltViewModel(),
-    context: Context = LocalContext.current,
 ) {
     val uiState = battleMenuViewModel.uiState.collectAsState()
     val matchQueueVo = battleMenuViewModel.matchQueueVo.collectAsState()
@@ -60,18 +56,16 @@ fun BattleMenuView(
             LoadingBar()
         } else {
             currentMongVo.value?.let {
-                Box(modifier = Modifier.zIndex(1f)) {
-                    if (uiState.value.matchingLoadingBar) {
-                        BattleMatchingContent(
-                            modifier = Modifier.zIndex(1f),
-                            battleMenuViewModel = battleMenuViewModel,
-                        )
-                    } else {
-                        BattleMenuContent(
-                            modifier = Modifier.zIndex(1f),
-                            battleMenuViewModel = battleMenuViewModel,
-                        )
-                    }
+                if (uiState.value.matchingLoadingBar) {
+                    BattleMatchingContent(
+                        modifier = Modifier.zIndex(1f),
+                        battleMenuViewModel = battleMenuViewModel,
+                    )
+                } else {
+                    BattleMenuContent(
+                        modifier = Modifier.zIndex(1f),
+                        battleMenuViewModel = battleMenuViewModel,
+                    )
                 }
 
                 Box(modifier = Modifier.zIndex(2f)) {
@@ -89,7 +83,10 @@ fun BattleMenuView(
 
     LaunchedEffect(matchQueueVo.value) {
         matchQueueVo.value?.let {
-            battleMenuViewModel.matching()
+            battleMenuViewModel.matching(
+                matchId = it.matchId,
+                playerId = it.playerId,
+            )
         }
     }
 
@@ -98,8 +95,7 @@ fun BattleMenuView(
         battleMenuViewModel.uiEvent.collect { event ->
             when (event) {
                 is BattleMenuViewModel.UiEvent.NavMatch -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
-                    navController.navigate(RouterPath.BattleMatch.route) {
+                    navController.navigate(route = "${RouterPath.BattleMatch.route}/${event.matchId}/${event.playerId}") {
                         popUpTo(RouterPath.BattleMenu.route) { inclusive = true }
                     }
                 }
@@ -148,6 +144,8 @@ private fun BattleMatchingContent(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }
@@ -255,6 +253,8 @@ private fun BattleMenuContent(
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }

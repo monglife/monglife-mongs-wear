@@ -48,7 +48,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-fun ExchangeStarPointView(
+internal fun ExchangeStarPointView(
     navController: NavController,
     exchangeStarPointViewModel: ExchangeStarPointViewModel = hiltViewModel(),
     context: Context = LocalContext.current,

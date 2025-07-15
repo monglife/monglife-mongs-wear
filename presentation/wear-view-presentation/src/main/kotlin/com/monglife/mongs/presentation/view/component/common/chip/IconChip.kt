@@ -21,7 +21,7 @@ import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
 import com.monglife.mongs.presentation.wear.component.common.button.CircleImageButton
 
 @Composable
-fun IconChip(
+internal fun IconChip(
     modifier: Modifier = Modifier,
     icon: Int,
     border: Int,

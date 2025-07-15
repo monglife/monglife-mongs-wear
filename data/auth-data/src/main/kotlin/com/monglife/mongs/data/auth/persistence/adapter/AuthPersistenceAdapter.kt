@@ -6,7 +6,9 @@ import com.monglife.mongs.domain.auth.model.Session
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AuthPersistenceAdapter @Inject constructor(
     private val sessionDataStore: SessionDataStore,
 ) : com.monglife.mongs.application.auth.port.persistence.AuthPersistencePort,

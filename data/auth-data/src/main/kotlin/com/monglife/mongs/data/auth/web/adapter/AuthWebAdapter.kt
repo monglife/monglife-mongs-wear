@@ -20,6 +20,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Singleton
 class AuthWebAdapter @Inject constructor(
     private val authWebClient: AuthWebClient,
 ): AuthWebPort {

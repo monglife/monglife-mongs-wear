@@ -27,7 +27,7 @@ import com.monglife.mongs.presentation.view.assets.MongsDarkGray
 import com.monglife.mongs.presentation.view.assets.MongsLightGray
 
 @Composable
-fun TimePicker(
+internal fun TimePicker(
     modifier: Modifier = Modifier,
     initValue: Int = 0,
     valueRange: List<Int>,

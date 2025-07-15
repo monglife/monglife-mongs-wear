@@ -1,10 +1,11 @@
 package com.monglife.mongs.application.mong.usecase.interaction
 
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.application.mong.exception.InvalidFeedSnackException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.application.mong.port.web.InteractionWebPort
-import com.monglife.core.application.usecase.BaseParamUseCase
+import com.monglife.mongs.application.mong.port.web.ManagementWebPort
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -14,6 +15,7 @@ import javax.inject.Inject
  */
 class FeedSnackMongUseCase @Inject constructor(
     private val interactionWebPort: InteractionWebPort,
+    private val managementWebPort: ManagementWebPort,
     private val managementPersistencePort: ManagementPersistencePort,
 ) : BaseParamUseCase<FeedSnackMongUseCase.Command, Unit>() {
 
@@ -25,9 +27,14 @@ class FeedSnackMongUseCase @Inject constructor(
                 mongId = command.mongId,
                 snackCode = command.snackCode,
             ).let { response ->
-                managementPersistencePort.getMong(mongId = command.mongId).let { mong ->
+                val mong = managementPersistencePort.getMong(mongId = command.mongId)
+                    ?: managementWebPort.getMong(mongId = command.mongId).let {
+                        managementPersistencePort.saveMong(mong = it.toDomain())
+                    }
+
+                mong.let {
                     // 몽 섭취
-                    mong.feed(
+                    it.feed(
                         payPoint = response.payPoint,
                         expRatio = response.expRatio,
                         strengthRatio = response.strengthRatio,
@@ -39,7 +46,7 @@ class FeedSnackMongUseCase @Inject constructor(
                         statusCode = response.statusCode,
                     )
                     // 몽 로컬 등록
-                    managementPersistencePort.saveMong(mong = mong)
+                    managementPersistencePort.saveMong(mong = it)
                 }
             }
         }

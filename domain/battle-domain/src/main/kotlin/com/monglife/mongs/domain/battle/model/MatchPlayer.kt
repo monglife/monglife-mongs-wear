@@ -3,8 +3,8 @@ package com.monglife.mongs.domain.battle.model
 import com.monglife.mongs.domain.battle.enums.MatchRoundCode
 
 class MatchPlayer(
-    matchId: Long,
     playerId: String,
+    deviceId: String,
     mongCode: String,
     mongName: String,
     name: String,
@@ -13,7 +13,7 @@ class MatchPlayer(
 ) {
     var playerId: String = playerId
         private set
-    var matchId: Long = matchId
+    var deviceId: String = deviceId
         private set
     var mongCode: String = mongCode
         private set

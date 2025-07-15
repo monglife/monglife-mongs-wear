@@ -8,10 +8,8 @@ import com.monglife.mongs.application.mong.vo.MongVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -59,13 +57,8 @@ class MainStepViewModel @Inject constructor(
                 // 활동 권한 정보 목록
                 _activityPermission.value = permissionUtil.verifyActivityPermission().isEmpty()
 
-                observeCurrentMongUseCase()
-                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow -> observeForever(flow, _currentMongVo) }
-
-                observeCurrentWalkingCountUseCase()
-                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow -> observeForever(flow, _currentWalkingCount) }
+                observeForever(observeCurrentMongUseCase(), _currentMongVo)
+                observeForever(observeCurrentWalkingCountUseCase(), _currentWalkingCount)
             }
 
             _uiState.value = UiState.Idle

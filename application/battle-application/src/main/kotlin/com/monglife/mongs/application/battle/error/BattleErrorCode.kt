@@ -7,7 +7,7 @@ enum class BattleErrorCode(
     private val isMessageShow: Boolean,
 ) : ErrorCode {
 
-    INVALID_CREATE_QUEUE_PLAYER("매치 큐 등록 실패", false),
+    INVALID_CREATE_QUEUE_PLAYER("페이포인트 부족", true),
     INVALID_DELETE_QUEUE_PLAYER("매치 큐 삭제 실패", false),
     NOT_FOUND_MATCH_REWARD("매치 보상 조회 실패", false),
     NOT_FOUND_WINNER_MATCH_PLAYER("승리 매치 플레이어 조회 실패", false),

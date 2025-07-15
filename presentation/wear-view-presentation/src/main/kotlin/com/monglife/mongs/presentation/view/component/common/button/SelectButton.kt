@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SelectButton(
+internal fun SelectButton(
     modifier: Modifier = Modifier,
     leftBtnDisabled: Boolean = false,
     rightBtnDisabled: Boolean = false,

@@ -1,9 +1,9 @@
 package com.monglife.mongs.application.auth.usecase
 
+import com.monglife.core.application.usecase.BaseNoParamUseCase
 import com.monglife.mongs.application.auth.exception.InvalidLogoutException
 import com.monglife.mongs.application.auth.port.persistence.AuthPersistencePort
 import com.monglife.mongs.application.auth.port.web.AuthWebPort
-import com.monglife.core.application.usecase.BaseNoParamUseCase
 import com.monglife.mongs.domain.auth.model.Session
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

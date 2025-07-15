@@ -7,6 +7,8 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.monglife.core.presentation.utils.PermissionUtil
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.auth.exception.InvalidJoinException
 import com.monglife.mongs.application.auth.exception.InvalidLoginException
 import com.monglife.mongs.application.auth.exception.NeedJoinException
@@ -14,8 +16,6 @@ import com.monglife.mongs.application.auth.usecase.JoinUseCase
 import com.monglife.mongs.application.auth.usecase.LoginUseCase
 import com.monglife.mongs.application.device.usecase.DeleteBackgroundMapCodeUseCase
 import com.monglife.mongs.application.mong.usecase.management.DeleteCurrentMongIdUseCase
-import com.monglife.core.presentation.utils.PermissionUtil
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

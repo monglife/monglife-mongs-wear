@@ -30,7 +30,7 @@ import com.monglife.mongs.presentation.view.component.common.textbox.StarPoint
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun BuySlot(
+internal fun BuySlot(
     modifier: Modifier = Modifier,
     starPoint: Int,
     buySlotPrice: Int,

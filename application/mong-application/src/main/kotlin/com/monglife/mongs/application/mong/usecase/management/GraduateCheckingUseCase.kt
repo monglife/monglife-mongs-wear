@@ -1,9 +1,9 @@
 package com.monglife.mongs.application.mong.usecase.management
 
-import com.monglife.mongs.application.mong.exception.NotFoundMongOptionException
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
-import com.monglife.core.application.usecase.BaseParamUseCase
+import com.monglife.mongs.domain.mong.model.MongOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -16,7 +16,6 @@ class GraduateCheckingUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort
 ) : BaseParamUseCase<GraduateCheckingUseCase.Command, Unit>() {
 
-    @Throws(NotFoundMongOptionException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
             if (devicePersistencePort.getCurrentMongId() == command.mongId) {
@@ -25,11 +24,19 @@ class GraduateCheckingUseCase @Inject constructor(
             }
 
             // 몽 옵션 로컬 조회
-            managementPersistencePort.getMongOption(mongId = command.mongId).let { mongOption ->
+            val mongOption = managementPersistencePort.getMongOption(mongId = command.mongId)
+                ?: managementPersistencePort.saveMongOption(
+                    mongOption = MongOption(
+                        mongId = command.mongId,
+                        graduateCheck = false,
+                    )
+                )
+
+            mongOption.let {
                 // 졸업 상태 사용자 확인
-                mongOption.graduateCheck()
+                it.graduateCheck()
                 // 몽 옵션 영속화
-                managementPersistencePort.saveMongOption(mongOption = mongOption)
+                managementPersistencePort.saveMongOption(mongOption = it)
             }
         }
     }

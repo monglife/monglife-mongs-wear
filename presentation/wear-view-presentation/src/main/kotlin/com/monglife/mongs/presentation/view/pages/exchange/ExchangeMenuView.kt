@@ -34,7 +34,7 @@ import com.monglife.mongs.presentation.view.component.common.background.DefaultB
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun ExchangeMenuView(
+internal fun ExchangeMenuView(
     navController: NavController,
 ) {
     Box {

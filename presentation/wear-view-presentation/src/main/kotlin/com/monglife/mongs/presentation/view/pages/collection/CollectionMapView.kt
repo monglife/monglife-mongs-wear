@@ -23,11 +23,9 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.compose.material.PositionIndicator
 import com.monglife.mongs.presentation.view.assets.MapResourceCode
-import com.monglife.mongs.presentation.view.assets.MongResourceCode
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.CircleTextButton
-import com.monglife.mongs.presentation.view.dialog.pages.collection.CollectionMongDetailDialog
 import com.monglife.mongs.presentation.viewmodel.pages.collection.CollectionMapViewModel
 import com.monglife.mongs.presentation.wear.component.common.button.CircleImageButton
 import com.mongs.wear.presentation.dialog.collection.CollectionMapDetailDialog
@@ -35,7 +33,7 @@ import com.mongs.wear.presentation.view.wear.R
 import kotlin.math.min
 
 @Composable
-fun CollectionMapView(
+internal fun CollectionMapView(
     collectionMapViewModel: CollectionMapViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
@@ -75,7 +73,7 @@ fun CollectionMapView(
                                 )) {
                                     val collectionMapVo = collectionMapVos.value[index - 1]
 
-                                    if (collectionMapVo.isIncluded) {
+                                    if (!collectionMapVo.isIncluded) {
                                         CircleTextButton(
                                             text = "?",
                                             border = R.drawable.btn_border_purple_dark,

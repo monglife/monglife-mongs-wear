@@ -14,10 +14,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -65,7 +63,7 @@ class MainSlotViewModel @Inject constructor(
     /**
      * UI 상태 변수
      */
-    private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     /**
@@ -79,10 +77,7 @@ class MainSlotViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             val initNotificationDialogOpen = withContext(Dispatchers.IO) {
-                observeCurrentMongUseCase()
-                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow -> observeForever(flow, _currentMongVo) }
-
+                observeForever(observeCurrentMongUseCase(), _currentMongVo)
                 getInitNotificationDialogOpenOptionUseCase()
             }
 

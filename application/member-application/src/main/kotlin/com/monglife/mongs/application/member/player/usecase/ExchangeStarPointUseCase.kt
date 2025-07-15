@@ -1,11 +1,11 @@
 package com.monglife.mongs.application.member.player.usecase
 
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.application.member.player.exception.InvalidExchangeStarPointException
 import com.monglife.mongs.application.member.player.exception.NotFoundPlayerException
 import com.monglife.mongs.application.member.player.port.persistence.PlayerPersistencePort
 import com.monglife.mongs.application.member.player.port.web.PlayerWebPort
 import com.monglife.mongs.application.member.player.vo.PlayerVo
-import com.monglife.core.application.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -21,21 +21,18 @@ class ExchangeStarPointUseCase @Inject constructor(
     @Throws(NotFoundPlayerException::class, InvalidExchangeStarPointException::class)
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
-            // 플레이어 조회 요청
             playerWebPort.getPlayer().let { response ->
-                val player = response.toDomain()
-                // 스타 포인트 환전 요청
-                playerWebPort.exchangeStarPoint(
-                    mongId = command.mongId,
-                    starPoint = command.starPoint,
-                ).let {
-                    // 플레이어 스타 포인트 환전
-                    player.exchangeStarPoint(starPoint = it.starPoint)
+                response.toDomain().let { player ->
+                    // 스타 포인트 환전 요청
+                    playerWebPort.exchangeStarPoint(
+                        mongId = command.mongId,
+                        starPoint = command.starPoint,
+                    ).let { player.exchangeStarPoint(starPoint = it.starPoint) }
+
+                    playerPersistencePort.savePlayer(player = player)
+
+                    PlayerVo.of(player = player)
                 }
-                // 플레이어 로컬 등록
-                playerPersistencePort.savePlayer(player = player)
-                // PlayerVo 반환
-                PlayerVo.of(player = player)
             }
         }
     }

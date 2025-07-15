@@ -1,11 +1,11 @@
 package com.monglife.mongs.application.mong.usecase.management
 
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.application.mong.exception.InvalidCreateMongException
 import com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.application.mong.port.web.ManagementWebPort
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.domain.mong.model.MongOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -42,10 +42,16 @@ class CreateMongUseCase @Inject constructor(
                 managementPersistencePort.saveMong(mong = mong)
                 // 현재 몽으로 설정
                 devicePersistencePort.setCurrentMongId(mongId = mong.mongId)
-                // MongVo 반환
-                managementPersistencePort.getMongOption(mongId = mong.mongId).let {
-                    MongVo.of(mong = mong, mongOption = it)
-                }
+
+                val mongOption = managementPersistencePort.getMongOption(mongId = mong.mongId)
+                    ?: managementPersistencePort.saveMongOption(
+                        mongOption = MongOption(
+                            mongId = mong.mongId,
+                            graduateCheck = false,
+                        )
+                    )
+
+                MongVo.of(mong = mong, mongOption = mongOption)
             }
         }
     }

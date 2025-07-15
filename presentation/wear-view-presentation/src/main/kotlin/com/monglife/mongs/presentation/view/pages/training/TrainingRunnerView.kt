@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 
 @Composable
-fun TrainingRunnerView(
+internal fun TrainingRunnerView(
     navController: NavController,
     // TODO: Add viewModel if need
 ) {

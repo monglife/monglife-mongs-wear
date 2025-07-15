@@ -1,8 +1,7 @@
 package com.monglife.mongs.application.device.usecase
 
-import com.monglife.mongs.application.device.port.persistence.DevicePersistencePort
 import com.monglife.core.application.usecase.BaseParamUseCase
-import com.monglife.mongs.domain.device.model.DeviceOption
+import com.monglife.mongs.application.device.port.persistence.DevicePersistencePort
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -16,12 +15,12 @@ class SetBackgroundMapCodeUseCase @Inject constructor(
 
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
-            // DeviceOption 로컬 조회
-            devicePersistencePort.getDeviceOption().let { deviceOption: DeviceOption ->
+            devicePersistencePort.getDeviceOption().let {
                 // DeviceOption backgroundMapCode 변경
-                deviceOption.updateBackgroundMapCode(backgroundMapCode = command.mapCode)
+                it.updateBackgroundMapCode(backgroundMapCode = command.mapCode)
+
                 // DeviceOption 로컬 등록
-                devicePersistencePort.saveDeviceOption(deviceOption = deviceOption)
+                devicePersistencePort.saveDeviceOption(deviceOption = it)
             }
         }
     }

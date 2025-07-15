@@ -7,6 +7,9 @@ data class PlayerEntity(
     val slotCount: Int,
     val starPoint: Int,
 ) {
+    /**
+     * 엔티티 도메인 변환
+     */
     fun toDomain() = Player(
         accountId = this.accountId,
         slotCount = this.slotCount,

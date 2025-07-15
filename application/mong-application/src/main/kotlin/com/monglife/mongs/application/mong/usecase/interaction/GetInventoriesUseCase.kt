@@ -1,9 +1,9 @@
 package com.monglife.mongs.application.mong.usecase.interaction
 
-import com.monglife.mongs.application.mong.port.web.InteractionWebPort
-import com.monglife.mongs.application.mong.vo.InventoryVo
 import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.core.application.wrapper.Page
+import com.monglife.mongs.application.mong.port.web.InteractionWebPort
+import com.monglife.mongs.application.mong.vo.InventoryVo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -22,18 +22,13 @@ class GetInventoriesUseCase @Inject constructor(
                 mongId = command.mongId,
                 page = command.page,
                 size = command.size,
-            ).let {
-                val result = it.result.map { response ->
-                    // InventoryVo 반환
-                    InventoryVo.of(response.toDomain())
-                }
-
+            ).let { response ->
                 Page(
-                    result = result,
-                    page = it.page,
-                    size = it.size,
-                    totalPage = it.totalPage,
-                    isLastPage = it.isLastPage,
+                    page = response.page,
+                    size = response.size,
+                    totalPage = response.totalPage,
+                    isLastPage = response.isLastPage,
+                    result = response.result.map { InventoryVo.of(it.toDomain()) },
                 )
             }
         }

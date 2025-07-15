@@ -73,25 +73,4 @@ class PlayerDataStore @Inject constructor(
             )
         }.first()
     }
-
-    /**
-     * 플레이어 삭제
-     */
-    suspend fun deletePlayer(): PlayerEntity = context.store.let { store ->
-        val playerEntity = store.data.map {
-            PlayerEntity(
-                accountId = it[ACCOUNT_ID]!!,
-                slotCount = it[SLOT_COUNT]!!,
-                starPoint = it[STAR_POINT]!!
-            )
-        }
-
-        store.edit { preferences ->
-            preferences.remove(ACCOUNT_ID)
-            preferences.remove(SLOT_COUNT)
-            preferences.remove(STAR_POINT)
-        }
-
-        playerEntity.first()
-    }
 }

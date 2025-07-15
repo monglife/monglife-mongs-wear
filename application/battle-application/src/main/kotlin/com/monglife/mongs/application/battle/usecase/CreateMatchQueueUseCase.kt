@@ -6,7 +6,9 @@ import com.monglife.mongs.application.battle.port.persistence.DevicePersistenceP
 import com.monglife.mongs.application.battle.port.persistence.MatchQueuePersistencePort
 import com.monglife.mongs.application.battle.port.web.MatchQueueWebPort
 import com.monglife.mongs.application.battle.vo.MatchQueueVo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -24,10 +26,13 @@ class CreateMatchQueueUseCase @Inject constructor(
 
         val deviceId = devicePersistencePort.getDeviceId()
 
-        return matchQueuePersistencePort.createMatchQueue(mongId = command.mongId, deviceId = deviceId).let { matchQueue ->
-            matchQueueWebPort.createQueuePlayer( mongId = command.mongId, deviceId = deviceId)
-            matchQueue.map { it?.let { MatchQueueVo.of(matchQueue = it) }}
-        }
+        val matchQueueFlow = matchQueuePersistencePort.createMatchQueue(mongId = command.mongId, deviceId = deviceId).map { matchQueue ->
+            matchQueue?.let { MatchQueueVo.of(matchQueue = it) }
+        }.flowOn(Dispatchers.IO)
+
+        matchQueueWebPort.createQueuePlayer( mongId = command.mongId, deviceId = deviceId)
+
+        return matchQueueFlow
     }
 
     data class Command(

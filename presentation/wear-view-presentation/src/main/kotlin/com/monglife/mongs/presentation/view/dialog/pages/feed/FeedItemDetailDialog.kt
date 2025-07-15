@@ -29,7 +29,7 @@ import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun FeedItemDetailDialog(
+internal fun FeedItemDetailDialog(
     modifier: Modifier = Modifier,
     weight: Double = 0.0,
     strength: Double = 0.0,

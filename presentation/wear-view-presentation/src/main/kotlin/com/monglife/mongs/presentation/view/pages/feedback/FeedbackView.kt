@@ -31,7 +31,7 @@ import com.monglife.mongs.presentation.view.dialog.pages.feedback.CreateFeedback
 import com.monglife.mongs.presentation.viewmodel.pages.feedback.FeedbackViewModel
 
 @Composable
-fun FeedbackView(
+internal fun FeedbackView(
     feedbackViewModel: FeedbackViewModel = hiltViewModel(),
 ) {
     val uiState = feedbackViewModel.uiState.collectAsState()

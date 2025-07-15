@@ -1,9 +1,9 @@
 package com.monglife.mongs.application.member.notice.usecase
 
-import com.monglife.mongs.application.member.notice.port.web.NoticeWebPort
-import com.monglife.mongs.application.member.notice.vo.NoticeVo
 import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.core.application.wrapper.Page
+import com.monglife.mongs.application.member.notice.port.web.NoticeWebPort
+import com.monglife.mongs.application.member.notice.vo.NoticeVo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -17,22 +17,16 @@ class GetNoticesUseCase @Inject constructor(
 
     override suspend fun execute(command: Command): Page<NoticeVo> {
         return withContext(Dispatchers.IO) {
-            // 공지 사항 목록 조회 요청
             noticeWebPort.getNotices(
                 page = command.page,
                 size = command.size
-            ).let {
-                val result = it.result.map { response ->
-                    // NoticeVo 반환
-                    NoticeVo.of(response.toDomain())
-                }
-
+            ).let { response ->
                 Page(
-                    result = result,
-                    page = it.page,
-                    size = it.size,
-                    totalPage = it.totalPage,
-                    isLastPage = it.isLastPage,
+                    page = response.page,
+                    size = response.size,
+                    totalPage = response.totalPage,
+                    isLastPage = response.isLastPage,
+                    result = response.result.map { NoticeVo.of(it.toDomain()) },
                 )
             }
         }

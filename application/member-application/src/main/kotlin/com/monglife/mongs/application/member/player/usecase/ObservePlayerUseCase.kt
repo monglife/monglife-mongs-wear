@@ -25,7 +25,9 @@ class ObservePlayerUseCase @Inject constructor(
             playerPersistencePort.savePlayer(player = response.toDomain())
             playerPersistencePort.getPlayerFlow()
         }.map { player ->
-            player?.let { PlayerVo.of(player = player) } ?: throw NotFoundPlayerException()
+            player?.let {
+                PlayerVo.of(player = player)
+            } ?: throw NotFoundPlayerException()
         }.flowOn(Dispatchers.IO)
     }
 }

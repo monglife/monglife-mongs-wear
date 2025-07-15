@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.member.collection.usecase
 
+import com.monglife.core.application.usecase.BaseNoParamUseCase
 import com.monglife.mongs.application.member.collection.port.web.CollectionWebPort
 import com.monglife.mongs.application.member.collection.vo.CollectionMapVo
-import com.monglife.core.application.usecase.BaseNoParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -16,9 +16,7 @@ class GetCollectionMapsUseCase @Inject constructor(
 
     override suspend fun execute(): List<CollectionMapVo> {
         return withContext(Dispatchers.IO) {
-            // 맵 컬렉션 목록 조회 요청
             collectionWebPort.getCollectionMaps().map { response ->
-                // CollectionMapVo 반환
                 CollectionMapVo.of(collectionMap = response.toDomain())
             }
         }

@@ -1,5 +1,6 @@
 package com.monglife.mongs.application.mong.usecase.interaction
 
+import com.monglife.core.application.usecase.BaseParamUseCase
 import com.monglife.mongs.application.mong.exception.InvalidBuyRandomDrawTicketException
 import com.monglife.mongs.application.mong.exception.InvalidRandomDrawException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
@@ -7,7 +8,6 @@ import com.monglife.mongs.application.mong.port.persistence.ManagementPersistenc
 import com.monglife.mongs.application.mong.port.web.InteractionWebPort
 import com.monglife.mongs.application.mong.port.web.ManagementWebPort
 import com.monglife.mongs.application.mong.vo.RandomDrawVo
-import com.monglife.core.application.usecase.BaseParamUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -16,8 +16,8 @@ import javax.inject.Inject
  * 랜덤 뽑기 UseCase
  */
 class RandomDrawUseCase @Inject constructor(
-    private val managementWebPort: ManagementWebPort,
     private val interactionWebPort: InteractionWebPort,
+    private val managementWebPort: ManagementWebPort,
     private val managementPersistencePort: ManagementPersistencePort,
 ) : BaseParamUseCase<RandomDrawUseCase.Command, RandomDrawVo>() {
 

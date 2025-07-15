@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.member.notice.port.web
 
+import com.monglife.core.application.response.PageResponse
 import com.monglife.mongs.application.member.notice.exception.NotFoundNoticeException
 import com.monglife.mongs.application.member.notice.port.web.response.GetNoticeResponse
-import com.monglife.core.application.response.PageResponse
 
 interface NoticeWebPort {
 

@@ -30,7 +30,7 @@ import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.monglife.mongs.presentation.view.component.common.textbox.InputTextBox
 
 @Composable
-fun NoticeDetailDialog(
+internal fun NoticeDetailDialog(
     modifier: Modifier = Modifier,
     content: String,
     confirm: () -> Unit,

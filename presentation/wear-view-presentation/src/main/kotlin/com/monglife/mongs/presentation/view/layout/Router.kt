@@ -34,7 +34,7 @@ import com.monglife.mongs.presentation.view.pages.training.TrainingRunnerView
 import com.monglife.mongs.presentation.view.utils.AlwaysOnScreen
 
 @Composable
-fun Router(
+internal fun Router(
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberSwipeDismissableNavController()
@@ -55,9 +55,13 @@ fun Router(
                     BattleMenuView(navController = navController)
                 }
             }
-            composable(route = RouterPath.BattleMatch.route) {
+            composable(route = "${RouterPath.BattleMatch.route}/{matchId}/{playerId}") { backStackEntry ->
                 AlwaysOnScreen {
-                    BattleMatchView(navController = navController)
+                    BattleMatchView(
+                        navController = navController,
+                        matchId = backStackEntry.arguments?.getString("matchId")?.toLong(),
+                        playerId = backStackEntry.arguments?.getString("playerId"),
+                    )
                 }
             }
         }

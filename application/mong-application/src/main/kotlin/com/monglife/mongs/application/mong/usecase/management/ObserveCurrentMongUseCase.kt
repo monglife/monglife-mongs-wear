@@ -4,17 +4,14 @@ import com.monglife.core.application.usecase.BaseNoParamUseCase
 import com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort
 import com.monglife.mongs.application.mong.port.persistence.ManagementPersistencePort
 import com.monglife.mongs.application.mong.vo.MongVo
-import kotlinx.coroutines.CoroutineScope
+import com.monglife.mongs.domain.mong.model.MongOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,10 +32,15 @@ class ObserveCurrentMongUseCase @Inject constructor(
                     managementPersistencePort.getMongFlow(mongId = mongId)
                         .map { mong ->
                             mong?.let {
-                                managementPersistencePort.getMongOption(mongId = mong.mongId)
-                                    .let { mongOption ->
-                                        MongVo.of(mong = mong, mongOption = mongOption)
-                                    }
+                                val mongOption = managementPersistencePort.getMongOption(mongId = it.mongId)
+                                    ?: managementPersistencePort.saveMongOption(
+                                        mongOption = MongOption(
+                                            mongId = it.mongId,
+                                            graduateCheck = false,
+                                        )
+                                    )
+
+                                MongVo.of(mong = it, mongOption = mongOption)
                             }
                         }
                 } ?: flowOf(null)

@@ -1,5 +1,6 @@
 package com.monglife.mongs.application.mong.port.web
 
+import com.monglife.core.application.response.PageResponse
 import com.monglife.mongs.application.mong.exception.InvalidBuyRandomDrawTicketException
 import com.monglife.mongs.application.mong.exception.InvalidConsumeInventoryException
 import com.monglife.mongs.application.mong.exception.InvalidFeedFoodException
@@ -13,7 +14,6 @@ import com.monglife.mongs.application.mong.port.web.response.GetFoodResponse
 import com.monglife.mongs.application.mong.port.web.response.GetInventoryResponse
 import com.monglife.mongs.application.mong.port.web.response.GetSnackResponse
 import com.monglife.mongs.application.mong.port.web.response.RandomDrawResponseVo
-import com.monglife.core.application.response.PageResponse
 
 interface InteractionWebPort {
 

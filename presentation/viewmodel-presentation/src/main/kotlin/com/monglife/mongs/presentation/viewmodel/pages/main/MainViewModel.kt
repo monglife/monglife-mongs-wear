@@ -10,10 +10,8 @@ import com.monglife.mongs.application.mong.vo.MongVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -40,7 +38,7 @@ class MainViewModel @Inject constructor(
     /**
      * UI 상태 변수
      */
-    private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     /**
@@ -64,13 +62,8 @@ class MainViewModel @Inject constructor(
                 // 걸음 수 서버 동기화
                 syncRemoteStepUseCase()
 
-                observeCurrentMongUseCase()
-                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow -> observeForever(flow, _currentMongVo) }
-
-                observeBackgroundMapCodeUseCase()
-                    .shareIn(viewModelScopeWithHandler, SharingStarted.Eagerly, replay = 1)
-                    .let { flow -> observeForever(flow, _backgroundMapCode) }
+                observeForever(observeCurrentMongUseCase(), _currentMongVo)
+                observeForever(observeBackgroundMapCodeUseCase(), _backgroundMapCode)
             }
 
             _uiState.value = UiState.Idle

@@ -32,7 +32,7 @@ import com.mongs.wear.presentation.view.wear.R
 import kotlin.math.min
 
 @Composable
-fun CollectionMongView(
+internal fun CollectionMongView(
     collectionMongViewModel: CollectionMongViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {

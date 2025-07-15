@@ -12,12 +12,12 @@ interface DevicePersistencePort {
     suspend fun getStep(): Step
 
     /**
-     * 걸음 수 라이브 객체 조회
+     * 걸음 수 Flow 조회
      */
     suspend fun getStepFlow(): Flow<Step>
 
     /**
-     * 걸음 수 로컬 동기화
+     * 걸음 수 저장
      */
     suspend fun saveStep(step: Step): Step
 
@@ -27,12 +27,12 @@ interface DevicePersistencePort {
     suspend fun getDeviceOption(): DeviceOption
 
     /**
-     * 기기 옵션 라이브 객체 조회
+     * 기기 옵션 Flow 조회
      */
     suspend fun getDeviceOptionFlow(): Flow<DeviceOption>
 
     /**
-     * 기기 옵션 수정
+     * 기기 옵션 저장
      */
     suspend fun saveDeviceOption(deviceOption: DeviceOption): DeviceOption
 }

@@ -8,7 +8,8 @@ import com.monglife.mongs.domain.battle.model.MatchQueue
 data class MatchQueueVo(
     val deviceId: String,
     val mongId: Long,
-    val matchId: Long?,
+    val matchId: Long,
+    val playerId: String,
 ) {
     companion object {
 
@@ -20,6 +21,7 @@ data class MatchQueueVo(
                 deviceId = matchQueue.deviceId,
                 mongId = matchQueue.mongId,
                 matchId = matchQueue.matchId,
+                playerId = matchQueue.playerId,
             )
     }
 }

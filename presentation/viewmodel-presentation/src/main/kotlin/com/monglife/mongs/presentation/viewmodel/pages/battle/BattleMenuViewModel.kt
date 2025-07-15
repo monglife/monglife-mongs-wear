@@ -23,10 +23,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BattleMenuViewModel @Inject constructor(
+    private val getMatchRewardUseCase: GetMatchRewardUseCase,
     private val getCurrentMongUseCase: GetCurrentMongUseCase,
     private val createMatchQueueUseCase: CreateMatchQueueUseCase,
     private val deleteMatchQueueUseCase: DeleteMatchQueueUseCase,
-    private val getMatchRewardUseCase: GetMatchRewardUseCase,
 ): BaseViewModel() {
 
     /**
@@ -48,7 +48,7 @@ class BattleMenuViewModel @Inject constructor(
      */
     sealed class UiEvent {
         data object Idle: UiEvent()
-        data class NavMatch(val message: String): UiEvent()
+        data class NavMatch(val matchId: Long, val playerId: String): UiEvent()
     }
 
     /**
@@ -99,8 +99,11 @@ class BattleMenuViewModel @Inject constructor(
                 _uiState.value = UiState.Loading
 
                 withContext(Dispatchers.IO) {
-                    createMatchQueueUseCase(command = CreateMatchQueueUseCase.Command(mongId = mongId))
-                        .let { observeKey = observeForever(it, _matchQueueVo) }
+                    observeKey = observeForever(
+                        createMatchQueueUseCase(
+                            command = CreateMatchQueueUseCase.Command(mongId = mongId)
+                        ), _matchQueueVo
+                    )
                 }
 
                 _uiState.value = UiState.Matching
@@ -132,10 +135,10 @@ class BattleMenuViewModel @Inject constructor(
     /**
      * 매칭 성공
      */
-    fun matching() {
+    fun matching(matchId: Long, playerId: String) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
-            _uiEvent.emit(UiEvent.NavMatch("매칭 성공"))
+            _uiEvent.emit(UiEvent.NavMatch(matchId, playerId))
         }
     }
 

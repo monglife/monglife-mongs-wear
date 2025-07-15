@@ -26,7 +26,7 @@ import com.monglife.mongs.presentation.view.assets.MongsDarkBrown
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun YellowButton(
+internal fun YellowButton(
     modifier: Modifier = Modifier,
     text: String,
     onClick: () -> Unit,

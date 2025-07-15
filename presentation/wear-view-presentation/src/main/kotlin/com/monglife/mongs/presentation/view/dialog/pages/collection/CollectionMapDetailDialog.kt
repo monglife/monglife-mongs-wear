@@ -22,7 +22,7 @@ import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 
 
 @Composable
-fun CollectionMapDetailDialog(
+internal fun CollectionMapDetailDialog(
     modifier: Modifier = Modifier,
     collectionMapVo: CollectionMapVo,
     onSetClick: (String) -> Unit,

@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 
 @Composable
-fun NoticeView(
+internal fun NoticeView(
     noticeViewModel: NoticeViewModel = hiltViewModel(),
 ) {
     val uiState = noticeViewModel.uiState.collectAsState()
@@ -89,7 +89,11 @@ fun NoticeView(
                                 fontColor = Color.White,
                                 backgroundColor = Color.Black,
                                 label = noticeVo.title,
-                                secondaryLabel = "[${noticeVo.writerName}] ${TimeUtil.localDateTimeToString(noticeVo.createdAt)}",
+                                secondaryLabel = "[${noticeVo.writerName}] ${
+                                    TimeUtil.localDateTimeToString(
+                                        noticeVo.createdAt
+                                    )
+                                }",
                                 onClick = { noticeViewModel.noticeDetailDialogOpen(content = noticeVo.content) },
                             )
                         }
@@ -122,9 +126,7 @@ fun NoticeView(
             if (visibleItems.isEmpty()) return@snapshotFlow false
             val lastVisibleIndex = visibleItems.last().index
             lastVisibleIndex >= totalItemsCount - 1
-        }.distinctUntilChanged()
-        .filter { it }
-        .collect {
+        }.distinctUntilChanged().filter { it }.collect {
             // 마지막 페이지 아닌 경우만 재조회
             if (!isLastPage.value) {
                 noticeViewModel.changePage(page = page.value + 1)

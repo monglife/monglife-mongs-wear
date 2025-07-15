@@ -8,6 +8,7 @@ class Match(
     round: Int,
     isLastRound: Boolean,
     stateCode: MatchStateCode,
+    matchPlayers: List<MatchPlayer>,
     val createdAt: LocalDateTime = LocalDateTime.now(),
 ) {
     var matchId: Long = matchId
@@ -18,30 +19,6 @@ class Match(
         private set
     var stateCode: MatchStateCode = stateCode
         private set
-
-    /**
-     * 매치 시작
-     */
-    fun start() {
-        this.stateCode = MatchStateCode.MATCH
-    }
-
-    /**
-     * 라운드 종료
-     */
-    fun update(
-        round: Int,
-        isLastRound: Boolean,
-    ) {
-        this.round = round
-        this.isLastRound = isLastRound
-    }
-
-    /**
-     * 매치 종료
-     */
-    fun end() {
-        this.isLastRound = true
-        this.stateCode = MatchStateCode.END
-    }
+    var matchPlayers: List<MatchPlayer> = matchPlayers
+        private set
 }

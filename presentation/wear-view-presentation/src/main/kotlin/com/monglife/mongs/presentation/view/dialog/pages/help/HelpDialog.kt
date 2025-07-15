@@ -32,7 +32,7 @@ import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 
 @Composable
-fun HelpDialog(
+internal fun HelpDialog(
     modifier: Modifier = Modifier,
     icon: Int? = null,
     contents: List<String>,

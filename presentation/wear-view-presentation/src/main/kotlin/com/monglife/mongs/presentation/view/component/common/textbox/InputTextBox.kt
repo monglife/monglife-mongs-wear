@@ -25,7 +25,7 @@ import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
 
 @Composable
-fun InputTextBox(
+internal fun InputTextBox(
     modifier: Modifier = Modifier,
     text: String,
     maxLines: Int = 1,

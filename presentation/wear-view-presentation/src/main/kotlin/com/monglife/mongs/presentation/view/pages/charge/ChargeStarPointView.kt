@@ -52,7 +52,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-fun ChargeStarPointView(
+internal fun ChargeStarPointView(
     navController: NavController,
     chargeStarPointViewModel: ChargeStarPointViewModel = hiltViewModel(),
     context: Context = LocalContext.current

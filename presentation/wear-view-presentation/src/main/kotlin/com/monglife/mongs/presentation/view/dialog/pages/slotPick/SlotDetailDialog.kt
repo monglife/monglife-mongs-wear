@@ -50,7 +50,7 @@ private const val SLOT_DETAIL_HEIGHT = 130
 private const val SLOT_DETAIL_BAR_HEIGHT = 32
 
 @Composable
-fun SlotDetailDialog(
+internal fun SlotDetailDialog(
     modifier: Modifier = Modifier,
     initTabIndex: Int = 0,
     mongId: Long = 0L,
