@@ -56,7 +56,7 @@ class NotificationService : FirebaseMessagingService() {
         }
         val pendingIntent = PendingIntent.getActivity(
             this,
-            0,
+            System.currentTimeMillis().toInt(),
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
@@ -67,6 +67,7 @@ class NotificationService : FirebaseMessagingService() {
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)
+            .setOnlyAlertOnce(false)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
 
