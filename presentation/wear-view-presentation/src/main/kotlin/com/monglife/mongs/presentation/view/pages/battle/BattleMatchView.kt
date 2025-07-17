@@ -37,28 +37,26 @@ import com.monglife.mongs.presentation.view.component.common.background.BattleBa
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.pages.match.HpBar
 import com.monglife.mongs.presentation.view.component.pages.match.MatchPlayer
+import com.monglife.mongs.presentation.view.component.pages.match.PickLoadingBar
 import com.monglife.mongs.presentation.view.dialog.pages.match.MatchOverDialog
 import com.monglife.mongs.presentation.view.dialog.pages.match.MatchPickDialog
 import com.monglife.mongs.presentation.viewmodel.pages.battle.BattleMatchViewModel
 import com.mongs.wear.presentation.view.wear.R
-import kotlin.math.max
-
-private const val MAX_ROUND = 10
 
 @Composable
 internal fun BattleMatchView(
+    matchId: Long?,
+    playerId: String?,
     navController: NavController,
     battleMatchViewModel: BattleMatchViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
-    matchId: Long?,
-    playerId: String?,
 ) {
     val uiState = battleMatchViewModel.uiState.collectAsState()
-    val matchRewardVo = battleMatchViewModel.matchRewardVo.collectAsState()
     val matchVo = battleMatchViewModel.matchVo.collectAsState()
     val matchPlayerVo = battleMatchViewModel.matchPlayerVo.collectAsState()
     val targetMatchPlayerVo = battleMatchViewModel.targetMatchPlayerVo.collectAsState()
     val winMatchPlayerVo = battleMatchViewModel.winMatchPlayerVo.collectAsState()
+    val maxSeconds = battleMatchViewModel.maxSeconds.collectAsState()
 
     Box {
         BattleBackground()
@@ -67,61 +65,65 @@ internal fun BattleMatchView(
             LoadingBar()
         } else {
             if (uiState.value.enteringLoadingBar) {
-                LaunchedEffect(Unit) {
-                    battleMatchViewModel.enter(
-                        matchId = matchId,
-                        playerId = playerId,
-                    )
-                }
-                BattleEnteringContent(modifier = Modifier.zIndex(1f))
+                BattleEnteringContent(
+                    modifier = Modifier.zIndex(1f),
+                    battleMatchViewModel = battleMatchViewModel,
+                    matchId = matchId,
+                    playerId = playerId,
+                )
             } else {
                 matchVo.value?.let {
-                    matchPlayerVo.value?.let { matchPlayerVo ->
-                        targetMatchPlayerVo.value?.let { targetMatchPlayerVo ->
-                            BattleMatchContent(
-                                modifier = Modifier.zIndex(1f),
-                                battleMatchViewModel = battleMatchViewModel,
-                            )
+                    BattleMatchContent(
+                        modifier = Modifier.zIndex(1f),
+                        battleMatchViewModel = battleMatchViewModel,
+                    )
 
-                            Box(modifier = Modifier.zIndex(2f)) {
-                                if (uiState.value.pickDialogOpen) {
-                                    MatchPickDialog(
-                                        onAttackClick = {
+                    Box(modifier = Modifier.zIndex(2f)) {
+                        if (uiState.value.pickDialogOpen) {
+                            MatchPickDialog(
+                                maxSeconds = maxSeconds.value,
+                                onAttackClick = {
+                                    matchPlayerVo.value?.let { matchPlayerVo ->
+                                        targetMatchPlayerVo.value?.let { targetMatchPlayerVo ->
                                             battleMatchViewModel.pick(
                                                 matchId = it.matchId,
                                                 playerId = matchPlayerVo.playerId,
                                                 targetPlayerId = targetMatchPlayerVo.playerId,
                                                 pickCode = MatchPickCode.MATCH_PICK_ATTACK,
                                             )
-                                        },
-                                        onDefenceClick = {
-                                            battleMatchViewModel.pick(
-                                                matchId = it.matchId,
-                                                playerId = matchPlayerVo.playerId,
-                                                targetPlayerId = matchPlayerVo.playerId,
-                                                pickCode = MatchPickCode.MATCH_PICK_DEFENCE,
-                                            )
-                                        },
-                                        onHealClick = {
-                                            battleMatchViewModel.pick(
-                                                matchId = it.matchId,
-                                                playerId = matchPlayerVo.playerId,
-                                                targetPlayerId = matchPlayerVo.playerId,
-                                                pickCode = MatchPickCode.MATCH_PICK_HEAL,
-                                            )
-                                        }
-                                    )
-                                } else if (uiState.value.endDialogOpen) {
-                                    matchRewardVo.value?.let { matchRewardVo ->
-                                        winMatchPlayerVo.value?.let { winMatchPlayerVo ->
-                                            MatchOverDialog(
-                                                battlePayPoint = matchRewardVo.rewardPayPoint,
-                                                matchPlayerVo = matchPlayerVo,
-                                                winnerMatchPlayer = winMatchPlayerVo,
-                                                onMatchEndClick = battleMatchViewModel::exit,
-                                            )
                                         }
                                     }
+                                },
+                                onDefenceClick = {
+                                    matchPlayerVo.value?.let { matchPlayerVo ->
+                                        battleMatchViewModel.pick(
+                                            matchId = it.matchId,
+                                            playerId = matchPlayerVo.playerId,
+                                            targetPlayerId = matchPlayerVo.playerId,
+                                            pickCode = MatchPickCode.MATCH_PICK_DEFENCE,
+                                        )
+                                    }
+                                },
+                                onHealClick = {
+                                    matchPlayerVo.value?.let { matchPlayerVo ->
+                                        battleMatchViewModel.pick(
+                                            matchId = it.matchId,
+                                            playerId = matchPlayerVo.playerId,
+                                            targetPlayerId = matchPlayerVo.playerId,
+                                            pickCode = MatchPickCode.MATCH_PICK_HEAL,
+                                        )
+                                    }
+                                }
+                            )
+                        } else if (uiState.value.endDialogOpen) {
+                            winMatchPlayerVo.value?.let { winMatchPlayerVo ->
+                                matchPlayerVo.value?.let { matchPlayerVo ->
+                                    MatchOverDialog(
+                                        rewardPayPoint = winMatchPlayerVo.rewardPayPoint,
+                                        matchPlayerVo = matchPlayerVo,
+                                        winnerMatchPlayer = winMatchPlayerVo,
+                                        onMatchEndClick = battleMatchViewModel::exit,
+                                    )
                                 }
                             }
                         }
@@ -131,9 +133,14 @@ internal fun BattleMatchView(
         }
     }
 
-    LaunchedEffect(matchVo.value) {
+    // 라운드 변경 시마다 랜더링
+    LaunchedEffect(matchVo.value?.round, matchVo.value?.isLastRound) {
         matchVo.value?.let {
-            battleMatchViewModel.nextRound()
+            if (it.isLastRound) {
+                battleMatchViewModel.end(matchId = it.matchId)
+            } else {
+                battleMatchViewModel.nextRound()
+            }
         }
     }
 
@@ -164,6 +171,7 @@ private fun BattleMatchContent(
     val matchPlayerMaxHp = battleMatchViewModel.matchPlayerMaxHp.collectAsState()
     val targetMatchPlayerVo = battleMatchViewModel.targetMatchPlayerVo.collectAsState()
     val targetMatchPlayerMaxHp = battleMatchViewModel.targetMatchPlayerMaxHp.collectAsState()
+    val maxRound = battleMatchViewModel.maxRound.collectAsState()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -185,7 +193,7 @@ private fun BattleMatchContent(
 
                     targetMatchPlayerVo.value?.let {
                         MatchPlayer(
-                            matchEffect = !uiState.value.pickDialogOpen,
+                            matchEffect = !uiState.value.pickDialogOpen && !uiState.value.pickWaitingLoadingBar,
                             matchPlayerVo = it,
                             effectAlignment = Alignment.BottomStart,
                         )
@@ -201,28 +209,71 @@ private fun BattleMatchContent(
                         .fillMaxWidth()
                         .weight(0.2f)
                 ) {
-                    matchPlayerVo.value?.let {
-                        HpBar(
-                            hp = it.hp.toFloat(),
-                            maxHp = matchPlayerMaxHp.value,
-                        )
-                    }
+                    if (matchVo.round == 0) {
+                        matchPlayerVo.value?.let {
+                            Text(
+                                text = it.name,
+                                textAlign = TextAlign.Center,
+                                fontFamily = DAL_MU_RI,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 18.sp,
+                                color = MongsWhite,
+                                maxLines = 1,
+                            )
+                        }
 
-                    Text(
-                        text = "${matchVo.round}/${MAX_ROUND}",
-                        textAlign = TextAlign.Center,
-                        fontFamily = DAL_MU_RI,
-                        fontWeight = FontWeight.Light,
-                        fontSize = 20.sp,
-                        color = MongsWhite,
-                        maxLines = 1,
-                    )
+                        if (uiState.value.pickWaitingLoadingBar) {
+                            PickLoadingBar()
+                        } else {
+                            Image(
+                                painter = painterResource(R.drawable.txt_vs),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .height(20.dp)
+                                    .width(20.dp),
+                                contentScale = ContentScale.FillBounds
+                            )
+                        }
 
-                    targetMatchPlayerVo.value?.let {
-                        HpBar(
-                            hp = it.hp.toFloat(),
-                            maxHp = targetMatchPlayerMaxHp.value,
-                        )
+                        targetMatchPlayerVo.value?.let {
+                            Text(
+                                text = it.name,
+                                textAlign = TextAlign.Center,
+                                fontFamily = DAL_MU_RI,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 18.sp,
+                                color = MongsWhite,
+                                maxLines = 1,
+                            )
+                        }
+                    } else {
+                        matchPlayerVo.value?.let {
+                            HpBar(
+                                hp = it.hp,
+                                maxHp = matchPlayerMaxHp.value,
+                            )
+                        }
+
+                        if (uiState.value.pickWaitingLoadingBar) {
+                            PickLoadingBar()
+                        } else {
+                            Text(
+                                text = "${matchVo.round}/${maxRound.value}",
+                                textAlign = TextAlign.Center,
+                                fontFamily = DAL_MU_RI,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 20.sp,
+                                color = MongsWhite,
+                                maxLines = 1,
+                            )
+                        }
+
+                        targetMatchPlayerVo.value?.let {
+                            HpBar(
+                                hp = it.hp,
+                                maxHp = targetMatchPlayerMaxHp.value,
+                            )
+                        }
                     }
                 }
 
@@ -237,7 +288,7 @@ private fun BattleMatchContent(
 
                     matchPlayerVo.value?.let {
                         MatchPlayer(
-                            matchEffect = !uiState.value.pickDialogOpen,
+                            matchEffect = !uiState.value.pickDialogOpen && !uiState.value.pickWaitingLoadingBar,
                             matchPlayerVo = it,
                             effectAlignment = Alignment.TopEnd,
                         )
@@ -262,7 +313,17 @@ private fun BattleMatchContent(
 @Composable
 private fun BattleEnteringContent(
     modifier: Modifier,
+    battleMatchViewModel: BattleMatchViewModel,
+    matchId: Long?,
+    playerId: String?,
 ) {
+    LaunchedEffect(Unit) {
+        battleMatchViewModel.enter(
+            matchId = matchId,
+            playerId = playerId
+        )
+    }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize(),

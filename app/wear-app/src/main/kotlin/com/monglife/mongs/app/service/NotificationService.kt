@@ -10,6 +10,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.monglife.mongs.app.activity.MainActivity
 import com.monglife.mongs.app.module.NotificationModule
+import com.monglife.mongs.application.auth.usecase.SyncUserDeviceUseCase
 import com.monglife.mongs.application.device.usecase.GetNotificationOptionUseCase
 import com.mongs.wear.presentation.view.wear.R
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,9 +23,18 @@ import javax.inject.Inject
 class NotificationService : FirebaseMessagingService() {
 
     @Inject lateinit var notificationManager: NotificationManager
+    @Inject lateinit var syncUserDeviceUseCase: SyncUserDeviceUseCase
     @Inject lateinit var getNotificationOptionUseCase: GetNotificationOptionUseCase
 
-    override fun onNewToken(token: String) {}
+    override fun onNewToken(token: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            syncUserDeviceUseCase(
+                command = SyncUserDeviceUseCase.Command(
+                    fcmToken = token,
+                )
+            )
+        }
+    }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -52,6 +62,7 @@ class NotificationService : FirebaseMessagingService() {
         )
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val notificationBuilder = NotificationCompat.Builder(this, NotificationModule.CHANNEL_ID)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setSmallIcon(R.drawable.icon_logo_not_open)
             .setContentTitle(title)
             .setContentText(body)

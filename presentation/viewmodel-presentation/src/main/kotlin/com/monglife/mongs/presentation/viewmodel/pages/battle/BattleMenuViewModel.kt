@@ -4,6 +4,7 @@ import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.battle.usecase.CreateMatchQueueUseCase
 import com.monglife.mongs.application.battle.usecase.DeleteMatchQueueUseCase
 import com.monglife.mongs.application.battle.usecase.GetMatchRewardUseCase
+import com.monglife.mongs.application.battle.usecase.ObserveMatchQueueUseCase
 import com.monglife.mongs.application.battle.vo.MatchQueueVo
 import com.monglife.mongs.application.battle.vo.MatchRewardVo
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
@@ -25,6 +26,7 @@ import javax.inject.Inject
 class BattleMenuViewModel @Inject constructor(
     private val getMatchRewardUseCase: GetMatchRewardUseCase,
     private val getCurrentMongUseCase: GetCurrentMongUseCase,
+    private val observeMatchQueueUseCase: ObserveMatchQueueUseCase,
     private val createMatchQueueUseCase: CreateMatchQueueUseCase,
     private val deleteMatchQueueUseCase: DeleteMatchQueueUseCase,
 ): BaseViewModel() {
@@ -48,6 +50,7 @@ class BattleMenuViewModel @Inject constructor(
      */
     sealed class UiEvent {
         data object Idle: UiEvent()
+        data class MatchingError(val message: String): UiEvent()
         data class NavMatch(val matchId: Long, val playerId: String): UiEvent()
     }
 
@@ -99,10 +102,16 @@ class BattleMenuViewModel @Inject constructor(
                 _uiState.value = UiState.Loading
 
                 withContext(Dispatchers.IO) {
-                    observeKey = observeForever(
-                        createMatchQueueUseCase(
-                            command = CreateMatchQueueUseCase.Command(mongId = mongId)
+                    observeKey =  observeForever(
+                        observeMatchQueueUseCase(
+                            command = ObserveMatchQueueUseCase.Command(
+                                mongId = mongId,
+                            )
                         ), _matchQueueVo
+                    )
+
+                    createMatchQueueUseCase(
+                        command = CreateMatchQueueUseCase.Command(mongId = mongId)
                     )
                 }
 
@@ -137,8 +146,12 @@ class BattleMenuViewModel @Inject constructor(
      */
     fun matching(matchId: Long, playerId: String) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Loading
-            _uiEvent.emit(UiEvent.NavMatch(matchId, playerId))
+            if (playerId.isBlank()) {
+                _uiEvent.emit(UiEvent.MatchingError("매칭 정보 오류"))
+            } else {
+                _uiState.value = UiState.Loading
+                _uiEvent.emit(UiEvent.NavMatch(matchId, playerId))
+            }
         }
     }
 

@@ -34,7 +34,7 @@ import com.mongs.wear.presentation.view.wear.R
 @Composable
 fun MatchOverDialog(
     modifier: Modifier = Modifier,
-    battlePayPoint: Int,
+    rewardPayPoint: Int,
     matchPlayerVo: MatchVo.MatchPlayerVo,
     winnerMatchPlayer: WinnerMatchPlayerVo,
     onMatchEndClick: () -> Unit,
@@ -99,7 +99,7 @@ fun MatchOverDialog(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Text(
-                        text = "+ $battlePayPoint",
+                        text = "+ $rewardPayPoint",
                         textAlign = TextAlign.Center,
                         fontFamily = DAL_MU_RI,
                         fontWeight = FontWeight.Light,

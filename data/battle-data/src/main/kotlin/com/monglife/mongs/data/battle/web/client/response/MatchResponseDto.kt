@@ -10,4 +10,5 @@ data class GetOverMatchResponseDto(
     val mongCode: String,
     val mongName: String,
     val name: String,
+    val rewardPayPoint: Int,
 )

@@ -27,16 +27,16 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
+import com.monglife.mongs.presentation.view.assets.MongsLightGray
 import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.monglife.mongs.presentation.wear.component.common.bar.ProgressIndicator
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
-private const val MAX_SECONDS = 30
-
 @Composable
 fun MatchPickDialog(
     modifier: Modifier = Modifier,
+    maxSeconds: Int,
     onAttackClick: () -> Unit,
     onDefenceClick: () -> Unit,
     onHealClick: () -> Unit,
@@ -49,11 +49,11 @@ fun MatchPickDialog(
         while (progress.floatValue < 100f) {
             delay(200)
             timer.floatValue += 0.2f
-            progress.floatValue = timer.floatValue / MAX_SECONDS.toFloat() * 100f
+            progress.floatValue = timer.floatValue / maxSeconds.toFloat() * 100f
         }
     }
 
-    LaunchedEffect(progress) {
+    LaunchedEffect(progress.floatValue) {
         if (progress.floatValue >= 100f) {
             when (Random.nextInt(3)) {
                 0 -> { onAttackClick() }
@@ -71,14 +71,13 @@ fun MatchPickDialog(
     ) {
         ProgressIndicator(
             progress = progress.floatValue,
-            modifier = Modifier.zIndex(1f)
+            modifier = Modifier.zIndex(2f)
         )
 
         Column(
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .zIndex(2f),
+            modifier = Modifier.zIndex(1f)
+                .fillMaxWidth(),
         ) {
             Row(
                 horizontalArrangement = Arrangement.Center,
@@ -116,7 +115,7 @@ fun MatchPickDialog(
                 ) {
                     Box(modifier = Modifier
                         .fillMaxHeight()
-                        .background(Color.White)
+                        .background(MongsLightGray)
                         .width(2.dp)
                     )
                 }
@@ -152,7 +151,7 @@ fun MatchPickDialog(
             ) {
                 Box(modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
+                    .background(MongsLightGray)
                     .height(2.dp)
                 )
             }

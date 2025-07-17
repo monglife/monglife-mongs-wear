@@ -1,5 +1,7 @@
 package com.monglife.mongs.presentation.view.pages.battle
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -20,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,6 +47,7 @@ import com.mongs.wear.presentation.view.wear.R
 internal fun BattleMenuView(
     navController: NavController,
     battleMenuViewModel: BattleMenuViewModel = hiltViewModel(),
+    context: Context = LocalContext.current,
 ) {
     val uiState = battleMenuViewModel.uiState.collectAsState()
     val matchQueueVo = battleMenuViewModel.matchQueueVo.collectAsState()
@@ -94,6 +98,9 @@ internal fun BattleMenuView(
     LaunchedEffect(Unit) {
         battleMenuViewModel.uiEvent.collect { event ->
             when (event) {
+                is BattleMenuViewModel.UiEvent.MatchingError -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
                 is BattleMenuViewModel.UiEvent.NavMatch -> {
                     navController.navigate(route = "${RouterPath.BattleMatch.route}/${event.matchId}/${event.playerId}") {
                         popUpTo(RouterPath.BattleMenu.route) { inclusive = true }

@@ -15,8 +15,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NotificationModule {
 
-    const val CHANNEL_ID = "mongs_default_channel"
-    private const val CHANNEL_NAME = "Mongs Default Channel"
+    const val CHANNEL_ID = "mongs_channel"
+    private const val CHANNEL_NAME = "mongs notification channel"
 
     @Provides
     @Singleton
@@ -30,10 +30,13 @@ object NotificationModule {
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        notificationManager.createNotificationChannel(NotificationChannel(
-            CHANNEL_ID,
-            CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_DEFAULT))
+        notificationManager.createNotificationChannel(
+            NotificationChannel(
+                CHANNEL_ID,
+                CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+        )
 
         return notificationManager
     }

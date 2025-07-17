@@ -3,15 +3,11 @@ package com.monglife.mongs.presentation.viewmodel.pages.battle
 import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.battle.usecase.EnterMatchUseCase
 import com.monglife.mongs.application.battle.usecase.ExitMatchUseCase
-import com.monglife.mongs.application.battle.usecase.GetMatchRewardUseCase
 import com.monglife.mongs.application.battle.usecase.GetWinnerMatchPlayerUseCase
 import com.monglife.mongs.application.battle.usecase.ObserveMatchUseCase
 import com.monglife.mongs.application.battle.usecase.PickMatchUseCase
-import com.monglife.mongs.application.battle.vo.MatchRewardVo
 import com.monglife.mongs.application.battle.vo.MatchVo
 import com.monglife.mongs.application.battle.vo.WinnerMatchPlayerVo
-import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
-import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.domain.battle.enums.MatchPickCode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -26,19 +22,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.Duration
 import javax.inject.Inject
 
 @HiltViewModel
 class BattleMatchViewModel @Inject constructor(
-    private val getMatchRewardUseCase: GetMatchRewardUseCase,
-    private val getCurrentMongUseCase: GetCurrentMongUseCase,
     private val observeMatchUseCase: ObserveMatchUseCase,
     private val enterMatchUseCase: EnterMatchUseCase,
     private val pickMatchUseCase: PickMatchUseCase,
     private val exitMatchUseCase: ExitMatchUseCase,
     private val getWinnerMatchPlayerUseCase: GetWinnerMatchPlayerUseCase,
 ): BaseViewModel() {
+
+    companion object {
+        private const val MAX_SECONDS = 30
+        private const val EFFECT_DELAY = 2000L
+        private const val MAX_ROUND = 10
+    }
 
     /**
      * UI 상태 정의
@@ -47,12 +46,14 @@ class BattleMatchViewModel @Inject constructor(
         val loadingBar: Boolean = false,
         val enteringLoadingBar: Boolean = false,
         val pickDialogOpen: Boolean = false,
+        val pickWaitingLoadingBar: Boolean = false,
         val endDialogOpen: Boolean = false,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
         data object Entering : UiState(enteringLoadingBar = true)
         data object Pick : UiState(pickDialogOpen = true)
+        data object PickWaiting: UiState(pickWaitingLoadingBar = true)
         data object End : UiState(endDialogOpen = true)
     }
 
@@ -79,40 +80,33 @@ class BattleMatchViewModel @Inject constructor(
     /**
      * 변수
      */
-    private val _matchRewardVo = MutableStateFlow<MatchRewardVo?>(null)
-    val matchRewardVo: StateFlow<MatchRewardVo?> = _matchRewardVo.asStateFlow()
-
-    private val _currentMongVo = MutableStateFlow<MongVo?>(null)
-    val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
-
     private val _matchVo = MutableStateFlow<MatchVo?>(null)
     val matchVo: StateFlow<MatchVo?> = _matchVo.asStateFlow()
 
     private val _matchPlayerVo = MutableStateFlow<MatchVo.MatchPlayerVo?>(null)
     val matchPlayerVo: StateFlow<MatchVo.MatchPlayerVo?> = _matchPlayerVo.asStateFlow()
 
-    private val _matchPlayerMaxHp = MutableStateFlow(0f)
+    private val _matchPlayerMaxHp = MutableStateFlow(Float.MAX_VALUE)
     val matchPlayerMaxHp: StateFlow<Float> = _matchPlayerMaxHp.asStateFlow()
 
     private val _targetMatchPlayerVo = MutableStateFlow<MatchVo.MatchPlayerVo?>(null)
     val targetMatchPlayerVo: StateFlow<MatchVo.MatchPlayerVo?> = _targetMatchPlayerVo.asStateFlow()
 
-    private val _targetMatchPlayerMaxHp = MutableStateFlow(0f)
+    private val _targetMatchPlayerMaxHp = MutableStateFlow(Float.MAX_VALUE)
     val targetMatchPlayerMaxHp: StateFlow<Float> = _targetMatchPlayerMaxHp.asStateFlow()
 
     private val _winMatchPlayerVo = MutableStateFlow<WinnerMatchPlayerVo?>(null)
     val winMatchPlayerVo: StateFlow<WinnerMatchPlayerVo?> = _winMatchPlayerVo.asStateFlow()
 
+    private val _maxRound = MutableStateFlow(MAX_ROUND)
+    val maxRound: StateFlow<Int> = _maxRound.asStateFlow()
+
+    private val _maxSeconds = MutableStateFlow(MAX_SECONDS)
+    val maxSeconds: StateFlow<Int> = _maxSeconds.asStateFlow()
+
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Loading
-
-            withContext(Dispatchers.IO) {
-                _matchRewardVo.value = getMatchRewardUseCase()
-                _currentMongVo.value = getCurrentMongUseCase()
-            }
-
             _uiState.value = UiState.Entering
         }
     }
@@ -137,15 +131,18 @@ class BattleMatchViewModel @Inject constructor(
                 ).let { flow ->
                     observeForever(flow, _matchVo)
 
+                    // TODO: 맴에 안듬 리팩 예정
                     observeForever(flow.map { matchVo -> matchVo?.matchPlayers?.first { it.isMe } }, _matchPlayerVo)
-                    _matchPlayerMaxHp.value = _matchPlayerVo.value?.hp?.toFloat() ?: 0f
+                    _matchPlayerMaxHp.value = 5000f
 
+                    // TODO: 맴에 안듬 리팩 예정
                     observeForever(flow.map { matchVo -> matchVo?.matchPlayers?.first { !it.isMe } }, _targetMatchPlayerVo)
-                    _targetMatchPlayerMaxHp.value = _targetMatchPlayerVo.value?.hp?.toFloat() ?: 0f
+                    _targetMatchPlayerMaxHp.value = 5000f
                 }
 
-                delay(Duration.ofSeconds(2).toMillis())
+                delay(EFFECT_DELAY)
 
+                // 매치 입장
                 enterMatchUseCase(
                     command = EnterMatchUseCase.Command(
                         matchId = matchId,
@@ -164,9 +161,33 @@ class BattleMatchViewModel @Inject constructor(
 
             _uiState.value = UiState.Idle
 
-            delay(Duration.ofSeconds(2).toMillis())
+            delay(EFFECT_DELAY)
 
             _uiState.value = UiState.Pick
+        }
+    }
+
+    /**
+     * 매치 종료
+     */
+    fun end(matchId: Long) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+
+            _uiState.value = UiState.Idle
+
+            delay(EFFECT_DELAY)
+
+            _uiState.value = UiState.Loading
+
+            withContext(Dispatchers.IO) {
+                _winMatchPlayerVo.value = getWinnerMatchPlayerUseCase(
+                    command = GetWinnerMatchPlayerUseCase.Command(
+                        matchId = matchId
+                    )
+                )
+            }
+
+            _uiState.value = UiState.End
         }
     }
 
@@ -175,6 +196,8 @@ class BattleMatchViewModel @Inject constructor(
      */
     fun pick(matchId: Long, playerId: String, targetPlayerId: String, pickCode: MatchPickCode) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Idle
+
             withContext(Dispatchers.IO) {
                 pickMatchUseCase(
                     command = PickMatchUseCase.Command(
@@ -186,27 +209,7 @@ class BattleMatchViewModel @Inject constructor(
                 )
             }
 
-            _uiState.value = UiState.Idle
-
-            // 매치 종료
-            _matchVo.value?.let {
-                if (it.isLastRound) {
-                    delay(Duration.ofSeconds(2).toMillis())
-
-                    _uiState.value = UiState.Loading
-
-                    withContext(Dispatchers.IO) {
-                        _winMatchPlayerVo.value = getWinnerMatchPlayerUseCase(
-                            command = GetWinnerMatchPlayerUseCase.Command(
-                                matchId = matchId
-                            )
-                        )
-                    }
-
-                    _uiState.value = UiState.End
-
-                }
-            }
+            _uiState.value = UiState.PickWaiting
         }
     }
 
@@ -216,7 +219,6 @@ class BattleMatchViewModel @Inject constructor(
     fun exit() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
-
             _uiEvent.emit(UiEvent.NavMenu())
         }
     }

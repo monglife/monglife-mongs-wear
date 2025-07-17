@@ -42,7 +42,7 @@ class StepSensorManager @Inject constructor(
 
                 override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
-            }, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)
+            }, stepSensor, SensorManager.SENSOR_DELAY_FASTEST)
         } ?: run {
             cont.resume(0)
         }
@@ -67,7 +67,7 @@ class StepSensorManager @Inject constructor(
         sensorManager.registerListener(
             listener,
             stepSensor,
-            SensorManager.SENSOR_DELAY_NORMAL
+            SensorManager.SENSOR_DELAY_FASTEST
         )
 
         // 정리

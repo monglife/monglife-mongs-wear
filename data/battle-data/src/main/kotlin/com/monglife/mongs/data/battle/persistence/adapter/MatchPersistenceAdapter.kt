@@ -3,7 +3,6 @@ package com.monglife.mongs.data.battle.persistence.adapter
 import android.content.Context
 import com.monglife.core.data.mqtt.client.MqttClient
 import com.monglife.mongs.application.battle.port.persistence.MatchPersistencePort
-import com.monglife.mongs.data.battle.persistence.dto.MatchEndEventDto
 import com.monglife.mongs.data.battle.persistence.dto.MatchEventDto
 import com.monglife.mongs.domain.battle.enums.MatchStateCode
 import com.monglife.mongs.domain.battle.model.Match
@@ -28,15 +27,8 @@ class MatchPersistenceAdapter @Inject constructor(
     private val mqttClient: MqttClient,
 ) : MatchPersistencePort {
 
-    companion object {
-        private const val MATCH_PLAYERS_ENTERED = "200-100-002"
-        private const val MATCH = "200-100-003"
-        private const val MATCH_END = "200-100-004"
-    }
-
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val matchSubscribeCounterMap = ConcurrentHashMap<Long, AtomicInteger>()
-    private val matchPlayerSubscribeCounterMap = ConcurrentHashMap<String, AtomicInteger>()
+    private val subscribeCounterMap = ConcurrentHashMap<Long, AtomicInteger>()
 
     /**
      * 매치 Flow 조회
@@ -44,7 +36,7 @@ class MatchPersistenceAdapter @Inject constructor(
     override suspend fun getMatchFlow(matchId: Long): Flow<Match?> = flow {
 
         val match = MutableStateFlow<Match?>(null)
-        val subscribeCount = matchSubscribeCounterMap.getOrPut(matchId) { AtomicInteger(0) }
+        val subscribeCount = subscribeCounterMap.getOrPut(matchId) { AtomicInteger(0) }
         val topic = "${context.getString(R.string.mongs_mqtt_topic)}/battle/match/$matchId"
 
         if (subscribeCount.getAndIncrement() == 0) {
@@ -52,40 +44,23 @@ class MatchPersistenceAdapter @Inject constructor(
                 topic = topic,
                 classType = MatchEventDto::class.java,
                 onReceive = { responseDto ->
-                    if (responseDto.code in listOf(MATCH_PLAYERS_ENTERED, MATCH)) {
-                        match.value = Match(
-                            matchId = responseDto.result.matchId,
-                            round = responseDto.result.round,
-                            isLastRound = responseDto.result.isLastRound,
-                            stateCode = MatchStateCode.MATCH,
-                            matchPlayers = responseDto.result.matchPlayers.map {
-                                MatchPlayer(
-                                    playerId = it.playerId,
-                                    deviceId = it.deviceId,
-                                    mongCode = it.mongCode,
-                                    mongName = it.mongName,
-                                    name = it.name,
-                                    hp = it.hp,
-                                    roundCode = it.roundCode,
-                                )
-                            }
-                        )
-                    }
-                }
-            )
-            mqttClient.subscribe(
-                topic = topic,
-                classType = MatchEndEventDto::class.java,
-                onReceive = { responseDto ->
-                    if (responseDto.code == MATCH_END) {
-                        match.value = Match(
-                            matchId = responseDto.result.matchId,
-                            round = match.value?.round ?: 0,
-                            isLastRound = true,
-                            stateCode = MatchStateCode.END,
-                            matchPlayers = match.value?.matchPlayers ?: emptyList(),
-                        )
-                    }
+                    match.value = Match(
+                        matchId = responseDto.result.matchId,
+                        round = responseDto.result.round,
+                        isLastRound = responseDto.result.isLastRound,
+                        stateCode = MatchStateCode.MATCH,
+                        matchPlayers = responseDto.result.matchPlayers.map {
+                            MatchPlayer(
+                                playerId = it.playerId,
+                                deviceId = it.deviceId,
+                                mongCode = it.mongCode,
+                                mongName = it.mongName,
+                                name = it.name,
+                                hp = it.hp,
+                                roundCode = it.roundCode,
+                            )
+                        }
+                    )
                 }
             )
         }
@@ -95,7 +70,7 @@ class MatchPersistenceAdapter @Inject constructor(
         } finally {
             if (subscribeCount.decrementAndGet() == 0) {
                 mqttClient.disSubscribe(topic = topic)
-                matchSubscribeCounterMap.remove(matchId)
+                subscribeCounterMap.remove(matchId)
             }
         }
     }.shareIn(

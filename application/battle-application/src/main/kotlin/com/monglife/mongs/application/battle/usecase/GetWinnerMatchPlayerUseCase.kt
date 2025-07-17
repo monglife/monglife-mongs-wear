@@ -24,6 +24,7 @@ class GetWinnerMatchPlayerUseCase @Inject constructor(
                     mongCode = response.mongCode,
                     mongName = response.mongName,
                     name = response.name,
+                    rewardPayPoint = response.rewardPayPoint,
                 )
             }
         }

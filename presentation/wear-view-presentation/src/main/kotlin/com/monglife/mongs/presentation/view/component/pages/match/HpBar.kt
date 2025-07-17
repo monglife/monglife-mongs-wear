@@ -34,7 +34,7 @@ fun HpBar(
         Row(
             modifier = Modifier
                 .height(height.dp)
-                .fillMaxWidth(fraction = hp / maxHp * 100f)
+                .fillMaxWidth(fraction = hp / maxHp)
                 .background(color = MongsRed)
         ) {}
     }

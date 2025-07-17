@@ -60,7 +60,7 @@ internal fun ExchangeStepView(
 
     val exchangeWalkingCount = remember { mutableIntStateOf(0) }
     val currentWalkingCount = remember { derivedStateOf { walkingCount.value - 1000 * exchangeWalkingCount.intValue }}
-    val chargePayPoint = remember { derivedStateOf { 1000 * exchangeWalkingCount.intValue } }
+    val chargePayPoint = remember { derivedStateOf { 100 * exchangeWalkingCount.intValue } }
 
     Box {
         DefaultBackground()
@@ -188,7 +188,7 @@ internal fun ExchangeStepView(
                             confirm = {
                                 exchangeStepViewModel.exchange(
                                     mongId = it.mongId,
-                                    walkingCount = exchangeWalkingCount.intValue
+                                    walkingCount = 1000 * exchangeWalkingCount.intValue
                                 )
 
                                 exchangeWalkingCount.intValue = 0

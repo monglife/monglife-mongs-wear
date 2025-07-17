@@ -8,8 +8,8 @@ class MatchPlayer(
     mongCode: String,
     mongName: String,
     name: String,
-    hp: Double = 0.0,
-    roundCode: MatchRoundCode = MatchRoundCode.NONE,
+    hp: Float,
+    roundCode: MatchRoundCode,
 ) {
     var playerId: String = playerId
         private set
@@ -21,19 +21,8 @@ class MatchPlayer(
         private set
     var name: String = name
         private set
-    var hp: Double = hp
+    var hp: Float = hp
         private set
     var roundCode: MatchRoundCode = roundCode
         private set
-
-    /**
-     * 업데이트
-     */
-    fun update(
-        hp: Double,
-        roundCode: MatchRoundCode,
-    ) {
-        this.hp = hp
-        this.roundCode = roundCode
-    }
 }

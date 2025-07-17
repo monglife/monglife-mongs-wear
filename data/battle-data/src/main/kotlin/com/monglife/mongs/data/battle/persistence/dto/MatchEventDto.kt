@@ -21,7 +21,7 @@ data class MatchEventDto(
         val mongCode: String,
         val mongName: String,
         val name: String,
-        val hp: Double,
+        val hp: Float,
         val roundCode: MatchRoundCode,
     )
 }

@@ -45,6 +45,7 @@ class MatchWebAdapter @Inject constructor(
                 mongCode = body.result.mongCode,
                 mongName = body.result.mongName,
                 name = body.result.name,
+                rewardPayPoint = body.result.rewardPayPoint,
             )
         }
 }

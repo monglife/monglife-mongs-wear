@@ -41,4 +41,5 @@ data class GetWinnerMatchPlayerResponse(
     val mongCode: String,
     val mongName: String,
     val name: String,
+    val rewardPayPoint: Int,
 )

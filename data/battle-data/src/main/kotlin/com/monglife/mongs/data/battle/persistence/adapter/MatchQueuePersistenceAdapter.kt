@@ -47,8 +47,7 @@ class MatchQueuePersistenceAdapter @Inject constructor(
                             deviceId = deviceId,
                             mongId = mongId,
                             matchId = responseDto.result.matchId,
-                            playerId = responseDto.result.matchPlayers.find { it.deviceId == deviceId }?.playerId
-                                ?: "",
+                            playerId = responseDto.result.matchPlayers.find { it.deviceId == deviceId }?.playerId ?: "",
                         )
                     }
                 )
