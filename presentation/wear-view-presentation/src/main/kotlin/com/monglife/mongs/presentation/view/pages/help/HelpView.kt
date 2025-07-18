@@ -35,9 +35,6 @@ internal fun HelpView(
 ) {
     val uiState = helpViewModel.uiState.collectAsState()
     val currentHelpVo = helpViewModel.currentHelpVo.collectAsState()
-    val helpVos = helpViewModel.helpVos.collectAsState()
-
-    val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
 
     Box {
         DefaultBackground()
@@ -45,50 +42,8 @@ internal fun HelpView(
         if (uiState.value.loadingBar) {
              LoadingBar()
         } else {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .zIndex(1f)
-            ) {
-                PositionIndicator(scalingLazyListState = listState)
-                ScalingLazyColumn(
-                    contentPadding = PaddingValues(vertical = 60.dp, horizontal = 6.dp),
-                    modifier = Modifier.fillMaxSize(),
-                    state = listState,
-                    autoCentering = null,
-                ) {
-                    item {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(15.dp)
-                        ) {
-                            Text(
-                                text = "도움말",
-                                textAlign = TextAlign.Center,
-                                fontFamily = DAL_MU_RI,
-                                fontWeight = FontWeight.Light,
-                                fontSize = 16.sp,
-                                color = MongsWhite,
-                                maxLines = 1,
-                            )
-                        }
-                    }
-
-                    for (helpVo in helpVos.value) {
-                        item {
-                            Chip(
-                                fontColor = Color.White,
-                                backgroundColor = Color.Black,
-                                label = helpVo.title,
-                                secondaryLabel = helpVo.subTitle,
-                                onClick = { helpViewModel.helpDialogOpen(helpVo) },
-                            )
-                        }
-                    }
-                }
+            Box(modifier = Modifier.zIndex(1f)) {
+                HelpContent(helpViewModel = helpViewModel)
             }
 
             Box(modifier = Modifier.zIndex(2f)) {
@@ -100,6 +55,59 @@ internal fun HelpView(
                             cancel = helpViewModel::helpDialogClose
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HelpContent(
+    modifier: Modifier = Modifier,
+    helpViewModel: HelpViewModel,
+) {
+    val helpVos = helpViewModel.helpVos.collectAsState()
+    val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        PositionIndicator(scalingLazyListState = listState)
+        ScalingLazyColumn(
+            contentPadding = PaddingValues(vertical = 60.dp, horizontal = 6.dp),
+            modifier = Modifier.fillMaxSize(),
+            state = listState,
+            autoCentering = null,
+        ) {
+            item {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp)
+                ) {
+                    Text(
+                        text = "도움말",
+                        textAlign = TextAlign.Center,
+                        fontFamily = DAL_MU_RI,
+                        fontWeight = FontWeight.Light,
+                        fontSize = 16.sp,
+                        color = MongsWhite,
+                        maxLines = 1,
+                    )
+                }
+            }
+
+            for (helpVo in helpVos.value) {
+                item {
+                    Chip(
+                        fontColor = Color.White,
+                        backgroundColor = Color.Black,
+                        label = helpVo.title,
+                        secondaryLabel = helpVo.subTitle,
+                        onClick = { helpViewModel.helpDialogOpen(helpVo) },
+                    )
                 }
             }
         }

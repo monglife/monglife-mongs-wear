@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
@@ -40,78 +41,88 @@ internal fun ExchangeMenuView(
     Box {
         DefaultBackground()
 
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize(),
+        Box(modifier = Modifier.zIndex(1f)) {
+            ExchangeMenuContent(navController = navController)
+        }
+    }
+}
+
+@Composable
+private fun ExchangeMenuContent(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxHeight()
         ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxHeight()
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.49f)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { navController.navigate(RouterPath.ExchangeStarPoint.route) }
+                    ),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.49f)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = { navController.navigate(RouterPath.ExchangeStarPoint.route) }
-                        ),
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.point_icon_star),
-                        contentDescription = null,
-                        modifier = Modifier.size(26.dp)
-                    )
+                Image(
+                    painter = painterResource(R.drawable.point_icon_star),
+                    contentDescription = null,
+                    modifier = Modifier.size(26.dp)
+                )
 
-                    Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
-                    Text(
-                        text = "환전",
-                        textAlign = TextAlign.Center,
-                        fontFamily = DAL_MU_RI,
-                        fontWeight = FontWeight.Light,
-                        fontSize = 18.sp,
-                        color = MongsWhite,
-                        maxLines = 1,
-                    )
-                }
+                Text(
+                    text = "환전",
+                    textAlign = TextAlign.Center,
+                    fontFamily = DAL_MU_RI,
+                    fontWeight = FontWeight.Light,
+                    fontSize = 18.sp,
+                    color = MongsWhite,
+                    maxLines = 1,
+                )
+            }
 
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.weight(0.02f)
-                ) {
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.White)
-                        .height(2.dp)
-                    )
-                }
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.weight(0.02f)
+            ) {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .height(2.dp)
+                )
+            }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(0.49f)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = { navController.navigate(RouterPath.ExchangeStep.route) }
-                        ),
-                ) {
-                    Text(
-                        text = "걸음 수 환전",
-                        textAlign = TextAlign.Center,
-                        fontFamily = DAL_MU_RI,
-                        fontWeight = FontWeight.Light,
-                        fontSize = 18.sp,
-                        color = MongsWhite,
-                        maxLines = 1,
-                    )
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(0.49f)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { navController.navigate(RouterPath.ExchangeStep.route) }
+                    ),
+            ) {
+                Text(
+                    text = "걸음 수 환전",
+                    textAlign = TextAlign.Center,
+                    fontFamily = DAL_MU_RI,
+                    fontWeight = FontWeight.Light,
+                    fontSize = 18.sp,
+                    color = MongsWhite,
+                    maxLines = 1,
+                )
             }
         }
     }

@@ -17,9 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -44,8 +41,6 @@ import com.monglife.mongs.presentation.view.component.common.textbox.PayPoint
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.viewmodel.pages.exchange.ExchangeStarPointViewModel
 import com.mongs.wear.presentation.view.wear.R
-import kotlin.math.max
-import kotlin.math.min
 
 @Composable
 internal fun ExchangeStarPointView(
@@ -55,11 +50,8 @@ internal fun ExchangeStarPointView(
 ) {
     val uiState = exchangeStarPointViewModel.uiState.collectAsState()
     val currentMongVo = exchangeStarPointViewModel.currentMongVo.collectAsState()
-    val starPoint = exchangeStarPointViewModel.starPoint.collectAsState()
-
-    val exchangeStarPoint = remember { mutableIntStateOf(0) }
-    val currentStarPoint = remember { derivedStateOf { starPoint.value - exchangeStarPoint.intValue } }
-    val chargePayPoint = remember { derivedStateOf { 1000 * exchangeStarPoint.intValue } }
+    val exchangeCount = exchangeStarPointViewModel.exchangeCount.collectAsState()
+    val chargePayPoint = exchangeStarPointViewModel.chargePayPoint.collectAsState()
 
     Box {
         DefaultBackground()
@@ -67,135 +59,24 @@ internal fun ExchangeStarPointView(
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            currentMongVo.value?.let {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize().zIndex(1f),
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxHeight(),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Spacer(modifier = Modifier.height(15.dp))
+            Box(modifier = Modifier.zIndex(1f)) {
+                ExchangeStarPointContent(exchangeStarPointViewModel = exchangeStarPointViewModel)
+            }
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.2f)
-                        ) {
-                            PayPoint(payPoint = it.payPoint)
-                        }
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.5f)
-                        ) {
-                            SelectButton(
-                                leftBtnDisabled = exchangeStarPoint.intValue == 0,
-                                rightBtnDisabled = exchangeStarPoint.intValue == starPoint.value,
-                                leftBtnClick = { exchangeStarPoint.intValue = max(exchangeStarPoint.intValue - 1, 0) },
-                                rightBtnClick = { exchangeStarPoint.intValue = min(exchangeStarPoint.intValue + 1, starPoint.value) },
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxHeight(),
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .weight(0.5f)
-                                    ) {
-                                        Image(
-                                            painter = painterResource(R.drawable.point_icon_star),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-
-                                        Spacer(modifier = Modifier.width(10.dp))
-
-                                        Text(
-                                            text = "x ${currentStarPoint.value}",
-                                            textAlign = TextAlign.Center,
-                                            fontFamily = DAL_MU_RI,
-                                            fontWeight = FontWeight.Light,
-                                            fontSize = 16.sp,
-                                            color = MongsWhite,
-                                            maxLines = 1,
-                                        )
-                                    }
-
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .weight(0.5f)
-                                    ) {
-                                        Image(
-                                            painter = painterResource(R.drawable.point_icon_pay),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(26.dp),
-                                            contentScale = ContentScale.FillBounds,
-                                        )
-
-                                        Spacer(modifier = Modifier.width(10.dp))
-
-                                        Text(
-                                            text = "+ ${chargePayPoint.value}",
-                                            textAlign = TextAlign.Center,
-                                            fontFamily = DAL_MU_RI,
-                                            fontWeight = FontWeight.Light,
-                                            fontSize = 18.sp,
-                                            color = MongsWhite,
-                                            maxLines = 1,
-                                        )
-                                    }
-                                }
+            Box(modifier = Modifier.zIndex(2f)) {
+                if (uiState.value.confirmDialogOpen) {
+                    ConfirmAndCancelDialog(
+                        text = "$${chargePayPoint.value}\n환전하시겠습니까?",
+                        cancel = exchangeStarPointViewModel::exchangeConfirmDialogClose,
+                        confirm = {
+                            currentMongVo.value?.let {
+                                exchangeStarPointViewModel.exchange(
+                                    mongId = it.mongId,
+                                    exchangeCount = exchangeCount.value
+                                )
                             }
-                        }
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.3f)
-                        ) {
-                            YellowButton(
-                                text = "환전",
-                                width = 70,
-                                disable = chargePayPoint.value == 0,
-                                onClick = exchangeStarPointViewModel::exchangeConfirmDialogOpen,
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(10.dp))
-                    }
-
-
-                    Box(modifier = Modifier.zIndex(2f)) {
-                        if (uiState.value.confirmDialogOpen) {
-                            ConfirmAndCancelDialog(
-                                text = "$${chargePayPoint.value}\n환전하시겠습니까?",
-                                cancel = exchangeStarPointViewModel::exchangeConfirmDialogClose,
-                                confirm = {
-                                    exchangeStarPointViewModel.exchange(
-                                        mongId = it.mongId,
-                                        starPoint = exchangeStarPoint.intValue
-                                    )
-
-                                    exchangeStarPoint.intValue = 0
-                                },
-                            )
-                        }
-                    }
+                        },
+                    )
                 }
             }
         }
@@ -214,6 +95,131 @@ internal fun ExchangeStarPointView(
                 }
                 else -> {}
             }
+        }
+    }
+}
+
+@Composable
+private fun ExchangeStarPointContent(
+    modifier: Modifier = Modifier,
+    exchangeStarPointViewModel: ExchangeStarPointViewModel,
+) {
+    val currentMongVo = exchangeStarPointViewModel.currentMongVo.collectAsState()
+    val starPoint = exchangeStarPointViewModel.starPoint.collectAsState()
+    val exchangeCount = exchangeStarPointViewModel.exchangeCount.collectAsState()
+    val chargePayPoint = exchangeStarPointViewModel.chargePayPoint.collectAsState()
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.2f)
+            ) {
+                currentMongVo.value?.let {
+                    PayPoint(payPoint = it.payPoint)
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.5f)
+            ) {
+                SelectButton(
+                    leftBtnDisabled = exchangeCount.value == 0,
+                    rightBtnDisabled = exchangeCount.value == starPoint.value,
+                    leftBtnClick = exchangeStarPointViewModel::decreaseExchangeCount,
+                    rightBtnClick = exchangeStarPointViewModel::increaseExchangeCount,
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxHeight(),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.5f)
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.point_icon_star),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            Text(
+                                text = "x ${starPoint.value - exchangeCount.value}",
+                                textAlign = TextAlign.Center,
+                                fontFamily = DAL_MU_RI,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 16.sp,
+                                color = MongsWhite,
+                                maxLines = 1,
+                            )
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.5f)
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.point_icon_pay),
+                                contentDescription = null,
+                                modifier = Modifier.size(26.dp),
+                                contentScale = ContentScale.FillBounds,
+                            )
+
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            Text(
+                                text = "+ ${chargePayPoint.value}",
+                                textAlign = TextAlign.Center,
+                                fontFamily = DAL_MU_RI,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 18.sp,
+                                color = MongsWhite,
+                                maxLines = 1,
+                            )
+                        }
+                    }
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.3f)
+            ) {
+                YellowButton(
+                    text = "환전",
+                    width = 70,
+                    disable = chargePayPoint.value == 0,
+                    onClick = exchangeStarPointViewModel::exchangeConfirmDialogOpen,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }

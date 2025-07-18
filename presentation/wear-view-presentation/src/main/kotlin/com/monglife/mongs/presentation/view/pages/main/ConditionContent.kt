@@ -25,7 +25,7 @@ import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.pages.main.condition.ConditionSection
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainConditionViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainPagerViewModel
-import com.monglife.mongs.presentation.wear.component.common.bar.ProgressIndicator
+import com.monglife.mongs.presentation.view.component.common.bar.ProgressIndicator
 import com.mongs.wear.presentation.view.wear.R
 
 @SuppressLint("UnrememberedGetBackStackEntry")

@@ -33,11 +33,11 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val permissionUtil: PermissionUtil,
     private val loginUseCase: LoginUseCase,
     private val joinUseCase: JoinUseCase,
     private val deleteCurrentMongIdUseCase: DeleteCurrentMongIdUseCase,
     private val deleteBackgroundMapCodeUseCase: DeleteBackgroundMapCodeUseCase,
+    private val permissionUtil: PermissionUtil,
 ): BaseViewModel() {
 
     /**

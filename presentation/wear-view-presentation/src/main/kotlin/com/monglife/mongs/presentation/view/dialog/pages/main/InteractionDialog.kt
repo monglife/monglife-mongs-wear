@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.monglife.mongs.domain.mong.enums.MongStateCode
 import com.monglife.mongs.presentation.view.component.common.textbox.PayPoint
-import com.monglife.mongs.presentation.wear.component.common.button.CircleImageButton
+import com.monglife.mongs.presentation.view.component.common.button.CircleImageButton
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable

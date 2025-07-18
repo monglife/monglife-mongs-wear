@@ -24,23 +24,19 @@ import androidx.wear.compose.material.PositionIndicator
 import com.monglife.mongs.presentation.view.assets.MongResourceCode
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
+import com.monglife.mongs.presentation.view.component.common.button.CircleImageButton
 import com.monglife.mongs.presentation.view.component.common.button.CircleTextButton
 import com.monglife.mongs.presentation.view.dialog.pages.collection.CollectionMongDetailDialog
 import com.monglife.mongs.presentation.viewmodel.pages.collection.CollectionMongViewModel
-import com.monglife.mongs.presentation.wear.component.common.button.CircleImageButton
 import com.mongs.wear.presentation.view.wear.R
 import kotlin.math.min
 
 @Composable
 internal fun CollectionMongView(
     collectionMongViewModel: CollectionMongViewModel = hiltViewModel(),
-    context: Context = LocalContext.current,
 ) {
     val uiState = collectionMongViewModel.uiState.collectAsState()
-    val collectionMongVos = collectionMongViewModel.collectionMongVos.collectAsState()
     val detailCollectionMongVo = collectionMongViewModel.detailCollectionMongVo.collectAsState()
-
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = 0)
 
     Box {
         DefaultBackground()
@@ -48,73 +44,93 @@ internal fun CollectionMongView(
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize().zIndex(1f),
-            ) {
-                PositionIndicator(lazyListState = listState)
-                LazyColumn(
-                    verticalArrangement = Arrangement.Center,
-                    contentPadding = PaddingValues(vertical = 40.dp),
-                    state = listState,
-                ) {
-                    for (startIndex: Int in 1..collectionMongVos.value.size step (3)) {
-                        item {
-                            Row(
-                                horizontalArrangement = Arrangement.Start,
-                                modifier = Modifier
-                                    .height(59.dp)
-                                    .padding(bottom = 5.dp)
-                            ) {
-                                for (index: Int in startIndex..min(
-                                    collectionMongVos.value.size,
-                                    startIndex + 2
-                                )) {
-                                    val collectionMongVo = collectionMongVos.value[index - 1]
+            Box(modifier = Modifier.zIndex(1f)) {
+                CollectionMongContent(collectionMongViewModel = collectionMongViewModel)
+            }
 
-                                    if (!collectionMongVo.isIncluded) {
-                                        CircleTextButton(
-                                            text = "?",
-                                            border = R.drawable.btn_border_purple_dark,
-                                            onClick = {
-                                                Toast.makeText(
-                                                    context,
-                                                    "수집하지 않은 몽",
-                                                    Toast.LENGTH_SHORT,
-                                                ).show()
-                                            },
-                                            modifier = Modifier
-                                                .offset(
-                                                    y = if (index % 3 == 2) (-27).dp else 0.dp,
-                                                    x = 0.dp
-                                                )
-                                        )
-                                    } else {
-                                        CircleImageButton(
-                                            icon = MongResourceCode.getResource(collectionMongVo.code).pngCode,
-                                            border = R.drawable.btn_border_purple_dark,
-                                            onClick = { collectionMongViewModel.collectionMongDetailDialogOpen(collectionMongVo = collectionMongVo) },
-                                            modifier = Modifier
-                                                .offset(
-                                                    y = if (index % 3 == 2) (-27).dp else 0.dp,
-                                                    x = 0.dp
-                                                )
-                                        )
-                                    }
-                                }
-                            }
-                        }
+            Box(modifier = Modifier.zIndex(2f)) {
+                if (uiState.value.collectionMongDetailDialogOpen) {
+                    detailCollectionMongVo.value?.let {
+                        CollectionMongDetailDialog(
+                            collectionMongVo = it,
+                            onClick = collectionMongViewModel::collectionMongDetailDialogClose,
+                        )
                     }
                 }
             }
+        }
+    }
+}
 
-            if (uiState.value.collectionMongDetailDialogOpen) {
-                detailCollectionMongVo.value?.let {
-                    CollectionMongDetailDialog(
-                        modifier = Modifier.zIndex(2f),
-                        collectionMongVo = it,
-                        onClick = collectionMongViewModel::collectionMongDetailDialogClose,
-                    )
+@Composable
+private fun CollectionMongContent(
+    modifier: Modifier = Modifier,
+    collectionMongViewModel: CollectionMongViewModel,
+    context: Context = LocalContext.current,
+) {
+    val collectionMongVos = collectionMongViewModel.collectionMongVos.collectAsState()
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = 0)
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        PositionIndicator(lazyListState = listState)
+
+        LazyColumn(
+            verticalArrangement = Arrangement.Center,
+            contentPadding = PaddingValues(vertical = 40.dp),
+            state = listState,
+        ) {
+            for (startIndex: Int in 1..collectionMongVos.value.size step (3)) {
+                item {
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        modifier = Modifier
+                            .height(59.dp)
+                            .padding(bottom = 5.dp)
+                    ) {
+                        for (index: Int in startIndex..min(
+                            collectionMongVos.value.size,
+                            startIndex + 2
+                        )) {
+                            val collectionMongVo = collectionMongVos.value[index - 1]
+
+                            if (!collectionMongVo.isIncluded) {
+                                CircleTextButton(
+                                    text = "?",
+                                    border = R.drawable.btn_border_purple_dark,
+                                    onClick = {
+                                        Toast.makeText(
+                                            context,
+                                            "수집하지 않은 몽",
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
+                                    },
+                                    modifier = Modifier
+                                        .offset(
+                                            y = if (index % 3 == 2) (-27).dp else 0.dp,
+                                            x = 0.dp
+                                        )
+                                )
+                            } else {
+                                CircleImageButton(
+                                    icon = MongResourceCode.getResource(collectionMongVo.code).pngCode,
+                                    border = R.drawable.btn_border_purple_dark,
+                                    onClick = {
+                                        collectionMongViewModel.collectionMongDetailDialogOpen(
+                                            collectionMongVo = collectionMongVo
+                                        )
+                                    },
+                                    modifier = Modifier
+                                        .offset(
+                                            y = if (index % 3 == 2) (-27).dp else 0.dp,
+                                            x = 0.dp
+                                        )
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

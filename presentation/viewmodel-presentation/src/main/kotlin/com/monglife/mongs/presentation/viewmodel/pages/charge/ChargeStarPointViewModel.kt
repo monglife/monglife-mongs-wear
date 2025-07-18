@@ -78,7 +78,7 @@ class ChargeStarPointViewModel @Inject constructor(
 
             withContext(Dispatchers.IO) {
                 observeForever(observePlayerUseCase().map {  it.starPoint }, _starPoint)
-                updateProductVos()
+                _productVos.value = getProductsUseCase()
             }
 
             _uiState.value = UiState.Idle
@@ -104,8 +104,8 @@ class ChargeStarPointViewModel @Inject constructor(
                     )
                 )
 
+                _productVos.value = getProductsUseCase()
                 _uiEvent.emit(UiEvent.Buy("충전 완료"))
-                updateProductVos()
             }
 
             _uiState.value = UiState.Idle
@@ -128,19 +128,12 @@ class ChargeStarPointViewModel @Inject constructor(
                     )
                 )
 
+                _productVos.value = getProductsUseCase()
                 _uiEvent.emit(UiEvent.Consume("소비 완료"))
-                updateProductVos()
             }
 
             _uiState.value = UiState.Idle
         }
-    }
-
-    /**
-     * 상품 목록 조회
-     */
-    private suspend fun updateProductVos() {
-        _productVos.value = getProductsUseCase()
     }
 
     /**
@@ -150,7 +143,9 @@ class ChargeStarPointViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
-            withContext(Dispatchers.IO) { updateProductVos() }
+            withContext(Dispatchers.IO) {
+                _productVos.value = getProductsUseCase()
+            }
 
             _uiState.value = UiState.Idle
         }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,31 +29,33 @@ internal fun ConfirmDialog(
     text: String,
     confirm: () -> Unit,
 ) {
+    val texts = remember { text.trim().split("\n") }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .background(color = Color.Black.copy(alpha = 0.95f))
             .fillMaxSize()
     ) {
-        Column {
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.7f)
-            ) {
-                Text(
-                    text = text,
-                    textAlign = TextAlign.Center,
-                    fontFamily = DAL_MU_RI,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 14.sp,
-                    color = MongsWhite,
-                    maxLines = 3,
-                )
+        Column(modifier = Modifier.height(150.dp)) {
+            texts.forEach {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.65f / texts.size)
+                ) {
+                    Text(
+                        text = it,
+                        textAlign = TextAlign.Center,
+                        fontFamily = DAL_MU_RI,
+                        fontWeight = FontWeight.Light,
+                        fontSize = 14.sp,
+                        color = MongsWhite,
+                        maxLines = 1,
+                    )
+                }
             }
 
             Row(
@@ -60,7 +63,7 @@ internal fun ConfirmDialog(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.3f)
+                    .weight(0.35f)
             ) {
                 BlueButton(
                     text = "확인",

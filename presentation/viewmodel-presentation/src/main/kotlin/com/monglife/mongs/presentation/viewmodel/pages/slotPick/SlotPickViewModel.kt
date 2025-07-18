@@ -10,6 +10,7 @@ import com.monglife.mongs.application.mong.usecase.management.GraduateMongUseCas
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.SetCurrentMongIdUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
+import com.monglife.mongs.presentation.viewmodel.pages.slotPick.vo.SlotVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,12 +21,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalTime
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 @HiltViewModel
 class SlotPickViewModel @Inject constructor(
-    private val getMongsUseCase: GetMongsUseCase,
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val observePlayerUseCase: ObservePlayerUseCase,
+    private val getMongsUseCase: GetMongsUseCase,
     private val createMongUseCase: CreateMongUseCase,
     private val deleteMongUseCase: DeleteMongUseCase,
     private val setCurrentMongIdUseCase: SetCurrentMongIdUseCase,
@@ -67,23 +70,25 @@ class SlotPickViewModel @Inject constructor(
     private val _currentMongVo = MutableStateFlow<MongVo?>(null)
     val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
 
-    private val _mongVos = MutableStateFlow<List<MongVo>>(emptyList())
-    val mongVos: StateFlow<List<MongVo>> get() = _mongVos
-
     private val _slotCount = MutableStateFlow(0)
-    val slotCount: StateFlow<Int> = _slotCount.asStateFlow()
 
     private val _starPoint = MutableStateFlow(0)
     val starPoint: StateFlow<Int> = _starPoint.asStateFlow()
+
+    private val _slotVos = MutableStateFlow<List<SlotVo>>(emptyList())
+    val slotVos: StateFlow<List<SlotVo>> = _slotVos.asStateFlow()
+
+    private val _slotVoIndex = MutableStateFlow(0)
+    val slotVoIndex: StateFlow<Int> = _slotVoIndex.asStateFlow()
+
+    private val _currentSlotVo = MutableStateFlow<SlotVo?>(null)
+    val currentSlotVo: StateFlow<SlotVo?> = _currentSlotVo.asStateFlow()
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                // 몽 목록 정보 조회
-                updateMongVos()
-
                 observeForever(observeCurrentMongUseCase(), _currentMongVo)
 
                 observePlayerUseCase()
@@ -91,9 +96,26 @@ class SlotPickViewModel @Inject constructor(
                         observeForever(flow.map { it.slotCount }, _slotCount)
                         observeForever(flow.map { it.starPoint }, _starPoint)
                     }
+
+                // 몽 목록 정보 조회
+                this@SlotPickViewModel.updateSlotVos()
             }
 
             _uiState.value = UiState.Idle
+        }
+    }
+
+    fun nextSlot() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _slotVoIndex.value = min(_slotVoIndex.value + 1, _slotVos.value.size - 1)
+            this@SlotPickViewModel.updateCurrentSlotVo()
+        }
+    }
+
+    fun prevSlot() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _slotVoIndex.value = max(_slotVoIndex.value - 1, 0)
+            this@SlotPickViewModel.updateCurrentSlotVo()
         }
     }
 
@@ -114,7 +136,7 @@ class SlotPickViewModel @Inject constructor(
                 )
 
                 // 몽 목록 정보 조회
-                updateMongVos()
+                this@SlotPickViewModel.updateSlotVos()
             }
 
             _uiState.value = UiState.Idle
@@ -136,7 +158,7 @@ class SlotPickViewModel @Inject constructor(
                 )
 
                 // 몽 목록 정보 조회
-                updateMongVos()
+                this@SlotPickViewModel.updateSlotVos()
             }
 
             _uiState.value = UiState.Idle
@@ -177,7 +199,7 @@ class SlotPickViewModel @Inject constructor(
                 )
 
                 // 몽 목록 정보 조회
-                updateMongVos()
+                this@SlotPickViewModel.updateSlotVos()
             }
 
             _uiState.value = UiState.Idle
@@ -193,6 +215,7 @@ class SlotPickViewModel @Inject constructor(
 
             withContext(Dispatchers.IO) {
                 buySlotUseCase()
+                this@SlotPickViewModel.updateSlotVos()
             }
 
             _uiState.value = UiState.Idle
@@ -253,11 +276,36 @@ class SlotPickViewModel @Inject constructor(
         }
     }
 
-    /**
-     * 몽 목록 조회
-     */
-    private suspend fun updateMongVos() {
-        _mongVos.value = getMongsUseCase()
+    private suspend fun updateSlotVos() {
+        // 몽 목록 정보 조회
+        _slotVos.value = getMongsUseCase().let {
+            val slotVos = it.map { mongVo ->
+                SlotVo(
+                    type = SlotVo.SlotType.EXISTS,
+                    mongVo = mongVo
+                )
+            } as ArrayList
+
+            repeat((_slotCount.value - it.size).coerceAtLeast(0)) {
+                slotVos.add(SlotVo(type = SlotVo.SlotType.EMPTY))
+            }
+
+            if (slotVos.size < 3) {
+                slotVos.add(SlotVo(type = SlotVo.SlotType.BUY))
+            }
+
+            slotVos
+        }
+
+        this@SlotPickViewModel.updateCurrentSlotVo()
+    }
+
+    private fun updateCurrentSlotVo() {
+        if (_slotVoIndex.value in 0..<_slotVos.value.size) {
+            _currentSlotVo.value = _slotVos.value[_slotVoIndex.value]
+        } else {
+            _currentSlotVo.value = null
+        }
     }
 
     /**

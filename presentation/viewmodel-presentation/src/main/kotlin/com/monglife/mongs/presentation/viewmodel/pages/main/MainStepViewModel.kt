@@ -46,7 +46,7 @@ class MainStepViewModel @Inject constructor(
     private val _currentMongVo = MutableStateFlow<MongVo?>(null)
     val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
 
-    private val _currentWalkingCount = MutableStateFlow(0)
+    private val _currentWalkingCount = MutableStateFlow(Int.MIN_VALUE)
     val currentWalkingCount: StateFlow<Int> = _currentWalkingCount.asStateFlow()
 
     init {

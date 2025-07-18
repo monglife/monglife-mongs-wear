@@ -66,17 +66,15 @@ internal fun BattleMatchView(
         } else {
             if (uiState.value.enteringLoadingBar) {
                 BattleEnteringContent(
-                    modifier = Modifier.zIndex(1f),
                     battleMatchViewModel = battleMatchViewModel,
                     matchId = matchId,
                     playerId = playerId,
                 )
             } else {
                 matchVo.value?.let {
-                    BattleMatchContent(
-                        modifier = Modifier.zIndex(1f),
-                        battleMatchViewModel = battleMatchViewModel,
-                    )
+                    Box(modifier = Modifier.zIndex(1f)) {
+                        BattleMatchContent(battleMatchViewModel = battleMatchViewModel)
+                    }
 
                     Box(modifier = Modifier.zIndex(2f)) {
                         if (uiState.value.pickDialogOpen) {
@@ -119,7 +117,6 @@ internal fun BattleMatchView(
                             winMatchPlayerVo.value?.let { winMatchPlayerVo ->
                                 matchPlayerVo.value?.let { matchPlayerVo ->
                                     MatchOverDialog(
-                                        rewardPayPoint = winMatchPlayerVo.rewardPayPoint,
                                         matchPlayerVo = matchPlayerVo,
                                         winnerMatchPlayer = winMatchPlayerVo,
                                         onMatchEndClick = battleMatchViewModel::exit,
@@ -162,7 +159,7 @@ internal fun BattleMatchView(
 
 @Composable
 private fun BattleMatchContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     battleMatchViewModel: BattleMatchViewModel,
 ) {
     val uiState = battleMatchViewModel.uiState.collectAsState()
@@ -312,7 +309,7 @@ private fun BattleMatchContent(
 
 @Composable
 private fun BattleEnteringContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     battleMatchViewModel: BattleMatchViewModel,
     matchId: Long?,
     playerId: String?,
@@ -347,7 +344,7 @@ private fun BattleEnteringContent(
                     .weight(0.3f)
             ) {
                 Text(
-                    text = "배틀 입장중",
+                    text = "매치입장중",
                     textAlign = TextAlign.Center,
                     fontFamily = DAL_MU_RI,
                     fontWeight = FontWeight.Light,

@@ -7,6 +7,7 @@ enum class DeviceErrorCode(
     private val isMessageShow: Boolean,
 ) : ErrorCode {
 
+    NOT_FOUND_STEP("걸음 수 조회 실패", false),
     EXCHANGE_WALKING_COUNT("걸음 수 환전 실패", false),
     UPDATE_WALKING_COUNT("걸음 수 서버 동기화 실패", false),
     ;

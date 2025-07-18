@@ -1,6 +1,14 @@
 package com.monglife.mongs.application.device.port.web.response
 
 /**
+ * 걸음 수 조회 응답
+ */
+data class GetStepResponse(
+    val consumeWalkingCount: Int,
+    val walkingCount: Int,
+)
+
+/**
  * 걸음 수 환전 응답
  */
 data class ExchangeWalkingCountResponse(

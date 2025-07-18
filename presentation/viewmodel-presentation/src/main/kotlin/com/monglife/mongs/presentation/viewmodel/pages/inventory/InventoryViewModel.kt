@@ -1,11 +1,12 @@
 package com.monglife.mongs.presentation.viewmodel.pages.inventory
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.mong.usecase.interaction.ConsumeInventoryUseCase
 import com.monglife.mongs.application.mong.usecase.interaction.GetInventoriesUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
+import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.InventoryVo
 import com.monglife.mongs.application.mong.vo.MongVo
-import com.monglife.mongs.presentation.viewmodel.pages.feed.FeedFoodViewModel.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,11 +18,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 @HiltViewModel
 class InventoryViewModel @Inject constructor(
     private val getCurrentMongUseCase: GetCurrentMongUseCase,
+    private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val getInventoriesUseCase: GetInventoriesUseCase,
+    private val consumeInventoryUseCase: ConsumeInventoryUseCase,
 ): BaseViewModel() {
 
     companion object {
@@ -34,9 +39,11 @@ class InventoryViewModel @Inject constructor(
      */
     sealed class UiState(
         val loadingBar: Boolean = false,
+        val confirmDialogOpen: Boolean = false,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
+        data object Confirm : UiState(confirmDialogOpen = true)
     }
 
     /**
@@ -62,6 +69,9 @@ class InventoryViewModel @Inject constructor(
     /**
      * 변수
      */
+    private val _currentMongVo = MutableStateFlow<MongVo?>(null)
+    val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
+
     private val _page = MutableStateFlow(INIT_PAGE)
     val page: StateFlow<Int> = _page.asStateFlow()
 
@@ -77,7 +87,8 @@ class InventoryViewModel @Inject constructor(
     private val _inventoryVos = MutableStateFlow<List<InventoryVo>>(emptyList())
     val inventoryVos: StateFlow<List<InventoryVo>> = _inventoryVos.asStateFlow()
 
-    private val _mongVo = MutableStateFlow<MongVo?>(null)
+    private val _currentInventoryVo = MutableStateFlow<InventoryVo?>(null)
+    val currentInventoryVo: StateFlow<InventoryVo?> = _currentInventoryVo.asStateFlow()
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
@@ -85,13 +96,15 @@ class InventoryViewModel @Inject constructor(
 
             withContext(Dispatchers.IO) {
                 getCurrentMongUseCase()?.let {
-                    _mongVo.value = it
+                    _currentMongVo.value = it
                 } ?: run {
                     _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
                 }
 
-                updateInventoryVos()
+                observeForever(observeCurrentMongUseCase(), _currentMongVo)
+
+                this@InventoryViewModel.updateInventoryVos()
             }
 
             _uiState.value = UiState.Idle
@@ -99,16 +112,77 @@ class InventoryViewModel @Inject constructor(
     }
 
     /**
-     * 페이지 변경
+     * 이전 페이지
      */
-    fun changePage(page: Int) {
+    fun prevPage() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
-            _page.value = page
+            _page.value = max(_page.value - 1, INIT_PAGE)
 
-            withContext(Dispatchers.IO) { updateInventoryVos() }
+            withContext(Dispatchers.IO) {
+                this@InventoryViewModel.updateInventoryVos()
+            }
 
             _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
+     * 다음 페이지
+     */
+    fun nextPage() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Loading
+            _page.value = min(_page.value + 1, _totalPage.value)
+
+            withContext(Dispatchers.IO) {
+                this@InventoryViewModel.updateInventoryVos()
+            }
+
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
+     * 인벤토리 소비
+     */
+    fun consumeInventory(mongId: Long, inventoryId: Long) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Loading
+            _page.value = INIT_PAGE
+
+            withContext(Dispatchers.IO) {
+                consumeInventoryUseCase(
+                    command = ConsumeInventoryUseCase.Command(
+                        inventoryId = inventoryId,
+                        mongId = mongId,
+                    )
+                )
+
+                this@InventoryViewModel.updateInventoryVos()
+            }
+
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
+     * 인벤토리 소비 확인 다이얼로그 오픈
+     */
+    fun consumeInventoryConfirmDialogOpen(inventoryVo: InventoryVo) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _currentInventoryVo.value = inventoryVo
+            _uiState.value = UiState.Confirm
+        }
+    }
+
+    /**
+     * 인벤토리 소비 확인 다이얼로그 닫기
+     */
+    fun consumeInventoryConfirmDialogClose() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Idle
+            _currentInventoryVo.value = null
         }
     }
 
@@ -116,7 +190,7 @@ class InventoryViewModel @Inject constructor(
      * 인벤토리 목록 조회
      */
     private suspend fun updateInventoryVos() {
-        _mongVo.value?.let {
+        _currentMongVo.value?.let {
             getInventoriesUseCase(
                 command = GetInventoriesUseCase.Command(
                     mongId = it.mongId,

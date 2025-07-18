@@ -4,11 +4,13 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.monglife.mongs.application.device.exception.ExchangeWalkingCountException
+import com.monglife.mongs.application.device.exception.NotFoundStepException
 import com.monglife.mongs.application.device.exception.UpdateWalkingCountException
 import com.monglife.mongs.application.device.port.web.DeviceWebPort
 import com.monglife.mongs.application.device.port.web.request.ExchangeWalkingCountRequest
 import com.monglife.mongs.application.device.port.web.request.UpdateWalkingCountRequest
 import com.monglife.mongs.application.device.port.web.response.ExchangeWalkingCountResponse
+import com.monglife.mongs.application.device.port.web.response.GetStepResponse
 import com.monglife.mongs.application.device.port.web.response.UpdateWalkingCountResponse
 import com.monglife.mongs.data.device.web.client.DeviceWebClient
 import com.monglife.mongs.data.device.web.client.request.ExchangeCurrentWalkingCountRequestDto
@@ -23,6 +25,21 @@ class DeviceWebAdapter @Inject constructor(
     private val deviceWebClient: DeviceWebClient,
     private val workerManager: WorkManager,
 ) : DeviceWebPort {
+
+    /**
+     * 걸음 수 조회
+     */
+    @Throws(NotFoundStepException::class)
+    override suspend fun getStep(): GetStepResponse =
+        deviceWebClient.getStep().let { response ->
+
+            val body = response.takeIf { it.isSuccessful }?.body() ?: throw NotFoundStepException()
+
+            GetStepResponse(
+                consumeWalkingCount = body.result.consumeWalkingCount,
+                walkingCount = body.result.walkingCount,
+            )
+        }
 
     /**
      * 걸음 수 환전
@@ -59,7 +76,8 @@ class DeviceWebAdapter @Inject constructor(
             )
         ).let { response ->
 
-            val body = response.takeIf { it.isSuccessful }?.body() ?: throw UpdateWalkingCountException()
+            val body =
+                response.takeIf { it.isSuccessful }?.body() ?: throw UpdateWalkingCountException()
 
             UpdateWalkingCountResponse(
                 consumeWalkingCount = body.result.consumeWalkingCount,

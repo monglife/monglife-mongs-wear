@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.wear.component.common.button
+package com.monglife.mongs.presentation.view.component.common.button
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

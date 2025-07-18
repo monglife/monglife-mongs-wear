@@ -1,4 +1,4 @@
-package com.mongs.wear.presentation.dialog.collection
+package com.monglife.mongs.presentation.view.dialog.pages.collection
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

@@ -33,7 +33,7 @@ import com.monglife.mongs.presentation.view.component.common.textbox.InputTextBo
 internal fun NoticeDetailDialog(
     modifier: Modifier = Modifier,
     content: String,
-    confirm: () -> Unit,
+    close: () -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -44,7 +44,7 @@ internal fun NoticeDetailDialog(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = confirm,
+                onClick = close,
             )
     ) {
         Column {
@@ -99,7 +99,7 @@ internal fun NoticeDetailDialog(
             ) {
                 BlueButton(
                     text = "닫기",
-                    onClick = confirm,
+                    onClick = close,
                 )
             }
         }

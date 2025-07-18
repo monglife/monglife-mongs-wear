@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
@@ -31,81 +32,88 @@ import com.monglife.mongs.presentation.view.component.common.background.DefaultB
 internal fun CollectionMenuView(
     navController: NavController,
 ) {
-
     Box {
         DefaultBackground()
 
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.weight(0.49f)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = {
-                                    navController.navigate(RouterPath.CollectionMong.route)
-                                }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "몽 컬렉션",
-                            textAlign = TextAlign.Center,
-                            fontFamily = DAL_MU_RI,
-                            fontWeight = FontWeight.Light,
-                            fontSize = 18.sp,
-                            color = MongsWhite,
-                            maxLines = 1,
-                        )
-                    }
-                }
+        Box(modifier = Modifier.zIndex(1f)) {
+            CollectionMenuContent(navController = navController)
+        }
+    }
+}
 
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.weight(0.02f)
+@Composable
+private fun CollectionMenuContent(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxHeight()
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.weight(0.49f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = { navController.navigate(RouterPath.CollectionMong.route) }
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.White)
-                        .height(2.dp)
+                    Text(
+                        text = "몽 컬렉션",
+                        textAlign = TextAlign.Center,
+                        fontFamily = DAL_MU_RI,
+                        fontWeight = FontWeight.Light,
+                        fontSize = 18.sp,
+                        color = MongsWhite,
+                        maxLines = 1,
                     )
                 }
+            }
 
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.weight(0.49f)
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.weight(0.02f)
+            ) {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .height(2.dp)
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.weight(0.49f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = { navController.navigate(RouterPath.CollectionMap.route) }
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = { navController.navigate(RouterPath.CollectionMap.route) }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "맵 컬렉션",
-                            textAlign = TextAlign.Center,
-                            fontFamily = DAL_MU_RI,
-                            fontWeight = FontWeight.Light,
-                            fontSize = 18.sp,
-                            color = MongsWhite,
-                            maxLines = 1,
-                        )
-                    }
+                    Text(
+                        text = "맵 컬렉션",
+                        textAlign = TextAlign.Center,
+                        fontFamily = DAL_MU_RI,
+                        fontWeight = FontWeight.Light,
+                        fontSize = 18.sp,
+                        color = MongsWhite,
+                        maxLines = 1,
+                    )
                 }
             }
         }

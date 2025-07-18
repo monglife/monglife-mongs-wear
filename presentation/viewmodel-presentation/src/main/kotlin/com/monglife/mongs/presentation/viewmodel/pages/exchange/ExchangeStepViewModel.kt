@@ -4,6 +4,7 @@ import com.monglife.core.presentation.utils.PermissionUtil
 import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.device.usecase.ExchangeWalkingCountUseCase
 import com.monglife.mongs.application.device.usecase.ObserveCurrentWalkingCountUseCase
+import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,13 +18,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 @HiltViewModel
 class ExchangeStepViewModel @Inject constructor(
-    private val permissionUtil: PermissionUtil,
+    private val getCurrentMongUseCase: GetCurrentMongUseCase,
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val observeCurrentWalkingCountUseCase: ObserveCurrentWalkingCountUseCase,
     private val exchangeWalkingCountUseCase: ExchangeWalkingCountUseCase,
+    private val permissionUtil: PermissionUtil,
 ): BaseViewModel() {
 
     /**
@@ -71,6 +75,12 @@ class ExchangeStepViewModel @Inject constructor(
     private val _walkingCount = MutableStateFlow(0)
     val walkingCount: StateFlow<Int> = _walkingCount.asStateFlow()
 
+    private val _exchangeCount = MutableStateFlow(0)
+    val exchangeCount: StateFlow<Int> = _exchangeCount.asStateFlow()
+
+    private val _chargePayPoint = MutableStateFlow(0)
+    val chargePayPoint: StateFlow<Int> = _chargePayPoint.asStateFlow()
+
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
@@ -79,17 +89,32 @@ class ExchangeStepViewModel @Inject constructor(
                 // 활동 권한 정보 목록
                 _activityPermission.value = permissionUtil.verifyActivityPermission().isEmpty()
 
-                observeForever(observeCurrentMongUseCase(), _currentMongVo)
-
-                _currentMongVo.value ?: run {
+                getCurrentMongUseCase()?.let {
+                    _currentMongVo.value = it
+                } ?: run {
                     _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
                 }
 
+                observeForever(observeCurrentMongUseCase(), _currentMongVo)
                 observeForever(observeCurrentWalkingCountUseCase(), _walkingCount)
             }
 
             _uiState.value = UiState.Idle
+        }
+    }
+
+    fun increaseExchangeCount() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _exchangeCount.value = min(_exchangeCount.value + 1, _walkingCount.value / 1000)
+            _chargePayPoint.value = _exchangeCount.value * 100
+        }
+    }
+
+    fun decreaseExchangeCount() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _exchangeCount.value = max(_exchangeCount.value - 1, 0)
+            _chargePayPoint.value = _exchangeCount.value * 100
         }
     }
 
@@ -114,7 +139,7 @@ class ExchangeStepViewModel @Inject constructor(
     /**
      * 스타 포인트 환전
      */
-    fun exchange(mongId: Long, walkingCount: Int) {
+    fun exchange(mongId: Long, exchangeCount: Int) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
@@ -122,9 +147,11 @@ class ExchangeStepViewModel @Inject constructor(
                 exchangeWalkingCountUseCase(
                     command = ExchangeWalkingCountUseCase.Command(
                         mongId = mongId,
-                        walkingCount = walkingCount,
+                        walkingCount = exchangeCount * 1000,
                     )
                 )
+                _exchangeCount.value = 0
+                _chargePayPoint.value = 0
             }
 
             _uiEvent.emit(UiEvent.Exchange(message = "환전 완료"))

@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.view.dialog.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +34,8 @@ internal fun ConfirmAndCancelDialog(
     confirm: () -> Unit,
     cancel: () -> Unit,
 ) {
+    val texts = remember { text.trim().split("\n") }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -44,32 +47,33 @@ internal fun ConfirmAndCancelDialog(
                 onClick = cancel,
             )
     ) {
-        Column {
-            Spacer(modifier = Modifier.height(15.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.6f)
-            ) {
-                Text(
-                    text = text,
-                    textAlign = TextAlign.Center,
-                    fontFamily = DAL_MU_RI,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 14.sp,
-                    color = MongsWhite,
-                    maxLines = 3,
-                )
+        Column(modifier = Modifier.height(150.dp)) {
+            texts.forEach {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.65f / texts.size)
+                ) {
+                    Text(
+                        text = it,
+                        textAlign = TextAlign.Center,
+                        fontFamily = DAL_MU_RI,
+                        fontWeight = FontWeight.Light,
+                        fontSize = 14.sp,
+                        color = MongsWhite,
+                        maxLines = 1,
+                    )
+                }
             }
 
             Row(
-                verticalAlignment = Alignment.Top,
+                verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.4f)
+                    .weight(0.35f)
             ) {
                 BlueButton(
                     text = "닫기",

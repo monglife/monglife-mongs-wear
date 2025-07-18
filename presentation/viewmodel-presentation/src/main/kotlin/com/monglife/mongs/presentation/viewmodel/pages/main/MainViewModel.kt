@@ -57,9 +57,9 @@ class MainViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 // 플레이어 정보 동기화
                 syncRemotePlayerUseCase()
-                // 몽 목록 서버 동기화
+                // 몽 목록 정보 동기화
                 syncRemoteMongsUseCase()
-                // 걸음 수 서버 동기화
+                // 걸음 수 정보 동기화
                 syncRemoteStepUseCase()
 
                 observeForever(observeCurrentMongUseCase(), _currentMongVo)

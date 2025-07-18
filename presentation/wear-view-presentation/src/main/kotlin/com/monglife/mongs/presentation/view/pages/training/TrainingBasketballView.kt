@@ -3,48 +3,41 @@ package com.monglife.mongs.presentation.view.pages.training
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
+import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
+import com.monglife.mongs.presentation.viewmodel.pages.training.TrainingBasketballViewModel
 
 @Composable
 internal fun TrainingBasketballView(
     navController: NavController,
-    // TODO: Add viewModel if need
+    trainingBasketballViewModel: TrainingBasketballViewModel = hiltViewModel(),
 ) {
-    // TODO: For control mainPageView pagerState
-//    val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
-//    val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
-//    val isPagerChange = mainPagerViewModel.isPagerChange.observeAsState(false)
-
-    // TODO: For control mainSlotView mongVo
-//    val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
-//    val mainSlotViewModel: MainSlotViewModel = hiltViewModel<MainSlotViewModel>(parentEntry)
-//    val mongVo = mainSlotViewModel.mongVo.observeAsState()
+    val uiState = trainingBasketballViewModel.uiState.collectAsState()
 
     Box {
-        // TODO: Add background method
-//         DefaultBackground()
-//
-//        if (ViewModel.uiState.loadingBar) {
-//             LoadingBar()
-//        } else {
-//            TrainingBasketballContent()
-//        }
-    }
+        DefaultBackground()
 
-        // TODO: call viewModel initialize method
-//    LaunchedEffect(Unit) {
-//        ViewModel.initialize()
-//    }
+        if (uiState.value.loadingBar) {
+            LoadingBar()
+        } else {
+            TrainingBasketballContent(trainingBasketballViewModel = trainingBasketballViewModel)
+        }
+    }
 }
 
 @Composable
 private fun TrainingBasketballContent(
+    modifier: Modifier = Modifier,
+    trainingBasketballViewModel: TrainingBasketballViewModel,
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
     ) {
 
     }

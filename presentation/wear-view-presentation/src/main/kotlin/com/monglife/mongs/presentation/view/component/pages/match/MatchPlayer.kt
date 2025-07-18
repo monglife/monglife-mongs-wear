@@ -49,7 +49,7 @@ fun MatchPlayer(
                     MatchRoundCode.MATCH_HEAL -> {
                         Image(
                             painter = rememberAsyncImagePainter(
-                                model = R.drawable.icon_healthy,
+                                model = R.drawable.icon_healthy,    // TODO: 회복 이미지 구급 상자 아이콘으로 변경
                                 imageLoader = imageLoader
                             ),
                             contentDescription = null,
@@ -64,7 +64,7 @@ fun MatchPlayer(
                     MatchRoundCode.MATCH_ATTACKED_HEAL -> {
                         Image(
                             painter = rememberAsyncImagePainter(
-                                model = R.drawable.icon_healthy,
+                                model = R.drawable.icon_healthy,    // TODO: 회복 이미지 구급 상자 아이콘으로 변경
                                 imageLoader = imageLoader
                             ),
                             contentDescription = null,

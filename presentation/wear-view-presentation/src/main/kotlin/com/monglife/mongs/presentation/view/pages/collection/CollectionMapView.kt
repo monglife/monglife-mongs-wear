@@ -25,10 +25,10 @@ import androidx.wear.compose.material.PositionIndicator
 import com.monglife.mongs.presentation.view.assets.MapResourceCode
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
+import com.monglife.mongs.presentation.view.component.common.button.CircleImageButton
 import com.monglife.mongs.presentation.view.component.common.button.CircleTextButton
+import com.monglife.mongs.presentation.view.dialog.pages.collection.CollectionMapDetailDialog
 import com.monglife.mongs.presentation.viewmodel.pages.collection.CollectionMapViewModel
-import com.monglife.mongs.presentation.wear.component.common.button.CircleImageButton
-import com.mongs.wear.presentation.dialog.collection.CollectionMapDetailDialog
 import com.mongs.wear.presentation.view.wear.R
 import kotlin.math.min
 
@@ -38,10 +38,7 @@ internal fun CollectionMapView(
     context: Context = LocalContext.current,
 ) {
     val uiState = collectionMapViewModel.uiState.collectAsState()
-    val collectionMapVos = collectionMapViewModel.collectionMapVos.collectAsState()
     val detailCollectionMapVo = collectionMapViewModel.detailCollectionMapVo.collectAsState()
-
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = 0)
 
     Box {
         DefaultBackground()
@@ -49,74 +46,19 @@ internal fun CollectionMapView(
         if (uiState.value.loadingBar) {
              LoadingBar()
         } else {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize().zIndex(1f),
-            ) {
-                PositionIndicator(lazyListState = listState)
-                LazyColumn(
-                    verticalArrangement = Arrangement.Center,
-                    contentPadding = PaddingValues(vertical = 40.dp),
-                    state = listState,
-                ) {
-                    for (startIndex: Int in 1..collectionMapVos.value.size step (3)) {
-                        item {
-                            Row(
-                                horizontalArrangement = Arrangement.Start,
-                                modifier = Modifier
-                                    .height(59.dp)
-                                    .padding(bottom = 5.dp)
-                            ) {
-                                for (index: Int in startIndex..min(
-                                    collectionMapVos.value.size,
-                                    startIndex + 2
-                                )) {
-                                    val collectionMapVo = collectionMapVos.value[index - 1]
-
-                                    if (!collectionMapVo.isIncluded) {
-                                        CircleTextButton(
-                                            text = "?",
-                                            border = R.drawable.btn_border_purple_dark,
-                                            onClick = {
-                                                Toast.makeText(
-                                                    context,
-                                                    "수집하지 않은 맵",
-                                                    Toast.LENGTH_SHORT,
-                                                ).show()
-                                            },
-                                            modifier = Modifier
-                                                .offset(
-                                                    y = if (index % 3 == 2) (-27).dp else 0.dp,
-                                                    x = 0.dp
-                                                )
-                                        )
-                                    } else {
-                                        CircleImageButton(
-                                            icon = MapResourceCode.getResource(collectionMapVo.code).code,
-                                            border = R.drawable.btn_border_purple_dark,
-                                            onClick = { collectionMapViewModel.collectionMapDetailDialogOpen(collectionMapVo = collectionMapVo) },
-                                            modifier = Modifier
-                                                .offset(
-                                                    y = if (index % 3 == 2) (-27).dp else 0.dp,
-                                                    x = 0.dp
-                                                )
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            Box(modifier = Modifier.zIndex(1f)) {
+                CollectionMapContent(collectionMapViewModel = collectionMapViewModel)
             }
 
-            if (uiState.value.collectionMapDetailDialogOpen) {
-                detailCollectionMapVo.value?.let {
-                    CollectionMapDetailDialog(
-                        modifier = Modifier.zIndex(2f),
-                        collectionMapVo = it,
-                        onSetClick = { mapCode -> collectionMapViewModel.setBackgroundMapCode(mapCode = mapCode) },
-                        onClick = collectionMapViewModel::collectionMapDetailDialogClose,
-                    )
+            Box(modifier = Modifier.zIndex(2f)) {
+                if (uiState.value.collectionMapDetailDialogOpen) {
+                    detailCollectionMapVo.value?.let {
+                        CollectionMapDetailDialog(
+                            collectionMapVo = it,
+                            onSetClick = { mapCode -> collectionMapViewModel.setBackgroundMapCode(mapCode = mapCode) },
+                            onClick = collectionMapViewModel::collectionMapDetailDialogClose,
+                        )
+                    }
                 }
             }
         }
@@ -130,6 +72,81 @@ internal fun CollectionMapView(
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
                 else -> {}
+            }
+        }
+    }
+}
+
+@Composable
+private fun CollectionMapContent(
+    modifier: Modifier = Modifier,
+    collectionMapViewModel: CollectionMapViewModel,
+    context: Context = LocalContext.current,
+) {
+    val collectionMapVos = collectionMapViewModel.collectionMapVos.collectAsState()
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = 0)
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        PositionIndicator(lazyListState = listState)
+
+        LazyColumn(
+            verticalArrangement = Arrangement.Center,
+            contentPadding = PaddingValues(vertical = 40.dp),
+            state = listState,
+        ) {
+            for (startIndex: Int in 1..collectionMapVos.value.size step (3)) {
+                item {
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        modifier = Modifier
+                            .height(59.dp)
+                            .padding(bottom = 5.dp)
+                    ) {
+                        for (index: Int in startIndex..min(
+                            collectionMapVos.value.size,
+                            startIndex + 2
+                        )) {
+                            val collectionMapVo = collectionMapVos.value[index - 1]
+
+                            if (!collectionMapVo.isIncluded) {
+                                CircleTextButton(
+                                    text = "?",
+                                    border = R.drawable.btn_border_purple_dark,
+                                    onClick = {
+                                        Toast.makeText(
+                                            context,
+                                            "수집하지 않은 맵",
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
+                                    },
+                                    modifier = Modifier
+                                        .offset(
+                                            y = if (index % 3 == 2) (-27).dp else 0.dp,
+                                            x = 0.dp
+                                        )
+                                )
+                            } else {
+                                CircleImageButton(
+                                    icon = MapResourceCode.getResource(collectionMapVo.code).code,
+                                    border = R.drawable.btn_border_purple_dark,
+                                    onClick = {
+                                        collectionMapViewModel.collectionMapDetailDialogOpen(
+                                            collectionMapVo = collectionMapVo
+                                        )
+                                    },
+                                    modifier = Modifier
+                                        .offset(
+                                            y = if (index % 3 == 2) (-27).dp else 0.dp,
+                                            x = 0.dp
+                                        )
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

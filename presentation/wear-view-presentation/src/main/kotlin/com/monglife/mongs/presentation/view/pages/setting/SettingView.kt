@@ -42,16 +42,10 @@ internal fun SettingView(
     settingViewModel: SettingViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
+    val uiState = settingViewModel.uiState.collectAsState()
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         settingViewModel.verifyPermission()
     }
-
-    val uiState = settingViewModel.uiState.collectAsState()
-    val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
-    val notificationOption = settingViewModel.notificationOption.collectAsState()
-    val notificationPermission = settingViewModel.notificationPermission.collectAsState()
-    val activityPermission = settingViewModel.activityPermission.collectAsState()
-    val locationPermission = settingViewModel.locationPermission.collectAsState()
 
     Box {
         DefaultBackground()
@@ -59,110 +53,8 @@ internal fun SettingView(
         if (uiState.value.loadingBar) {
              LoadingBar()
         } else {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize().zIndex(1f)
-            ) {
-                PositionIndicator(scalingLazyListState = listState)
-                ScalingLazyColumn(
-                    contentPadding = PaddingValues(vertical = 60.dp, horizontal = 6.dp),
-                    modifier = Modifier.fillMaxSize(),
-                    state = listState,
-                    autoCentering = null,
-                ) {
-                    item {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(15.dp)
-                        ) {
-                            Text(
-                                text = "설정",
-                                textAlign = TextAlign.Center,
-                                fontFamily = DAL_MU_RI,
-                                fontWeight = FontWeight.Light,
-                                fontSize = 16.sp,
-                                color = MongsWhite,
-                                maxLines = 1,
-                            )
-                        }
-                    }
-
-                    item {
-                        ToggleChip(
-                            fontColor = Color.White,
-                            backgroundColor = Color.Black,
-                            label = "알림",
-                            checked = notificationOption.value && notificationPermission.value,
-                            disabled = !notificationPermission.value,
-                        ) {
-                            settingViewModel.toggleNotificationOption(notificationOption.value)
-                        }
-                    }
-
-                    item {
-                        Chip(
-                            fontColor = Color.White,
-                            backgroundColor = Color.Black,
-                            label = "로그아웃",
-                            secondaryLabel = "구글 계정 로그아웃",
-                            onClick = settingViewModel::logoutConfirmDialogOpen,
-                        )
-                    }
-
-                    /**
-                     * 권한 설정
-                     */
-                    item {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(15.dp)
-                        ) {
-                            Text(
-                                text = "권한",
-                                textAlign = TextAlign.Center,
-                                fontFamily = DAL_MU_RI,
-                                fontWeight = FontWeight.Light,
-                                fontSize = 16.sp,
-                                color = MongsWhite,
-                                maxLines = 1,
-                            )
-                        }
-                    }
-
-                    item {
-                        ToggleChip(
-                            fontColor = Color.White,
-                            backgroundColor = Color.Black,
-                            label = "알림 권한",
-                            checked = notificationPermission.value,
-                            disabled = false,
-                        ) { settingViewModel.requestNotificationPermission() }
-                    }
-
-                    item {
-                        ToggleChip(
-                            fontColor = Color.White,
-                            backgroundColor = Color.Black,
-                            label = "활동 권한",
-                            checked = activityPermission.value,
-                            disabled = false,
-                        ) { settingViewModel.requestActivityPermission() }
-                    }
-
-                    item {
-                        ToggleChip(
-                            fontColor = Color.White,
-                            backgroundColor = Color.Black,
-                            label = "위치 권한",
-                            checked = locationPermission.value,
-                            disabled = false,
-                        ) { settingViewModel.requestLocationPermission() }
-                    }
-                }
+            Box(modifier = Modifier.zIndex(1f)) {
+                SettingContent(settingViewModel = settingViewModel)
             }
 
             Box(modifier = Modifier.zIndex(2f)) {
@@ -192,4 +84,123 @@ internal fun SettingView(
             }
         }
     }
+}
+
+@Composable
+private fun SettingContent(
+    modifier: Modifier = Modifier,
+    settingViewModel: SettingViewModel,
+) {
+    val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
+    val notificationOption = settingViewModel.notificationOption.collectAsState()
+    val notificationPermission = settingViewModel.notificationPermission.collectAsState()
+    val activityPermission = settingViewModel.activityPermission.collectAsState()
+    val locationPermission = settingViewModel.locationPermission.collectAsState()
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        PositionIndicator(scalingLazyListState = listState)
+        ScalingLazyColumn(
+            contentPadding = PaddingValues(vertical = 60.dp, horizontal = 6.dp),
+            modifier = Modifier.fillMaxSize(),
+            state = listState,
+            autoCentering = null,
+        ) {
+            item {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp)
+                ) {
+                    Text(
+                        text = "설정",
+                        textAlign = TextAlign.Center,
+                        fontFamily = DAL_MU_RI,
+                        fontWeight = FontWeight.Light,
+                        fontSize = 16.sp,
+                        color = MongsWhite,
+                        maxLines = 1,
+                    )
+                }
+            }
+
+            item {
+                ToggleChip(
+                    fontColor = Color.White,
+                    backgroundColor = Color.Black,
+                    label = "알림",
+                    checked = notificationOption.value && notificationPermission.value,
+                    disabled = !notificationPermission.value,
+                ) {
+                    settingViewModel.toggleNotificationOption(notificationOption.value)
+                }
+            }
+
+            item {
+                Chip(
+                    fontColor = Color.White,
+                    backgroundColor = Color.Black,
+                    label = "로그아웃",
+                    secondaryLabel = "구글 계정 로그아웃",
+                    onClick = settingViewModel::logoutConfirmDialogOpen,
+                )
+            }
+
+            /**
+             * 권한 설정
+             */
+            item {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp)
+                ) {
+                    Text(
+                        text = "권한",
+                        textAlign = TextAlign.Center,
+                        fontFamily = DAL_MU_RI,
+                        fontWeight = FontWeight.Light,
+                        fontSize = 16.sp,
+                        color = MongsWhite,
+                        maxLines = 1,
+                    )
+                }
+            }
+
+            item {
+                ToggleChip(
+                    fontColor = Color.White,
+                    backgroundColor = Color.Black,
+                    label = "알림 권한",
+                    checked = notificationPermission.value,
+                    disabled = false,
+                ) { settingViewModel.requestNotificationPermission() }
+            }
+
+            item {
+                ToggleChip(
+                    fontColor = Color.White,
+                    backgroundColor = Color.Black,
+                    label = "활동 권한",
+                    checked = activityPermission.value,
+                    disabled = false,
+                ) { settingViewModel.requestActivityPermission() }
+            }
+
+            item {
+                ToggleChip(
+                    fontColor = Color.White,
+                    backgroundColor = Color.Black,
+                    label = "위치 권한",
+                    checked = locationPermission.value,
+                    disabled = false,
+                ) { settingViewModel.requestLocationPermission() }
+            }
+        }
+    }
+
 }

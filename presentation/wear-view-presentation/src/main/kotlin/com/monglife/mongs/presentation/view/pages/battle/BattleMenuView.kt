@@ -60,22 +60,18 @@ internal fun BattleMenuView(
             LoadingBar()
         } else {
             currentMongVo.value?.let {
-                if (uiState.value.matchingLoadingBar) {
-                    BattleMatchingContent(
-                        modifier = Modifier.zIndex(1f),
-                        battleMenuViewModel = battleMenuViewModel,
-                    )
-                } else {
-                    BattleMenuContent(
-                        modifier = Modifier.zIndex(1f),
-                        battleMenuViewModel = battleMenuViewModel,
-                    )
+                Box(modifier = Modifier.zIndex(1f)) {
+                    if (uiState.value.matchingLoadingBar) {
+                        BattleMatchingContent(battleMenuViewModel = battleMenuViewModel)
+                    } else {
+                        BattleMenuContent(battleMenuViewModel = battleMenuViewModel)
+                    }
                 }
 
                 Box(modifier = Modifier.zIndex(2f)) {
                     if (uiState.value.deleteQueueConfirmDialogOpen) {
                         ConfirmAndCancelDialog(
-                            text = "매치를\n\n취소하시겠습니까?",
+                            text = "매치를\n취소하시겠습니까?",
                             confirm = { battleMenuViewModel.deleteQueue(mongId = it.mongId) },
                             cancel = { battleMenuViewModel.deleteQueueConfirmDialogClose() },
                         )

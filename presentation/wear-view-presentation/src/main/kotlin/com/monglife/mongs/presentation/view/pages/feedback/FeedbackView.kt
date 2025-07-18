@@ -35,11 +35,8 @@ internal fun FeedbackView(
     feedbackViewModel: FeedbackViewModel = hiltViewModel(),
 ) {
     val uiState = feedbackViewModel.uiState.collectAsState()
-    val feedbackTypeVos = feedbackViewModel.feedbackTypeVos.collectAsState()
     val title = feedbackViewModel.title.collectAsState()
     val content = feedbackViewModel.content.collectAsState()
-
-    val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
 
     Box {
         DefaultBackground()
@@ -47,52 +44,8 @@ internal fun FeedbackView(
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            Box(
-                modifier = Modifier.zIndex(1f),
-                contentAlignment = Alignment.Center,
-            ) {
-                PositionIndicator(scalingLazyListState = listState)
-                ScalingLazyColumn(
-                    contentPadding = PaddingValues(vertical = 60.dp, horizontal = 6.dp),
-                    modifier = Modifier.fillMaxSize(),
-                    state = listState,
-                    autoCentering = null,
-                ) {
-                    item {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(15.dp)
-                        ) {
-                            Text(
-                                text = "오류신고",
-                                textAlign = TextAlign.Center,
-                                fontFamily = DAL_MU_RI,
-                                fontWeight = FontWeight.Light,
-                                fontSize = 16.sp,
-                                color = MongsWhite,
-                                maxLines = 1,
-                            )
-                        }
-                    }
-
-                    for (feedbackTypeVo in feedbackTypeVos.value) {
-                        item {
-                            Chip(
-                                fontColor = Color.White,
-                                backgroundColor = Color.Black,
-                                label = feedbackTypeVo.feedbackName,
-                                secondaryLabel = feedbackTypeVo.description,
-                                onClick = {
-                                    feedbackViewModel.createFeedbackDialogOpen(
-                                        title = feedbackTypeVo.feedbackName
-                                    )
-                                },
-                            )
-                        }
-                    }
-                }
+            Box(modifier = Modifier.zIndex(1f)) {
+                FeedbackContent(feedbackViewModel = feedbackViewModel)
             }
 
             Box(modifier = Modifier.zIndex(2f)) {
@@ -109,7 +62,7 @@ internal fun FeedbackView(
             Box(modifier = Modifier.zIndex(3f)) {
                 if (uiState.value.confirmDialogOpen) {
                     ConfirmAndCancelDialog(
-                        text = "오류를\n전송 하시겠습니까?",
+                        text = "${title.value} 오류를\n전송 하시겠습니까?",
                         cancel = feedbackViewModel::createFeedbackConfirmDialogClose,
                         confirm = {
                             feedbackViewModel.createFeedback(
@@ -122,6 +75,63 @@ internal fun FeedbackView(
                     ConfirmDialog(
                         text = "오류 전송 완료!\n처리결과는 메일로\n전달드리겠습니다.",
                         confirm = feedbackViewModel::createFeedbackSuccessDialogClose,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FeedbackContent(
+    modifier: Modifier = Modifier,
+    feedbackViewModel: FeedbackViewModel,
+) {
+    val feedbackTypeVos = feedbackViewModel.feedbackTypeVos.collectAsState()
+    val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
+
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        PositionIndicator(scalingLazyListState = listState)
+        ScalingLazyColumn(
+            contentPadding = PaddingValues(vertical = 60.dp, horizontal = 6.dp),
+            modifier = Modifier.fillMaxSize(),
+            state = listState,
+            autoCentering = null,
+        ) {
+            item {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp)
+                ) {
+                    Text(
+                        text = "오류신고",
+                        textAlign = TextAlign.Center,
+                        fontFamily = DAL_MU_RI,
+                        fontWeight = FontWeight.Light,
+                        fontSize = 16.sp,
+                        color = MongsWhite,
+                        maxLines = 1,
+                    )
+                }
+            }
+
+            for (feedbackTypeVo in feedbackTypeVos.value) {
+                item {
+                    Chip(
+                        fontColor = Color.White,
+                        backgroundColor = Color.Black,
+                        label = feedbackTypeVo.feedbackName,
+                        secondaryLabel = feedbackTypeVo.description,
+                        onClick = {
+                            feedbackViewModel.createFeedbackDialogOpen(
+                                title = feedbackTypeVo.feedbackName
+                            )
+                        },
                     )
                 }
             }

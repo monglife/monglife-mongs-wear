@@ -19,10 +19,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingViewModel @Inject constructor(
-    private val permissionUtil: PermissionUtil,
     private val observeNotificationOptionUseCase: ObserveNotificationOptionUseCase,
     private val setNotificationOptionUseCase: SetNotificationOptionUseCase,
     private val logoutUseCase: LogoutUseCase,
+    private val permissionUtil: PermissionUtil,
 ): BaseViewModel() {
 
     /**

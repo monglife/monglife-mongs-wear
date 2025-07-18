@@ -29,7 +29,7 @@ import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
 import com.monglife.mongs.presentation.view.assets.MongsLightGray
 import com.monglife.mongs.presentation.view.assets.MongsWhite
-import com.monglife.mongs.presentation.wear.component.common.bar.ProgressIndicator
+import com.monglife.mongs.presentation.view.component.common.bar.ProgressIndicator
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 

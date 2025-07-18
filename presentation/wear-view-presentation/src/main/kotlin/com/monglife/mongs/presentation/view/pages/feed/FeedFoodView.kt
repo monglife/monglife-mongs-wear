@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,8 +50,6 @@ import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.view.dialog.pages.feed.FeedItemDetailDialog
 import com.monglife.mongs.presentation.viewmodel.pages.feed.FeedFoodViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainSlotViewModel
-import kotlin.math.max
-import kotlin.math.min
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
@@ -67,25 +63,7 @@ internal fun FeedFoodView(
 
     val uiState = feedFoodViewModel.uiState.collectAsState()
     val currentMongVo = feedFoodViewModel.currentMongVo.collectAsState()
-    val foodVos = feedFoodViewModel.foodVos.collectAsState()
-    val foodIndex = remember { mutableIntStateOf(0) }
-    val currentFoodVo = remember {
-        derivedStateOf {
-            if (foodIndex.intValue < foodVos.value.size) {
-                foodVos.value[foodIndex.intValue]
-            } else null
-        }
-    }
-    val pageIndicatorState: PageIndicatorState = remember {
-        object : PageIndicatorState {
-            override val pageOffset: Float
-                get() = 0f
-            override val selectedPage: Int
-                get() = foodIndex.intValue
-            override val pageCount: Int
-                get() = foodVos.value.size
-        }
-    }
+    val currentFoodVo = feedFoodViewModel.currentFoodVo.collectAsState()
 
     Box {
         DefaultBackground()
@@ -93,52 +71,35 @@ internal fun FeedFoodView(
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            currentMongVo.value?.let { mongVo ->
+            Box(modifier = Modifier.zIndex(1f)) {
+                FeedFoodContent(feedFoodViewModel = feedFoodViewModel)
+            }
+
+            Box(modifier = Modifier.zIndex(2f)) {
                 currentFoodVo.value?.let { foodVo ->
-                    FeedFoodContent(
-                        modifier = Modifier.zIndex(1f),
-                        mongVo = mongVo,
-                        foodVo = foodVo,
-                        detailDialogOpen = feedFoodViewModel::detailDialogOpen,
-                        buyDialogOpen = feedFoodViewModel::buyConfirmDialogOpen,
-                    )
-
-                    PageIndicator(
-                        pageIndicatorState = pageIndicatorState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = 5.dp)
-                            .zIndex(1f)
-                    )
-
-                    Box(
-                        modifier = Modifier.zIndex(2f),
-                    ) {
-                        if (uiState.value.detailDialogOpen) {
-                            FeedItemDetailDialog(
-                                weight = foodVo.weight,
-                                strength = foodVo.strength,
-                                satiety = foodVo.satiety,
-                                healthy = foodVo.healthy,
-                                fatigue = foodVo.fatigue,
-                                onClick = feedFoodViewModel::detailDialogClose,
-                            )
-                        } else if (uiState.value.confirmDialogOpen) {
-                            ConfirmAndCancelDialog(
-                                text = "구매하시겠습니까?",
-                                cancel = feedFoodViewModel::buyConfirmDialogClose,
-                                confirm = { feedFoodViewModel.buy(mongId = mongVo.mongId, foodCode = foodVo.foodCode) },
-                            )
-                        }
+                    if (uiState.value.detailDialogOpen) {
+                        FeedItemDetailDialog(
+                            weight = foodVo.weight,
+                            strength = foodVo.strength,
+                            satiety = foodVo.satiety,
+                            healthy = foodVo.healthy,
+                            fatigue = foodVo.fatigue,
+                            onClick = feedFoodViewModel::detailDialogClose,
+                        )
+                    } else if (uiState.value.confirmDialogOpen) {
+                        ConfirmAndCancelDialog(
+                            text = "${foodVo.foodName}\n구매하시겠습니까?",
+                            cancel = feedFoodViewModel::buyConfirmDialogClose,
+                            confirm = {
+                                currentMongVo.value?.let { mongVo ->
+                                    feedFoodViewModel.buy(
+                                        mongId = mongVo.mongId,
+                                        foodCode = foodVo.foodCode
+                                    )
+                                }
+                            },
+                        )
                     }
-
-                    SelectButton(
-                        modifier = Modifier.zIndex(3f),
-                        leftBtnDisabled = foodIndex.intValue == 0,
-                        rightBtnDisabled = foodIndex.intValue == foodVos.value.size - 1,
-                        leftBtnClick = { foodIndex.intValue = max(0, foodIndex.intValue - 1) },
-                        rightBtnClick = { foodIndex.intValue = min(foodIndex.intValue + 1, foodVos.value.size - 1) },
-                    )
                 }
             }
         }
@@ -165,12 +126,65 @@ internal fun FeedFoodView(
 @Composable
 private fun FeedFoodContent(
     modifier: Modifier = Modifier,
+    feedFoodViewModel: FeedFoodViewModel,
+) {
+    val currentMongVo = feedFoodViewModel.currentMongVo.collectAsState()
+    val currentFoodVo = feedFoodViewModel.currentFoodVo.collectAsState()
+    val foodVos = feedFoodViewModel.foodVos.collectAsState()
+    val foodVoIndex = feedFoodViewModel.foodVoIndex.collectAsState()
+    val pageIndicatorState: PageIndicatorState = remember {
+        object : PageIndicatorState {
+            override val pageOffset: Float
+                get() = 0f
+            override val selectedPage: Int
+                get() = foodVoIndex.value
+            override val pageCount: Int
+                get() = foodVos.value.size
+        }
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize()
+    ) {
+        currentMongVo.value?.let { mongVo ->
+            currentFoodVo.value?.let { foodVo ->
+                FoodSection(
+                    modifier = Modifier.zIndex(1f),
+                    mongVo = mongVo,
+                    foodVo = foodVo,
+                    detailDialogOpen = feedFoodViewModel::detailDialogOpen,
+                    buyDialogOpen = feedFoodViewModel::buyConfirmDialogOpen,
+                )
+            }
+        }
+
+        PageIndicator(
+            pageIndicatorState = pageIndicatorState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 5.dp)
+                .zIndex(1f)
+        )
+
+        SelectButton(
+            modifier = Modifier.zIndex(2f),
+            leftBtnDisabled = foodVoIndex.value == 0,
+            rightBtnDisabled = foodVoIndex.value == foodVos.value.size - 1,
+            leftBtnClick = feedFoodViewModel::prevFood,
+            rightBtnClick = feedFoodViewModel::nextFood,
+        )
+    }
+}
+
+@Composable
+private fun FoodSection(
+    modifier: Modifier = Modifier,
     mongVo: MongVo,
     foodVo: FoodVo,
     detailDialogOpen: () -> Unit,
     buyDialogOpen: () -> Unit,
 ) {
-
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize()

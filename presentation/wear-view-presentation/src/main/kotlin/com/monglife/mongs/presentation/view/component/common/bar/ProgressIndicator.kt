@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.wear.component.common.bar
+package com.monglife.mongs.presentation.view.component.common.bar
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

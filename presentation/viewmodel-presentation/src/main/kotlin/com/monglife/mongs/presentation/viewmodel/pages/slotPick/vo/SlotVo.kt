@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.viewmodel.pages.slotPick
+package com.monglife.mongs.presentation.viewmodel.pages.slotPick.vo
 
 import com.monglife.mongs.application.mong.vo.MongVo
 

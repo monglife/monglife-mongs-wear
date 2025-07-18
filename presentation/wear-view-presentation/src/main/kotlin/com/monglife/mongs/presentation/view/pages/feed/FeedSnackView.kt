@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,8 +50,6 @@ import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.view.dialog.pages.feed.FeedItemDetailDialog
 import com.monglife.mongs.presentation.viewmodel.pages.feed.FeedSnackViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainSlotViewModel
-import kotlin.math.max
-import kotlin.math.min
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
@@ -67,25 +63,7 @@ internal fun FeedSnackView(
 
     val uiState = feedSnackViewModel.uiState.collectAsState()
     val currentMongVo = feedSnackViewModel.currentMongVo.collectAsState()
-    val snackVos = feedSnackViewModel.snackVos.collectAsState()
-    val snackIndex = remember { mutableIntStateOf(0) }
-    val currentSnackVo = remember {
-        derivedStateOf {
-            if (snackIndex.intValue < snackVos.value.size) {
-                snackVos.value[snackIndex.intValue]
-            } else null
-        }
-    }
-    val pageIndicatorState: PageIndicatorState = remember {
-        object : PageIndicatorState {
-            override val pageOffset: Float
-                get() = 0f
-            override val selectedPage: Int
-                get() = snackIndex.intValue
-            override val pageCount: Int
-                get() = snackVos.value.size
-        }
-    }
+    val currentSnackVo = feedSnackViewModel.currentSnackVo.collectAsState()
 
     Box {
         DefaultBackground()
@@ -93,52 +71,34 @@ internal fun FeedSnackView(
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            currentMongVo.value?.let { mongVo ->
+            Box(modifier = Modifier.zIndex(3f)) {
+                FeedSnackContent(feedSnackViewModel = feedSnackViewModel)
+            }
+            Box(modifier = Modifier.zIndex(3f)) {
                 currentSnackVo.value?.let { snackVo ->
-                    FeedSnackContent(
-                        modifier = Modifier.zIndex(1f),
-                        mongVo = mongVo,
-                        snackVo = snackVo,
-                        detailDialogOpen = feedSnackViewModel::detailDialogOpen,
-                        buyDialogOpen = feedSnackViewModel::buyConfirmDialogOpen,
-                    )
-
-                    PageIndicator(
-                        pageIndicatorState = pageIndicatorState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = 5.dp)
-                            .zIndex(1f)
-                    )
-
-                    Box(
-                        modifier = Modifier.zIndex(2f),
-                    ) {
-                        if (uiState.value.detailDialogOpen) {
-                            FeedItemDetailDialog(
-                                weight = snackVo.weight,
-                                strength = snackVo.strength,
-                                satiety = snackVo.satiety,
-                                healthy = snackVo.healthy,
-                                fatigue = snackVo.fatigue,
-                                onClick = feedSnackViewModel::detailDialogClose,
-                            )
-                        } else if (uiState.value.confirmDialogOpen) {
-                            ConfirmAndCancelDialog(
-                                text = "구매하시겠습니까?",
-                                cancel = feedSnackViewModel::buyConfirmDialogClose,
-                                confirm = { feedSnackViewModel.buy(mongId = mongVo.mongId, snackCode = snackVo.snackCode) },
-                            )
-                        }
+                    if (uiState.value.detailDialogOpen) {
+                        FeedItemDetailDialog(
+                            weight = snackVo.weight,
+                            strength = snackVo.strength,
+                            satiety = snackVo.satiety,
+                            healthy = snackVo.healthy,
+                            fatigue = snackVo.fatigue,
+                            onClick = feedSnackViewModel::detailDialogClose,
+                        )
+                    } else if (uiState.value.confirmDialogOpen) {
+                        ConfirmAndCancelDialog(
+                            text = "${snackVo.snackName}\n구매하시겠습니까?",
+                            cancel = feedSnackViewModel::buyConfirmDialogClose,
+                            confirm = {
+                                currentMongVo.value?.let { mongVo ->
+                                    feedSnackViewModel.buy(
+                                        mongId = mongVo.mongId,
+                                        snackCode = snackVo.snackCode
+                                    )
+                                }
+                            },
+                        )
                     }
-
-                    SelectButton(
-                        modifier = Modifier.zIndex(3f),
-                        leftBtnDisabled = snackIndex.intValue == 0,
-                        rightBtnDisabled = snackIndex.intValue == snackVos.value.size - 1,
-                        leftBtnClick = { snackIndex.intValue = max(0, snackIndex.intValue - 1) },
-                        rightBtnClick = { snackIndex.intValue = min(snackIndex.intValue + 1, snackVos.value.size - 1) },
-                    )
                 }
             }
         }
@@ -164,6 +124,61 @@ internal fun FeedSnackView(
 
 @Composable
 private fun FeedSnackContent(
+    modifier: Modifier = Modifier,
+    feedSnackViewModel: FeedSnackViewModel,
+) {
+    val currentMongVo = feedSnackViewModel.currentMongVo.collectAsState()
+    val currentSnackVo = feedSnackViewModel.currentSnackVo.collectAsState()
+    val snackVos = feedSnackViewModel.snackVos.collectAsState()
+    val snackVoIndex = feedSnackViewModel.snackVoIndex.collectAsState()
+    val pageIndicatorState: PageIndicatorState = remember {
+        object : PageIndicatorState {
+            override val pageOffset: Float
+                get() = 0f
+            override val selectedPage: Int
+                get() = snackVoIndex.value
+            override val pageCount: Int
+                get() = snackVos.value.size
+        }
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize()
+    ) {
+        currentMongVo.value?.let { mongVo ->
+            currentSnackVo.value?.let { snackVo ->
+                SnackSection(
+                    modifier = Modifier.zIndex(1f),
+                    mongVo = mongVo,
+                    snackVo = snackVo,
+                    detailDialogOpen = feedSnackViewModel::detailDialogOpen,
+                    buyDialogOpen = feedSnackViewModel::buyConfirmDialogOpen,
+                )
+            }
+        }
+
+        PageIndicator(
+            pageIndicatorState = pageIndicatorState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 5.dp)
+                .zIndex(1f)
+        )
+
+        SelectButton(
+            modifier = Modifier.zIndex(2f),
+            leftBtnDisabled = snackVoIndex.value == 0,
+            rightBtnDisabled = snackVoIndex.value == snackVos.value.size - 1,
+            leftBtnClick = feedSnackViewModel::prevSnack,
+            rightBtnClick = feedSnackViewModel::nextSnack,
+        )
+
+    }
+}
+
+@Composable
+private fun SnackSection(
     modifier: Modifier = Modifier,
     mongVo: MongVo,
     snackVo: SnackVo,

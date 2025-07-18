@@ -58,142 +58,14 @@ internal fun ChargeStarPointView(
     context: Context = LocalContext.current
 ) {
     val uiState = chargeStarPointViewModel.uiState.collectAsState()
-    val starPoint = chargeStarPointViewModel.starPoint.collectAsState()
-    val productVos = chargeStarPointViewModel.productVos.collectAsState()
-    val productIndex = remember { mutableIntStateOf(0) }
-    val productVo = remember {
-        derivedStateOf {
-            if (productIndex.intValue < productVos.value.size) {
-                productVos.value[productIndex.intValue]
-            } else null
-        }
-    }
-    val pageIndicatorState: PageIndicatorState = remember {
-        object : PageIndicatorState {
-            override val pageOffset: Float
-                get() = 0f
-            override val selectedPage: Int
-                get() = productIndex.intValue
-            override val pageCount: Int
-                get() = productVos.value.size
-        }
-    }
 
     Box {
         DefaultBackground()
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            PageIndicator(
-                pageIndicatorState = pageIndicatorState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 5.dp)
-                    .zIndex(1f),
-            )
-
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.zIndex(2f).fillMaxWidth(),
-            ) {
-                productVo.value?.let {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxHeight()
-                    ) {
-                        Spacer(modifier = Modifier.height(15.dp))
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.2f)
-                        ) {
-                            StarPoint(starPoint = starPoint.value)
-                        }
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.5f)
-                        ) {
-                            SelectButton(
-                                leftBtnDisabled = productIndex.intValue == 0,
-                                rightBtnDisabled = productIndex.intValue == productVos.value.size - 1,
-                                leftBtnClick = { productIndex.intValue = max(0, productIndex.intValue - 1) },
-                                rightBtnClick = { productIndex.intValue = min(productIndex.intValue + 1, productVos.value.size - 1) },
-                            ) {
-                                Column(
-                                    verticalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxHeight()
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Text(
-                                            text = it.productName,
-                                            textAlign = TextAlign.Center,
-                                            fontFamily = DAL_MU_RI,
-                                            fontWeight = FontWeight.Light,
-                                            fontSize = 16.sp,
-                                            color = MongsWhite,
-                                            maxLines = 1,
-                                        )
-                                    }
-
-                                    Spacer(modifier = Modifier.height(15.dp))
-
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Image(
-                                            painter = painterResource(R.drawable.point_icon_star),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(28.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.3f)
-                        ) {
-                            if (it.orderVos.isNotEmpty()) {
-                                BlueButton(
-                                    text = "소비",
-                                    height = 37,
-                                    width = 90,
-                                    fontSize = 16,
-                                    onClick = { chargeStarPointViewModel.consume(orderVo = it.orderVos.first()) },
-                                )
-                            } else {
-                                YellowButton(
-                                    text = "${NumberUtil.formatAsCurrency(ceil(it.price).toInt())}원",
-                                    height = 37,
-                                    width = 110,
-                                    fontSize = 16,
-                                    onClick = {
-                                        chargeStarPointViewModel.orderAndConsume(
-                                            activity = context as Activity,
-                                            productId = it.productId
-                                        )
-                                    },
-                                )
-                            }
-                        }
-                    }
-                }
+            Box(modifier = Modifier.zIndex(1f)) {
+                ChargeStarPointContent(chargeStarPointViewModel = chargeStarPointViewModel)
             }
         }
     }
@@ -212,6 +84,158 @@ internal fun ChargeStarPointView(
                     navController.popBackStack(RouterPath.Main.route, inclusive = false)
                 }
                 else -> {}
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChargeStarPointContent(
+    modifier: Modifier = Modifier,
+    chargeStarPointViewModel: ChargeStarPointViewModel,
+    context: Context = LocalContext.current
+) {
+    val productVos = chargeStarPointViewModel.productVos.collectAsState()
+    val productIndex = remember { mutableIntStateOf(0) }
+    val starPoint = chargeStarPointViewModel.starPoint.collectAsState()
+    val currentProductVo = remember {
+        derivedStateOf {
+            if (productIndex.intValue < productVos.value.size) {
+                productVos.value[productIndex.intValue]
+            } else null
+        }
+    }
+    val pageIndicatorState: PageIndicatorState = remember {
+        object : PageIndicatorState {
+            override val pageOffset: Float
+                get() = 0f
+            override val selectedPage: Int
+                get() = productIndex.intValue
+            override val pageCount: Int
+                get() = productVos.value.size
+        }
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        PageIndicator(
+            pageIndicatorState = pageIndicatorState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 5.dp)
+                .zIndex(1f),
+        )
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .zIndex(2f),
+        ) {
+            currentProductVo.value?.let {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxHeight()
+                ) {
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(0.2f)
+                    ) {
+                        StarPoint(starPoint = starPoint.value)
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(0.5f)
+                    ) {
+                        SelectButton(
+                            leftBtnDisabled = productIndex.intValue == 0,
+                            rightBtnDisabled = productIndex.intValue == productVos.value.size - 1,
+                            leftBtnClick = {
+                                productIndex.intValue = max(0, productIndex.intValue - 1)
+                            },
+                            rightBtnClick = {
+                                productIndex.intValue =
+                                    min(productIndex.intValue + 1, productVos.value.size - 1)
+                            },
+                        ) {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier.fillMaxHeight()
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = it.productName,
+                                        textAlign = TextAlign.Center,
+                                        fontFamily = DAL_MU_RI,
+                                        fontWeight = FontWeight.Light,
+                                        fontSize = 16.sp,
+                                        color = MongsWhite,
+                                        maxLines = 1,
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(15.dp))
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Image(
+                                        painter = painterResource(R.drawable.point_icon_star),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(0.3f)
+                    ) {
+                        if (it.orderVos.isNotEmpty()) {
+                            BlueButton(
+                                text = "소비",
+                                height = 37,
+                                width = 90,
+                                fontSize = 16,
+                                onClick = { chargeStarPointViewModel.consume(orderVo = it.orderVos.first()) },
+                            )
+                        } else {
+                            YellowButton(
+                                text = "${NumberUtil.formatAsCurrency(ceil(it.price).toInt())}원",
+                                height = 37,
+                                width = 110,
+                                fontSize = 16,
+                                onClick = {
+                                    chargeStarPointViewModel.orderAndConsume(
+                                        activity = context as Activity,
+                                        productId = it.productId
+                                    )
+                                },
+                            )
+                        }
+                    }
+                }
             }
         }
     }

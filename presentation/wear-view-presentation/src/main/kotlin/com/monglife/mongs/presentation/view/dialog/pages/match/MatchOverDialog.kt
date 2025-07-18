@@ -34,7 +34,6 @@ import com.mongs.wear.presentation.view.wear.R
 @Composable
 fun MatchOverDialog(
     modifier: Modifier = Modifier,
-    rewardPayPoint: Int,
     matchPlayerVo: MatchVo.MatchPlayerVo,
     winnerMatchPlayer: WinnerMatchPlayerVo,
     onMatchEndClick: () -> Unit,
@@ -99,7 +98,7 @@ fun MatchOverDialog(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Text(
-                        text = "+ $rewardPayPoint",
+                        text = "+ ${winnerMatchPlayer.rewardPayPoint}",
                         textAlign = TextAlign.Center,
                         fontFamily = DAL_MU_RI,
                         fontWeight = FontWeight.Light,
@@ -118,7 +117,7 @@ fun MatchOverDialog(
                     .weight(0.2f)
             ) {
                 BlueButton(
-                    text = "배틀종료",
+                    text = "종료",
                     width = 100,
                     onClick = onMatchEndClick
                 )

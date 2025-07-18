@@ -82,7 +82,7 @@ internal fun StepContent(
                         .weight(0.5f),
                 ) {
                     Text(
-                        text = "${currentWalkingCount.value} 걸음",
+                        text = if (currentWalkingCount.value < 0) "-" else "${currentWalkingCount.value} 걸음",
                         textAlign = TextAlign.Center,
                         fontFamily = DAL_MU_RI,
                         fontWeight = FontWeight.Light,

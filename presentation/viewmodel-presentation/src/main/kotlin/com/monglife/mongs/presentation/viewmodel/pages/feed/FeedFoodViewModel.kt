@@ -4,6 +4,7 @@ import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.mong.usecase.interaction.FeedFoodMongUseCase
 import com.monglife.mongs.application.mong.usecase.interaction.GetFoodsUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
+import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.FoodVo
 import com.monglife.mongs.application.mong.vo.MongVo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,10 +18,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 @HiltViewModel
 class FeedFoodViewModel @Inject constructor(
     private val getCurrentMongUseCase: GetCurrentMongUseCase,
+    private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val getFoodsUseCase: GetFoodsUseCase,
     private val feedFoodMongUseCase: FeedFoodMongUseCase,
 ): BaseViewModel() {
@@ -69,6 +73,12 @@ class FeedFoodViewModel @Inject constructor(
     private val _foodVos = MutableStateFlow<List<FoodVo>>(emptyList())
     val foodVos: StateFlow<List<FoodVo>> = _foodVos.asStateFlow()
 
+    private val _currentFoodVo = MutableStateFlow<FoodVo?>(null)
+    val currentFoodVo: StateFlow<FoodVo?> = _currentFoodVo.asStateFlow()
+
+    private val _foodVoIndex = MutableStateFlow(0)
+    val foodVoIndex: StateFlow<Int> = _foodVoIndex.asStateFlow()
+
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
@@ -83,13 +93,46 @@ class FeedFoodViewModel @Inject constructor(
                             mongId = it.mongId,
                         )
                     )
+
+                    if (_foodVoIndex.value in 0..< _foodVos.value.size) {
+                        _currentFoodVo.value = _foodVos.value[_foodVoIndex.value]
+                    } else {
+                        _currentFoodVo.value = null
+                    }
+
                 } ?: run {
                     _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
                 }
+
+                observeForever(observeCurrentMongUseCase(), _currentMongVo)
             }
 
             _uiState.value = UiState.Idle
+        }
+    }
+
+    fun nextFood() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _foodVoIndex.value = min(_foodVoIndex.value + 1, _foodVos.value.size - 1)
+
+            if (_foodVoIndex.value in 0..< _foodVos.value.size) {
+                _currentFoodVo.value = _foodVos.value[_foodVoIndex.value]
+            } else {
+                _currentFoodVo.value = null
+            }
+        }
+    }
+
+    fun prevFood() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _foodVoIndex.value = max(_foodVoIndex.value - 1, 0)
+
+            if (_foodVoIndex.value in 0..< _foodVos.value.size) {
+                _currentFoodVo.value = _foodVos.value[_foodVoIndex.value]
+            } else {
+                _currentFoodVo.value = null
+            }
         }
     }
 
