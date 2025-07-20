@@ -23,7 +23,38 @@ class GetCurrentMongUseCase @Inject constructor(
     @Throws(NotFoundMongException::class)
     override suspend fun execute(): MongVo? = withContext(Dispatchers.IO) {
         devicePersistencePort.getCurrentMongId()?.let {
-            managementWebPort.getMong(mongId = it).toDomain().let { mong ->
+            managementWebPort.getMong(mongId = it).let { response ->
+                // 몽 로컬 조회
+                val mong = managementPersistencePort.getMong(mongId = response.mongId)
+                    ?: managementPersistencePort.saveMong(mong = response.toDomain())
+
+                mong.let {
+                    // 몽 업데이트
+                    it.update(
+                        name = response.name,
+                        mongCode = response.mongCode,
+                        mongName = response.mongName,
+                        stateCode = response.stateCode,
+                        statusCode = response.statusCode,
+                        level = response.level,
+                        sleepAt = response.sleepAt,
+                        wakeupAt = response.wakeupAt,
+                        payPoint = response.payPoint,
+                        isSleep = response.isSleep,
+                        strengthRatio = response.strengthRatio,
+                        healthyRatio = response.healthyRatio,
+                        satietyRatio = response.satietyRatio,
+                        fatigueRatio = response.fatigueRatio,
+                        expRatio = response.expRatio,
+                        weight = response.weight,
+                        poopCount = response.poopCount,
+                        randomDrawTicketCount = response.randomDrawTicketCount,
+                        createdAt = response.createdAt,
+                        updatedAt = response.updatedAt,
+                    )
+                    // 몽 로컬 등록
+                    managementPersistencePort.saveMong(mong = it)
+                }
                 // MongVo 반환
                 val mongOption = managementPersistencePort.getMongOption(mongId = mong.mongId)
                     ?: managementPersistencePort.saveMongOption(

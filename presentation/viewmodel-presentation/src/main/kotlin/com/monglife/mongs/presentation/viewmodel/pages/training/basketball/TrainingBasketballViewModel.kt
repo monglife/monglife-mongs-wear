@@ -1,17 +1,19 @@
-package com.monglife.mongs.presentation.viewmodel.pages.training
+package com.monglife.mongs.presentation.viewmodel.pages.training.basketball
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class TrainingRunnerViewModel @Inject constructor(
+class TrainingBasketballViewModel @Inject constructor(
 
 ): BaseViewModel() {
 
@@ -26,6 +28,20 @@ class TrainingRunnerViewModel @Inject constructor(
     }
 
     /**
+     * UI 이벤트 정의
+     */
+    sealed class UiEvent {
+        data object Idle : UiEvent()
+        data class NavMenu(val message: String): UiEvent()
+    }
+
+    /**
+     * UI 이벤트 변수
+     */
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+
+    /**
      * UI 상태 변수
      */
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
@@ -34,10 +50,6 @@ class TrainingRunnerViewModel @Inject constructor(
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
-
-            withContext(Dispatchers.IO) {
-
-            }
 
             _uiState.value = UiState.Idle
         }

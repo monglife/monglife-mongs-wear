@@ -22,11 +22,9 @@ class ObserveMatchQueueUseCase @Inject constructor(
 
         val deviceId = devicePersistencePort.getDeviceId()
 
-        val matchQueueFlow = matchQueuePersistencePort.createMatchQueue(mongId = command.mongId, deviceId = deviceId).map { matchQueue ->
+        return matchQueuePersistencePort.createMatchQueue(mongId = command.mongId, deviceId = deviceId).map { matchQueue ->
             matchQueue?.let { MatchQueueVo.of(matchQueue = it) }
         }.flowOn(Dispatchers.IO)
-
-        return matchQueueFlow
     }
 
     data class Command(

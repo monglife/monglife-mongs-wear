@@ -28,9 +28,8 @@ import com.monglife.mongs.presentation.view.pages.randomDraw.RandomDrawView
 import com.monglife.mongs.presentation.view.pages.searchMap.SearchMapView
 import com.monglife.mongs.presentation.view.pages.setting.SettingView
 import com.monglife.mongs.presentation.view.pages.slotPick.SlotPickView
-import com.monglife.mongs.presentation.view.pages.training.TrainingBasketballView
 import com.monglife.mongs.presentation.view.pages.training.TrainingMenuView
-import com.monglife.mongs.presentation.view.pages.training.TrainingRunnerView
+import com.monglife.mongs.presentation.view.pages.training.TrainingPlayView
 import com.monglife.mongs.presentation.view.utils.AlwaysOnScreen
 
 @Composable
@@ -169,14 +168,12 @@ internal fun Router(
             composable(route = RouterPath.TrainingMenu.route) {
                 TrainingMenuView(navController = navController)
             }
-            composable(route = RouterPath.TrainingRunner.route) {
+            composable(route = "${RouterPath.TrainingPlay.route}/{trainingCode}") { backStackEntry ->
                 AlwaysOnScreen {
-                    TrainingRunnerView(navController = navController)
-                }
-            }
-            composable(route = RouterPath.TrainingBasketball.route) {
-                AlwaysOnScreen {
-                    TrainingBasketballView(navController = navController)
+                    TrainingPlayView(
+                        navController = navController,
+                        trainingCode = backStackEntry.arguments?.getString("trainingCode"),
+                    )
                 }
             }
         }

@@ -29,7 +29,6 @@ import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.monglife.mongs.presentation.view.component.common.textbox.InputTextBox
 
-
 @Composable
 internal fun CreateFeedbackDialog(
     modifier: Modifier = Modifier,
@@ -103,14 +102,14 @@ internal fun CreateFeedbackDialog(
                     .weight(0.35f)
             ) {
                 BlueButton(
-                    text = "닫기",
+                    text = "취소",
                     onClick = cancel,
                 )
 
                 Spacer(modifier = Modifier.width(10.dp))
 
                 BlueButton(
-                    text = "확인",
+                    text = "전송",
                     disable = content.isEmpty(),
                     onClick = confirm,
                 )

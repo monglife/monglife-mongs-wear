@@ -7,65 +7,64 @@ sealed class RouterPath(
     val route: String
 ) {
     // Parent
-    data object Root: RouterPath("Root")
+    data object Root: RouterPath("root")
 
     // Battle
-    data object BattleNested: RouterPath("BattleNested")
-    data object BattleMenu: RouterPath("BattleMenu")
-    data object BattleMatch: RouterPath("BattleMatch")
+    data object BattleNested: RouterPath("battle")
+    data object BattleMenu: RouterPath("battle/menu")
+    data object BattleMatch: RouterPath("battle/match")
 
     // Charge
-    data object ChargeNested: RouterPath("ChargeNested")
-    data object ChargeStarPoint: RouterPath("ChargeStarPoint")
+    data object ChargeNested: RouterPath("charge")
+    data object ChargeStarPoint: RouterPath("charge/starPoint")
 
     // Collection
-    data object CollectionNested: RouterPath("CollectionNested")
-    data object CollectionMenu: RouterPath("CollectionMenu")
-    data object CollectionMap: RouterPath("CollectionMap")
-    data object CollectionMong: RouterPath("CollectionMong")
+    data object CollectionNested: RouterPath("collection")
+    data object CollectionMenu: RouterPath("collection/menu")
+    data object CollectionMap: RouterPath("collection/map")
+    data object CollectionMong: RouterPath("collection/mong")
 
     // Exchange
-    data object ExchangeNested: RouterPath("ExchangeNested")
-    data object ExchangeMenu: RouterPath("ExchangeMenu")
-    data object ExchangeStep: RouterPath("ExchangeStep")
-    data object ExchangeStarPoint: RouterPath("ExchangeStarPoint")
+    data object ExchangeNested: RouterPath("exchange")
+    data object ExchangeMenu: RouterPath("exchange/menu")
+    data object ExchangeStep: RouterPath("exchange/step")
+    data object ExchangeStarPoint: RouterPath("exchange/starPoint")
 
     // Feed
-    data object FeedNested: RouterPath("FeedNested")
-    data object FeedMenu: RouterPath("FeedMenu")
-    data object FeedFood: RouterPath("FeedFood")
-    data object FeedSnack: RouterPath("FeedSnack")
+    data object FeedNested: RouterPath("feed")
+    data object FeedMenu: RouterPath("feed/menu")
+    data object FeedFood: RouterPath("feed/food")
+    data object FeedSnack: RouterPath("feed/snack")
 
     // Feedback
-    data object Feedback: RouterPath("Feedback")
+    data object Feedback: RouterPath("feedback")
 
     // Help
-    data object Help: RouterPath("Help")
+    data object Help: RouterPath("help")
 
     // Inventory
-    data object Inventory: RouterPath("Inventory")
+    data object Inventory: RouterPath("inventory")
 
     // Main
-    data object Main: RouterPath("Main")
+    data object Main: RouterPath("main")
 
     // Notice
-    data object Notice: RouterPath("Notice")
+    data object Notice: RouterPath("notice")
 
     // RandomDraw
-    data object RandomDraw: RouterPath("RandomDraw")
+    data object RandomDraw: RouterPath("randomDraw")
 
     // SearchMap
-    data object SearchMap: RouterPath("SearchMap")
+    data object SearchMap: RouterPath("searchMap")
 
     // Setting
-    data object Setting: RouterPath("Setting")
+    data object Setting: RouterPath("setting")
 
     // SlotPick
-    data object SlotPick: RouterPath("SlotPick")
+    data object SlotPick: RouterPath("slotPick")
 
     // Training
-    data object TrainingNested: RouterPath("TrainingNested")
-    data object TrainingMenu: RouterPath("TrainingMenu")
-    data object TrainingRunner: RouterPath("TrainingRunner")
-    data object TrainingBasketball: RouterPath("TrainingBasketball")
+    data object TrainingNested: RouterPath("training")
+    data object TrainingMenu: RouterPath("training/menu")
+    data object TrainingPlay: RouterPath("training/play")
 }

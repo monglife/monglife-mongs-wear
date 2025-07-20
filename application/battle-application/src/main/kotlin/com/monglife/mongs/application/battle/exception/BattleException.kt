@@ -1,8 +1,8 @@
 package com.monglife.mongs.application.battle.exception
 
-import com.monglife.mongs.application.battle.error.BattleErrorCode
 import com.monglife.core.common.error.ErrorCode
 import com.monglife.core.common.exception.ErrorException
+import com.monglife.mongs.application.battle.error.BattleErrorCode
 
 /**
  * 매치 큐 등록 실패 예외
@@ -37,22 +37,6 @@ class NotFoundWinnerMatchPlayerException(
 ) : ErrorException(code = code, message = message)
 
 /**
- * 매치 조회 실패 예외
- */
-class NotFoundMatchException(
-    override val code: ErrorCode = BattleErrorCode.NOT_FOUND_MATCH,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- * 매치 플레이어 조회 실패 예외
- */
-class NotFoundMatchPlayerException(
-    override val code: ErrorCode = BattleErrorCode.NOT_FOUND_MATCH_PLAYER,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
  * 매치 입장 이벤트 전송 실패 예외
  */
 class InvalidPublishMatchEnterException(
@@ -73,45 +57,5 @@ class InvalidPublishMatchExitException(
  */
 class InvalidPublishMatchPickException(
     override val code: ErrorCode = BattleErrorCode.INVALID_PUBLISH_MATCH_PICK,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- * 매치 구독 실패 예외
- */
-class InvalidSubscribeMatchException(
-    override val code: ErrorCode = BattleErrorCode.INVALID_SUBSCRIBE_MATCH,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- * 매치 구독 해제 실패 예외
- */
-class InvalidDisSubscribeMatchException(
-    override val code: ErrorCode = BattleErrorCode.INVALID_DIS_SUBSCRIBE_MATCH,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- * 매치 큐 구독 실패 예외
- */
-class InvalidSubscribeQueueException(
-    override val code: ErrorCode = BattleErrorCode.INVALID_SUBSCRIBE_QUEUE,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- * 매치 큐 구독 해제 실패 예외
- */
-class InvalidDisSubscribeQueueException(
-    override val code: ErrorCode = BattleErrorCode.INVALID_DIS_SUBSCRIBE_QUEUE,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
- * 매치 큐 매칭 실패 예외
- */
-class InvalidQueueMatchingException(
-    override val code: ErrorCode = BattleErrorCode.INVALID_MATCHING,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)
