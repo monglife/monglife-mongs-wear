@@ -57,13 +57,13 @@ internal fun TrainingRunnerContent(
 
                         trainingTypeVo.value?.let { trainingTypeVo ->
                             currentMongVo.value?.let { currentMongVo ->
-                                LaunchedEffect(it.score, it.timeMillis) {
-                                    if (it.score >= trainingTypeVo.score || it.timeMillis >= trainingTypeVo.timeout * 1000L) {
+                                LaunchedEffect(it.isProcess, it.score, it.timeMillis) {
+                                    if (!it.isProcess || it.score >= trainingTypeVo.score || it.timeMillis >= trainingTypeVo.timeout * 1000L) {
                                         trainingRunnerViewModel.stop()
                                     }
                                 }
 
-                                LaunchedEffect(it.isProcess, uiState.value) {
+                                LaunchedEffect(uiState.value) {
                                     if (!it.isProcess && uiState.value.stopSection) {
                                         trainingRunnerViewModel.end(
                                             mongId = currentMongVo.mongId,

@@ -3,6 +3,7 @@ package com.monglife.mongs.presentation.view.pages.training
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -62,13 +63,13 @@ internal fun TrainingBasketballContent(
 
                         trainingTypeVo.value?.let { trainingTypeVo ->
                             currentMongVo.value?.let { currentMongVo ->
-                                LaunchedEffect(it.score, it.timeMillis) {
-                                    if (it.score >= trainingTypeVo.score || it.timeMillis >= trainingTypeVo.timeout * 1000L) {
+                                LaunchedEffect(it.isProcess, it.score, it.timeMillis) {
+                                    if (!it.isProcess || it.score >= trainingTypeVo.score || it.timeMillis >= trainingTypeVo.timeout * 1000L) {
                                         trainingBasketballViewModel.stop()
                                     }
                                 }
 
-                                LaunchedEffect(it.isProcess, uiState.value) {
+                                LaunchedEffect(uiState.value) {
                                     if (!it.isProcess && uiState.value.stopSection) {
                                         trainingBasketballViewModel.end(
                                             mongId = currentMongVo.mongId,
