@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.view.component.pages.training
+package com.monglife.mongs.presentation.view.component.pages.training.runner
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.monglife.mongs.presentation.view.assets.MongResourceCode
 
 @Composable
-internal fun TrainingPlayer(
+internal fun Player(
     modifier: Modifier = Modifier,
     mongCode: String,
     height: Int,

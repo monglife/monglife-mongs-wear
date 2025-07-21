@@ -60,7 +60,7 @@ internal fun SettingView(
             Box(modifier = Modifier.zIndex(2f)) {
                 if (uiState.value.logoutConfirmDialogOpen) {
                     ConfirmAndCancelDialog(
-                        text = "로그아웃하시겠습니까?",
+                        text = "로그아웃\n하시겠습니까?",
                         confirm = settingViewModel::logout,
                         cancel = settingViewModel::logoutConfirmDialogClose
                     )

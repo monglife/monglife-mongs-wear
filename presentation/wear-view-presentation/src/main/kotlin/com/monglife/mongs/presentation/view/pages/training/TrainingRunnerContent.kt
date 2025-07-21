@@ -1,114 +1,126 @@
 package com.monglife.mongs.presentation.view.pages.training
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.monglife.mongs.presentation.view.component.pages.training.Hurdle
-import com.monglife.mongs.presentation.view.component.pages.training.TrainingPlayer
+import androidx.navigation.NavController
+import com.monglife.mongs.presentation.view.assets.RouterPath
+import com.monglife.mongs.presentation.view.component.common.background.TrainingBackground
+import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
+import com.monglife.mongs.presentation.view.component.pages.training.runner.section.RunnerScoreSection
+import com.monglife.mongs.presentation.view.component.pages.training.runner.section.RunnerSection
+import com.monglife.mongs.presentation.view.component.pages.training.runner.section.RunnerTimerSection
+import com.monglife.mongs.presentation.view.dialog.pages.training.TrainingEnteringDialog
+import com.monglife.mongs.presentation.view.dialog.pages.training.TrainingOverDialog
 import com.monglife.mongs.presentation.viewmodel.pages.training.runner.TrainingRunnerViewModel
-import com.mongs.wear.presentation.view.wear.R
 
 @Composable
 internal fun TrainingRunnerContent(
-    modifier: Modifier = Modifier,
+    trainingCode: String?,
+    navController: NavController,
     trainingRunnerViewModel: TrainingRunnerViewModel = hiltViewModel(),
+    context: Context = LocalContext.current,
 ) {
+    val uiState = trainingRunnerViewModel.uiState.collectAsState()
     val currentMongVo = trainingRunnerViewModel.currentMongVo.collectAsState()
-    val trainingPlayerVo = trainingRunnerViewModel.trainingPlayerVo.collectAsState()
-    val hurdleVos = trainingRunnerViewModel.hurdleVos.collectAsState()
+    val runnerVo = trainingRunnerViewModel.runnerVo.collectAsState()
+    val trainingTypeVo = trainingRunnerViewModel.trainingTypeVo.collectAsState()
+    val trainingEndVo = trainingRunnerViewModel.trainingEndVo.collectAsState()
 
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = { trainingRunnerViewModel.trainingPlayerJump() },
-            ),
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Bottom,
-            modifier = Modifier.fillMaxHeight()
-        ) {
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.72f)
-            ) {
-                Box(
-                    contentAlignment = Alignment.BottomStart,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Box(
-                        modifier = Modifier.zIndex(1f)
-                    ) {
-                        hurdleVos.value.forEachIndexed { index, hurdle ->
-                            Hurdle(
-                                image = R.drawable.icon_poop,
-                                height = hurdle.height,
-                                width = hurdle.width,
-                                modifier = Modifier
-                                    .zIndex(-index.toFloat())
-                                    .offset {
-                                        IntOffset(
-                                            y = (hurdle.py).dp.roundToPx(),
-                                            x = (hurdle.px).dp.roundToPx(),
+    Box {
+        if (uiState.value.loadingBar) {
+            LoadingBar()
+        } else {
+            runnerVo.value?.let {
+                Box(modifier = Modifier.zIndex(0f)) {
+                    TrainingBackground(isMoving = uiState.value.playSection && it.isProcess)
+                }
+
+                Box(modifier = Modifier.zIndex(1f)) {
+                    if (uiState.value.playSection) {
+                        RunnerScoreSection(
+                            modifier = Modifier.zIndex(1f),
+                            trainingRunnerViewModel = trainingRunnerViewModel
+                        )
+
+                        RunnerTimerSection(
+                            modifier = Modifier.zIndex(2f),
+                            trainingRunnerViewModel = trainingRunnerViewModel
+                        )
+
+                        trainingTypeVo.value?.let { trainingTypeVo ->
+                            currentMongVo.value?.let { currentMongVo ->
+                                LaunchedEffect(it.score, it.timeMillis) {
+                                    if (it.score >= trainingTypeVo.score || it.timeMillis >= trainingTypeVo.timeout * 1000L) {
+                                        trainingRunnerViewModel.stop()
+                                    }
+                                }
+
+                                LaunchedEffect(it.isProcess, uiState.value) {
+                                    if (!it.isProcess && uiState.value.stopSection) {
+                                        trainingRunnerViewModel.end(
+                                            mongId = currentMongVo.mongId,
+                                            trainingCode = trainingTypeVo.trainingCode,
+                                            score = it.score,
                                         )
                                     }
-                            )
+                                }
+                            }
                         }
                     }
+                }
 
-                    Box(
-                        modifier = Modifier.zIndex(2f)
-                    ) {
-                        currentMongVo.value?.let {
-                            trainingPlayerVo.value?.let { trainingPlayerVo ->
-                                TrainingPlayer(
-                                    mongCode = it.mongCode,
-                                    height = trainingPlayerVo.height,
-                                    width = trainingPlayerVo.width,
-                                    modifier = Modifier
-                                        .zIndex(1f)
-                                        .offset {
-                                            IntOffset(
-                                                y = (trainingPlayerVo.py).dp.roundToPx(),
-                                                x = (trainingPlayerVo.px).dp.roundToPx(),
-                                            )
-                                        }
+                Box(modifier = Modifier.zIndex(2f)) {
+                    if (uiState.value.playSection) {
+                        RunnerSection(trainingRunnerViewModel = trainingRunnerViewModel)
+                    }
+                }
+
+                Box(modifier = Modifier.zIndex(3f)) {
+                    trainingTypeVo.value?.let { trainingTypeVo ->
+                        if (uiState.value.enteringDialog) {
+                            TrainingEnteringDialog(
+                                trainingTypeVo = trainingTypeVo,
+                                onClick = trainingRunnerViewModel::start
+                            )
+                        } else if (uiState.value.endDialog) {
+                            trainingEndVo.value?.let { trainingEndVo ->
+                                TrainingOverDialog(
+                                    isSuccess = trainingEndVo.isSuccess,
+                                    rewardPayPoint = trainingEndVo.rewardPayPoint,
+                                    onTrainingEndClick = trainingRunnerViewModel::exit,
                                 )
                             }
                         }
                     }
                 }
             }
+        }
+    }
 
-            Row(
-                horizontalArrangement = Arrangement.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.28f)
-            ) {
-                Spacer(modifier = Modifier)
+    LaunchedEffect(Unit) {
+        trainingRunnerViewModel.enter(trainingCode = trainingCode)
+    }
+
+    // UI 이벤트 소비
+    LaunchedEffect(Unit) {
+        trainingRunnerViewModel.uiEvent.collect { event ->
+            when (event) {
+                is TrainingRunnerViewModel.UiEvent.NavMenu -> {
+                    if (event.message.isNotBlank()) {
+                        Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    }
+                    navController.popBackStack(RouterPath.TrainingMenu.route, inclusive = false)
+                }
+
+                else -> {}
             }
         }
     }

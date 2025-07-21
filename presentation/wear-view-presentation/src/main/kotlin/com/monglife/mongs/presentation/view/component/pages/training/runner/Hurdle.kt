@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.view.component.pages.training
+package com.monglife.mongs.presentation.view.component.pages.training.runner
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box

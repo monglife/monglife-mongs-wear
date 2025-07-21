@@ -6,14 +6,14 @@ data class RunnerPlayer(
     val height: Int,
     val width: Int,
     private val gravity: Float,
-    private val startY: Float,
-    private val startX: Float,
-    private val startSpeed: Float,
-    private val startFrame: Float,
-    var py: Float = startY,
-    var px: Float = startX,
-    var speed: Float = startSpeed,
-    var frame: Float = startFrame,
+    private val initY: Float,
+    private val initX: Float,
+    private val initSpeed: Float,
+    private val initFrame: Float,
+    var py: Float = initY,
+    var px: Float = initX,
+    private var speed: Float = initSpeed,
+    private var frame: Float = initFrame,
     var isJump: Boolean = false,
 ) {
 
@@ -27,10 +27,10 @@ data class RunnerPlayer(
 
             // 좌표 변경
             val nextPy = this.py - this.speed * this.frame
-            this.py = min(nextPy, this.startY)
+            this.py = min(nextPy, this.initY)
 
             // 지면 도착 여부 확인
-            if (this.py == this.startY) {
+            if (this.py == this.initY) {
                 this.isJump = false
                 this.speed = 0f
                 this.frame = 0f
@@ -44,10 +44,9 @@ data class RunnerPlayer(
     fun jump() {
         if (!isJump) {
             this.isJump = true
-            this.py = this.startY
-            this.speed = this.startSpeed
-            this.frame = this.startFrame
+            this.py = this.initY
+            this.speed = this.initSpeed
+            this.frame = this.initFrame
         }
-
     }
 }

@@ -59,7 +59,7 @@ internal fun ConfirmDialog(
             }
 
             Row(
-                verticalAlignment = Alignment.Bottom,
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()

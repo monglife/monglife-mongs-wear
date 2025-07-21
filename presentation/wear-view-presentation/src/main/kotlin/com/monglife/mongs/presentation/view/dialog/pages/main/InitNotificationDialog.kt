@@ -56,14 +56,14 @@ internal fun InitNotificationDialog(
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
-                    .weight(0.35f)
+                    .weight(0.3f)
             ) {
                 Image(
                     painter = painterResource(R.drawable.btn_icon_notice),
                     contentDescription = null,
                     modifier = Modifier
-                        .height(35.dp)
-                        .width(35.dp),
+                        .height(30.dp)
+                        .width(30.dp),
                     contentScale = ContentScale.FillBounds,
                 )
             }
@@ -100,32 +100,32 @@ internal fun InitNotificationDialog(
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
-                    .weight(0.125f)
+                    .weight(0.15f)
             ) {
                 BlueButton(
                     text = "그만보기",
                     width = 78,
-                    height = 34,
+                    height = 44,
                     onClick = onCloseForeverClick,
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(7.dp))
 
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
-                    .weight(0.125f)
+                    .weight(0.15f)
             ) {
                 BlueButton(
                     text = "닫기",
                     width = 78,
-                    height = 34,
+                    height = 44,
                     onClick = onCloseClick,
                 )
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(15.dp))
         }
     }
 }

@@ -3,11 +3,9 @@ package com.monglife.mongs.presentation.view.pages.training
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.zIndex
@@ -38,7 +36,11 @@ internal fun TrainingPlayView(
             }
         } else {
             Box(modifier = Modifier.zIndex(1f)) {
-                TrainingPlayContent(trainingPlayViewModel = trainingPlayViewModel)
+                if (uiState.value.runnerContent) {
+                    TrainingRunnerContent(trainingCode = trainingCode, navController = navController)
+                } else if (uiState.value.basketballContent) {
+                    TrainingBasketballContent(trainingCode = trainingCode, navController = navController)
+                }
             }
         }
     }
@@ -51,27 +53,9 @@ internal fun TrainingPlayView(
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                     navController.popBackStack(RouterPath.TrainingMenu.route, inclusive = false)
                 }
+
                 else -> {}
             }
-        }
-    }
-}
-
-@Composable
-private fun TrainingPlayContent(
-    modifier: Modifier = Modifier,
-    trainingPlayViewModel: TrainingPlayViewModel,
-) {
-    val uiState = trainingPlayViewModel.uiState.collectAsState()
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize(),
-    ) {
-        if (uiState.value.runnerContent) {
-            TrainingRunnerContent()
-        } else if (uiState.value.basketballContent) {
-            TrainingBasketballContent()
         }
     }
 }

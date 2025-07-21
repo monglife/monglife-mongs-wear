@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.view.dialog.pages.match
+package com.monglife.mongs.presentation.view.dialog.pages.training
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,19 +24,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.wear.compose.material.Text
-import com.monglife.mongs.application.battle.vo.MatchVo
-import com.monglife.mongs.application.battle.vo.WinnerMatchPlayerVo
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
 import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-fun MatchOverDialog(
+fun TrainingOverDialog(
     modifier: Modifier = Modifier,
-    matchPlayerVo: MatchVo.MatchPlayerVo,
-    winnerMatchPlayer: WinnerMatchPlayerVo,
-    onMatchEndClick: () -> Unit,
+    isSuccess: Boolean,
+    rewardPayPoint: Int,
+    onTrainingEndClick: () -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -57,14 +55,17 @@ fun MatchOverDialog(
             ) {
                 Image(
                     painter = painterResource(
-                        if (matchPlayerVo.playerId == winnerMatchPlayer.playerId) R.drawable.txt_win
-                        else R.drawable.txt_lose
+                        if (isSuccess) R.drawable.txt_success
+                        else R.drawable.txt_fail
                     ),
                     contentDescription = null,
                     modifier = Modifier
                         .zIndex(2f)
                         .height(35.dp)
-                        .width(90.dp),
+                        .width(
+                            if (isSuccess) 110.dp
+                            else 90.dp
+                        ),
                     contentScale = ContentScale.FillBounds
                 )
             }
@@ -89,7 +90,7 @@ fun MatchOverDialog(
 
                 Text(
                     text = "+ ${
-                        if (matchPlayerVo.playerId == winnerMatchPlayer.playerId) winnerMatchPlayer.rewardPayPoint
+                        if (isSuccess) rewardPayPoint
                         else 0
                     }",
                     textAlign = TextAlign.Center,
@@ -111,7 +112,7 @@ fun MatchOverDialog(
                 BlueButton(
                     text = "종료",
                     width = 80,
-                    onClick = onMatchEndClick
+                    onClick = onTrainingEndClick
                 )
             }
 
