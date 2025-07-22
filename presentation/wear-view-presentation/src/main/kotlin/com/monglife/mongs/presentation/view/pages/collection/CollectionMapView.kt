@@ -111,7 +111,22 @@ private fun CollectionMapContent(
                         )) {
                             val collectionMapVo = collectionMapVos.value[index - 1]
 
-                            if (!collectionMapVo.isIncluded) {
+                            if (collectionMapVo.isIncluded || collectionMapVo.code == MapResourceCode.MP000.name) {
+                                CircleImageButton(
+                                    icon = MapResourceCode.getResource(collectionMapVo.code).code,
+                                    border = R.drawable.btn_border_purple_dark,
+                                    onClick = {
+                                        collectionMapViewModel.collectionMapDetailDialogOpen(
+                                            collectionMapVo = collectionMapVo
+                                        )
+                                    },
+                                    modifier = Modifier
+                                        .offset(
+                                            y = if (index % 3 == 2) (-27).dp else 0.dp,
+                                            x = 0.dp
+                                        )
+                                )
+                            } else {
                                 CircleTextButton(
                                     text = "?",
                                     border = R.drawable.btn_border_purple_dark,
@@ -121,21 +136,6 @@ private fun CollectionMapContent(
                                             "수집하지 않은 맵",
                                             Toast.LENGTH_SHORT,
                                         ).show()
-                                    },
-                                    modifier = Modifier
-                                        .offset(
-                                            y = if (index % 3 == 2) (-27).dp else 0.dp,
-                                            x = 0.dp
-                                        )
-                                )
-                            } else {
-                                CircleImageButton(
-                                    icon = MapResourceCode.getResource(collectionMapVo.code).code,
-                                    border = R.drawable.btn_border_purple_dark,
-                                    onClick = {
-                                        collectionMapViewModel.collectionMapDetailDialogOpen(
-                                            collectionMapVo = collectionMapVo
-                                        )
                                     },
                                     modifier = Modifier
                                         .offset(

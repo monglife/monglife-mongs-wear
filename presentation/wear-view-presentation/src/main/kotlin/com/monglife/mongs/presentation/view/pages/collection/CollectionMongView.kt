@@ -96,7 +96,22 @@ private fun CollectionMongContent(
                         )) {
                             val collectionMongVo = collectionMongVos.value[index - 1]
 
-                            if (!collectionMongVo.isIncluded) {
+                            if (collectionMongVo.isIncluded) {
+                                CircleImageButton(
+                                    icon = MongResourceCode.getResource(collectionMongVo.code).pngCode,
+                                    border = R.drawable.btn_border_purple_dark,
+                                    onClick = {
+                                        collectionMongViewModel.collectionMongDetailDialogOpen(
+                                            collectionMongVo = collectionMongVo
+                                        )
+                                    },
+                                    modifier = Modifier
+                                        .offset(
+                                            y = if (index % 3 == 2) (-27).dp else 0.dp,
+                                            x = 0.dp
+                                        )
+                                )
+                            } else {
                                 CircleTextButton(
                                     text = "?",
                                     border = R.drawable.btn_border_purple_dark,
@@ -106,21 +121,6 @@ private fun CollectionMongContent(
                                             "수집하지 않은 몽",
                                             Toast.LENGTH_SHORT,
                                         ).show()
-                                    },
-                                    modifier = Modifier
-                                        .offset(
-                                            y = if (index % 3 == 2) (-27).dp else 0.dp,
-                                            x = 0.dp
-                                        )
-                                )
-                            } else {
-                                CircleImageButton(
-                                    icon = MongResourceCode.getResource(collectionMongVo.code).pngCode,
-                                    border = R.drawable.btn_border_purple_dark,
-                                    onClick = {
-                                        collectionMongViewModel.collectionMongDetailDialogOpen(
-                                            collectionMongVo = collectionMongVo
-                                        )
                                     },
                                     modifier = Modifier
                                         .offset(

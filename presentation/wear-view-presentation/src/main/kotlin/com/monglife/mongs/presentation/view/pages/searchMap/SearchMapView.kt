@@ -130,24 +130,24 @@ private fun SearchMapContent(
         ) {
             Spacer(modifier = Modifier.height(15.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(if (uiState.value.searchLoading) 0.7f else 0.2f)
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.point_icon_pay),   // TODO: 이미지 변경
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(currentSize.value.dp)
-                        .rotate(degrees = rotation.value),
-                    contentScale = ContentScale.FillBounds,
-                )
-            }
-
             if (uiState.value.searchLoading) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.7f)
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.icon_search),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(currentSize.value.dp)
+                            .rotate(degrees = rotation.value),
+                        contentScale = ContentScale.FillBounds,
+                    )
+                }
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
@@ -166,6 +166,20 @@ private fun SearchMapContent(
                     )
                 }
             } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.2f)
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.icon_search),
+                        contentDescription = null,
+                        modifier = Modifier.size(SEARCH_MIN_SIZE.dp),
+                        contentScale = ContentScale.FillBounds,
+                    )
+                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,

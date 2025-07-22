@@ -29,16 +29,16 @@ class BasketballEngine @Inject constructor() {
         ballInitRadius: Float,
         basketHeight: Float,
         basketWidth: Float,
-        basketInitY: Float,
-        basketInitX: Float,
+        basketTopInitY: Float,
+        basketTopInitX: Float,
         ratio: Float,
     ): BasketballVo {
 
         val basket = Basket(
             height = basketHeight * ratio,
             width = basketWidth * ratio,
-            initY = basketInitY,
-            initX = basketInitX,
+            topInitY = basketTopInitY,
+            topInitX = basketTopInitX,
         )
         val ball = Ball(
             gravity = GRAVITY,

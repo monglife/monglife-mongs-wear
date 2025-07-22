@@ -121,8 +121,8 @@ internal fun TrainingBasketballContent(
             trainingCode = trainingCode,
             ballInitY = windowInfo.containerSize.height.toFloat() * 0.85f,
             ballInitX = windowInfo.containerSize.width.toFloat() * 0.5f,
-            basketInitY = windowInfo.containerSize.height.toFloat() * 0.35f,
-            basketInitX = windowInfo.containerSize.width.toFloat() * 0.5f,
+            basketTopInitY = windowInfo.containerSize.height.toFloat() * 0.35f,
+            basketTopInitX = windowInfo.containerSize.width.toFloat() * 0.5f,
         )
     }
 

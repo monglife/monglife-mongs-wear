@@ -112,8 +112,8 @@ class TrainingBasketballViewModel @Inject constructor(
         trainingCode: String?,
         ballInitY: Float,
         ballInitX: Float,
-        basketInitY: Float,
-        basketInitX: Float,
+        basketTopInitY: Float,
+        basketTopInitX: Float,
     ) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
 
@@ -134,10 +134,10 @@ class TrainingBasketballViewModel @Inject constructor(
                     ballInitRadius = 50f,
                     ballInitY = ballInitY,
                     ballInitX = ballInitX,
-                    basketHeight = 31.5f,
-                    basketWidth = 180f,
-                    basketInitY = basketInitY,
-                    basketInitX = basketInitX,
+                    basketHeight = 32f,
+                    basketWidth = 190f,
+                    basketTopInitY = basketTopInitY,
+                    basketTopInitX = basketTopInitX,
                     ratio = 0.6f
                 )
             }
