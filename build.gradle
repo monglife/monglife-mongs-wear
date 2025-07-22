@@ -6,7 +6,6 @@ buildscript {
         kotlinVersion           = "2.1.21"
         kspVersion              = "2.1.21-2.0.1"
         hiltVersion             = "2.54"
-//        hiltWorkerVersion       = "1.2.0"
         hiltWorkerVersion       = "1.3.0-alpha01"
         workerVersion           = "2.10.2"
         lifecycleVersion        = "2.9.1"

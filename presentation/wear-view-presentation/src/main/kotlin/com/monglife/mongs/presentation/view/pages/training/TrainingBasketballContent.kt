@@ -3,7 +3,6 @@ package com.monglife.mongs.presentation.view.pages.training
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -60,26 +59,6 @@ internal fun TrainingBasketballContent(
                             modifier = Modifier.zIndex(2f),
                             trainingBasketballViewModel = trainingBasketballViewModel
                         )
-
-                        trainingTypeVo.value?.let { trainingTypeVo ->
-                            currentMongVo.value?.let { currentMongVo ->
-                                LaunchedEffect(it.isProcess, it.score, it.timeMillis) {
-                                    if (!it.isProcess || it.score >= trainingTypeVo.score || it.timeMillis >= trainingTypeVo.timeout * 1000L) {
-                                        trainingBasketballViewModel.stop()
-                                    }
-                                }
-
-                                LaunchedEffect(uiState.value) {
-                                    if (!it.isProcess && uiState.value.stopSection) {
-                                        trainingBasketballViewModel.end(
-                                            mongId = currentMongVo.mongId,
-                                            trainingCode = trainingTypeVo.trainingCode,
-                                            score = it.score,
-                                        )
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
 
@@ -105,6 +84,38 @@ internal fun TrainingBasketballContent(
                                 )
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(basketballVo.value) {
+        basketballVo.value?.let {
+            trainingTypeVo.value?.let { trainingTypeVo ->
+                if (uiState.value.playSection) {
+                    if (
+                        !it.isProcess ||
+                        it.score >= trainingTypeVo.score ||
+                        it.timeMillis >= trainingTypeVo.timeout * 1000L
+                    ) {
+                        trainingBasketballViewModel.stop()
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(uiState.value) {
+        if (uiState.value.stopSection) {
+            basketballVo.value?.let {
+                trainingTypeVo.value?.let { trainingTypeVo ->
+                    currentMongVo.value?.let { currentMongVo ->
+                        trainingBasketballViewModel.end(
+                            mongId = currentMongVo.mongId,
+                            trainingCode = trainingTypeVo.trainingCode,
+                            score = it.score,
+                        )
                     }
                 }
             }

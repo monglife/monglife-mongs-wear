@@ -163,21 +163,28 @@ class TrainingBasketballViewModel @Inject constructor(
     }
 
     /**
-     * 종료
+     * 정지
      */
     fun stop() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
 
-            _basketballVo.value?.let {
-                basketballEngine.stop(basketballId = it.basketballId)
-            }
+            if (_uiState.value == UiState.Stop) return@launch
 
-            delay(END_DELAY)
+            withContext(Dispatchers.IO) {
+                _basketballVo.value?.let {
+                    basketballEngine.stop(basketballId = it.basketballId)
+                }
+
+                delay(END_DELAY)
+            }
 
             _uiState.value = UiState.Stop
         }
     }
 
+    /**
+     * 종료
+     */
     fun end(mongId: Long, trainingCode: String, score: Int) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading

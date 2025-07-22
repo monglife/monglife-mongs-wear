@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.view.dialog.pages.match
+package com.monglife.mongs.presentation.view.dialog.pages.battle
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

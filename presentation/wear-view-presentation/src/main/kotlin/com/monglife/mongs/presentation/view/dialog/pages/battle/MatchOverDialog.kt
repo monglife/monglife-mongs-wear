@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.view.dialog.pages.match
+package com.monglife.mongs.presentation.view.dialog.pages.battle
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,7 +36,7 @@ fun MatchOverDialog(
     modifier: Modifier = Modifier,
     matchPlayerVo: MatchVo.MatchPlayerVo,
     winnerMatchPlayer: WinnerMatchPlayerVo,
-    onMatchEndClick: () -> Unit,
+    onEndClick: () -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -111,7 +111,7 @@ fun MatchOverDialog(
                 BlueButton(
                     text = "종료",
                     width = 80,
-                    onClick = onMatchEndClick
+                    onClick = onEndClick
                 )
             }
 

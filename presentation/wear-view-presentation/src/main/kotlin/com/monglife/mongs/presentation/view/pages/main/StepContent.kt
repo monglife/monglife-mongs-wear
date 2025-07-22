@@ -29,7 +29,7 @@ import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
-import com.monglife.mongs.presentation.view.component.common.textbox.PayPoint
+import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
 import com.monglife.mongs.presentation.view.dialog.common.PermissionDialog
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainPagerViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainStepViewModel
@@ -71,7 +71,7 @@ internal fun StepContent(
                         .weight(0.2f),
                 ) {
                     currentMongVo.value?.let {
-                        PayPoint(payPoint = currentMongVo.value?.payPoint ?: 0)
+                        PayPointBox(payPoint = currentMongVo.value?.payPoint ?: 0)
                     }
                 }
                 Row(

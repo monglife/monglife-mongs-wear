@@ -155,21 +155,29 @@ class TrainingRunnerViewModel @Inject constructor(
     }
 
     /**
-     * 종료
+     * 정지
      */
     fun stop() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
 
-            _runnerVo.value?.let {
-                runnerEngine.stop(runnerId = it.runnerId)
+            if (_uiState.value == UiState.Stop) return@launch
+
+            withContext(Dispatchers.IO) {
+                _runnerVo.value?.let {
+                    runnerEngine.stop(runnerId = it.runnerId)
+                }
+
+                delay(END_DELAY)
             }
 
-            delay(END_DELAY)
 
             _uiState.value = UiState.Stop
         }
     }
 
+    /**
+     * 종료
+     */
     fun end(mongId: Long, trainingCode: String, score: Int) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading

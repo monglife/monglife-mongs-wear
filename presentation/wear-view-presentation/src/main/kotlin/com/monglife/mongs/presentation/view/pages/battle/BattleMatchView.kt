@@ -35,11 +35,11 @@ import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.background.BattleBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
-import com.monglife.mongs.presentation.view.component.pages.match.HpBar
-import com.monglife.mongs.presentation.view.component.pages.match.MatchPlayer
-import com.monglife.mongs.presentation.view.component.pages.match.PickLoadingBar
-import com.monglife.mongs.presentation.view.dialog.pages.match.MatchOverDialog
-import com.monglife.mongs.presentation.view.dialog.pages.match.MatchPickDialog
+import com.monglife.mongs.presentation.view.component.pages.battle.HpBar
+import com.monglife.mongs.presentation.view.component.pages.battle.MatchPlayer
+import com.monglife.mongs.presentation.view.component.pages.battle.PickLoadingBar
+import com.monglife.mongs.presentation.view.dialog.pages.battle.MatchOverDialog
+import com.monglife.mongs.presentation.view.dialog.pages.battle.MatchPickDialog
 import com.monglife.mongs.presentation.viewmodel.pages.battle.BattleMatchViewModel
 import com.mongs.wear.presentation.view.wear.R
 
@@ -119,7 +119,7 @@ internal fun BattleMatchView(
                                     MatchOverDialog(
                                         matchPlayerVo = matchPlayerVo,
                                         winnerMatchPlayer = winMatchPlayerVo,
-                                        onMatchEndClick = battleMatchViewModel::exit,
+                                        onEndClick = battleMatchViewModel::exit,
                                     )
                                 }
                             }

@@ -38,7 +38,7 @@ import com.monglife.mongs.presentation.view.assets.MongsGreen
 import com.monglife.mongs.presentation.view.assets.MongsLightGray
 import com.monglife.mongs.presentation.view.assets.MongsPink
 import com.monglife.mongs.presentation.view.assets.MongsYellow
-import com.monglife.mongs.presentation.view.component.common.textbox.PayPoint
+import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
 import com.mongs.wear.presentation.view.wear.R
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
@@ -190,7 +190,7 @@ private fun InfoTabContent(
                 .width(SLOT_DETAIL_WIDTH.dp)
                 .weight(0.2f)
         ) {
-            PayPoint(
+            PayPointBox(
                 width = 110,
                 payPoint = payPoint,
             )

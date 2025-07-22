@@ -8,6 +8,7 @@ import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.application.mong.vo.RandomDrawVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -21,9 +22,13 @@ import javax.inject.Inject
 @HiltViewModel
 class RandomDrawViewModel @Inject constructor(
     private val getCurrentMongUseCase: GetCurrentMongUseCase,
-    private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val randomDrawUseCase: RandomDrawUseCase,
 ): BaseViewModel() {
+
+    companion object {
+        private const val DRAW_DELAY = 1500L
+        private const val DRAW_PAY_POINT = 100
+    }
 
     /**
      * UI 상태 정의
@@ -31,12 +36,16 @@ class RandomDrawViewModel @Inject constructor(
     sealed class UiState(
         val loadingBar: Boolean = false,
         val confirmDialogOpen: Boolean = false,
+        val enteringDialogOpen: Boolean = false,
+        val drawLoading: Boolean = false,
         val randomDrawDetailDialogOpen: Boolean = false,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
-        data object Confirm: UiState(confirmDialogOpen = true)
-        data object Detail: UiState(randomDrawDetailDialogOpen = true)
+        data object Entering : UiState(enteringDialogOpen = true)
+        data object Confirm : UiState(confirmDialogOpen = true)
+        data object Draw : UiState(drawLoading = true)
+        data object Detail : UiState(randomDrawDetailDialogOpen = true)
     }
 
     /**
@@ -68,6 +77,9 @@ class RandomDrawViewModel @Inject constructor(
     private val _randomDrawVo = MutableStateFlow<RandomDrawVo?>(null)
     val randomDrawVo: StateFlow<RandomDrawVo?> = _randomDrawVo.asStateFlow()
 
+    private val _randomDrawPayPoint = MutableStateFlow(0)
+    val randomDrawPayPoint: StateFlow<Int> = _randomDrawPayPoint.asStateFlow()
+
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
@@ -80,10 +92,10 @@ class RandomDrawViewModel @Inject constructor(
                     return@withContext
                 }
 
-                observeForever(observeCurrentMongUseCase(), _currentMongVo)
+                _randomDrawPayPoint.value = DRAW_PAY_POINT
             }
 
-            _uiState.value = UiState.Idle
+            _uiState.value = UiState.Entering
         }
     }
 
@@ -92,13 +104,17 @@ class RandomDrawViewModel @Inject constructor(
      */
     fun randomDraw(mongId: Long) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Loading
+            _uiState.value = UiState.Draw
+
+            delay(DRAW_DELAY)
 
             _randomDrawVo.value = randomDrawUseCase(
                 command = RandomDrawUseCase.Command(
                     mongId = mongId,
                 )
             )
+
+            _currentMongVo.value = getCurrentMongUseCase()
 
             _uiState.value = UiState.Detail
         }
@@ -118,7 +134,7 @@ class RandomDrawViewModel @Inject constructor(
      */
     fun randomDrawConfirmDialogClose() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Idle
+            _uiState.value = UiState.Entering
         }
     }
 
@@ -127,7 +143,7 @@ class RandomDrawViewModel @Inject constructor(
      */
     fun randomDrawDetailDialogClose() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Idle
+            _uiState.value = UiState.Entering
             _randomDrawVo.value = null
         }
     }

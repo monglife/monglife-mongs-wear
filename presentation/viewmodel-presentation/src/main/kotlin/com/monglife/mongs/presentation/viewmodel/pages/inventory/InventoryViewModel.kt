@@ -52,6 +52,7 @@ class InventoryViewModel @Inject constructor(
     sealed class UiEvent {
         data object Idle: UiEvent()
         data class NavMenu(val message: String): UiEvent()
+        data object Consume: UiEvent()
     }
 
     /**
@@ -76,13 +77,11 @@ class InventoryViewModel @Inject constructor(
     val page: StateFlow<Int> = _page.asStateFlow()
 
     private val _size = MutableStateFlow(INIT_SIZE)
-    val size: StateFlow<Int> = _size.asStateFlow()
 
     private val _totalPage = MutableStateFlow(0)
     val totalPage: StateFlow<Int> = _totalPage.asStateFlow()
 
     private val _isLastPage = MutableStateFlow(true)
-    val isLastPage: StateFlow<Boolean> = _isLastPage.asStateFlow()
 
     private val _inventoryVos = MutableStateFlow<List<InventoryVo>>(emptyList())
     val inventoryVos: StateFlow<List<InventoryVo>> = _inventoryVos.asStateFlow()
@@ -159,9 +158,8 @@ class InventoryViewModel @Inject constructor(
                     )
                 )
 
-                this@InventoryViewModel.updateInventoryVos()
+                _uiEvent.emit(UiEvent.Consume)
             }
-
             _uiState.value = UiState.Idle
         }
     }

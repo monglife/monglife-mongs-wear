@@ -45,7 +45,7 @@ import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.monglife.mongs.presentation.view.component.common.button.SelectButton
 import com.monglife.mongs.presentation.view.component.common.pagenation.PageIndicator
-import com.monglife.mongs.presentation.view.component.common.textbox.PayPoint
+import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.view.dialog.pages.feed.FeedItemDetailDialog
 import com.monglife.mongs.presentation.viewmodel.pages.feed.FeedSnackViewModel
@@ -203,7 +203,7 @@ private fun SnackSection(
                     .fillMaxWidth()
                     .weight(0.2f)
             ) {
-                PayPoint(payPoint = mongVo.payPoint)
+                PayPointBox(payPoint = mongVo.payPoint)
             }
 
             Row(

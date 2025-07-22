@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.view.component.pages.match
+package com.monglife.mongs.presentation.view.component.pages.battle
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

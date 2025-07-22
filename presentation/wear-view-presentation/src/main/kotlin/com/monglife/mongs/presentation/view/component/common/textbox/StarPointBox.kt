@@ -19,21 +19,21 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
-import com.monglife.mongs.presentation.view.assets.MongsNavy
+import com.monglife.mongs.presentation.view.assets.MongsDarkBrown
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-internal fun PayPoint(
+internal fun StarPointBox(
     modifier: Modifier = Modifier,
     height: Int = 30,
     width: Int = 80,
-    payPoint: Int = 0,
+    starPoint: Int = 0,
 ) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .height(height.dp)
-            .width(width.dp),
+            .width(width.dp)
     ) {
         Image(
             painter = painterResource(R.drawable.point_bg),
@@ -54,7 +54,7 @@ internal fun PayPoint(
                 modifier = Modifier.weight(0.2f),
             ) {
                 Image(
-                    painter = painterResource(R.drawable.point_icon_pay),
+                    painter = painterResource(R.drawable.point_icon_star),
                     contentDescription = null,
                     modifier = Modifier
                         .height(12.dp)
@@ -64,12 +64,12 @@ internal fun PayPoint(
             }
 
             Text(
-                text = "$payPoint",
+                text = "$starPoint",
                 textAlign = TextAlign.Center,
                 fontFamily = DAL_MU_RI,
                 fontWeight = FontWeight.Light,
                 fontSize = 14.sp,
-                color = MongsNavy,
+                color = MongsDarkBrown,
                 maxLines = 1,
                 modifier = Modifier.weight(0.8f)
             )

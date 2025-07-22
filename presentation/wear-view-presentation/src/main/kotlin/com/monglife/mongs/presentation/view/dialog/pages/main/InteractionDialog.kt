@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.monglife.mongs.domain.mong.enums.MongStateCode
-import com.monglife.mongs.presentation.view.component.common.textbox.PayPoint
+import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
 import com.monglife.mongs.presentation.view.component.common.button.CircleImageButton
 import com.mongs.wear.presentation.view.wear.R
 
@@ -60,7 +60,7 @@ internal fun InteractionDialog(
                 modifier = Modifier.fillMaxWidth()
                     .weight(0.4f),
             ) {
-                PayPoint(
+                PayPointBox(
                     payPoint = payPoint,
                     width = 100,
                 )

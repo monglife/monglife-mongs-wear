@@ -1,5 +1,6 @@
 package com.monglife.mongs.presentation.view.pages.inventory
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -40,13 +41,18 @@ import com.monglife.mongs.presentation.view.component.common.pagenation.PageIndi
 import com.monglife.mongs.presentation.view.component.pages.inventory.InventoryItem
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.viewmodel.pages.inventory.InventoryViewModel
+import com.monglife.mongs.presentation.viewmodel.pages.main.MainSlotViewModel
 
+@SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
 internal fun InventoryView(
     navController: NavController,
     inventoryViewModel: InventoryViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
+    val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
+    val mainSlotViewModel: MainSlotViewModel = hiltViewModel<MainSlotViewModel>(parentEntry)
+
     val uiState = inventoryViewModel.uiState.collectAsState()
     val currentMongVo = inventoryViewModel.currentMongVo.collectAsState()
     val currentInventoryVo = inventoryViewModel.currentInventoryVo.collectAsState()
@@ -88,6 +94,10 @@ internal fun InventoryView(
             when (event) {
                 is InventoryViewModel.UiEvent.NavMenu -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    navController.popBackStack(RouterPath.Main.route, inclusive = false)
+                }
+                is InventoryViewModel.UiEvent.Consume -> {
+                    mainSlotViewModel.eatingEvent()
                     navController.popBackStack(RouterPath.Main.route, inclusive = false)
                 }
                 else -> {}

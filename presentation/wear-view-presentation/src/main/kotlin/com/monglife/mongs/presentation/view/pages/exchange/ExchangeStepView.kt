@@ -36,7 +36,7 @@ import com.monglife.mongs.presentation.view.component.common.background.DefaultB
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.monglife.mongs.presentation.view.component.common.button.SelectButton
-import com.monglife.mongs.presentation.view.component.common.textbox.PayPoint
+import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.view.dialog.common.PermissionDialog
 import com.monglife.mongs.presentation.viewmodel.pages.exchange.ExchangeStepViewModel
@@ -133,7 +133,7 @@ private fun ExchangeStepContent(
                     .weight(0.2f)
             ) {
                 currentMongVo.value?.let {
-                    PayPoint(payPoint = it.payPoint)
+                    PayPointBox(payPoint = it.payPoint)
                 }
             }
 

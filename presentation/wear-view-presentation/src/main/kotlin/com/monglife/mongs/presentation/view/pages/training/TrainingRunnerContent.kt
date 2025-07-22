@@ -16,7 +16,6 @@ import com.monglife.mongs.presentation.view.component.common.background.Training
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.pages.training.runner.section.RunnerScoreSection
 import com.monglife.mongs.presentation.view.component.pages.training.runner.section.RunnerSection
-import com.monglife.mongs.presentation.view.component.pages.training.runner.section.RunnerTimerSection
 import com.monglife.mongs.presentation.view.dialog.pages.training.TrainingEnteringDialog
 import com.monglife.mongs.presentation.view.dialog.pages.training.TrainingOverDialog
 import com.monglife.mongs.presentation.viewmodel.pages.training.runner.TrainingRunnerViewModel
@@ -49,31 +48,6 @@ internal fun TrainingRunnerContent(
                             modifier = Modifier.zIndex(1f),
                             trainingRunnerViewModel = trainingRunnerViewModel
                         )
-
-                        RunnerTimerSection(
-                            modifier = Modifier.zIndex(2f),
-                            trainingRunnerViewModel = trainingRunnerViewModel
-                        )
-
-                        trainingTypeVo.value?.let { trainingTypeVo ->
-                            currentMongVo.value?.let { currentMongVo ->
-                                LaunchedEffect(it.isProcess, it.score, it.timeMillis) {
-                                    if (!it.isProcess || it.score >= trainingTypeVo.score || it.timeMillis >= trainingTypeVo.timeout * 1000L) {
-                                        trainingRunnerViewModel.stop()
-                                    }
-                                }
-
-                                LaunchedEffect(uiState.value) {
-                                    if (!it.isProcess && uiState.value.stopSection) {
-                                        trainingRunnerViewModel.end(
-                                            mongId = currentMongVo.mongId,
-                                            trainingCode = trainingTypeVo.trainingCode,
-                                            score = it.score,
-                                        )
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
 
@@ -99,6 +73,34 @@ internal fun TrainingRunnerContent(
                                 )
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(runnerVo.value) {
+        runnerVo.value?.let {
+            trainingTypeVo.value?.let { trainingTypeVo ->
+                if (uiState.value.playSection) {
+                    if (!it.isProcess || it.score >= trainingTypeVo.score) {
+                        trainingRunnerViewModel.stop()
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(uiState.value) {
+        if (uiState.value.stopSection) {
+            runnerVo.value?.let {
+                trainingTypeVo.value?.let { trainingTypeVo ->
+                    currentMongVo.value?.let { currentMongVo ->
+                        trainingRunnerViewModel.end(
+                            mongId = currentMongVo.mongId,
+                            trainingCode = trainingTypeVo.trainingCode,
+                            score = it.score,
+                        )
                     }
                 }
             }

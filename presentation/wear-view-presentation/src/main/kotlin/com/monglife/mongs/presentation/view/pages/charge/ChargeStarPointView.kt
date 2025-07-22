@@ -43,7 +43,7 @@ import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.monglife.mongs.presentation.view.component.common.button.SelectButton
 import com.monglife.mongs.presentation.view.component.common.button.YellowButton
 import com.monglife.mongs.presentation.view.component.common.pagenation.PageIndicator
-import com.monglife.mongs.presentation.view.component.common.textbox.StarPoint
+import com.monglife.mongs.presentation.view.component.common.textbox.StarPointBox
 import com.monglife.mongs.presentation.view.utils.NumberUtil
 import com.monglife.mongs.presentation.viewmodel.pages.charge.ChargeStarPointViewModel
 import com.mongs.wear.presentation.view.wear.R
@@ -148,7 +148,7 @@ private fun ChargeStarPointContent(
                             .fillMaxWidth()
                             .weight(0.2f)
                     ) {
-                        StarPoint(starPoint = starPoint.value)
+                        StarPointBox(starPoint = starPoint.value)
                     }
 
                     Row(

@@ -96,7 +96,7 @@ fun TrainingEnteringDialog(
                         .weight(0.15f)
                 ) {
                     Text(
-                        text = "제한시간 ${it.timeout}s",
+                        text = "제한시간 " + if(it.timeout > 0) "${it.timeout}s" else "없음",
                         textAlign = TextAlign.Center,
                         fontFamily = DAL_MU_RI,
                         fontWeight = FontWeight.Light,
