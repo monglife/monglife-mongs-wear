@@ -1,7 +1,7 @@
 package com.monglife.mongs.presentation.view.pages.randomDraw
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,38 +94,44 @@ private fun RandomDrawContent(
         contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize(),
     ) {
-        if (uiState.value.drawLoading) {
-            val currentRotation = remember { mutableStateOf(10f) }
-            val rotation = remember { Animatable(currentRotation.value) }
+        val maxDegree = 7f
+        val currentRotation = remember { mutableFloatStateOf(0f) }
+        val rotation = remember { Animatable(currentRotation.floatValue) }
 
+        if(uiState.value.drawLoading) {
             LaunchedEffect(Unit) {
                 rotation.animateTo(
-                    targetValue = currentRotation.value * -1,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(5000, easing = LinearEasing),
-                        repeatMode = RepeatMode.Restart
-                    )
-                ) { currentRotation.value = value }
-            }
+                    targetValue = maxDegree,
+                    animationSpec = tween(250, easing = FastOutSlowInEasing),
+                ) { currentRotation.floatValue = value }
 
-            Image(
-                painter = painterResource(R.drawable.icon_luck_draw),
-                contentDescription = null,
-                modifier = Modifier
-                    .width(110.dp)
-                    .height(180.dp)
-                    .rotate(degrees = rotation.value),
-                contentScale = ContentScale.FillBounds,
-            )
+                rotation.animateTo(
+                    targetValue = currentRotation.floatValue * -1,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(500, easing = FastOutSlowInEasing),
+                        repeatMode = RepeatMode.Reverse
+                    )
+                ) { currentRotation.floatValue = value }
+            }
         } else {
-            Image(
-                painter = painterResource(R.drawable.icon_luck_draw),
-                contentDescription = null,
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(170.dp),
-                contentScale = ContentScale.FillBounds,
-            )
+            LaunchedEffect(Unit) {
+                rotation.animateTo(
+                    targetValue = 0f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(500, easing = FastOutSlowInEasing),
+                    )
+                ) { currentRotation.floatValue = value }
+            }
         }
+
+        Image(
+            painter = painterResource(R.drawable.icon_luck_draw),
+            contentDescription = null,
+            modifier = Modifier
+                .width(100.dp)
+                .height(170.dp)
+                .rotate(degrees = rotation.value),
+            contentScale = ContentScale.FillBounds,
+        )
     }
 }

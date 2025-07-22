@@ -47,7 +47,9 @@ internal fun TicketBox(
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.zIndex(1.2f).padding(start = 10.dp, end = 10.dp)
+            modifier = Modifier
+                .zIndex(1.2f)
+                .padding(start = 10.dp, end = 10.dp)
         ) {
             Box(
                 contentAlignment = Alignment.Center,

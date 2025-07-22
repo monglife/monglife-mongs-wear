@@ -41,7 +41,7 @@ fun RandomDrawEnteringDialog(
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .background(color = Color.Black.copy(alpha = 0.85f))
+            .background(color = Color.Black.copy(alpha = 0.75f))
             .fillMaxSize(),
     ) {
         Column(
@@ -72,7 +72,7 @@ fun RandomDrawEnteringDialog(
                     .weight(0.3f)
             ) {
                 Text(
-                    text = "Gotcha!",
+                    text = "랜덤뽑기",
                     textAlign = TextAlign.Center,
                     fontFamily = DAL_MU_RI,
                     fontWeight = FontWeight.Light,
@@ -143,7 +143,7 @@ fun RandomDrawEnteringDialog(
             ) {
                 BlueButton(
                     text = "뽑기",
-                    disable = randomDrawPayPoint > payPoint,
+                    disable = randomDrawPayPoint > payPoint && randomDrawTicketCount <= 0,
                     onClick = onDrawClick,
                 )
             }
