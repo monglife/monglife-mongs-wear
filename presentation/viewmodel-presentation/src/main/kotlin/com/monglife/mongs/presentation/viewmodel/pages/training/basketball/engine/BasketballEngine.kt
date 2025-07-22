@@ -31,11 +31,12 @@ class BasketballEngine @Inject constructor() {
         basketWidth: Float,
         basketInitY: Float,
         basketInitX: Float,
+        ratio: Float,
     ): BasketballVo {
 
         val basket = Basket(
-            height = basketHeight,
-            width = basketWidth,
+            height = basketHeight * ratio,
+            width = basketWidth * ratio,
             initY = basketInitY,
             initX = basketInitX,
         )
@@ -46,10 +47,11 @@ class BasketballEngine @Inject constructor() {
             initX = ballInitX,
             initSpeed = BALL_SPEED,
             initFrame = 0.2f,
-            initMinRadius = ballInitRadius * 0.7f,
+            initMinRadius = ballInitRadius * ratio,
             initMaxRadius = ballInitRadius,
         )
         val basketball = Basketball(
+            isStart = false,
             isProcess = false,
             timeMillis = 0L,
             score = 0,
@@ -113,9 +115,6 @@ class BasketballEngine @Inject constructor() {
 
                 emit(BasketballVo.of(it))
             }
-
-            stop(basketballId = it.basketballId)
-            emit(BasketballVo.of(it))
         }
     }
 

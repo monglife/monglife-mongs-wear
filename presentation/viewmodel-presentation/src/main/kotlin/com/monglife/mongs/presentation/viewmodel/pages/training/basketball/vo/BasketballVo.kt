@@ -4,6 +4,7 @@ import com.monglife.mongs.presentation.viewmodel.pages.training.basketball.engin
 
 data class BasketballVo(
     val basketballId: String,
+    val isStart: Boolean,
     val isProcess: Boolean,
     val timeMillis: Long,
     val score: Int,
@@ -13,6 +14,7 @@ data class BasketballVo(
     companion object {
         fun of(basketball: Basketball) = BasketballVo(
             basketballId = basketball.basketballId,
+            isStart = basketball.isStart,
             isProcess = basketball.isProcess,
             timeMillis = basketball.timeMillis,
             score = basketball.score,

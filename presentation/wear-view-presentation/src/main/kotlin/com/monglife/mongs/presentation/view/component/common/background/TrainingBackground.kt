@@ -39,7 +39,7 @@ fun TrainingBackground(
         ) {
             Image(
                 painter = painterResource(background),
-                contentDescription = "TrainingNestedBackground",
+                contentDescription = "TrainingBackground",
                 contentScale = ContentScale.Crop
             )
         }
@@ -53,7 +53,7 @@ fun TrainingBackground(
 
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
 
-            val infiniteTransition = rememberInfiniteTransition(label = "TrainingNestedBackgroundTransition")
+            val infiniteTransition = rememberInfiniteTransition(label = "TrainingBackgroundTransition")
             val offsetX by infiniteTransition.animateFloat(
                 initialValue = 0f,
                 targetValue = constraints.maxWidth.toFloat() * -(backgrounds.size - 1),         // 배경 수 - 1 = 2
@@ -63,7 +63,7 @@ fun TrainingBackground(
                         easing = LinearEasing,
                     ),
                     repeatMode = RepeatMode.Restart
-                ), label = "TrainingNestedBackgroundOffset"
+                ), label = "TrainingBackgroundOffset"
             )
 
             Canvas(modifier = Modifier.fillMaxSize()) {

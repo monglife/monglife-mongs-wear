@@ -1,4 +1,4 @@
-package com.monglife.mongs.data.device.persistence.manager
+package com.monglife.mongs.data.member.collection.web.manager
 
 import android.annotation.SuppressLint
 import android.content.Context

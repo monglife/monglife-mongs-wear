@@ -5,6 +5,7 @@ import kotlin.math.sqrt
 
 data class Runner(
     val runnerId: String = UUID.randomUUID().toString(),
+    var isStart: Boolean,
     var isProcess: Boolean,
     var timeMillis: Long,
     var score: Int,
@@ -22,6 +23,7 @@ data class Runner(
      * 게임 시작
      */
     fun start() {
+        this.isStart = true
         this.isProcess = true
     }
 

@@ -14,7 +14,7 @@ import coil.decode.ImageDecoderDecoder
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
-internal fun BattleBackground(
+internal fun SearchMapBackground(
     modifier: Modifier = Modifier,
 ) {
     val imageLoader = ImageLoader.Builder(LocalContext.current)
@@ -27,11 +27,11 @@ internal fun BattleBackground(
     ) {
         Image(
             painter = rememberAsyncImagePainter(
-                model = R.drawable.bg_battle_gif,
+                model = R.drawable.bg_walking_gif,
                 imageLoader = imageLoader,
-                placeholder = painterResource(R.drawable.bg_battle),
+                placeholder = painterResource(R.drawable.bg_walking),
             ),
-            contentDescription = "BattleBackground",
+            contentDescription = "SearchMapBackground",
         )
     }
 }

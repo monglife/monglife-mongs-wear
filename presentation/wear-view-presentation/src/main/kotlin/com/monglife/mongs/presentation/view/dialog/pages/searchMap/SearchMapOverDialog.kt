@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.view.dialog.pages.randomDraw
+package com.monglife.mongs.presentation.view.dialog.pages.searchMap
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,19 +22,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.Text
-import com.monglife.mongs.application.mong.vo.RandomDrawVo
-import com.monglife.mongs.domain.mong.enums.InventoryTypeCode
+import com.monglife.mongs.application.member.collection.vo.CollectionMapVo
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
-import com.monglife.mongs.presentation.view.assets.FoodResourceCode
 import com.monglife.mongs.presentation.view.assets.MapResourceCode
 import com.monglife.mongs.presentation.view.assets.MongsWhite
-import com.monglife.mongs.presentation.view.assets.SnackResourceCode
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 
 @Composable
-fun RandomDrawOverDialog(
+fun SearchMapOverDialog(
     modifier: Modifier = Modifier,
-    randomDrawVo: RandomDrawVo,
+    collectionMapVo: CollectionMapVo,
     onEndClick: () -> Unit,
 ) {
     Box(
@@ -47,25 +44,18 @@ fun RandomDrawOverDialog(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxHeight()
         ) {
-            Spacer(modifier = Modifier.height(15.dp))
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.6f)
+                    .weight(0.5f)
             ) {
-                val resourceCode = when (randomDrawVo.inventoryTypeCode) {
-                    InventoryTypeCode.FOOD -> FoodResourceCode.getResourceCode(randomDrawVo.randomDrawCode)
-                    InventoryTypeCode.SNACK -> SnackResourceCode.getResourceCode(randomDrawVo.randomDrawCode)
-                    InventoryTypeCode.MAP -> MapResourceCode.getResourceCode(randomDrawVo.randomDrawCode)
-                }
-
                 Image(
-                    painter = painterResource(resourceCode),
+                    painter = painterResource(MapResourceCode.getResourceCode(collectionMapVo.code)),
                     contentDescription = null,
-                    modifier = Modifier.size(70.dp)
+                    modifier = Modifier
+                        .size(48.dp),
                 )
             }
             Row(
@@ -73,10 +63,10 @@ fun RandomDrawOverDialog(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.2f)
+                    .weight(0.3f)
             ) {
                 Text(
-                    text = randomDrawVo.randomDrawName,
+                    text = collectionMapVo.name,
                     textAlign = TextAlign.Center,
                     fontFamily = DAL_MU_RI,
                     fontWeight = FontWeight.Light,

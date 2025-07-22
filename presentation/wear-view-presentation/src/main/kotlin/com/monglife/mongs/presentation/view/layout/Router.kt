@@ -143,13 +143,13 @@ internal fun Router(
         // 랜덤 뽑기
         composable(route = RouterPath.RandomDraw.route) {
             AlwaysOnScreen {
-                RandomDrawView()
+                RandomDrawView(navController = navController)
             }
         }
         // 맵 탐색
         composable(route = RouterPath.SearchMap.route) {
             AlwaysOnScreen {
-                SearchMapView()
+                SearchMapView(navController = navController)
             }
         }
         // 환경 설정

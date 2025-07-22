@@ -31,7 +31,7 @@ internal fun RandomDrawBackground(
                 imageLoader = imageLoader,
                 placeholder = painterResource(R.drawable.bg_walking),
             ),
-            contentDescription = "MainPagerBackground",
+            contentDescription = "RandomDrawBackground",
         )
     }
 }

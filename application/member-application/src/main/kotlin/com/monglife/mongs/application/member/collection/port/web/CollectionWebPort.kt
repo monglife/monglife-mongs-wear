@@ -14,4 +14,9 @@ interface CollectionWebPort {
      * 컬렉션 몽 목록 조회
      */
     suspend fun getCollectionMongs(): List<GetCollectionMongResponse>
+
+    /**
+     * 맵 탐색
+     */
+    suspend fun searchCollectionMap(): GetCollectionMapResponse?
 }

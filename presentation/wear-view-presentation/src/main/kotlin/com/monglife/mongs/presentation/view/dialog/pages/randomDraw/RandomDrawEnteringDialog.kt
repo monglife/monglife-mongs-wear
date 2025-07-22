@@ -94,8 +94,8 @@ fun RandomDrawEnteringDialog(
                         painter = painterResource(R.drawable.icon_ticket),
                         contentDescription = null,
                         modifier = Modifier
-                            .height(20.dp)
-                            .width(20.dp),
+                            .height(24.dp)
+                            .width(24.dp),
                         contentScale = ContentScale.FillBounds,
                     )
 

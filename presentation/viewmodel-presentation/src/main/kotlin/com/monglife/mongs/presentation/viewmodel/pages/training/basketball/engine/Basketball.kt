@@ -6,6 +6,7 @@ import kotlin.math.sqrt
 
 open class Basketball(
     val basketballId: String = UUID.randomUUID().toString(),
+    var isStart: Boolean,
     var isProcess: Boolean,
     var timeMillis: Long,
     var score: Int,
@@ -17,6 +18,7 @@ open class Basketball(
      * 시작
      */
     fun start() {
+        this.isStart = true
         this.isProcess = true
     }
 

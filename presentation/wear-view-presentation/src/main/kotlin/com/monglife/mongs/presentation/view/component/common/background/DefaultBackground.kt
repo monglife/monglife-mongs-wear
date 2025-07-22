@@ -20,7 +20,7 @@ internal fun DefaultBackground(
     ) {
         Image(
             painter = painterResource(MapResourceCode.MP000.code),
-            contentDescription = "MainBackground",
+            contentDescription = "DefaultBackground",
             contentScale = ContentScale.Crop
         )
     }

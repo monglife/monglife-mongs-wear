@@ -59,8 +59,8 @@ internal fun TicketBox(
                     painter = painterResource(R.drawable.icon_ticket),
                     contentDescription = null,
                     modifier = Modifier
-                        .height(12.dp)
-                        .width(12.dp),
+                        .height(14.dp)
+                        .width(14.dp),
                     contentScale = ContentScale.FillBounds,
                 )
             }

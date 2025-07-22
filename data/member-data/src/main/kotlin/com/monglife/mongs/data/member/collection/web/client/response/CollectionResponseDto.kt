@@ -17,3 +17,11 @@ data class GetCollectionMongResponseDto(
     val mongName: String,
     val isIncluded: Boolean,
 )
+
+/**
+ * 맵 탐색 응답 Dto
+ */
+data class SearchCollectionMapResponseDto(
+    val isFound: Boolean,
+    val data: GetCollectionMapResponseDto?,
+)

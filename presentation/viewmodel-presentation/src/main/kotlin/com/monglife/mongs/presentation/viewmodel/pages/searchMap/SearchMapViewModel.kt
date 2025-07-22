@@ -1,9 +1,9 @@
 package com.monglife.mongs.presentation.viewmodel.pages.searchMap
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.member.collection.usecase.SearchCollectionMapUseCase
+import com.monglife.mongs.application.member.collection.vo.CollectionMapVo
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
-import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
-import com.monglife.mongs.application.mong.vo.MongVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -20,22 +20,26 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchMapViewModel @Inject constructor(
     private val getCurrentMongUseCase: GetCurrentMongUseCase,
-    private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
+    private val searchCollectionMapUseCase: SearchCollectionMapUseCase,
 ): BaseViewModel() {
+
+    companion object {
+        private const val SEARCH_DELAY = 2000L
+    }
 
     /**
      * UI 상태 정의
      */
     sealed class UiState(
         val loadingBar: Boolean = false,
-        val searchLoadingBar: Boolean = false,
         val confirmDialogOpen: Boolean = false,
+        val searchLoading: Boolean = false,
         val searchDetailDialogOpen: Boolean = false,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
         data object Confirm : UiState(confirmDialogOpen = true)
-        data object Search: UiState(searchLoadingBar = true)
+        data object Search: UiState(searchLoading = true)
         data object Detail: UiState(searchDetailDialogOpen = true)
     }
 
@@ -45,6 +49,7 @@ class SearchMapViewModel @Inject constructor(
     sealed class UiEvent {
         data object Idle: UiEvent()
         data class NavMenu(val message: String): UiEvent()
+        data class NotFound(val message: String): UiEvent()
     }
 
     /**
@@ -62,22 +67,18 @@ class SearchMapViewModel @Inject constructor(
     /**
      * 변수
      */
-    private val _currentMongVo = MutableStateFlow<MongVo?>(null)
-    val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
+    private val _collectionMapVo = MutableStateFlow<CollectionMapVo?>(null)
+    val collectionMapVo: StateFlow<CollectionMapVo?> = _collectionMapVo.asStateFlow()
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                getCurrentMongUseCase()?.let {
-                    _currentMongVo.value = it
-                } ?: run {
+                getCurrentMongUseCase() ?: run {
                     _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
                 }
-
-                observeForever(observeCurrentMongUseCase(), _currentMongVo)
             }
 
             _uiState.value = UiState.Idle
@@ -91,9 +92,20 @@ class SearchMapViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Search
 
-            delay(5000)
+            delay(SEARCH_DELAY)
 
-            _uiState.value = UiState.Detail
+            withContext(Dispatchers.IO) {
+                searchCollectionMapUseCase()?.let {
+                    _collectionMapVo.value = it
+                }
+            }
+
+            _collectionMapVo.value?.let {
+                _uiState.value = UiState.Detail
+            } ?: run {
+                _uiEvent.emit(UiEvent.NotFound("탐색된 맵이 없음"))
+                _uiState.value = UiState.Idle
+            }
         }
     }
 

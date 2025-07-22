@@ -45,6 +45,7 @@ class RunnerEngine @Inject constructor() {
         )
         val runner = Runner(
             isProcess = false,
+            isStart = false,
             timeMillis = 0L,
             score = 0,
             runnerPlayer = runnerPlayer,
@@ -118,9 +119,6 @@ class RunnerEngine @Inject constructor() {
 
                 emit(RunnerVo.of(it))
             }
-
-            stop(runnerId = it.runnerId)
-            emit(RunnerVo.of(it))
         }
     }
 

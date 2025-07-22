@@ -13,16 +13,10 @@ import javax.inject.Inject
  */
 class GraduateCheckingUseCase @Inject constructor(
     private val managementPersistencePort: ManagementPersistencePort,
-    private val devicePersistencePort: DevicePersistencePort
 ) : BaseParamUseCase<GraduateCheckingUseCase.Command, Unit>() {
 
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
-            if (devicePersistencePort.getCurrentMongId() == command.mongId) {
-                // 현재 몽 ID 삭제
-                devicePersistencePort.deleteCurrentMongId()
-            }
-
             // 몽 옵션 로컬 조회
             val mongOption = managementPersistencePort.getMongOption(mongId = command.mongId)
                 ?: managementPersistencePort.saveMongOption(

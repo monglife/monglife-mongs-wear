@@ -40,7 +40,7 @@ data class Ball(
             this.px = nextPx
 
             // 원 반지름 감소
-            this.radius = max(this.radius - 0.5f, initMinRadius)
+            this.radius = max(this.radius - 0.45f, initMinRadius)
 
             // 각도 변경
             if (this.speedX < 0f) {

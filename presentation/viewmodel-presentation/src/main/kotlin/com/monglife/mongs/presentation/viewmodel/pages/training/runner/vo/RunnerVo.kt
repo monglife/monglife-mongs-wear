@@ -4,6 +4,7 @@ import com.monglife.mongs.presentation.viewmodel.pages.training.runner.engine.Ru
 
 data class RunnerVo(
     val runnerId: String,
+    val isStart: Boolean,
     val isProcess: Boolean,
     val timeMillis: Long,
     val score: Int,
@@ -13,6 +14,7 @@ data class RunnerVo(
     companion object {
         fun of(runner: Runner) = RunnerVo(
             runnerId = runner.runnerId,
+            isStart = runner.isStart,
             isProcess = runner.isProcess,
             timeMillis = runner.timeMillis,
             score = runner.score,

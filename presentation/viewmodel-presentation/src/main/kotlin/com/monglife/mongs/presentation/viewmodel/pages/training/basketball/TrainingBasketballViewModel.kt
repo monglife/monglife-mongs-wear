@@ -33,7 +33,7 @@ class TrainingBasketballViewModel @Inject constructor(
 ): BaseViewModel() {
 
     companion object {
-        private const val END_DELAY = 600L
+        private const val END_DELAY = 400L
     }
 
     /**
@@ -43,14 +43,12 @@ class TrainingBasketballViewModel @Inject constructor(
         val loadingBar: Boolean = false,
         val enteringDialog: Boolean = false,
         val playSection: Boolean = false,
-        val stopSection: Boolean = false,
         val endDialog: Boolean = false,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
         data object Entering: UiState(enteringDialog = true)
         data object Running: UiState(playSection = true)
-        data object Stop: UiState(playSection = true, stopSection = true)
         data object End: UiState(endDialog = true)
     }
 
@@ -133,13 +131,14 @@ class TrainingBasketballViewModel @Inject constructor(
 
                 // 게임 엔진 초기 설정
                 _basketballVo.value = basketballEngine.generate(
+                    ballInitRadius = 50f,
                     ballInitY = ballInitY,
                     ballInitX = ballInitX,
-                    ballInitRadius = 50f,
-                    basketHeight = 22f,
-                    basketWidth = 125f,
+                    basketHeight = 31.5f,
+                    basketWidth = 180f,
                     basketInitY = basketInitY,
                     basketInitX = basketInitX,
+                    ratio = 0.6f
                 )
             }
 
@@ -167,18 +166,11 @@ class TrainingBasketballViewModel @Inject constructor(
      */
     fun stop() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-
-            if (_uiState.value == UiState.Stop) return@launch
-
             withContext(Dispatchers.IO) {
                 _basketballVo.value?.let {
                     basketballEngine.stop(basketballId = it.basketballId)
                 }
-
-                delay(END_DELAY)
             }
-
-            _uiState.value = UiState.Stop
         }
     }
 
@@ -187,6 +179,8 @@ class TrainingBasketballViewModel @Inject constructor(
      */
     fun end(mongId: Long, trainingCode: String, score: Int) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            delay(END_DELAY)
+
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {

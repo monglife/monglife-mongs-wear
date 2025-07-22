@@ -1,16 +1,15 @@
 package com.monglife.mongs.presentation.view.pages.training
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -24,14 +23,13 @@ import com.monglife.mongs.presentation.view.dialog.pages.training.TrainingEnteri
 import com.monglife.mongs.presentation.view.dialog.pages.training.TrainingOverDialog
 import com.monglife.mongs.presentation.viewmodel.pages.training.basketball.TrainingBasketballViewModel
 
-@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 internal fun TrainingBasketballContent(
     trainingCode: String?,
     navController: NavController,
     trainingBasketballViewModel: TrainingBasketballViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
-    configuration: Configuration = LocalConfiguration.current,
+    windowInfo: WindowInfo = LocalWindowInfo.current,
 ) {
     val uiState = trainingBasketballViewModel.uiState.collectAsState()
     val currentMongVo = trainingBasketballViewModel.currentMongVo.collectAsState()
@@ -90,27 +88,11 @@ internal fun TrainingBasketballContent(
         }
     }
 
-    LaunchedEffect(basketballVo.value) {
+    LaunchedEffect(basketballVo.value?.isProcess) {
         basketballVo.value?.let {
             trainingTypeVo.value?.let { trainingTypeVo ->
-                if (uiState.value.playSection) {
-                    if (
-                        !it.isProcess ||
-                        it.score >= trainingTypeVo.score ||
-                        it.timeMillis >= trainingTypeVo.timeout * 1000L
-                    ) {
-                        trainingBasketballViewModel.stop()
-                    }
-                }
-            }
-        }
-    }
-
-    LaunchedEffect(uiState.value) {
-        if (uiState.value.stopSection) {
-            basketballVo.value?.let {
-                trainingTypeVo.value?.let { trainingTypeVo ->
-                    currentMongVo.value?.let { currentMongVo ->
+                currentMongVo.value?.let { currentMongVo ->
+                    if (it.isStart && !it.isProcess) {
                         trainingBasketballViewModel.end(
                             mongId = currentMongVo.mongId,
                             trainingCode = trainingTypeVo.trainingCode,
@@ -122,13 +104,25 @@ internal fun TrainingBasketballContent(
         }
     }
 
+    LaunchedEffect(basketballVo.value) {
+        basketballVo.value?.let {
+            trainingTypeVo.value?.let { trainingTypeVo ->
+                if (it.isStart) {
+                    if (it.score >= trainingTypeVo.score || it.timeMillis >= trainingTypeVo.timeout * 1000L) {
+                        trainingBasketballViewModel.stop()
+                    }
+                }
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         trainingBasketballViewModel.enter(
             trainingCode = trainingCode,
-            ballInitY = configuration.screenHeightDp.toFloat() * 1.73f,
-            ballInitX = configuration.screenWidthDp.toFloat(),
-            basketInitY = configuration.screenHeightDp.toFloat() * 0.73f,
-            basketInitX = configuration.screenWidthDp.toFloat(),
+            ballInitY = windowInfo.containerSize.height.toFloat() * 0.85f,
+            ballInitX = windowInfo.containerSize.width.toFloat() * 0.5f,
+            basketInitY = windowInfo.containerSize.height.toFloat() * 0.35f,
+            basketInitX = windowInfo.containerSize.width.toFloat() * 0.5f,
         )
     }
 

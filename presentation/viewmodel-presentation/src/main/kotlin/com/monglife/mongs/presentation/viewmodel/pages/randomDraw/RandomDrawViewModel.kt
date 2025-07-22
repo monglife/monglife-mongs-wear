@@ -3,7 +3,6 @@ package com.monglife.mongs.presentation.viewmodel.pages.randomDraw
 import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.mong.usecase.interaction.RandomDrawUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
-import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.application.mong.vo.RandomDrawVo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +25,7 @@ class RandomDrawViewModel @Inject constructor(
 ): BaseViewModel() {
 
     companion object {
-        private const val DRAW_DELAY = 1500L
+        private const val DRAW_DELAY = 2000L
         private const val DRAW_PAY_POINT = 100
     }
 

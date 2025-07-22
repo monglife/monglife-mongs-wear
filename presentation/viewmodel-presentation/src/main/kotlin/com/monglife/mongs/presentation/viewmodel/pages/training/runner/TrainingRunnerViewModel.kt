@@ -43,14 +43,12 @@ class TrainingRunnerViewModel @Inject constructor(
         val loadingBar: Boolean = false,
         val enteringDialog: Boolean = false,
         val playSection: Boolean = false,
-        val stopSection: Boolean = false,
         val endDialog: Boolean = false,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
         data object Entering: UiState(enteringDialog = true)
         data object Running: UiState(playSection = true)
-        data object Stop: UiState(playSection = true, stopSection = true)
         data object End: UiState(endDialog = true)
     }
 
@@ -159,19 +157,11 @@ class TrainingRunnerViewModel @Inject constructor(
      */
     fun stop() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-
-            if (_uiState.value == UiState.Stop) return@launch
-
             withContext(Dispatchers.IO) {
                 _runnerVo.value?.let {
                     runnerEngine.stop(runnerId = it.runnerId)
                 }
-
-                delay(END_DELAY)
             }
-
-
-            _uiState.value = UiState.Stop
         }
     }
 
@@ -180,6 +170,8 @@ class TrainingRunnerViewModel @Inject constructor(
      */
     fun end(mongId: Long, trainingCode: String, score: Int) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            delay(END_DELAY)
+
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {

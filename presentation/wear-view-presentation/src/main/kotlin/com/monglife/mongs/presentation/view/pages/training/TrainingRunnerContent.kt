@@ -39,7 +39,7 @@ internal fun TrainingRunnerContent(
         } else {
             runnerVo.value?.let {
                 Box(modifier = Modifier.zIndex(0f)) {
-                    TrainingBackground(isMoving = uiState.value.playSection && it.isProcess)
+                    TrainingBackground(isMoving = it.isStart && it.isProcess)
                 }
 
                 Box(modifier = Modifier.zIndex(1f)) {
@@ -79,28 +79,28 @@ internal fun TrainingRunnerContent(
         }
     }
 
-    LaunchedEffect(runnerVo.value) {
+    LaunchedEffect(runnerVo.value?.isProcess) {
         runnerVo.value?.let {
             trainingTypeVo.value?.let { trainingTypeVo ->
-                if (uiState.value.playSection) {
-                    if (!it.isProcess || it.score >= trainingTypeVo.score) {
-                        trainingRunnerViewModel.stop()
+                currentMongVo.value?.let { currentMongVo ->
+                    if (it.isStart && !it.isProcess) {
+                        trainingRunnerViewModel.end(
+                            mongId = currentMongVo.mongId,
+                            trainingCode = trainingTypeVo.trainingCode,
+                            score = it.score,
+                        )
                     }
                 }
             }
         }
     }
 
-    LaunchedEffect(uiState.value) {
-        if (uiState.value.stopSection) {
-            runnerVo.value?.let {
-                trainingTypeVo.value?.let { trainingTypeVo ->
-                    currentMongVo.value?.let { currentMongVo ->
-                        trainingRunnerViewModel.end(
-                            mongId = currentMongVo.mongId,
-                            trainingCode = trainingTypeVo.trainingCode,
-                            score = it.score,
-                        )
+    LaunchedEffect(runnerVo.value) {
+        runnerVo.value?.let {
+            trainingTypeVo.value?.let { trainingTypeVo ->
+                if (it.isStart) {
+                    if (it.score >= trainingTypeVo.score) {
+                        trainingRunnerViewModel.stop()
                     }
                 }
             }
