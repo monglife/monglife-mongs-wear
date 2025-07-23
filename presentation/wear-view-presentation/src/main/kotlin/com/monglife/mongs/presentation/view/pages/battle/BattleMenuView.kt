@@ -97,11 +97,18 @@ internal fun BattleMenuView(
                 is BattleMenuViewModel.UiEvent.MatchingError -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
+                is BattleMenuViewModel.UiEvent.NavMain -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    navController.popBackStack(RouterPath.Main.route, inclusive = false)
+                }
+
                 is BattleMenuViewModel.UiEvent.NavMatch -> {
                     navController.navigate(route = "${RouterPath.BattleMatch.route}/${event.matchId}/${event.playerId}") {
-                        popUpTo(RouterPath.BattleMenu.route) { inclusive = true }
+                        popUpTo(RouterPath.BattleMenu.route) { inclusive = false }
                     }
                 }
+
                 else -> {}
             }
         }

@@ -21,8 +21,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.wear.compose.material.PositionIndicator
 import com.monglife.mongs.presentation.view.assets.MapResourceCode
+import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.CircleImageButton
@@ -34,6 +36,7 @@ import kotlin.math.min
 
 @Composable
 internal fun CollectionMapView(
+    navController: NavController,
     collectionMapViewModel: CollectionMapViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
@@ -44,7 +47,7 @@ internal fun CollectionMapView(
         DefaultBackground()
 
         if (uiState.value.loadingBar) {
-             LoadingBar()
+            LoadingBar()
         } else {
             Box(modifier = Modifier.zIndex(1f)) {
                 CollectionMapContent(collectionMapViewModel = collectionMapViewModel)
@@ -55,7 +58,11 @@ internal fun CollectionMapView(
                     detailCollectionMapVo.value?.let {
                         CollectionMapDetailDialog(
                             collectionMapVo = it,
-                            onSetClick = { mapCode -> collectionMapViewModel.setBackgroundMapCode(mapCode = mapCode) },
+                            onSetClick = { mapCode ->
+                                collectionMapViewModel.setBackgroundMapCode(
+                                    mapCode = mapCode
+                                )
+                            },
                             onClick = collectionMapViewModel::collectionMapDetailDialogClose,
                         )
                     }
@@ -68,9 +75,15 @@ internal fun CollectionMapView(
     LaunchedEffect(Unit) {
         collectionMapViewModel.uiEvent.collect { event ->
             when (event) {
+                is CollectionMapViewModel.UiEvent.NavMenu -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    navController.popBackStack(RouterPath.CollectionMenu.route, inclusive = false)
+                }
+
                 is CollectionMapViewModel.UiEvent.SetBackground -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
                 else -> {}
             }
         }

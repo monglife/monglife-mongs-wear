@@ -1,27 +1,33 @@
 package com.monglife.mongs.presentation.view.pages.notice
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
 import com.monglife.mongs.presentation.view.assets.MongsWhite
+import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.chip.Chip
@@ -32,7 +38,9 @@ import com.monglife.mongs.presentation.viewmodel.pages.notice.NoticeViewModel
 
 @Composable
 internal fun NoticeView(
+    navController: NavController,
     noticeViewModel: NoticeViewModel = hiltViewModel(),
+    context: Context = LocalContext.current,
 ) {
     val uiState = noticeViewModel.uiState.collectAsState()
     val content = noticeViewModel.content.collectAsState()
@@ -54,6 +62,20 @@ internal fun NoticeView(
                         close = noticeViewModel::noticeDetailDialogClose
                     )
                 }
+            }
+        }
+    }
+
+    // UI 이벤트 소비
+    LaunchedEffect(Unit) {
+        noticeViewModel.uiEvent.collect { event ->
+            when (event) {
+                is NoticeViewModel.UiEvent.NavMain -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    navController.popBackStack(RouterPath.Main.route, inclusive = false)
+                }
+
+                else -> {}
             }
         }
     }

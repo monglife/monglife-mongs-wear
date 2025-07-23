@@ -4,6 +4,7 @@ import android.app.Activity
 import com.monglife.core.billing.client.GoogleBillingClient
 import com.monglife.core.billing.exception.BillingNotSupportException
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.member.player.exception.NotFoundPlayerException
 import com.monglife.mongs.application.member.player.usecase.ObservePlayerUseCase
 import com.monglife.mongs.application.member.store.usecase.ConsumeProductOrderUseCase
 import com.monglife.mongs.application.member.store.usecase.GetProductsUseCase
@@ -11,6 +12,7 @@ import com.monglife.mongs.application.member.store.vo.OrderVo
 import com.monglife.mongs.application.member.store.vo.ProductVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -25,8 +27,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChargeStarPointViewModel @Inject constructor(
-    private val observePlayerUseCase: ObservePlayerUseCase,
     private val getProductsUseCase: GetProductsUseCase,
+    private val observePlayerUseCase: ObservePlayerUseCase,
     private val consumeProductOrderUseCase: ConsumeProductOrderUseCase,
     private val billingClient: GoogleBillingClient,
 ): BaseViewModel() {
@@ -48,7 +50,7 @@ class ChargeStarPointViewModel @Inject constructor(
         data object Idle: UiEvent()
         data class Buy(val message: String): UiEvent()
         data class Consume(val message: String): UiEvent()
-        data object NavMain: UiEvent()
+        data class NavMain(val message: String): UiEvent()
     }
 
     /**
@@ -77,8 +79,16 @@ class ChargeStarPointViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
+                getProductsUseCase().let {
+                    if (it.isNotEmpty()) {
+                        _productVos.value = it
+                    } else {
+                        delay(NAVIGATE_DELAY)
+                        _uiEvent.emit(UiEvent.NavMain("인앱 상품 없음"))
+                    }
+                }
+
                 observeForever(observePlayerUseCase().map {  it.starPoint }, _starPoint)
-                _productVos.value = getProductsUseCase()
             }
 
             _uiState.value = UiState.Idle
@@ -152,9 +162,9 @@ class ChargeStarPointViewModel @Inject constructor(
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-
         when (exception) {
-            is BillingNotSupportException -> _uiEvent.emit(UiEvent.NavMain)
+            is NotFoundPlayerException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            is BillingNotSupportException -> _uiEvent.emit(UiEvent.NavMain("결제 미지원 기기"))
             else -> initialize()
         }
     }

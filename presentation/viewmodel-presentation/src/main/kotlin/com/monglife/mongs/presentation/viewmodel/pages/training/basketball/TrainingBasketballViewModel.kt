@@ -1,6 +1,8 @@
 package com.monglife.mongs.presentation.viewmodel.pages.training.basketball
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.mong.exception.NotFoundMongException
+import com.monglife.mongs.application.mong.exception.NotFoundTrainingException
 import com.monglife.mongs.application.mong.usecase.activity.GetTrainingUseCase
 import com.monglife.mongs.application.mong.usecase.activity.TrainingEndUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
@@ -92,7 +94,6 @@ class TrainingBasketballViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-
                 getCurrentMongUseCase()?.let {
                     _currentMongVo.value = it
                 } ?: run {
@@ -239,6 +240,10 @@ class TrainingBasketballViewModel @Inject constructor(
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        initialize()
+        when (exception) {
+            is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
+            is NotFoundTrainingException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
+            else -> initialize()
+        }
     }
 }

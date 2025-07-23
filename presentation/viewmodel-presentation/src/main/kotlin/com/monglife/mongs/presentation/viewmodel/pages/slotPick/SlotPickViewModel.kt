@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.viewmodel.pages.slotPick
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.member.player.exception.NotFoundPlayerException
 import com.monglife.mongs.application.member.player.usecase.BuySlotUseCase
 import com.monglife.mongs.application.member.player.usecase.ObservePlayerUseCase
 import com.monglife.mongs.application.mong.usecase.management.CreateMongUseCase
@@ -13,8 +14,11 @@ import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.presentation.viewmodel.pages.slotPick.vo.SlotVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -26,9 +30,9 @@ import kotlin.math.min
 
 @HiltViewModel
 class SlotPickViewModel @Inject constructor(
+    private val getMongsUseCase: GetMongsUseCase,
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val observePlayerUseCase: ObservePlayerUseCase,
-    private val getMongsUseCase: GetMongsUseCase,
     private val createMongUseCase: CreateMongUseCase,
     private val deleteMongUseCase: DeleteMongUseCase,
     private val setCurrentMongIdUseCase: SetCurrentMongIdUseCase,
@@ -59,10 +63,24 @@ class SlotPickViewModel @Inject constructor(
     }
 
     /**
+     * UI 이벤트 정의
+     */
+    sealed class UiEvent {
+        data object Idle: UiEvent()
+        data class NavMain(val message: String): UiEvent()
+    }
+
+    /**
      * UI 상태 변수
      */
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    /**
+     * UI 이벤트 변수
+     */
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
 
     /**
      * 변수
@@ -318,6 +336,9 @@ class SlotPickViewModel @Inject constructor(
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        initialize()
+        when (exception) {
+            is NotFoundPlayerException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            else -> initialize()
+        }
     }
 }

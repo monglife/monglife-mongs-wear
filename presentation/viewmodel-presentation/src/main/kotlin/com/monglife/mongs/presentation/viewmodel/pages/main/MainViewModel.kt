@@ -55,12 +55,14 @@ class MainViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                // 플레이어 정보 동기화
-                syncRemotePlayerUseCase()
-                // 몽 목록 정보 동기화
-                syncRemoteMongsUseCase()
-                // 걸음 수 정보 동기화
-                syncRemoteStepUseCase()
+                runCatching {
+                    // 플레이어 정보 동기화
+                    syncRemotePlayerUseCase()
+                    // 몽 목록 정보 동기화
+                    syncRemoteMongsUseCase()
+                    // 걸음 수 정보 동기화
+                    syncRemoteStepUseCase()
+                }
 
                 observeForever(observeCurrentMongUseCase(), _currentMongVo)
                 observeForever(observeBackgroundMapCodeUseCase(), _backgroundMapCode)

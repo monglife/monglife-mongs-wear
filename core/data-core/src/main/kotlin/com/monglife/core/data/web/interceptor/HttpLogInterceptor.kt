@@ -13,7 +13,6 @@ import okhttp3.ResponseBody
 import okio.BufferedSource
 import okio.buffer
 import okio.source
-import java.net.ConnectException
 
 class HttpLogInterceptor(
     private val gson: Gson
@@ -32,12 +31,12 @@ class HttpLogInterceptor(
             .append(" ")
             .append("%-30s".format(request.url()))
             .append("\n")
-            .append("  - authorization => ${request.header(HttpConst.AUTHORIZATION_HEADER)?: ""}\n")
+            .append("  - authorization => ${request.header(HttpConst.AUTHORIZATION_HEADER) ?: ""}\n")
             .append("  - request body  => ${getRequestBodyJson(request = request)}\n")
 
-        val response: Response = try {
+        val response: Response = runCatching {
             chain.proceed(request)
-        } catch (e: ConnectException) {
+        }.getOrDefault(
             Response.Builder()
                 .request(request)
                 .protocol(Protocol.HTTP_1_1)
@@ -56,7 +55,7 @@ class HttpLogInterceptor(
                     )
                 )
                 .build()
-        }
+        )
 
         response.body()?.let { responseBody ->
             val bodyJson = responseBody.string()

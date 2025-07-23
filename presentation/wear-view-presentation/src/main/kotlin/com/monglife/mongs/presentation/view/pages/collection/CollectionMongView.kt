@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,8 +21,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.wear.compose.material.PositionIndicator
 import com.monglife.mongs.presentation.view.assets.MongResourceCode
+import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.CircleImageButton
@@ -33,7 +36,9 @@ import kotlin.math.min
 
 @Composable
 internal fun CollectionMongView(
+    navController: NavController,
     collectionMongViewModel: CollectionMongViewModel = hiltViewModel(),
+    context: Context = LocalContext.current,
 ) {
     val uiState = collectionMongViewModel.uiState.collectAsState()
     val detailCollectionMongVo = collectionMongViewModel.detailCollectionMongVo.collectAsState()
@@ -57,6 +62,20 @@ internal fun CollectionMongView(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    // UI 이벤트 소비
+    LaunchedEffect(Unit) {
+        collectionMongViewModel.uiEvent.collect { event ->
+            when (event) {
+                is CollectionMongViewModel.UiEvent.NavMenu -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    navController.popBackStack(RouterPath.CollectionMenu.route, inclusive = false)
+                }
+
+                else -> {}
             }
         }
     }

@@ -116,7 +116,7 @@ class DevicePersistenceAdapter @Inject constructor(
         val deviceBootedAt = this.getBootedAt()
 
         return Step(
-            totalWalkingCount = totalWalkingCount,
+            totalWalkingCount = totalWalkingCount ?: Int.MIN_VALUE,
             deviceBootedAt = deviceBootedAt,
             walkingCount = stepEntity.walkingCount,
             consumedWalkingCount = stepEntity.consumedWalkingCount,
@@ -155,7 +155,7 @@ class DevicePersistenceAdapter @Inject constructor(
                     stepSensorManager.getTotalWalkingCountFlow(),
                 ) { stepEntity, totalWalkingCount ->
                     Step(
-                        totalWalkingCount = totalWalkingCount,
+                        totalWalkingCount = totalWalkingCount ?: Int.MIN_VALUE,
                         deviceBootedAt = this@DevicePersistenceAdapter.getBootedAt(),
                         walkingCount = stepEntity?.walkingCount ?: 0,
                         consumedWalkingCount = stepEntity?.consumedWalkingCount ?: 0,
@@ -189,7 +189,7 @@ class DevicePersistenceAdapter @Inject constructor(
         )
 
         return Step(
-            totalWalkingCount = totalWalkingCount,
+            totalWalkingCount = totalWalkingCount ?: Int.MIN_VALUE,
             deviceBootedAt = deviceBootedAt,
             walkingCount = stepEntity.walkingCount,
             consumedWalkingCount = stepEntity.consumedWalkingCount,

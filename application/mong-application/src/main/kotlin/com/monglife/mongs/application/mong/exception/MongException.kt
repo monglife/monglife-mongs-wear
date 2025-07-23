@@ -5,14 +5,6 @@ import com.monglife.core.common.error.ErrorCode
 import com.monglife.core.common.exception.ErrorException
 
 /**
- * 몽 옵션 조회 실패 예외
- */
-class NotFoundMongOptionException(
-    override val code: ErrorCode = MongErrorCode.NOT_FOUND_MONG_OPTION,
-    override val message: String = code.getMessage()
-) : ErrorException(code = code, message = message)
-
-/**
  * 몽 조회 실패 예외
  */
 class NotFoundMongException(

@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.viewmodel.pages.feed
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.usecase.interaction.FeedFoodMongUseCase
 import com.monglife.mongs.application.mong.usecase.interaction.GetFoodsUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
@@ -24,8 +25,8 @@ import kotlin.math.min
 @HiltViewModel
 class FeedFoodViewModel @Inject constructor(
     private val getCurrentMongUseCase: GetCurrentMongUseCase,
-    private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val getFoodsUseCase: GetFoodsUseCase,
+    private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val feedFoodMongUseCase: FeedFoodMongUseCase,
 ): BaseViewModel() {
 
@@ -99,7 +100,6 @@ class FeedFoodViewModel @Inject constructor(
                     } else {
                         _currentFoodVo.value = null
                     }
-
                 } ?: run {
                     _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
@@ -204,6 +204,9 @@ class FeedFoodViewModel @Inject constructor(
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        initialize()
+        when (exception) {
+            is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
+            else -> initialize()
+        }
     }
 }

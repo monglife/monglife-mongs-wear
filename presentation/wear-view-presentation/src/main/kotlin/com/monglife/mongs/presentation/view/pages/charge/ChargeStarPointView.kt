@@ -77,12 +77,16 @@ internal fun ChargeStarPointView(
                 is ChargeStarPointViewModel.UiEvent.Buy -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
                 is ChargeStarPointViewModel.UiEvent.Consume -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
                 is ChargeStarPointViewModel.UiEvent.NavMain -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                     navController.popBackStack(RouterPath.Main.route, inclusive = false)
                 }
+
                 else -> {}
             }
         }

@@ -93,7 +93,7 @@ internal fun RandomDrawView(
     LaunchedEffect(Unit) {
         randomDrawViewModel.uiEvent.collect { event ->
             when (event) {
-                is RandomDrawViewModel.UiEvent.NavMenu -> {
+                is RandomDrawViewModel.UiEvent.NavMain -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                     navController.popBackStack(RouterPath.Main.route, inclusive = false)
                 }

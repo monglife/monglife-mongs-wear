@@ -14,7 +14,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TrainingPlayViewModel @Inject constructor(
-
 ): BaseViewModel() {
 
     /**

@@ -22,7 +22,7 @@ class   Step(
      * 총 걸음 수 조회
      */
     fun getCurrentWalkingCount(): Int {
-        return 0.coerceAtLeast(totalWalkingCount - consumedWalkingCount + walkingCount)
+        return -1L.coerceAtLeast(totalWalkingCount.toLong() - consumedWalkingCount.toLong() + walkingCount.toLong()).toInt()
     }
 
     /**

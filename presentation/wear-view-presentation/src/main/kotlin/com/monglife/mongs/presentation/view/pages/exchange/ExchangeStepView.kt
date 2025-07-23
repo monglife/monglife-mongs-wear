@@ -31,7 +31,6 @@ import androidx.navigation.NavController
 import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
 import com.monglife.mongs.presentation.view.assets.MongsWhite
-import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
@@ -41,6 +40,7 @@ import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.view.dialog.common.PermissionDialog
 import com.monglife.mongs.presentation.viewmodel.pages.exchange.ExchangeStepViewModel
 import com.mongs.wear.presentation.view.wear.R
+import kotlin.math.max
 
 @Composable
 internal fun ExchangeStepView(
@@ -52,20 +52,20 @@ internal fun ExchangeStepView(
     val currentMongVo = exchangeStepViewModel.currentMongVo.collectAsState()
     val exchangeCount = exchangeStepViewModel.exchangeCount.collectAsState()
     val chargePayPoint = exchangeStepViewModel.chargePayPoint.collectAsState()
-    val activityPermission = exchangeStepViewModel.activityPermission.collectAsState()
+    val permission = exchangeStepViewModel.permission.collectAsState()
 
     Box {
         DefaultBackground()
 
         if (uiState.value.loadingBar) {
-             LoadingBar()
+            LoadingBar()
         } else {
             Box(modifier = Modifier.zIndex(1f)) {
                 ExchangeStepContent(exchangeStepViewModel = exchangeStepViewModel)
             }
 
             Box(modifier = Modifier.zIndex(2f)) {
-                if (!activityPermission.value) {
+                if (!permission.value) {
                     PermissionDialog(
                         permissionName = "활동",
                         callback = exchangeStepViewModel::verifyActivityPermission,
@@ -92,13 +92,15 @@ internal fun ExchangeStepView(
     LaunchedEffect(Unit) {
         exchangeStepViewModel.uiEvent.collect { event ->
             when (event) {
-                is ExchangeStepViewModel.UiEvent.NavMenu -> {
+                is ExchangeStepViewModel.UiEvent.NavPopBackStack -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
-                    navController.popBackStack(RouterPath.ExchangeMenu.route, inclusive = false)
+                    navController.popBackStack()
                 }
+
                 is ExchangeStepViewModel.UiEvent.Exchange -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
                 else -> {}
             }
         }
@@ -162,7 +164,7 @@ private fun ExchangeStepContent(
                                 .weight(0.5f)
                         ) {
                             Text(
-                                text = "${walkingCount.value - 1000 * exchangeCount.value} 걸음",
+                                text = "${max(0, walkingCount.value - 1000 * exchangeCount.value)} 걸음",
                                 textAlign = TextAlign.Center,
                                 fontFamily = DAL_MU_RI,
                                 fontWeight = FontWeight.Light,

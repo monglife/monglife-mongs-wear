@@ -5,8 +5,12 @@ import com.monglife.mongs.application.member.collection.usecase.GetCollectionMon
 import com.monglife.mongs.application.member.collection.vo.CollectionMongVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,10 +34,24 @@ class CollectionMongViewModel @Inject constructor(
     }
 
     /**
+     * UI 이벤트 정의
+     */
+    sealed class UiEvent {
+        data object Idle: UiEvent()
+        data class NavMenu(val message: String): UiEvent()
+    }
+
+    /**
      * UI 상태 변수
      */
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    /**
+     * UI 이벤트 변수
+     */
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
 
     /**
      * 변수
@@ -49,7 +67,14 @@ class CollectionMongViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                _collectionMongVos.value = getCollectionMongsUseCase()
+                getCollectionMongsUseCase().let {
+                    if (it.isNotEmpty()) {
+                        _collectionMongVos.value = it
+                    } else {
+                        delay(NAVIGATE_DELAY)
+                        _uiEvent.emit(UiEvent.NavMenu("몽 컬렉션 없음"))
+                    }
+                }
             }
 
             _uiState.value = UiState.Idle

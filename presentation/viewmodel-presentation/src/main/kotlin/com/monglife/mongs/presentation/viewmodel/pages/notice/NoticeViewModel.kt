@@ -1,12 +1,16 @@
 package com.monglife.mongs.presentation.viewmodel.pages.notice
 
+import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.member.notice.usecase.GetNoticesUseCase
 import com.monglife.mongs.application.member.notice.vo.NoticeVo
-import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -43,6 +47,20 @@ class NoticeViewModel @Inject constructor(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     /**
+     * UI 이벤트 변수
+     */
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+
+    /**
+     * UI 이벤트 정의
+     */
+    sealed class UiEvent {
+        data object Idle: UiEvent()
+        data class NavMain(val message: String): UiEvent()
+    }
+
+    /**
      * 변수
      */
     private val _page = MutableStateFlow(INIT_PAGE)
@@ -61,7 +79,9 @@ class NoticeViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
-            withContext(Dispatchers.IO) { updateNoticeVos() }
+            withContext(Dispatchers.IO) {
+                updateNoticeVos()
+            }
 
             _uiState.value = UiState.Idle
         }
@@ -79,7 +99,9 @@ class NoticeViewModel @Inject constructor(
             _uiState.value = UiState.ListLoading
             _page.value = page
 
-            withContext(Dispatchers.IO) { updateNoticeVos() }
+            withContext(Dispatchers.IO) {
+                updateNoticeVos()
+            }
 
             _uiState.value = UiState.Idle
         }
@@ -115,9 +137,15 @@ class NoticeViewModel @Inject constructor(
                 size = INIT_SIZE,
             )
         ).let { noticeVosPage ->
-            _page.value = noticeVosPage.page
-            _isLastPage.value = noticeVosPage.isLastPage
-            _noticeVos.value += noticeVosPage.result
+
+            if (noticeVosPage.result.isNotEmpty()) {
+                _page.value = noticeVosPage.page
+                _isLastPage.value = noticeVosPage.isLastPage
+                _noticeVos.value += noticeVosPage.result
+            } else {
+                delay(NAVIGATE_DELAY)
+                _uiEvent.emit(UiEvent.NavMain("공지사항 없음"))
+            }
         }
     }
 

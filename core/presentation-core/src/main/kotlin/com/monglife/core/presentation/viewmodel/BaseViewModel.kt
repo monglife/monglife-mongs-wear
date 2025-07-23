@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,23 +19,17 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class BaseViewModel : ViewModel() {
+
     companion object {
-        /**
-         * 오류 메시지 표출 이벤트 (Toast)
-         */
+        // 예외 표출 딜레이
+        const val NAVIGATE_DELAY = 500L
+
+        // 오류 메시지 표출 이벤트 (Toast)
         private val _errorEvent = MutableSharedFlow<String>()
         val errorEvent = _errorEvent.asSharedFlow()
-        suspend fun errorToast(message: String) {
-            _successEvent.emit(message)
-        }
 
-        /**
-         * 성공 메시지 표출 이벤트 (Toast)
-         */
-        private val _successEvent = MutableSharedFlow<String>()
-        val successEvent = _successEvent.asSharedFlow()
-        suspend fun successToast(message: String) {
-            _successEvent.emit(message)
+        suspend fun errorToast(message: String) {
+            _errorEvent.emit(message)
         }
     }
 
@@ -70,6 +65,8 @@ abstract class BaseViewModel : ViewModel() {
             out.append("  - exception     => ${exception.stackTraceToString()}")
 
             Log.e(this@BaseViewModel::class.simpleName ?: "Anonymous", "EXCEPTION >> $out")
+
+            delay(NAVIGATE_DELAY)
 
             // 자식 클래스 exception handler 실행
             exceptionHandler(exception = exception)

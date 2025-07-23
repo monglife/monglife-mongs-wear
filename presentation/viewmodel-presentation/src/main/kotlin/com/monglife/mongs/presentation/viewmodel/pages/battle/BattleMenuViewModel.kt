@@ -1,12 +1,14 @@
 package com.monglife.mongs.presentation.viewmodel.pages.battle
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.battle.exception.NotFoundMatchRewardException
 import com.monglife.mongs.application.battle.usecase.CreateMatchQueueUseCase
 import com.monglife.mongs.application.battle.usecase.DeleteMatchQueueUseCase
 import com.monglife.mongs.application.battle.usecase.GetMatchRewardUseCase
 import com.monglife.mongs.application.battle.usecase.ObserveMatchQueueUseCase
 import com.monglife.mongs.application.battle.vo.MatchQueueVo
 import com.monglife.mongs.application.battle.vo.MatchRewardVo
+import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,6 +54,7 @@ class BattleMenuViewModel @Inject constructor(
         data object Idle: UiEvent()
         data class MatchingError(val message: String): UiEvent()
         data class NavMatch(val matchId: Long, val playerId: String): UiEvent()
+        data class NavMain(val message: String): UiEvent()
     }
 
     /**
@@ -183,7 +186,11 @@ class BattleMenuViewModel @Inject constructor(
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        initialize()
+        when (exception) {
+            is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            is NotFoundMatchRewardException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            else -> initialize()
+        }
     }
 
     override fun onCleared() {

@@ -22,20 +22,22 @@ class SyncRemoteStepUseCase @Inject constructor(
         withContext(Dispatchers.IO) {
             devicePersistencePort.getStep().let { step ->
                 // 걸음 수 동기화 요청
-                deviceWebPort.updateWalkingCount(
-                    updateWalkingCountRequest = UpdateWalkingCountRequest(
-                        totalWalkingCount = step.totalWalkingCount,
-                        deviceBootedAt = step.deviceBootedAt,
-                    ),
-                ).let {
-                    // Step 업데이트
-                    step.updateWalkingCount(
-                        consumedWalkingCount = it.consumeWalkingCount,
-                        walkingCount = it.walkingCount
-                    )
+                if (step.totalWalkingCount >= 0) {
+                    deviceWebPort.updateWalkingCount(
+                        updateWalkingCountRequest = UpdateWalkingCountRequest(
+                            totalWalkingCount = step.totalWalkingCount,
+                            deviceBootedAt = step.deviceBootedAt,
+                        ),
+                    ).let {
+                        // Step 업데이트
+                        step.updateWalkingCount(
+                            consumedWalkingCount = it.consumeWalkingCount,
+                            walkingCount = it.walkingCount
+                        )
 
-                    // Step 로컬 등록
-                    devicePersistencePort.saveStep(step = step)
+                        // Step 로컬 등록
+                        devicePersistencePort.saveStep(step = step)
+                    }
                 }
 
                 // 정기 스케줄 등록

@@ -52,18 +52,4 @@ fun LayoutView (
             ).show()
         }
     }
-
-    /**
-     * 성공 메시지 표출 이벤트 (Toast)
-     * @see BaseViewModel.successEvent
-     */
-    LaunchedEffect(Unit) {
-        BaseViewModel.successEvent.collect { message ->
-            Toast.makeText(
-                context,
-                message,
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
 }

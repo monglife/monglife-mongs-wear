@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.viewmodel.pages.feed
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.usecase.interaction.FeedSnackMongUseCase
 import com.monglife.mongs.application.mong.usecase.interaction.GetSnacksUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
@@ -201,6 +202,9 @@ class FeedSnackViewModel @Inject constructor(
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        initialize()
+        when (exception) {
+            is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
+            else -> initialize()
+        }
     }
 }

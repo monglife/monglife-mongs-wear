@@ -44,6 +44,7 @@ import com.monglife.mongs.presentation.view.component.common.background.SearchMa
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
+import com.monglife.mongs.presentation.view.dialog.common.PermissionDialog
 import com.monglife.mongs.presentation.view.dialog.pages.searchMap.SearchMapOverDialog
 import com.monglife.mongs.presentation.viewmodel.pages.searchMap.SearchMapViewModel
 import com.mongs.wear.presentation.view.wear.R
@@ -56,6 +57,7 @@ internal fun SearchMapView(
 ) {
     val uiState = searchMapViewModel.uiState.collectAsState()
     val collectionMapVo = searchMapViewModel.collectionMapVo.collectAsState()
+    val permission = searchMapViewModel.permission.collectAsState()
 
     Box {
         SearchMapBackground()
@@ -68,7 +70,12 @@ internal fun SearchMapView(
             }
 
             Box(modifier = Modifier.zIndex(2f)) {
-                if (uiState.value.confirmDialogOpen) {
+                if (!permission.value) {
+                    PermissionDialog(
+                        permissionName = "위치",
+                        callback = searchMapViewModel::verifyLocationPermission,
+                    )
+                } else if (uiState.value.confirmDialogOpen) {
                     ConfirmAndCancelDialog(
                         text = "맵 탐색을\n하시겠습니까?\n(현재 위치 정보 수집)",
                         cancel = searchMapViewModel::searchMapConfirmDialogClose,
@@ -90,7 +97,7 @@ internal fun SearchMapView(
     LaunchedEffect(Unit) {
         searchMapViewModel.uiEvent.collect { event ->
             when (event) {
-                is SearchMapViewModel.UiEvent.NavMenu -> {
+                is SearchMapViewModel.UiEvent.NavMain -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                     navController.popBackStack(RouterPath.Main.route, inclusive = false)
                 }

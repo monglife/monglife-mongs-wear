@@ -1,14 +1,18 @@
 package com.monglife.mongs.presentation.view.pages.slotPick
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,6 +38,7 @@ import com.monglife.mongs.presentation.viewmodel.pages.slotPick.vo.SlotVo
 internal fun SlotPickView(
     navController: NavController,
     slotPickViewModel: SlotPickViewModel = hiltViewModel(),
+    context: Context = LocalContext.current,
 ) {
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
@@ -115,6 +120,20 @@ internal fun SlotPickView(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // UI 이벤트 소비
+    LaunchedEffect(Unit) {
+        slotPickViewModel.uiEvent.collect { event ->
+            when (event) {
+                is SlotPickViewModel.UiEvent.NavMain -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    navController.popBackStack(RouterPath.Main.route, inclusive = false)
+                }
+
+                else -> {}
             }
         }
     }

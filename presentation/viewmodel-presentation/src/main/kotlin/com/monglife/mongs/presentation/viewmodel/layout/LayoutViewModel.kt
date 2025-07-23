@@ -29,6 +29,7 @@ class LayoutViewModel @Inject constructor(
         data object Loading : UiState(loadingBar = true)
         data object NeedUpdate : UiState(mustUpdateApp = true)
     }
+
     /**
      * UI 상태 변수
      */
@@ -51,16 +52,9 @@ class LayoutViewModel @Inject constructor(
             }
 
             // 앱 업데이트 체크
-            val mustUpdateApp = runCatching {
-                withContext(Dispatchers.IO) { getMustUpdateAppUseCase() }
-            }.getOrElse { true }
-
-            if (mustUpdateApp) {
-                _uiState.value = UiState.NeedUpdate
-                return@launch
+            _uiState.value = withContext(Dispatchers.IO) {
+                if (getMustUpdateAppUseCase()) UiState.NeedUpdate else UiState.Idle
             }
-
-            _uiState.value = UiState.Idle
         }
     }
 

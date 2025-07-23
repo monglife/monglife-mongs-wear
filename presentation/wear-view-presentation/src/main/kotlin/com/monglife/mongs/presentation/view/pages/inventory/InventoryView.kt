@@ -61,7 +61,7 @@ internal fun InventoryView(
         DefaultBackground()
 
         if (uiState.value.loadingBar) {
-             LoadingBar()
+            LoadingBar()
         } else {
             Box(modifier = Modifier.zIndex(1f)) {
                 InventoryContent(inventoryViewModel = inventoryViewModel)
@@ -92,14 +92,16 @@ internal fun InventoryView(
     LaunchedEffect(Unit) {
         inventoryViewModel.uiEvent.collect { event ->
             when (event) {
-                is InventoryViewModel.UiEvent.NavMenu -> {
+                is InventoryViewModel.UiEvent.NavMain -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                     navController.popBackStack(RouterPath.Main.route, inclusive = false)
                 }
+
                 is InventoryViewModel.UiEvent.Consume -> {
                     mainSlotViewModel.eatingEvent()
                     navController.popBackStack(RouterPath.Main.route, inclusive = false)
                 }
+
                 else -> {}
             }
         }

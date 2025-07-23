@@ -4,6 +4,7 @@ import com.monglife.core.presentation.utils.PermissionUtil
 import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.device.usecase.ExchangeWalkingCountUseCase
 import com.monglife.mongs.application.device.usecase.ObserveCurrentWalkingCountUseCase
+import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
@@ -47,7 +48,7 @@ class ExchangeStepViewModel @Inject constructor(
      */
     sealed class UiEvent {
         data object Idle: UiEvent()
-        data class NavMenu(val message: String): UiEvent()
+        data class NavPopBackStack(val message: String): UiEvent()
         data class Exchange(val message: String): UiEvent()
     }
 
@@ -66,8 +67,8 @@ class ExchangeStepViewModel @Inject constructor(
     /**
      * 변수
      */
-    private val _activityPermission = MutableStateFlow(false)
-    val activityPermission: StateFlow<Boolean> = _activityPermission.asStateFlow()
+    private val _permission = MutableStateFlow(false)
+    val permission: StateFlow<Boolean> = _permission.asStateFlow()
 
     private val _currentMongVo = MutableStateFlow<MongVo?>(null)
     val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
@@ -87,12 +88,12 @@ class ExchangeStepViewModel @Inject constructor(
 
             withContext(Dispatchers.IO) {
                 // 활동 권한 정보 목록
-                _activityPermission.value = permissionUtil.verifyActivityPermission().isEmpty()
+                _permission.value = permissionUtil.verifyActivityPermission().isEmpty()
 
                 getCurrentMongUseCase()?.let {
                     _currentMongVo.value = it
                 } ?: run {
-                    _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
+                    _uiEvent.emit(UiEvent.NavPopBackStack("선택된 몽이 없음"))
                     return@withContext
                 }
 
@@ -164,7 +165,7 @@ class ExchangeStepViewModel @Inject constructor(
      */
     fun verifyActivityPermission() {
         viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            _activityPermission.value = permissionUtil.verifyActivityPermission().isEmpty()
+            _permission.value = permissionUtil.verifyActivityPermission().isEmpty()
         }
     }
 
@@ -178,6 +179,9 @@ class ExchangeStepViewModel @Inject constructor(
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        initialize()
+        when (exception) {
+            is NotFoundMongException -> _uiEvent.emit(UiEvent.NavPopBackStack("잠시후 다시 시도"))
+            else -> initialize()
+        }
     }
 }

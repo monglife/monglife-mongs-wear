@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.viewmodel.pages.inventory
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.usecase.interaction.ConsumeInventoryUseCase
 import com.monglife.mongs.application.mong.usecase.interaction.GetInventoriesUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
@@ -51,7 +52,7 @@ class InventoryViewModel @Inject constructor(
      */
     sealed class UiEvent {
         data object Idle: UiEvent()
-        data class NavMenu(val message: String): UiEvent()
+        data class NavMain(val message: String): UiEvent()
         data object Consume: UiEvent()
     }
 
@@ -97,7 +98,7 @@ class InventoryViewModel @Inject constructor(
                 getCurrentMongUseCase()?.let {
                     _currentMongVo.value = it
                 } ?: run {
-                    _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
+                    _uiEvent.emit(UiEvent.NavMain("선택된 몽이 없음"))
                     return@withContext
                 }
 
@@ -215,6 +216,9 @@ class InventoryViewModel @Inject constructor(
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        initialize()
+        when (exception) {
+            is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            else -> initialize()
+        }
     }
 }

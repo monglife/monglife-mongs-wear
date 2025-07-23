@@ -20,8 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.monglife.mongs.domain.mong.enums.MongStateCode
-import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
 import com.monglife.mongs.presentation.view.component.common.button.CircleImageButton
+import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
 import com.mongs.wear.presentation.view.wear.R
 
 @Composable
@@ -75,7 +75,7 @@ internal fun InteractionDialog(
                     icon = R.drawable.btn_icon_sleep,
                     border = R.drawable.btn_border_blue,
                     iconSize = 34f,
-                    disable = level == 0 || stateCode == MongStateCode.DEAD,
+                    disable = level == 0 || stateCode != MongStateCode.NORMAL,
                     onClick = onSleepClick,
                 )
 
@@ -85,7 +85,7 @@ internal fun InteractionDialog(
                     icon = R.drawable.btn_icon_stroke,
                     border = R.drawable.btn_border_pink,
                     iconSize = 34f,
-                    disable = level == 0 || stateCode == MongStateCode.DEAD || isSleep,
+                    disable = level == 0 || isSleep || stateCode != MongStateCode.NORMAL,
                     onClick = onStrokeClick,
                 )
 
@@ -95,7 +95,7 @@ internal fun InteractionDialog(
                     icon = R.drawable.btn_icon_poop_clean,
                     border = R.drawable.btn_border_purple,
                     iconSize = 34f,
-                    disable = level == 0 || stateCode == MongStateCode.DEAD || isSleep,
+                    disable = level == 0 || isSleep || stateCode != MongStateCode.NORMAL,
                     onClick = onPoopCleanClick,
                 )
             }
@@ -109,7 +109,7 @@ internal fun InteractionDialog(
                     icon = R.drawable.btn_icon_feed,
                     border = R.drawable.btn_border_yellow,
                     iconSize = 34f,
-                    disable = level == 0 || stateCode == MongStateCode.DEAD || isSleep,
+                    disable = level == 0 || isSleep || stateCode in listOf(MongStateCode.DEAD, MongStateCode.DELETE),
                     onClick = onFeedClick,
                 )
 
@@ -119,6 +119,7 @@ internal fun InteractionDialog(
                     icon = R.drawable.btn_icon_inventory,
                     border = R.drawable.btn_border_green,
                     iconSize = 34f,
+                    disable = level == 0 || isSleep || stateCode in listOf(MongStateCode.DEAD, MongStateCode.DELETE),
                     onClick = onInventoryClick,
                 )
             }

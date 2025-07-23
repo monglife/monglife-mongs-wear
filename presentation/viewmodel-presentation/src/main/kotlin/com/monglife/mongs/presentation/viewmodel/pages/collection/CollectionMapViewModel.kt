@@ -6,6 +6,7 @@ import com.monglife.mongs.application.member.collection.usecase.GetCollectionMap
 import com.monglife.mongs.application.member.collection.vo.CollectionMapVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -39,6 +40,7 @@ class CollectionMapViewModel @Inject constructor(
      */
     sealed class UiEvent {
         data object Idle: UiEvent()
+        data class NavMenu(val message: String): UiEvent()
         data class SetBackground(val message: String): UiEvent()
     }
 
@@ -68,7 +70,14 @@ class CollectionMapViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
-                _collectionMapVos.value = getCollectionMapsUseCase()
+                getCollectionMapsUseCase().let {
+                    if (it.isNotEmpty()) {
+                        _collectionMapVos.value = it
+                    } else {
+                        delay(NAVIGATE_DELAY)
+                        _uiEvent.emit(UiEvent.NavMenu("맵 컬렉션 없음"))
+                    }
+                }
             }
 
             _uiState.value = UiState.Idle

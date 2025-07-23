@@ -5,6 +5,7 @@ import android.os.SystemClock
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.monglife.core.data.persistence.datastore.SessionDataStore
 import com.monglife.mongs.application.device.exception.UpdateWalkingCountException
 import com.monglife.mongs.data.device.persistence.datastore.DeviceDataStore
 import com.monglife.mongs.data.device.persistence.entity.StepEntity
@@ -25,6 +26,7 @@ class SyncStepWorker @AssistedInject constructor(
     private val deviceWebClient: DeviceWebClient,
     private val stepSensorManager: StepSensorManager,
     private val deviceDataStore: DeviceDataStore,
+    private val sessionDataStore: SessionDataStore,
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
@@ -32,21 +34,26 @@ class SyncStepWorker @AssistedInject constructor(
     }
 
     override suspend fun doWork(): Result = try {
-        deviceWebClient.updateTotalWalkingCount(
-            updateTotalWalkingCountRequestDto = UpdateTotalWalkingCountRequestDto(
-                totalWalkingCount = stepSensorManager.getTotalWalkingCount(),
-                deviceBootedAt = getBootedAt(),
-            )
-        ).let { response ->
-            val body = response.takeIf { it.isSuccessful }?.body() ?: throw UpdateWalkingCountException()
-
-            deviceDataStore.getStep()?.let {
-                deviceDataStore.saveStep(
-                    stepEntity = StepEntity(
-                        walkingCount = body.result.walkingCount,
-                        consumedWalkingCount = body.result.consumeWalkingCount
+        sessionDataStore.getSession()?.let {
+            stepSensorManager.getTotalWalkingCount()?.let { totalWalkingCount ->
+                deviceWebClient.updateTotalWalkingCount(
+                    updateTotalWalkingCountRequestDto = UpdateTotalWalkingCountRequestDto(
+                        totalWalkingCount = totalWalkingCount,
+                        deviceBootedAt = getBootedAt(),
                     )
-                )
+                ).let { response ->
+                    val body = response.takeIf { it.isSuccessful }?.body()
+                        ?: throw UpdateWalkingCountException()
+
+                    deviceDataStore.getStep()?.let {
+                        deviceDataStore.saveStep(
+                            stepEntity = StepEntity(
+                                walkingCount = body.result.walkingCount,
+                                consumedWalkingCount = body.result.consumeWalkingCount
+                            )
+                        )
+                    }
+                }
             }
         }
 

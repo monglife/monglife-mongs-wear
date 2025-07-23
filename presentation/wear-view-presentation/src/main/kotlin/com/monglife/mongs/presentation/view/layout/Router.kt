@@ -82,10 +82,10 @@ internal fun Router(
                 CollectionMenuView(navController = navController)
             }
             composable(route = RouterPath.CollectionMap.route) {
-                CollectionMapView()
+                CollectionMapView(navController = navController)
             }
             composable(route = RouterPath.CollectionMong.route) {
-                CollectionMongView()
+                CollectionMongView(navController = navController)
             }
         }
         // 환전
@@ -138,7 +138,7 @@ internal fun Router(
         }
         // 공지사항
         composable(route = RouterPath.Notice.route) {
-            NoticeView()
+            NoticeView(navController = navController)
         }
         // 랜덤 뽑기
         composable(route = RouterPath.RandomDraw.route) {
