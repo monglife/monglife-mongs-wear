@@ -15,6 +15,11 @@ import com.monglife.core.data.web.dto.response.ResponseDto
 import com.mongs.wear.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import info.mqtt.android.service.MqttAndroidClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.eclipse.paho.client.mqttv3.IMqttActionListener
@@ -37,6 +42,8 @@ class MqttClient @Inject constructor(
     companion object {
         private const val TAG = "MqttClient"
 
+        private const val SUBSCRIBE_RETRY_DELAY = 10000L
+
         private sealed class MqttUserContext {
             data object Connect : MqttUserContext()
             data object Disconnect : MqttUserContext()
@@ -48,6 +55,7 @@ class MqttClient @Inject constructor(
 
     private val mutex = Mutex()
     private val callbackMap = ConcurrentHashMap<String, MqttCallback>()
+    private val retrySubscribeJobMap = ConcurrentHashMap<String, Job>()
 
     /**
      * Mqtt 브로커 연결
@@ -77,20 +85,17 @@ class MqttClient @Inject constructor(
      * Mqtt 메시지 전송
      */
     suspend fun <T> publish(topic: String, requestDto: T) {
-        runCatching {
-            val mqttAndroidClient = connect()
+        val mqttAndroidClient = connect()
+        val payload = gson.toJson(requestDto)
 
-            val payload = gson.toJson(requestDto)
-
-            mqttAndroidClient.publish(
-                topic = topic,
-                payload = payload.toByteArray(),
-                qos = 2,
-                retained = false,
-                userContext = MqttUserContext.Publish(topic = topic, payload = payload),
-                callback = null
-            ).await()
-        }
+        mqttAndroidClient.publish(
+            topic = topic,
+            payload = payload.toByteArray(),
+            qos = 2,
+            retained = false,
+            userContext = MqttUserContext.Publish(topic = topic, payload = payload),
+            callback = null
+        ).await()
     }
 
     /**
@@ -101,6 +106,8 @@ class MqttClient @Inject constructor(
         classType: Class<T>,
         onReceive: suspend (ResponseDto<T>) -> Unit
     ) {
+        if (retrySubscribeJobMap.contains(topic)) return
+
         runCatching {
             val mqttAndroidClient = connect()
 
@@ -119,6 +126,52 @@ class MqttClient @Inject constructor(
             ).await()
 
             callbackMap[topic] = callback
+
+        }.onFailure {
+            retrySubscribeJobMap[topic] = retrySubscribe(
+                topic = topic,
+                classType = classType,
+                onReceive = onReceive
+            )
+        }
+    }
+
+    private fun <T> retrySubscribe(
+        topic: String,
+        classType: Class<T>,
+        onReceive: suspend (ResponseDto<T>) -> Unit
+    ) = CoroutineScope(Dispatchers.IO).launch {
+
+        var isSuccess = false
+
+        while (!isSuccess) {
+            runCatching {
+                val mqttAndroidClient = connect()
+
+                val callback = MqttConsumer(
+                    topic = topic,
+                    onReceive = onReceive,
+                    classType = classType,
+                )
+
+                mqttAndroidClient.addCallback(callback = callback)
+                mqttAndroidClient.subscribe(
+                    topic = topic,
+                    qos = 2,
+                    userContext = MqttUserContext.Subscribe(topic = topic),
+                    callback = null
+                ).await()
+
+                callbackMap[topic] = callback
+            }
+            .onSuccess {
+                retrySubscribeJobMap[topic]?.let {
+                    retrySubscribeJobMap.remove(topic)
+                }
+
+                isSuccess = true
+            }
+            .onFailure { delay(SUBSCRIBE_RETRY_DELAY) }
         }
     }
 
@@ -127,6 +180,11 @@ class MqttClient @Inject constructor(
      */
     suspend fun disSubscribe(topic: String) {
         runCatching {
+            retrySubscribeJobMap[topic]?.let {
+                it.cancel()
+                retrySubscribeJobMap.remove(topic)
+            }
+
             // 연결 중인 경우만 구독 해제
             this.mqttAndroidClient.takeIf { it.isConnected }?.let {
                 mqttAndroidClient.unsubscribe(
@@ -148,6 +206,10 @@ class MqttClient @Inject constructor(
      */
     suspend fun disconnect() {
         runCatching {
+            retrySubscribeJobMap.values.forEach {
+                it.cancel()
+            }
+
             if (mqttAndroidClient.isConnected) {
                 mqttAndroidClient.disconnect(
                     userContext = MqttUserContext.Disconnect,

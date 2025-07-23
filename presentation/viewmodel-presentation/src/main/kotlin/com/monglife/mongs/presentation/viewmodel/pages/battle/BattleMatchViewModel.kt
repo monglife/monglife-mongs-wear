@@ -1,6 +1,8 @@
 package com.monglife.mongs.presentation.viewmodel.pages.battle
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.battle.exception.InvalidPublishMatchEnterException
+import com.monglife.mongs.application.battle.exception.InvalidPublishMatchPickException
 import com.monglife.mongs.application.battle.usecase.EnterMatchUseCase
 import com.monglife.mongs.application.battle.usecase.ExitMatchUseCase
 import com.monglife.mongs.application.battle.usecase.GetWinnerMatchPlayerUseCase
@@ -233,7 +235,11 @@ class BattleMatchViewModel @Inject constructor(
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        initialize()
+        when (exception) {
+            is InvalidPublishMatchEnterException -> _uiEvent.emit(UiEvent.NavMenu("매치 입장 실패"))
+            is InvalidPublishMatchPickException -> _uiState.value = UiState.Pick
+            else -> initialize()
+        }
     }
 
     override fun onCleared() {

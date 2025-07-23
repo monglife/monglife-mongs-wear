@@ -153,7 +153,12 @@ class BattleMenuViewModel @Inject constructor(
                 _uiEvent.emit(UiEvent.MatchingError("매칭 정보 오류"))
             } else {
                 _uiState.value = UiState.Loading
+
                 _uiEvent.emit(UiEvent.NavMatch(matchId, playerId))
+
+                _matchQueueVo.value = null
+
+                _uiState.value = UiState.Idle
             }
         }
     }

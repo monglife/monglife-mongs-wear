@@ -13,7 +13,7 @@ enum class BattleErrorCode(
     NOT_FOUND_WINNER_MATCH_PLAYER("승리 매치 플레이어 조회 실패", false),
     INVALID_PUBLISH_MATCH_ENTER("매치 입장 실패", false),
     INVALID_PUBLISH_MATCH_EXIT("매치 퇴장 실패", false),
-    INVALID_PUBLISH_MATCH_PICK("매치 선택 실패", false),
+    INVALID_PUBLISH_MATCH_PICK("매치 선택 실패", true),
     ;
 
     override fun getMessage(): String {
