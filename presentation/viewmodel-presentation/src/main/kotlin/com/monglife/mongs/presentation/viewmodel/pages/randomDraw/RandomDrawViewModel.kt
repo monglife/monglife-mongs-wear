@@ -153,7 +153,7 @@ class RandomDrawViewModel @Inject constructor(
      */
     override fun initialize() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Idle
+            _uiState.value = UiState.Entering
         }
     }
 

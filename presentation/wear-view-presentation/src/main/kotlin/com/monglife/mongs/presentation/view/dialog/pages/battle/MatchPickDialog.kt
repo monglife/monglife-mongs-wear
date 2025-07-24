@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,14 +43,17 @@ fun MatchPickDialog(
     onHealClick: () -> Unit,
 ) {
     val progress = remember { mutableFloatStateOf(0f) }
-    val timer = remember { mutableFloatStateOf(0f) }
+    val timeMills = remember { mutableLongStateOf(0L) }
 
     // 타이머
     LaunchedEffect(Unit) {
+        val maxTimeMills = maxSeconds * 1000f
+        val timeDelay = 1000L
+
         while (progress.floatValue < 100f) {
-            delay(200)
-            timer.floatValue += 0.2f
-            progress.floatValue = timer.floatValue / maxSeconds.toFloat() * 100f
+            delay(timeDelay)
+            timeMills.longValue += timeDelay
+            progress.floatValue = timeMills.longValue / maxTimeMills * 100f
         }
     }
 

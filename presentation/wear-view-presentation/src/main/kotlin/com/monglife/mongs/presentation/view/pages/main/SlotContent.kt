@@ -1,11 +1,15 @@
 package com.monglife.mongs.presentation.view.pages.main
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,6 +19,7 @@ import androidx.navigation.NavController
 import com.monglife.mongs.domain.mong.enums.MongStateCode
 import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
+import com.monglife.mongs.presentation.view.component.common.bar.ProgressIndicator
 import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.EvolutionEffect
 import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.GraduatedEffect
 import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.GraduationEffect
@@ -30,8 +35,12 @@ import com.monglife.mongs.presentation.view.component.pages.main.slot.section.Gr
 import com.monglife.mongs.presentation.view.component.pages.main.slot.section.NormalSection
 import com.monglife.mongs.presentation.view.dialog.pages.main.InitNotificationDialog
 import com.monglife.mongs.presentation.view.dialog.pages.main.InteractionDialog
+import com.monglife.mongs.presentation.view.utils.Timer
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainPagerViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainSlotViewModel
+import kotlinx.coroutines.delay
+import java.time.Duration
+import java.time.LocalDateTime
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
@@ -54,6 +63,38 @@ internal fun SlotContent(
             LoadingBar()
         } else {
             currentMongVo.value?.let {
+                Box(modifier = Modifier.zIndex(0f)) {
+                    if (it.level == 0) {
+                        val progress = remember { mutableFloatStateOf(0f) }
+
+//
+//                        val timeMills = remember { mutableLongStateOf(
+//
+//                        }
+//
+//                        // 타이머
+//                        LaunchedEffect(Unit) {
+//                            val maxTimeMills =
+//                            val timerDelay = 1000L
+//
+//                            while (progress.floatValue < 100f) {
+//                                delay(timerDelay)
+//                                timeMills.longValue += timerDelay
+//                                progress.floatValue = timeMills.longValue / maxTimeMills * 100f
+//                            }
+//                        }
+
+                        Timer(
+                            progress = progress,
+                            startTimeMillis = Duration.between(it.createdAt, LocalDateTime.now()).toMillis(),
+                            maxTimeMillis = 5 * 60 * 1000L,
+                        )
+
+                        ProgressIndicator(progress = progress.floatValue)
+                    }
+                }
+
+
                 // content layer
                 Box(modifier = Modifier.zIndex(1f)) {
                     when (it.stateCode) {
@@ -82,7 +123,6 @@ internal fun SlotContent(
                             }
                         }
                     }
-
                 }
             } ?: run {
                 Box(modifier = Modifier.zIndex(1f)) {
