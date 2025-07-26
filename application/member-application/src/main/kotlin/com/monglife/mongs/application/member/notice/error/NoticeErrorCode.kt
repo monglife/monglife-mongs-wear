@@ -7,7 +7,7 @@ enum class NoticeErrorCode(
     private val isMessageShow: Boolean,
 ) : ErrorCode {
 
-    NOT_FOUND_NOTICE("공지 사항 조회 실패", false)
+    NOT_FOUND_NOTICE("공지 조회 실패", true)
     ;
 
     override fun getMessage(): String {

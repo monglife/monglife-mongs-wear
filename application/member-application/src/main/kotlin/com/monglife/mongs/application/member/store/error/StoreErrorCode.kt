@@ -7,7 +7,7 @@ enum class StoreErrorCode(
     private val isMessageShow: Boolean,
 ) : ErrorCode {
 
-    INVALID_CONSUME_ORDER("주문 소비 실패", false),
+    INVALID_CONSUME_ORDER("소비 실패", true),
     ;
 
     override fun getMessage(): String {

@@ -41,46 +41,51 @@ internal fun TrainingBasketballContent(
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            basketballVo.value?.let {
-                Box(modifier = Modifier.zIndex(0f)) {
-                    TrainingBackground()
+            Box(modifier = Modifier.zIndex(0f)) {
+                TrainingBackground()
+            }
+
+            Box(modifier = Modifier.zIndex(1f)) {
+                if (uiState.value.playSection) {
+                    BasketballScoreSection(
+                        modifier = Modifier.zIndex(1f),
+                        trainingBasketballViewModel = trainingBasketballViewModel
+                    )
+
+                    BasketballTimerSection(
+                        modifier = Modifier.zIndex(2f),
+                        trainingBasketballViewModel = trainingBasketballViewModel
+                    )
                 }
+            }
 
-                Box(modifier = Modifier.zIndex(1f)) {
-                    if (uiState.value.playSection) {
-                        BasketballScoreSection(
-                            modifier = Modifier.zIndex(1f),
-                            trainingBasketballViewModel = trainingBasketballViewModel
-                        )
-
-                        BasketballTimerSection(
-                            modifier = Modifier.zIndex(2f),
-                            trainingBasketballViewModel = trainingBasketballViewModel
-                        )
-                    }
+            Box(modifier = Modifier.zIndex(2f)) {
+                if (uiState.value.playSection) {
+                    BasketballSection(trainingBasketballViewModel = trainingBasketballViewModel)
                 }
+            }
 
-                Box(modifier = Modifier.zIndex(2f)) {
-                    if (uiState.value.playSection) {
-                        BasketballSection(trainingBasketballViewModel = trainingBasketballViewModel)
-                    }
-                }
-
-                Box(modifier = Modifier.zIndex(3f)) {
-                    trainingTypeVo.value?.let { trainingTypeVo ->
-                        if (uiState.value.enteringDialog) {
-                            TrainingEnteringDialog(
-                                trainingTypeVo = trainingTypeVo,
-                                onClick = trainingBasketballViewModel::start
-                            )
-                        } else if (uiState.value.endDialog) {
-                            trainingEndVo.value?.let { trainingEndVo ->
-                                TrainingOverDialog(
-                                    isSuccess = trainingEndVo.isSuccess,
-                                    rewardPayPoint = trainingEndVo.rewardPayPoint,
-                                    onTrainingEndClick = trainingBasketballViewModel::exit,
+            Box(modifier = Modifier.zIndex(3f)) {
+                trainingTypeVo.value?.let { trainingTypeVo ->
+                    if (uiState.value.enteringDialog) {
+                        TrainingEnteringDialog(
+                            trainingTypeVo = trainingTypeVo,
+                            onClick = {
+                                trainingBasketballViewModel.start(
+                                    ballInitY = windowInfo.containerSize.height.toFloat() * 0.85f,
+                                    ballInitX = windowInfo.containerSize.width.toFloat() * 0.5f,
+                                    basketTopInitY = windowInfo.containerSize.height.toFloat() * 0.35f,
+                                    basketTopInitX = windowInfo.containerSize.width.toFloat() * 0.5f,
                                 )
                             }
+                        )
+                    } else if (uiState.value.endDialog) {
+                        trainingEndVo.value?.let { trainingEndVo ->
+                            TrainingOverDialog(
+                                isSuccess = trainingEndVo.isSuccess,
+                                rewardPayPoint = trainingEndVo.rewardPayPoint,
+                                onTrainingEndClick = trainingBasketballViewModel::exit,
+                            )
                         }
                     }
                 }
@@ -117,13 +122,7 @@ internal fun TrainingBasketballContent(
     }
 
     LaunchedEffect(Unit) {
-        trainingBasketballViewModel.enter(
-            trainingCode = trainingCode,
-            ballInitY = windowInfo.containerSize.height.toFloat() * 0.85f,
-            ballInitX = windowInfo.containerSize.width.toFloat() * 0.5f,
-            basketTopInitY = windowInfo.containerSize.height.toFloat() * 0.35f,
-            basketTopInitX = windowInfo.containerSize.width.toFloat() * 0.5f,
-        )
+        trainingBasketballViewModel.enter(trainingCode = trainingCode)
     }
 
     // UI 이벤트 소비

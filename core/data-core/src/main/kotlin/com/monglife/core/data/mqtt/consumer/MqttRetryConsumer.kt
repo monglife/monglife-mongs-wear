@@ -13,6 +13,7 @@ import javax.inject.Singleton
 
 @Singleton
 class MqttRetryConsumer @Inject constructor(
+    private val callbackMap: Map<String, MqttCallback>,
     private val onConnectLost: () -> Unit,
 ) : MqttCallback {
 
@@ -24,8 +25,21 @@ class MqttRetryConsumer @Inject constructor(
 
     override fun connectionLost(cause: Throwable?) {
         applicationScope.launch {
-            Log.i(TAG, "MQTT >> connection lost retry connection and subscribe.")
-            onConnectLost()
+            runCatching {
+                if (callbackMap.isNotEmpty()) {
+                    onConnectLost()
+
+                    val out = StringBuilder()
+                        .append("연결 중단")
+                        .append("\n")
+
+                    callbackMap.keys.forEach { topic ->
+                        out.append("  - topic         => $topic\n")
+                    }
+
+                    Log.i(TAG, "MQTT >> $out")
+                }
+            }
         }
     }
 

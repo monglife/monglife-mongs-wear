@@ -37,42 +37,44 @@ internal fun TrainingRunnerContent(
         if (uiState.value.loadingBar) {
             LoadingBar()
         } else {
-            runnerVo.value?.let {
-                Box(modifier = Modifier.zIndex(0f)) {
-                    TrainingBackground(isMoving = it.isStart && it.isProcess)
-                }
+            Box(modifier = Modifier.zIndex(0f)) {
+                TrainingBackground(
+                    isMoving = runnerVo.value?.let {
+                        it.isStart && it.isProcess
+                    } ?: false
+                )
+            }
 
-                Box(modifier = Modifier.zIndex(1f)) {
-                    if (uiState.value.playSection) {
-                        RunnerScoreSection(
-                            modifier = Modifier.zIndex(1f),
-                            trainingRunnerViewModel = trainingRunnerViewModel
+            Box(modifier = Modifier.zIndex(1f)) {
+                if (uiState.value.playSection) {
+                    RunnerScoreSection(
+                        modifier = Modifier.zIndex(1f),
+                        trainingRunnerViewModel = trainingRunnerViewModel
+                    )
+                }
+            }
+
+            Box(modifier = Modifier.zIndex(2f)) {
+                if (uiState.value.playSection) {
+                    RunnerSection(trainingRunnerViewModel = trainingRunnerViewModel)
+                }
+            }
+
+            Box(modifier = Modifier.zIndex(3f)) {
+                if (uiState.value.enteringDialog) {
+                    trainingTypeVo.value?.let { trainingTypeVo ->
+                        TrainingEnteringDialog(
+                            trainingTypeVo = trainingTypeVo,
+                            onClick = trainingRunnerViewModel::start
                         )
                     }
-                }
-
-                Box(modifier = Modifier.zIndex(2f)) {
-                    if (uiState.value.playSection) {
-                        RunnerSection(trainingRunnerViewModel = trainingRunnerViewModel)
-                    }
-                }
-
-                Box(modifier = Modifier.zIndex(3f)) {
-                    trainingTypeVo.value?.let { trainingTypeVo ->
-                        if (uiState.value.enteringDialog) {
-                            TrainingEnteringDialog(
-                                trainingTypeVo = trainingTypeVo,
-                                onClick = trainingRunnerViewModel::start
-                            )
-                        } else if (uiState.value.endDialog) {
-                            trainingEndVo.value?.let { trainingEndVo ->
-                                TrainingOverDialog(
-                                    isSuccess = trainingEndVo.isSuccess,
-                                    rewardPayPoint = trainingEndVo.rewardPayPoint,
-                                    onTrainingEndClick = trainingRunnerViewModel::exit,
-                                )
-                            }
-                        }
+                } else if (uiState.value.endDialog) {
+                    trainingEndVo.value?.let { trainingEndVo ->
+                        TrainingOverDialog(
+                            isSuccess = trainingEndVo.isSuccess,
+                            rewardPayPoint = trainingEndVo.rewardPayPoint,
+                            onTrainingEndClick = trainingRunnerViewModel::exit,
+                        )
                     }
                 }
             }

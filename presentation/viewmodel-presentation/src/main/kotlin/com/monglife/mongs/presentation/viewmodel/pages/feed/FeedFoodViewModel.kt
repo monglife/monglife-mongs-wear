@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.viewmodel.pages.feed
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.mong.exception.InvalidFeedFoodException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.usecase.interaction.FeedFoodMongUseCase
 import com.monglife.mongs.application.mong.usecase.interaction.GetFoodsUseCase
@@ -206,6 +207,7 @@ class FeedFoodViewModel @Inject constructor(
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
             is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
+            is InvalidFeedFoodException -> _uiState.value = UiState.Idle
             else -> initialize()
         }
     }

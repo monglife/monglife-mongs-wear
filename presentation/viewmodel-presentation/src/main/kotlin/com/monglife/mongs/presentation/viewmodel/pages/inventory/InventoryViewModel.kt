@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.viewmodel.pages.inventory
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.mong.exception.InvalidConsumeInventoryException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.usecase.interaction.ConsumeInventoryUseCase
 import com.monglife.mongs.application.mong.usecase.interaction.GetInventoriesUseCase
@@ -218,6 +219,7 @@ class InventoryViewModel @Inject constructor(
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
             is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            is InvalidConsumeInventoryException -> _uiState.value = UiState.Idle
             else -> initialize()
         }
     }

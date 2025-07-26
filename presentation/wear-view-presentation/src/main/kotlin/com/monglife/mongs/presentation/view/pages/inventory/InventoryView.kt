@@ -138,13 +138,15 @@ private fun InventoryContent(
         modifier = modifier.fillMaxSize(),
     ) {
         Box(modifier = Modifier.zIndex(1f)) {
-            PageIndicator(
-                pageIndicatorState = pageIndicatorState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 5.dp)
-                    .zIndex(1f)
-            )
+            if (totalPage.value > 0) {
+                PageIndicator(
+                    pageIndicatorState = pageIndicatorState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 5.dp)
+                        .zIndex(1f)
+                )
+            }
         }
 
         Box(modifier = Modifier.zIndex(2f)) {

@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.viewmodel.pages.training.basketball
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.mong.exception.InvalidTrainingException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.exception.NotFoundTrainingException
 import com.monglife.mongs.application.mong.usecase.activity.GetTrainingUseCase
@@ -89,6 +90,8 @@ class TrainingBasketballViewModel @Inject constructor(
     private val _basketballVo = MutableStateFlow<BasketballVo?>(null)
     val basketballVo: StateFlow<BasketballVo?> = _basketballVo.asStateFlow()
 
+    private var observeKey: String? = null
+
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
@@ -109,13 +112,7 @@ class TrainingBasketballViewModel @Inject constructor(
     /**
      * 입장 (초기 설정)
      */
-    fun enter(
-        trainingCode: String?,
-        ballInitY: Float,
-        ballInitX: Float,
-        basketTopInitY: Float,
-        basketTopInitX: Float,
-    ) {
+    fun enter(trainingCode: String?) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
 
             if (trainingCode == null) {
@@ -129,18 +126,6 @@ class TrainingBasketballViewModel @Inject constructor(
                         trainingCode = trainingCode
                     )
                 )
-
-                // 게임 엔진 초기 설정
-                _basketballVo.value = basketballEngine.generate(
-                    ballInitRadius = 50f,
-                    ballInitY = ballInitY,
-                    ballInitX = ballInitX,
-                    basketHeight = 32f,
-                    basketWidth = 190f,
-                    basketTopInitY = basketTopInitY,
-                    basketTopInitX = basketTopInitX,
-                    ratio = 0.6f
-                )
             }
 
             _uiState.value = UiState.Entering
@@ -150,11 +135,29 @@ class TrainingBasketballViewModel @Inject constructor(
     /**
      * 시작
      */
-    fun start() {
+    fun start(
+        ballInitY: Float,
+        ballInitX: Float,
+        basketTopInitY: Float,
+        basketTopInitX: Float,
+    ) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             withContext(Dispatchers.IO) {
-                _basketballVo.value?.let {
-                    observeForever(basketballEngine.start(basketballId = it.basketballId), _basketballVo)
+                // 게임 엔진 초기 설정
+                basketballEngine.generate(
+                    ballInitRadius = 50f,
+                    ballInitY = ballInitY,
+                    ballInitX = ballInitX,
+                    basketHeight = 32f,
+                    basketWidth = 190f,
+                    basketTopInitY = basketTopInitY,
+                    basketTopInitX = basketTopInitX,
+                    ratio = 0.6f
+                ).let {
+                    observeKey = observeForever(
+                        basketballEngine.start(basketballId = it.basketballId),
+                        _basketballVo
+                    )
                 }
             }
 
@@ -185,6 +188,8 @@ class TrainingBasketballViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
+                observeKey?.let { observeStop(key = it) }
+
                 _trainingEndVo.value = trainingEndUseCase(
                     command = TrainingEndUseCase.Command(
                         mongId = mongId,
@@ -195,6 +200,15 @@ class TrainingBasketballViewModel @Inject constructor(
             }
 
             _uiState.value = UiState.End
+        }
+    }
+
+    /**
+     * 퇴장
+     */
+    fun exit() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiEvent.emit(UiEvent.NavMenu())
         }
     }
 
@@ -213,21 +227,13 @@ class TrainingBasketballViewModel @Inject constructor(
         }
     }
 
-    /**
-     * 퇴장
-     */
-    fun exit() {
-        viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiEvent.emit(UiEvent.NavMenu())
-        }
-    }
-
     override fun onCleared() {
         super.onCleared()
 
         _basketballVo.value?.let {
             basketballEngine.stop(basketballId = it.basketballId)
         }
+        observeKey?.let { observeStop(key = it) }
     }
 
     /**
@@ -235,7 +241,7 @@ class TrainingBasketballViewModel @Inject constructor(
      */
     override fun initialize() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Idle
+            _uiState.value = UiState.Entering
         }
     }
 
@@ -243,6 +249,7 @@ class TrainingBasketballViewModel @Inject constructor(
         when (exception) {
             is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
             is NotFoundTrainingException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
+            is InvalidTrainingException -> _uiState.value = UiState.Entering
             else -> initialize()
         }
     }

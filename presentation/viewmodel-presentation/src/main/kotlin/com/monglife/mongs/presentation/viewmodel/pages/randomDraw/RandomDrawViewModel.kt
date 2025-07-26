@@ -1,6 +1,8 @@
 package com.monglife.mongs.presentation.viewmodel.pages.randomDraw
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.mong.exception.InvalidBuyRandomDrawTicketException
+import com.monglife.mongs.application.mong.exception.InvalidRandomDrawException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.usecase.interaction.RandomDrawUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseCase
@@ -160,6 +162,8 @@ class RandomDrawViewModel @Inject constructor(
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
             is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            is InvalidBuyRandomDrawTicketException -> _uiState.value = UiState.Entering
+            is InvalidRandomDrawException -> _uiState.value = UiState.Entering
             else -> initialize()
         }
     }

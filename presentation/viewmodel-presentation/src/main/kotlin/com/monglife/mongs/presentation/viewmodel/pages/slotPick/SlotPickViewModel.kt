@@ -1,9 +1,13 @@
 package com.monglife.mongs.presentation.viewmodel.pages.slotPick
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.member.player.exception.InvalidBuySlotException
 import com.monglife.mongs.application.member.player.exception.NotFoundPlayerException
 import com.monglife.mongs.application.member.player.usecase.BuySlotUseCase
 import com.monglife.mongs.application.member.player.usecase.ObservePlayerUseCase
+import com.monglife.mongs.application.mong.exception.InvalidCreateMongException
+import com.monglife.mongs.application.mong.exception.InvalidDeleteMongException
+import com.monglife.mongs.application.mong.exception.InvalidGraduateMongException
 import com.monglife.mongs.application.mong.usecase.management.CreateMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.DeleteMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.GetMongsUseCase
@@ -33,9 +37,9 @@ class SlotPickViewModel @Inject constructor(
     private val getMongsUseCase: GetMongsUseCase,
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val observePlayerUseCase: ObservePlayerUseCase,
+    private val setCurrentMongIdUseCase: SetCurrentMongIdUseCase,
     private val createMongUseCase: CreateMongUseCase,
     private val deleteMongUseCase: DeleteMongUseCase,
-    private val setCurrentMongIdUseCase: SetCurrentMongIdUseCase,
     private val graduateMongUseCase: GraduateMongUseCase,
     private val buySlotUseCase: BuySlotUseCase,
 ): BaseViewModel() {
@@ -338,6 +342,10 @@ class SlotPickViewModel @Inject constructor(
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
             is NotFoundPlayerException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            is InvalidCreateMongException -> _uiState.value = UiState.Create
+            is InvalidDeleteMongException -> _uiState.value = UiState.Idle
+            is InvalidGraduateMongException -> _uiState.value = UiState.Idle
+            is InvalidBuySlotException -> _uiState.value = UiState.Idle
             else -> initialize()
         }
     }

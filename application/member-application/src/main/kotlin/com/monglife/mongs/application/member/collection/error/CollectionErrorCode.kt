@@ -7,7 +7,7 @@ enum class CollectionErrorCode(
     private val isMessageShow: Boolean,
 ) : ErrorCode {
 
-    INVALID_SEARCH_COLLECTION_MAP("맵 탐색 실패", false),
+    INVALID_SEARCH_COLLECTION_MAP("맵 탐색 실패", true),
     ;
 
     override fun getMessage(): String {

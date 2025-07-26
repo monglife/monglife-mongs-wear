@@ -2,6 +2,7 @@ package com.monglife.mongs.presentation.viewmodel.pages.exchange
 
 import com.monglife.core.presentation.utils.PermissionUtil
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.device.exception.InvalidExchangeWalkingCountException
 import com.monglife.mongs.application.device.usecase.ExchangeWalkingCountUseCase
 import com.monglife.mongs.application.device.usecase.ObserveCurrentWalkingCountUseCase
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
@@ -181,6 +182,7 @@ class ExchangeStepViewModel @Inject constructor(
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
             is NotFoundMongException -> _uiEvent.emit(UiEvent.NavPopBackStack("잠시후 다시 시도"))
+            is InvalidExchangeWalkingCountException -> _uiState.value = UiState.Idle
             else -> initialize()
         }
     }

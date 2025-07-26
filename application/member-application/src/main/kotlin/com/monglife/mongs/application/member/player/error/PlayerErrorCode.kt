@@ -9,8 +9,8 @@ enum class PlayerErrorCode(
 
     INVALID_CREATE_PLAYER("플레이어 등록 실패", false),
     NOT_FOUND_PLAYER("플레이어 조회 실패", false),
-    INVALID_BUY_SLOT("슬롯 구매 실패", false),
-    INVALID_EXCHANGE_STAR_POINT("스타 포인트 환전 실패", false),
+    INVALID_BUY_SLOT("슬롯 구매 실패", true),
+    INVALID_EXCHANGE_STAR_POINT("스타 포인트 환전 실패", true),
     ;
 
     override fun getMessage(): String {

@@ -132,14 +132,10 @@ class BattleMatchViewModel @Inject constructor(
                     )
                 ).let { flow ->
                     observeForever(flow, _matchVo)
-
-                    // TODO: 맴에 안듬 리팩 예정
                     observeForever(flow.map { matchVo -> matchVo?.matchPlayers?.first { it.isMe } }, _matchPlayerVo)
-                    _matchPlayerMaxHp.value = 5000f
-
-                    // TODO: 맴에 안듬 리팩 예정
+                    _matchPlayerMaxHp.value = _matchPlayerVo.value?.hp ?: 5000f
                     observeForever(flow.map { matchVo -> matchVo?.matchPlayers?.first { !it.isMe } }, _targetMatchPlayerVo)
-                    _targetMatchPlayerMaxHp.value = 5000f
+                    _targetMatchPlayerMaxHp.value = _targetMatchPlayerVo.value?.hp ?: 5000f
                 }
 
                 delay(EFFECT_DELAY)
@@ -225,23 +221,6 @@ class BattleMatchViewModel @Inject constructor(
         }
     }
 
-    /**
-     * 화면 초기화 메서드
-     */
-    override fun initialize() {
-        viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Idle
-        }
-    }
-
-    override suspend fun exceptionHandler(exception: Throwable) {
-        when (exception) {
-            is InvalidPublishMatchEnterException -> _uiEvent.emit(UiEvent.NavMenu("매치 입장 실패"))
-            is InvalidPublishMatchPickException -> _uiState.value = UiState.Pick
-            else -> initialize()
-        }
-    }
-
     override fun onCleared() {
         CoroutineScope(Dispatchers.IO).launch {
             if (_uiState.value != UiState.End) {
@@ -257,6 +236,23 @@ class BattleMatchViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * 화면 초기화 메서드
+     */
+    override fun initialize() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    override suspend fun exceptionHandler(exception: Throwable) {
+        when (exception) {
+            is InvalidPublishMatchEnterException -> _uiEvent.emit(UiEvent.NavMenu("매치 입장 실패"))
+            is InvalidPublishMatchPickException -> _uiState.value = UiState.Pick
+            else -> initialize()
         }
     }
 }

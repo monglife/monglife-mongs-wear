@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.viewmodel.pages.feedback
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.member.feedback.exception.InvalidCreateFeedbackException
 import com.monglife.mongs.application.member.feedback.usecase.CreateFeedbackUseCase
 import com.monglife.mongs.application.member.feedback.usecase.GetFeedbackTypesUseCase
 import com.monglife.mongs.application.member.feedback.vo.FeedbackTypeVo
@@ -151,6 +152,9 @@ class FeedbackViewModel @Inject constructor(
     }
 
     override suspend fun exceptionHandler(exception: Throwable) {
-        initialize()
+        when (exception) {
+            is InvalidCreateFeedbackException -> _uiState.value = UiState.Create
+            else -> initialize()
+        }
     }
 }

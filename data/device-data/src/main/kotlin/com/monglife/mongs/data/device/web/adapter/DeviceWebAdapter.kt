@@ -3,7 +3,7 @@ package com.monglife.mongs.data.device.web.adapter
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.monglife.mongs.application.device.exception.ExchangeWalkingCountException
+import com.monglife.mongs.application.device.exception.InvalidExchangeWalkingCountException
 import com.monglife.mongs.application.device.exception.NotFoundStepException
 import com.monglife.mongs.application.device.exception.UpdateWalkingCountException
 import com.monglife.mongs.application.device.port.web.DeviceWebPort
@@ -44,7 +44,7 @@ class DeviceWebAdapter @Inject constructor(
     /**
      * 걸음 수 환전
      */
-    @Throws(ExchangeWalkingCountException::class)
+    @Throws(InvalidExchangeWalkingCountException::class)
     override suspend fun exchangeWalkingCount(exchangeWalkingCountRequest: ExchangeWalkingCountRequest): ExchangeWalkingCountResponse =
         deviceWebClient.exchangeCurrentWalkingCount(
             exchangeCurrentWalkingCountRequestDto = ExchangeCurrentWalkingCountRequestDto(
@@ -56,7 +56,7 @@ class DeviceWebAdapter @Inject constructor(
         ).let { response ->
 
             val body =
-                response.takeIf { it.isSuccessful }?.body() ?: throw ExchangeWalkingCountException()
+                response.takeIf { it.isSuccessful }?.body() ?: throw InvalidExchangeWalkingCountException()
 
             ExchangeWalkingCountResponse(
                 consumeWalkingCount = body.result.consumeWalkingCount,

@@ -181,6 +181,21 @@ class BattleMenuViewModel @Inject constructor(
         }
     }
 
+    override fun onCleared() {
+        CoroutineScope(Dispatchers.IO).launch {
+            if (_uiState.value == UiState.Matching) {
+                _currentMongVo.value?.let {
+                    deleteMatchQueueUseCase(
+                        command = DeleteMatchQueueUseCase.Command(
+                            mongId = it.mongId,
+                        )
+                    )
+                }
+            }
+        }
+        super.onCleared()
+    }
+
     /**
      * 화면 초기화 메서드
      */
@@ -196,20 +211,5 @@ class BattleMenuViewModel @Inject constructor(
             is NotFoundMatchRewardException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
             else -> initialize()
         }
-    }
-
-    override fun onCleared() {
-        CoroutineScope(Dispatchers.IO).launch {
-            if (_uiState.value == UiState.Matching) {
-                _currentMongVo.value?.let {
-                    deleteMatchQueueUseCase(
-                        command = DeleteMatchQueueUseCase.Command(
-                            mongId = it.mongId,
-                        )
-                    )
-                }
-            }
-        }
-        super.onCleared()
     }
 }

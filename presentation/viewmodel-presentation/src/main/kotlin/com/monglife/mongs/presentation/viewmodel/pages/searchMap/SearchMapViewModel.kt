@@ -2,6 +2,7 @@ package com.monglife.mongs.presentation.viewmodel.pages.searchMap
 
 import com.monglife.core.presentation.utils.PermissionUtil
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.member.collection.exception.InvalidSearchCollectionMapException
 import com.monglife.mongs.application.member.collection.usecase.SearchCollectionMapUseCase
 import com.monglife.mongs.application.member.collection.vo.CollectionMapVo
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
@@ -165,6 +166,7 @@ class SearchMapViewModel @Inject constructor(
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
             is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            is InvalidSearchCollectionMapException -> _uiState.value = UiState.Idle
             else -> initialize()
         }
     }

@@ -16,7 +16,7 @@ class NotFoundStepException(
 /**
  * 걸음 수 환전 실패 예외
  */
-class ExchangeWalkingCountException(
+class InvalidExchangeWalkingCountException(
     override val code: ErrorCode = DeviceErrorCode.EXCHANGE_WALKING_COUNT,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)

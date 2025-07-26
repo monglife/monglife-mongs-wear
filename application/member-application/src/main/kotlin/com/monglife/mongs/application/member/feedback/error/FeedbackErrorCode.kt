@@ -7,7 +7,7 @@ enum class FeedbackErrorCode(
     private val isMessageShow: Boolean,
 ) : ErrorCode {
 
-    INVALID_CREATE_FEEDBACK("오류 신고 실패", false),
+    INVALID_CREATE_FEEDBACK("오류 신고 실패", true),
     ;
 
     override fun getMessage(): String {

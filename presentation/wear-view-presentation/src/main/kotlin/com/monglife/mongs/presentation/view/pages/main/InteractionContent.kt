@@ -20,8 +20,8 @@ import androidx.navigation.NavController
 import com.monglife.mongs.domain.mong.enums.MongStateCode
 import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
-import com.monglife.mongs.presentation.viewmodel.pages.main.MainInteractionViewModel
 import com.monglife.mongs.presentation.view.component.common.button.CircleImageButton
+import com.monglife.mongs.presentation.viewmodel.pages.main.MainInteractionViewModel
 import com.mongs.wear.presentation.view.wear.R
 
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -78,6 +78,9 @@ internal fun InteractionContent(
                         icon = R.drawable.btn_icon_map_search,
                         border = R.drawable.btn_border_blue,
                         iconSize = 34f,
+                        disable = currentMongVo.value?.let {
+                            it.stateCode == MongStateCode.DEAD || it.stateCode == MongStateCode.DELETE
+                        } ?: true,
                     ) {
                         navController.navigate(RouterPath.SearchMap.route)
                     }
@@ -97,10 +100,10 @@ internal fun InteractionContent(
                     CircleImageButton(
                         icon = R.drawable.btn_icon_luck_draw,
                         border = R.drawable.btn_border_purple,
+                        iconSize = 34f,
                         disable = currentMongVo.value?.let {
                             it.stateCode == MongStateCode.DEAD || it.stateCode == MongStateCode.DELETE
                         } ?: true,
-                        iconSize = 34f,
                     ) {
                         navController.navigate(RouterPath.RandomDraw.route)
                     }

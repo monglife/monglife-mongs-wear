@@ -1,6 +1,6 @@
 package com.monglife.mongs.application.device.port.web
 
-import com.monglife.mongs.application.device.exception.ExchangeWalkingCountException
+import com.monglife.mongs.application.device.exception.InvalidExchangeWalkingCountException
 import com.monglife.mongs.application.device.exception.NotFoundStepException
 import com.monglife.mongs.application.device.exception.UpdateWalkingCountException
 import com.monglife.mongs.application.device.port.web.request.ExchangeWalkingCountRequest
@@ -20,7 +20,7 @@ interface DeviceWebPort {
     /**
      * 걸음 수 환전
      */
-    @Throws(ExchangeWalkingCountException::class)
+    @Throws(InvalidExchangeWalkingCountException::class)
     suspend fun exchangeWalkingCount(exchangeWalkingCountRequest: ExchangeWalkingCountRequest): ExchangeWalkingCountResponse
 
     /**

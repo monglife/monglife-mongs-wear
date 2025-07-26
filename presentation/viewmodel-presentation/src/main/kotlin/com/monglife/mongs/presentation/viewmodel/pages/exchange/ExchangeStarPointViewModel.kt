@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.viewmodel.pages.exchange
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.member.player.exception.InvalidExchangeStarPointException
 import com.monglife.mongs.application.member.player.usecase.ExchangeStarPointUseCase
 import com.monglife.mongs.application.member.player.usecase.ObservePlayerUseCase
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
@@ -165,6 +166,7 @@ class ExchangeStarPointViewModel @Inject constructor(
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
             is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
+            is InvalidExchangeStarPointException -> _uiState.value = UiState.Idle
             else -> initialize()
         }
     }

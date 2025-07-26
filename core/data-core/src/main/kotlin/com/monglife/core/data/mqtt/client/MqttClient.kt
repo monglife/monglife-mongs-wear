@@ -76,6 +76,7 @@ class MqttClient @Inject constructor(
             mqttAndroidClient.setCallback(mqttLogConsumer)
             mqttAndroidClient.addCallback(
                 MqttRetryConsumer(
+                    callbackMap = callbackMap,
                     onConnectLost = {
                         callbackMap.forEach { (topic, callback) ->
                             retrySubscribe(topic = topic, callback = callback)
@@ -147,6 +148,9 @@ class MqttClient @Inject constructor(
         }
     }
 
+    /**
+     * Mqtt 구독 재시도
+     */
     private fun retrySubscribe(
         topic: String,
         callback: MqttCallback,
@@ -213,6 +217,7 @@ class MqttClient @Inject constructor(
      */
     suspend fun disconnect() {
         runCatching {
+            callbackMap.clear()
             retrySubscribeJobMap.values.forEach {
                 it.cancel()
             }

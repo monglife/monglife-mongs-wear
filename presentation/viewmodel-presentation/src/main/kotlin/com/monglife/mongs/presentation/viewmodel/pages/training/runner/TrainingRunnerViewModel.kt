@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.viewmodel.pages.training.runner
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
+import com.monglife.mongs.application.mong.exception.InvalidTrainingException
 import com.monglife.mongs.application.mong.exception.NotFoundMongException
 import com.monglife.mongs.application.mong.exception.NotFoundTrainingException
 import com.monglife.mongs.application.mong.usecase.activity.GetTrainingUseCase
@@ -89,6 +90,8 @@ class TrainingRunnerViewModel @Inject constructor(
     private val _runnerVo = MutableStateFlow<RunnerVo?>(null)
     val runnerVo: StateFlow<RunnerVo?> = _runnerVo.asStateFlow()
 
+    private var observeKey: String? = null
+
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
@@ -123,16 +126,6 @@ class TrainingRunnerViewModel @Inject constructor(
                         trainingCode = trainingCode
                     )
                 )
-
-                // 게임 엔진 초기 설정
-                _runnerVo.value = runnerEngine.generate(
-                    runnerPlayerHeight = 50,
-                    runnerPlayerWidth = 50,
-                    runnerPlayerX = 24f,
-                    floorY = 5f,
-                    startX = -150f,
-                    endX = 250f,
-                )
             }
 
             _uiState.value = UiState.Entering
@@ -145,8 +138,19 @@ class TrainingRunnerViewModel @Inject constructor(
     fun start() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             withContext(Dispatchers.IO) {
-                _runnerVo.value?.let {
-                    observeForever(runnerEngine.start(runnerId = it.runnerId), _runnerVo)
+                // 게임 엔진 초기 설정
+                runnerEngine.generate(
+                    runnerPlayerHeight = 50,
+                    runnerPlayerWidth = 50,
+                    runnerPlayerX = 24f,
+                    floorY = 5f,
+                    startX = -150f,
+                    endX = 250f,
+                ).let {
+                    observeKey = observeForever(
+                        runnerEngine.start(runnerId = it.runnerId),
+                        _runnerVo
+                    )
                 }
             }
 
@@ -177,6 +181,8 @@ class TrainingRunnerViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
+                observeKey?.let { observeStop(key = it) }
+
                 _trainingEndVo.value = trainingEndUseCase(
                     command = TrainingEndUseCase.Command(
                         mongId = mongId,
@@ -218,6 +224,7 @@ class TrainingRunnerViewModel @Inject constructor(
         _runnerVo.value?.let {
             runnerEngine.stop(runnerId = it.runnerId)
         }
+        observeKey?.let { observeStop(key = it) }
     }
 
     /**
@@ -225,7 +232,7 @@ class TrainingRunnerViewModel @Inject constructor(
      */
     override fun initialize() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Idle
+            _uiState.value = UiState.Entering
         }
     }
 
@@ -233,6 +240,7 @@ class TrainingRunnerViewModel @Inject constructor(
         when (exception) {
             is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
             is NotFoundTrainingException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
+            is InvalidTrainingException -> _uiState.value = UiState.Entering
             else -> initialize()
         }
     }
