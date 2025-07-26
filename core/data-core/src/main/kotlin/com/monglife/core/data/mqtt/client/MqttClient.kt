@@ -5,6 +5,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.monglife.core.data.mqtt.consumer.MqttConsumer
 import com.monglife.core.data.mqtt.consumer.MqttLogConsumer
+import com.monglife.core.data.mqtt.consumer.MqttRetryConsumer
 import com.monglife.core.data.mqtt.exception.InvalidConnectException
 import com.monglife.core.data.mqtt.exception.InvalidDisConnectException
 import com.monglife.core.data.mqtt.exception.InvalidDisSubscribeException
@@ -28,10 +29,12 @@ import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
+@Singleton
 class MqttClient @Inject constructor(
     @ApplicationContext private val context: Context,
     private val mqttAndroidClient: MqttAndroidClient,
@@ -71,6 +74,15 @@ class MqttClient @Inject constructor(
             }
 
             mqttAndroidClient.setCallback(mqttLogConsumer)
+            mqttAndroidClient.addCallback(
+                MqttRetryConsumer(
+                    onConnectLost = {
+                        callbackMap.forEach { (topic, callback) ->
+                            retrySubscribe(topic = topic, callback = callback)
+                        }
+                    }
+                )
+            )
             mqttAndroidClient.connect(
                 options = options,
                 userContext = MqttUserContext.Connect,
@@ -108,14 +120,14 @@ class MqttClient @Inject constructor(
     ) {
         if (retrySubscribeJobMap.contains(topic)) return
 
+        val callback = MqttConsumer(
+            topic = topic,
+            onReceive = onReceive,
+            classType = classType,
+        )
+
         runCatching {
             val mqttAndroidClient = connect()
-
-            val callback = MqttConsumer(
-                topic = topic,
-                onReceive = onReceive,
-                classType = classType,
-            )
 
             mqttAndroidClient.addCallback(callback = callback)
             mqttAndroidClient.subscribe(
@@ -130,29 +142,25 @@ class MqttClient @Inject constructor(
         }.onFailure {
             retrySubscribeJobMap[topic] = retrySubscribe(
                 topic = topic,
-                classType = classType,
-                onReceive = onReceive
+                callback = callback,
             )
         }
     }
 
-    private fun <T> retrySubscribe(
+    private fun retrySubscribe(
         topic: String,
-        classType: Class<T>,
-        onReceive: suspend (ResponseDto<T>) -> Unit
+        callback: MqttCallback,
     ) = CoroutineScope(Dispatchers.IO).launch {
+
+        if (retrySubscribeJobMap.contains(topic)) return@launch
 
         var isSuccess = false
 
         while (!isSuccess) {
+            delay(SUBSCRIBE_RETRY_DELAY)
+
             runCatching {
                 val mqttAndroidClient = connect()
-
-                val callback = MqttConsumer(
-                    topic = topic,
-                    onReceive = onReceive,
-                    classType = classType,
-                )
 
                 mqttAndroidClient.addCallback(callback = callback)
                 mqttAndroidClient.subscribe(
@@ -171,7 +179,6 @@ class MqttClient @Inject constructor(
 
                 isSuccess = true
             }
-            .onFailure { delay(SUBSCRIBE_RETRY_DELAY) }
         }
     }
 

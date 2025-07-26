@@ -1,6 +1,5 @@
 package com.monglife.mongs.presentation.view.utils
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
@@ -19,14 +18,11 @@ fun Timer(
 
     // 타이머
     LaunchedEffect(Unit) {
-        Log.d("TEST", "startTimeMillis: $startTimeMillis, maxTimeMillis: $maxTimeMillis")
-
         if (startTimeMillis < maxTimeMillis) {
             while (progress.floatValue < 100f) {
-                delay(timerDelay)
                 timeMillis.longValue += timerDelay
-                progress.floatValue = timeMillis.longValue / maxTimeMillis * 100f
-                Log.d("TEST", "timeMillis: ${timeMillis.longValue}, progress: ${progress.value}")
+                progress.floatValue = timeMillis.longValue.toFloat() / maxTimeMillis.toFloat() * 100f
+                delay(timerDelay)
             }
         } else {
             progress.floatValue = 100f
