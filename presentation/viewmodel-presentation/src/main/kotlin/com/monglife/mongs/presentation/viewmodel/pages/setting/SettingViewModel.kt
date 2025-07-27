@@ -126,7 +126,9 @@ class SettingViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
-            withContext(Dispatchers.IO) { logoutUseCase() }
+            withContext(Dispatchers.IO) {
+                logoutUseCase()
+            }
 
             _uiState.value = UiState.Idle
         }

@@ -21,11 +21,10 @@ class LogoutUseCase @Inject constructor(
     override suspend fun execute() {
         withContext(Dispatchers.IO) {
             authPersistencePort.getSession()?.let { session: Session ->
-                // 로그 아웃 요청
-                authWebPort.logout(refreshToken = session.refreshToken)
                 // 세션 로컬 삭제
                 authPersistencePort.deleteSession()
-                // 현재 몽 설정 삭제
+                // 로그 아웃 요청
+                authWebPort.logout(refreshToken = session.refreshToken)
             } ?: throw InvalidLogoutException()
         }
     }
