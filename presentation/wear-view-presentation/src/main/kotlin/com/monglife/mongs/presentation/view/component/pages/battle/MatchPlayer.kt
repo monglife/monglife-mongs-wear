@@ -117,8 +117,6 @@ fun MatchPlayer(
                             contentScale = ContentScale.FillBounds
                         )
                     }
-
-                    else -> {}
                 }
             }
         }

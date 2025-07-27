@@ -19,6 +19,6 @@ object RoomModule {
     @Singleton
     fun provideMongRoomDB(@ApplicationContext context: Context): MongRoomDB =
         Room.databaseBuilder(context.applicationContext, MongRoomDB::class.java, ROOM_NAME)
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration(true)
             .build()
 }

@@ -98,6 +98,7 @@ subprojects {
                     project.delete fileTree("./") {
                         include("*.json")
                         include("*.pro")
+                        include("*.properties")
                     }
                     project.copy {
                         from(configPath + "/" + parentModule + "/" + currentModule + "/") {
@@ -109,6 +110,7 @@ subprojects {
                         from(configPath + "/" + parentModule + "/" + currentModule + "/") {
                             include("*.json")
                             include("*.pro")
+                            include("*.properties")
                         }
                         into("./")
                     }

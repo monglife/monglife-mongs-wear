@@ -33,10 +33,28 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            def properties = new Properties()
+            properties.load(new FileInputStream(file("keystore.properties")))
+
+            storeFile file(properties["key.store.file"])
+            storePassword properties["key.store.password"]
+            keyAlias properties["key.alias.name"]
+            keyPassword properties["key.alias.password"]
+        }
+    }
+
     buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.release
         }
     }
 
