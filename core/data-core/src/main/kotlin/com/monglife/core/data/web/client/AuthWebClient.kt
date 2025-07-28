@@ -19,7 +19,7 @@ interface AuthWebClient {
     /**
      * 앱 버전 검증 API 요청
      */
-    @GET("auth/verify/version")
+    @GET("public/auth/verify/version")
     suspend fun verifyAppVersion(
         @Query("appPackageName") appPackageName: String, @Query("buildVersion") buildVersion: String
     ): Response<ResponseDto<VerifyAppVersionResponseDto>>
@@ -27,24 +27,24 @@ interface AuthWebClient {
     /**
      * 회원 가입 API 요청
      */
-    @POST("auth/join")
+    @POST("public/auth/join")
     suspend fun join(@Body joinRequestDto: JoinRequestDto): Response<ResponseDto<Void>>
 
     /**
      * 로그인 API 요청
      */
-    @POST("auth/login")
+    @POST("public/auth/login")
     suspend fun login(@Body loginRequestDto: LoginRequestDto): Response<ResponseDto<LoginResponseDto>>
 
     /**
      * 로그아웃 API 요청
      */
-    @POST("auth/logout")
+    @POST("public/auth/logout")
     suspend fun logout(@Body logoutRequestDto: LogoutRequestDto): Response<ResponseDto<Void>>
 
     /**
      * 토큰 재발행 API 요청
      */
-    @POST("auth/reissue")
+    @POST("public/auth/reissue")
     suspend fun reissue(@Body reissueRequestDto: ReissueRequestDto): Response<ResponseDto<ReissueResponseDto>>
 }
