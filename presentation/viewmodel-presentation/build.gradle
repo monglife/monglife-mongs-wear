@@ -1,0 +1,35 @@
+android {
+    namespace "${rootProject.ext.namespace}.presentation.viewmodel"
+}
+
+dependencies {
+    // core layer
+    implementation project(":core:billing-core")
+
+    // application layer
+    api project(":application:auth-application")
+    api project(":application:battle-application")
+    api project(":application:device-application")
+    api project(":application:member-application")
+    api project(":application:mong-application")
+
+    // data layer
+    implementation project(":data:auth-data")
+    implementation project(":data:battle-data")
+    implementation project(":data:device-data")
+    implementation project(":data:member-data")
+    implementation project(":data:mong-data")
+
+    // livedata
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:${rootProject.ext.lifecycleVersion}"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:${rootProject.ext.lifecycleVersion}"
+
+    // viewmodel
+    implementation "androidx.wear.compose:compose-foundation:${parent.ext.composeVersion}"
+    implementation "androidx.wear.compose:compose-navigation:${parent.ext.composeVersion}"
+
+    // google-auth & firebase-fcm & google-location
+    implementation "com.google.firebase:firebase-auth"
+    implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
+    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsversion}"
+}

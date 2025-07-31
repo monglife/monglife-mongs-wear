@@ -1,0 +1,44 @@
+buildscript {
+    ext {
+        composeVersion          = "1.4.1"
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "com.google.devtools.ksp"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "dagger.hilt.android.plugin"
+
+android {
+    namespace "${rootProject.ext.namespace}.core.presentation"
+
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 30
+    }
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.javaVersion
+        targetCompatibility rootProject.ext.javaVersion
+    }
+
+    kotlinOptions {
+        jvmTarget = rootProject.ext.javaVersion.toString()
+    }
+}
+
+dependencies {
+    // core layer
+    api project(":core:common-core")
+    implementation project(":core:application-core")
+
+    // dagger & hilt
+    implementation group: "javax.inject", name: "javax.inject", version: "1"
+    implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
+    ksp "com.google.dagger:dagger-compiler:${rootProject.ext.hiltVersion}"
+    ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
+
+    implementation "androidx.wear.compose:compose-foundation:${this.ext.composeVersion}"
+    implementation "androidx.wear.compose:compose-navigation:${this.ext.composeVersion}"
+}

@@ -1,85 +1,41 @@
-plugins {
-    id 'org.jetbrains.kotlin.android'
-    id 'com.android.library'
-    id 'com.google.devtools.ksp'
-    id 'dagger.hilt.android.plugin'
+buildscript {
+    ext {
+        composeVersion          = "1.4.1"
+        composeWearVersion      = "1.8.3"
+    }
 }
 
-android {
-    namespace 'com.mongs.wear.presentation'
-    compileSdk 34
+subprojects {
+    apply plugin: "com.android.library"
+    apply plugin: "com.google.devtools.ksp"
+    apply plugin: "org.jetbrains.kotlin.android"
+    apply plugin: "dagger.hilt.android.plugin"
 
-    defaultConfig {
-        minSdk 30
-    }
+    android {
+        compileSdk 35
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        defaultConfig {
+            minSdk 30
+        }
+
+        compileOptions {
+            sourceCompatibility rootProject.ext.javaVersion
+            targetCompatibility rootProject.ext.javaVersion
+        }
+
+        kotlinOptions {
+            jvmTarget = rootProject.ext.javaVersion.toString()
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+    dependencies {
+        // core layer
+        implementation project(":core:presentation-core")
+
+        // dagger & hilt
+        implementation group: "javax.inject", name: "javax.inject", version: "1"
+        implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
+        ksp "com.google.dagger:dagger-compiler:${rootProject.ext.hiltVersion}"
+        ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
     }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
-    buildFeatures {
-        compose true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
-}
-
-dependencies {
-    implementation project(':core')
-    implementation project(':domain')
-
-    // dagger & hilt
-    implementation group: 'javax.inject', name: 'javax.inject', version: '1'
-    implementation "com.google.dagger:hilt-android:2.49"
-    ksp 'com.google.dagger:hilt-compiler:2.48.1'
-    implementation 'androidx.hilt:hilt-work:1.2.0'
-    ksp "androidx.hilt:hilt-compiler:1.2.0"
-
-    // google-login
-    implementation platform("com.google.firebase:firebase-bom:33.8.0")
-    implementation "com.google.firebase:firebase-auth"
-    implementation 'com.google.android.gms:play-services-auth:21.3.0'
-//    implementation "androidx.credentials:credentials:1.3.0"
-//    implementation "androidx.credentials:credentials-play-services-auth:1.3.0"
-//    implementation "com.google.android.libraries.identity.googleid:googleid:1.1.1"
-
-    // coil (gif)
-    api 'io.coil-kt:coil-compose:2.5.0'
-    api 'io.coil-kt:coil-gif:2.5.0'
-
-    // compose
-    api 'androidx.wear.compose:compose-material:1.4.0'
-    api 'androidx.compose.material:material-icons-extended:1.7.6'
-    api 'androidx.wear.compose:compose-foundation:1.4.0'
-    api 'androidx.hilt:hilt-navigation-compose:1.2.0'
-    api "androidx.compose.runtime:runtime-livedata:1.7.6"
-    implementation 'androidx.wear.compose:compose-navigation:1.4.0'
-    implementation 'androidx.compose.ui:ui-tooling-preview:1.7.6'
-    debugImplementation 'androidx.compose.ui:ui-tooling:1.7.6'
-
-    // worker
-    implementation "androidx.work:work-runtime-ktx:2.8.1"
-
-    // billing
-    implementation "com.android.billingclient:billing-ktx:7.1.1"
-
-    // fcm
-    implementation 'com.google.firebase:firebase-messaging-ktx:24.1.0'
-
-    // gps
-    implementation 'com.google.android.gms:play-services-location:21.3.0'
 }

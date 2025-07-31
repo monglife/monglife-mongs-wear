@@ -1,0 +1,22 @@
+subprojects {
+    apply plugin: "org.jetbrains.kotlin.jvm"
+    apply plugin: 'com.google.devtools.ksp'
+
+    dependencies {
+        // core layer
+        api project(':core:application-core')
+
+        // coroutine-flow
+        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
+
+        // dagger-hilt
+        implementation "com.google.dagger:dagger:${rootProject.ext.hiltVersion}"
+        ksp "com.google.dagger:dagger-compiler:${rootProject.ext.hiltVersion}"
+
+        // test
+        testImplementation "junit:junit:${rootProject.ext.jupiterVersion}"
+        testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
+        testImplementation "org.mockito.kotlin:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
+        testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2"
+    }
+}

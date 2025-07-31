@@ -1,0 +1,39 @@
+android {
+    namespace "${rootProject.ext.namespace}.data.device"
+}
+
+dependencies {
+    // core layer
+    implementation project(":core:data-core")
+
+    // application layer
+    implementation project(":application:auth-application")
+    implementation project(":application:battle-application")
+    implementation project(":application:device-application")
+    implementation project(":application:member-application")
+    implementation project(":application:mong-application")
+
+    // retrofit2 & coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
+    implementation 'com.squareup.okio:okio:3.9.0'
+    implementation "com.squareup.retrofit2:retrofit:${parent.ext.retrofitVersion}"
+    implementation "com.squareup.retrofit2:converter-gson:${parent.ext.retrofitVersion}"
+
+    // data store
+    implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
+    implementation "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
+
+    // google-auth & firebase-fcm & google-location
+    implementation "com.google.firebase:firebase-auth"
+    implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
+    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsversion}"
+
+    // worker
+    implementation "androidx.work:work-runtime-ktx:${rootProject.ext.workerVersion}"
+    implementation "androidx.hilt:hilt-work:${rootProject.ext.hiltWorkerVersion}"
+    ksp "androidx.hilt:hilt-compiler:${rootProject.ext.hiltWorkerVersion}"
+
+    // fcm
+    implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
+    implementation "com.google.firebase:firebase-messaging-ktx:${rootProject.ext.fcmVersion}"
+}

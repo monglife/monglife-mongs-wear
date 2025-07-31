@@ -11,13 +11,43 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven { url "https://jitpack.io" }
     }
 }
 
 rootProject.name = "mongs"
-include ':core'
-include ':app'
-include ':presentation'
-include ':domain'
-include ':data'
+
+include ":app"
+include ":app:wear-app"
+
+include ":application"
+include ":application:auth-application"
+include ":application:battle-application"
+include ":application:device-application"
+include ":application:member-application"
+include ":application:mong-application"
+
+include ":core"
+include ":core:common-core"
+include ":core:presentation-core"
+include ":core:application-core"
+include ":core:data-core"
+include ":core:billing-core"
+
+include ":data"
+include ":data:auth-data"
+include ":data:battle-data"
+include ":data:device-data"
+include ":data:member-data"
+include ":data:mong-data"
+
+include ":domain"
+include ":domain:auth-domain"
+include ":domain:battle-domain"
+include ":domain:device-domain"
+include ":domain:member-domain"
+include ":domain:mong-domain"
+
+include ":presentation"
+include ":presentation:viewmodel-presentation"
+include ":presentation:wear-view-presentation"

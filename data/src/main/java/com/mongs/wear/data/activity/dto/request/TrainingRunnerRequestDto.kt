@@ -1,8 +1,0 @@
-package com.mongs.wear.data.activity.dto.request
-
-data class TrainingRunnerRequestDto(
-
-    val mongId: Long,
-
-    val score: Int,
-)

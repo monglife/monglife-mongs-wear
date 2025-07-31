@@ -1,0 +1,29 @@
+android {
+    namespace "${rootProject.ext.namespace}.data.battle"
+}
+
+dependencies {
+    // core layer
+    implementation project(":core:data-core")
+
+    // application layer
+    implementation project(":application:battle-application")
+
+    // retrofit2 & coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
+    implementation 'com.squareup.okio:okio:3.9.0'
+    implementation "com.squareup.retrofit2:retrofit:${parent.ext.retrofitVersion}"
+    implementation "com.squareup.retrofit2:converter-gson:${parent.ext.retrofitVersion}"
+    // data store
+    implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
+    implementation "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
+
+    // room
+    implementation "androidx.room:room-runtime:${parent.ext.roomVersion}"
+    implementation "androidx.room:room-ktx:${parent.ext.roomVersion}"
+    ksp "androidx.room:room-compiler:${parent.ext.roomVersion}"
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}

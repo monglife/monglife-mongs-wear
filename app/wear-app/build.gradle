@@ -1,0 +1,94 @@
+apply plugin: "com.android.application"
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: "dagger.hilt.android.plugin"
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: "com.google.gms.google-services"
+apply plugin: "org.jetbrains.kotlin.plugin.compose"
+
+android {
+    namespace "${rootProject.ext.namespace}"
+
+    compileSdk 35
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.javaVersion
+        targetCompatibility rootProject.ext.javaVersion
+    }
+
+    kotlinOptions {
+        jvmTarget = rootProject.ext.javaVersion.toString()
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    defaultConfig {
+        minSdk          30
+        targetSdk       34
+        versionCode     25
+        versionName     "2.0.2"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    signingConfigs {
+        release {
+            if (file("keystore.properties").exists()) {
+                def properties = new Properties()
+                properties.load(new FileInputStream(file("keystore.properties")))
+
+                storeFile file(properties["key.store.file"])
+                storePassword properties["key.store.password"]
+                keyAlias properties["key.alias.name"]
+                keyPassword properties["key.alias.password"]
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.release
+        }
+    }
+
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+}
+
+dependencies {
+    // core layer
+    implementation project(":core:data-core")
+
+    // presentation layer
+    implementation project(":presentation:wear-view-presentation")
+
+    // service
+    implementation "androidx.lifecycle:lifecycle-service:2.9.1"
+
+    // dagger & hilt
+    implementation group: "javax.inject", name: "javax.inject", version: "1"
+    implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
+    ksp "com.google.dagger:dagger-compiler:${rootProject.ext.hiltVersion}"
+    ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
+
+    // worker
+    implementation "androidx.work:work-runtime-ktx:${rootProject.ext.workerVersion}"
+    implementation "androidx.hilt:hilt-work:${rootProject.ext.hiltWorkerVersion}"
+    ksp "androidx.hilt:hilt-compiler:${rootProject.ext.hiltWorkerVersion}"
+
+    // fcm
+    implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
+    implementation "com.google.firebase:firebase-messaging-ktx:${rootProject.ext.fcmVersion}"
+}

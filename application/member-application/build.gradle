@@ -1,0 +1,5 @@
+dependencies {
+    // domain layer
+    api project(':domain:member-domain')
+    api project(':domain:auth-domain')
+}

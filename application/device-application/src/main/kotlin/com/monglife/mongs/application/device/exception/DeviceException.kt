@@ -1,0 +1,30 @@
+package com.monglife.mongs.application.device.exception
+
+import com.monglife.core.common.error.ErrorCode
+import com.monglife.core.common.exception.ErrorException
+import com.monglife.mongs.application.device.error.DeviceErrorCode
+
+/**
+ * 걸음 수 환전 실패 예외
+ */
+class NotFoundStepException(
+    override val code: ErrorCode = DeviceErrorCode.NOT_FOUND_STEP,
+    override val message: String = code.getMessage()
+) : ErrorException(code = code, message = message)
+
+
+/**
+ * 걸음 수 환전 실패 예외
+ */
+class InvalidExchangeWalkingCountException(
+    override val code: ErrorCode = DeviceErrorCode.EXCHANGE_WALKING_COUNT,
+    override val message: String = code.getMessage()
+) : ErrorException(code = code, message = message)
+
+/**
+ * 걸음 수 동기화 실패 예외
+ */
+class UpdateWalkingCountException(
+    override val code: ErrorCode = DeviceErrorCode.UPDATE_WALKING_COUNT,
+    override val message: String = code.getMessage()
+) : ErrorException(code = code, message = message)

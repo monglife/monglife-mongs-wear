@@ -1,0 +1,28 @@
+android {
+    namespace "${rootProject.ext.namespace}.data.member"
+}
+
+dependencies {
+    // core layer
+    implementation project(":core:billing-core")
+    implementation project(":core:data-core")
+
+    // application layer
+    implementation project(":application:member-application")
+
+    // retrofit2 & coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
+    implementation 'com.squareup.okio:okio:3.9.0'
+    implementation "com.squareup.retrofit2:retrofit:${parent.ext.retrofitVersion}"
+    implementation "com.squareup.retrofit2:converter-gson:${parent.ext.retrofitVersion}"
+
+    // google-location
+    implementation "com.google.firebase:firebase-auth"
+    implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
+    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsversion}"
+    implementation "com.google.android.gms:play-services-location:${rootProject.ext.gmsversion}"
+
+    // data store
+    implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
+    implementation "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
+}

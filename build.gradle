@@ -1,8 +1,131 @@
+buildscript {
+    ext {
+        namespace               = "com.mongs.wear"
+        javaVersion             = JavaVersion.VERSION_17
+        androidVersion          = "8.10.1"
+        kotlinVersion           = "2.1.21"
+        kspVersion              = "2.1.21-2.0.1"
+        hiltVersion             = "2.54"
+        hiltWorkerVersion       = "1.3.0-alpha01"
+        workerVersion           = "2.10.2"
+        lifecycleVersion        = "2.9.1"
+        firebaseVersion         = "33.8.0"
+        fcmVersion              = "24.1.2"
+        gmsPluginVersion        = "4.4.2"
+        gmsversion              = "21.3.0"
+        jupiterVersion          = "4.13.2"
+        mockitoVersion          = "5.14.2"
+        mockitoKotlinVersion    = "5.2.1"
+        composePluginVersion    = "2.0.0"
+    }
+}
+
 plugins {
-    id 'org.jetbrains.kotlin.android' version '1.9.24' apply false
-    id 'com.google.devtools.ksp' version "1.9.10-1.0.13" apply false
-    id 'com.android.application' version '8.5.2' apply false
-    id 'com.android.library' version '8.5.2' apply false
-    id 'com.google.dagger.hilt.android' version '2.48' apply false
-    id 'com.google.gms.google-services' version "4.4.2" apply false
+    id "com.android.library"                 version "${androidVersion}"        apply false
+    id "com.android.application"             version "${androidVersion}"        apply false
+    id "org.jetbrains.kotlin.jvm"            version "${kotlinVersion}"         apply false
+    id "org.jetbrains.kotlin.android"        version "${kotlinVersion}"         apply false
+    id "com.google.devtools.ksp"             version "${kspVersion}"            apply false
+    id "com.google.dagger.hilt.android"      version "${hiltVersion}"           apply false
+    id "com.google.gms.google-services"      version "${gmsPluginVersion}"      apply false
+    id "org.jetbrains.kotlin.plugin.compose" version "${composePluginVersion}"  apply false
+}
+
+subprojects {
+    // 개발 환경 파일 복사
+    tasks.register("copyPrivateDev", DefaultTask) {
+        def profile = "dev"
+        def configPath = "${rootDir}/configs"
+        def fullPath = project.path
+        def pathSegments = fullPath.tokenize(":")
+
+        if (pathSegments.size() > 1) {
+            def parentModule = pathSegments[-2]
+            def currentModule = pathSegments[-1]
+
+            doLast {
+                if (parentModule == 'app') {
+                    project.delete fileTree("src/main/res/values") {
+                        include("*.xml")
+                    }
+                    project.delete fileTree("./") {
+                        include("*.json")
+                        include("*.pro")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*.xml")
+                        }
+                        into("src/main/res/values")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*.json")
+                            include("*.pro")
+                        }
+                        into("./")
+                    }
+                } else {
+                    project.delete fileTree("src/main/res/values") {
+                        include("*.xml")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*${profile}.xml")
+                        }
+                        into("src/main/res/values")
+                    }
+                }
+            }
+        }
+    }
+    // 프로덕트 환경 파일 복사
+    tasks.register("copyPrivatePrd", DefaultTask) {
+        def profile = "prd"
+        def configPath = "${rootDir}/configs"
+        def fullPath = project.path
+        def pathSegments = fullPath.tokenize(":")
+
+        if (pathSegments.size() > 1) {
+            def parentModule = pathSegments[-2]
+            def currentModule = pathSegments[-1]
+
+            doLast {
+                if (parentModule == 'app') {
+                    project.delete fileTree("src/main/res/values") {
+                        include("*.xml")
+                    }
+                    project.delete fileTree("./") {
+                        include("*.json")
+                        include("*.pro")
+                        include("*.properties")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*.xml")
+                        }
+                        into("src/main/res/values")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*.json")
+                            include("*.pro")
+                            include("*.properties")
+                        }
+                        into("./")
+                    }
+                } else {
+                    project.delete fileTree("src/main/res/values") {
+                        include("*.xml")
+                    }
+                    project.copy {
+                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
+                            include("*${profile}.xml")
+                        }
+                        into("src/main/res/values")
+                    }
+                }
+            }
+        }
+    }
 }

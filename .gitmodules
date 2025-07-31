@@ -1,0 +1,3 @@
+[submodule "monglife-mongs-wear-sub"]
+	path = configs
+	url = https://github.com/monglife/monglife-mongs-wear-sub.git

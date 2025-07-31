@@ -1,0 +1,66 @@
+buildscript {
+    ext {
+        retrofitVersion   = "2.9.0"
+        dataStoreVersion  = "1.1.2"
+        mqttVersion       = "4.4.1"
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: "dagger.hilt.android.plugin"
+
+android {
+    namespace "${rootProject.ext.namespace}.data.core"
+
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 30
+    }
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.javaVersion
+        targetCompatibility rootProject.ext.javaVersion
+    }
+
+    kotlinOptions {
+        jvmTarget = rootProject.ext.javaVersion.toString()
+    }
+}
+
+dependencies {
+    // core layer
+    api project(":core:common-core")
+
+    // domain layer
+    implementation project(":domain:auth-domain")
+
+    // gson
+    api 'com.google.code.gson:gson:2.11.0'
+
+    // retrofit2 & coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
+    implementation 'com.squareup.okio:okio:3.9.0'
+    implementation "com.squareup.retrofit2:retrofit:${this.ext.retrofitVersion}"
+    implementation "com.squareup.retrofit2:converter-gson:${this.ext.retrofitVersion}"
+
+    implementation "androidx.datastore:datastore-preferences:${this.ext.dataStoreVersion}"
+    api "androidx.datastore:datastore-preferences-core:${this.ext.dataStoreVersion}"
+
+    // mqtt
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    api "com.github.hannesa2:paho.mqtt.android:${this.ext.mqttVersion}"
+
+    // dagger-hilt
+    implementation group: "javax.inject", name: "javax.inject", version: "1"
+    implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
+    ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
+
+    // test
+    testImplementation "junit:junit:${rootProject.ext.jupiterVersion}"
+    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2"
+}
