@@ -181,5 +181,8 @@ internal fun SlotContent(
         if (isPagerChange.value && uiState.value.interactionDialogOpen) {
             mainSlotViewModel.interactionDialogClose()
         }
+        if (isPagerChange.value && uiState.value.initNotificationDialogOpen) {
+            mainSlotViewModel.initDialogClose()
+        }
     }
 }

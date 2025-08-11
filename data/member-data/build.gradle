@@ -19,8 +19,8 @@ dependencies {
     // google-location
     implementation "com.google.firebase:firebase-auth"
     implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
-    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsversion}"
-    implementation "com.google.android.gms:play-services-location:${rootProject.ext.gmsversion}"
+    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsAuthVersion}"
+    implementation "com.google.android.gms:play-services-location:${rootProject.ext.gmsLocationVersion}"
 
     // data store
     implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"

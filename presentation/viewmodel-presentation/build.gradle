@@ -31,5 +31,5 @@ dependencies {
     // google-auth & firebase-fcm & google-location
     implementation "com.google.firebase:firebase-auth"
     implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
-    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsversion}"
+    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsAuthVersion}"
 }

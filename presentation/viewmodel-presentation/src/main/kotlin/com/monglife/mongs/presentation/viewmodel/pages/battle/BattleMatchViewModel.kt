@@ -223,9 +223,9 @@ class BattleMatchViewModel @Inject constructor(
 
     override fun onCleared() {
         CoroutineScope(Dispatchers.IO).launch {
-            if (_uiState.value != UiState.End) {
-                // 매치 퇴장
-                _matchVo.value?.let { matchVo ->
+            _matchVo.value?.let { matchVo ->
+                if (_uiState.value != UiState.End && !matchVo.isLastRound) {
+                    // 매치 퇴장
                     matchVo.matchPlayers.find { it.isMe }?.let { matchPlayer ->
                         exitMatchUseCase(
                             command = ExitMatchUseCase.Command(

@@ -37,18 +37,18 @@ class StepSensorManager @Inject constructor(
         // 타임 아웃 측정
         val timeoutJob = CoroutineScope(Dispatchers.IO).launch {
             delay(STEP_LISTENER_TIMEOUT)
-            cont.resume(null)
+            if (cont.isActive) cont.resume(null)
         }
 
         runCatching {
             sensorManager.getDefaultSensor(STEP_SENSOR_TYPE)?.let {
                 sensorManager.registerListener(object : SensorEventListener {
                     override fun onSensorChanged(event: SensorEvent?) {
-                        if (event?.sensor?.type == STEP_SENSOR_TYPE) {
+                        if (event?.sensor?.type == STEP_SENSOR_TYPE && cont.isActive) {
                             val totalWalkingCount = event.values[0].toInt()
                             sensorManager.unregisterListener(this)
                             timeoutJob.cancel()
-                            cont.resume(totalWalkingCount)
+                            if (cont.isActive) cont.resume(totalWalkingCount)
                         }
                     }
 
@@ -57,11 +57,11 @@ class StepSensorManager @Inject constructor(
                 }, it, SensorManager.SENSOR_DELAY_FASTEST)
             } ?: run {
                 timeoutJob.cancel()
-                cont.resume(null)
+                if (cont.isActive) cont.resume(null)
             }
         }.onFailure {
             timeoutJob.cancel()
-            cont.resume(null)
+            if (cont.isActive) cont.resume(null)
         }
     }
 
@@ -82,6 +82,8 @@ class StepSensorManager @Inject constructor(
         }
 
         runCatching {
+            trySend(null)
+
             sensorManager.getDefaultSensor(STEP_SENSOR_TYPE)?.let {
                 sensorManager.registerListener(
                     listener,
