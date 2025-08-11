@@ -82,6 +82,8 @@ class StepSensorManager @Inject constructor(
         }
 
         runCatching {
+            trySend(null)
+
             sensorManager.getDefaultSensor(STEP_SENSOR_TYPE)?.let {
                 sensorManager.registerListener(
                     listener,
