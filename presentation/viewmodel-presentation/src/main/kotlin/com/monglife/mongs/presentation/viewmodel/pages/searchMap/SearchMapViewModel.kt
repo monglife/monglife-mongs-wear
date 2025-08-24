@@ -141,6 +141,7 @@ class SearchMapViewModel @Inject constructor(
      */
     fun searchMapDetailDialogClose() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _collectionMapVo.value = null
             _uiState.value = UiState.Idle
         }
     }
