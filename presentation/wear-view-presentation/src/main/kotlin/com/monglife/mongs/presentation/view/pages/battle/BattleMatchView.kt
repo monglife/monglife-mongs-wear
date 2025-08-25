@@ -41,7 +41,7 @@ import com.monglife.mongs.presentation.view.component.pages.battle.PickLoadingBa
 import com.monglife.mongs.presentation.view.dialog.pages.battle.MatchOverDialog
 import com.monglife.mongs.presentation.view.dialog.pages.battle.MatchPickDialog
 import com.monglife.mongs.presentation.viewmodel.pages.battle.BattleMatchViewModel
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 @Composable
 internal fun BattleMatchView(

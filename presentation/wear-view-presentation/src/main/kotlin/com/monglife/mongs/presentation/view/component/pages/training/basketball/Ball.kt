@@ -12,7 +12,7 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.monglife.mongs.presentation.viewmodel.pages.training.basketball.vo.BallVo
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 @Composable
 internal fun Ball(

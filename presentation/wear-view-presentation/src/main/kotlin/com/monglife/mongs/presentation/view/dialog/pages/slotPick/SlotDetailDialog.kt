@@ -39,7 +39,7 @@ import com.monglife.mongs.presentation.view.assets.MongsLightGray
 import com.monglife.mongs.presentation.view.assets.MongsPink
 import com.monglife.mongs.presentation.view.assets.MongsYellow
 import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit

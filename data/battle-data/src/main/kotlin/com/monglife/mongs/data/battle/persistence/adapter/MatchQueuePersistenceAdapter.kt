@@ -5,7 +5,7 @@ import com.monglife.core.data.mqtt.client.MqttClient
 import com.monglife.mongs.application.battle.port.persistence.MatchQueuePersistencePort
 import com.monglife.mongs.data.battle.persistence.dto.MatchQueueEventDto
 import com.monglife.mongs.domain.battle.model.MatchQueue
-import com.mongs.wear.data.core.R
+import com.mongs.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

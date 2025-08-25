@@ -1,8 +1,11 @@
 buildscript {
     ext {
+        composeWearVersion      = "1.4.1"
+        composeVersion          = "1.8.3"
+        composeNavigateVersion  = "1.5.0-rc02"
         hiltNavigationVersion   = "1.2.0"
         materialVersion         = "1.7.6"
-        coilVersion             = "2.5.0"
+        coilVersion             = "2.7.0"
     }
 }
 
@@ -21,14 +24,13 @@ dependencies {
     api project(":presentation:viewmodel-presentation")
 
     // compose
-    api "androidx.wear.compose:compose-material:${parent.ext.composeVersion}"
-    api "androidx.wear.compose:compose-foundation:${parent.ext.composeVersion}"
-    api "androidx.wear.compose:compose-navigation:${parent.ext.composeVersion}"
+    api "androidx.wear.compose:compose-material:${this.ext.composeWearVersion}"
+    api "androidx.wear.compose:compose-foundation:${this.ext.composeWearVersion}"
+    api "androidx.wear.compose:compose-navigation:${this.ext.composeNavigateVersion}"
     implementation "androidx.hilt:hilt-navigation-compose:${this.ext.hiltNavigationVersion}"
-    implementation "androidx.compose.runtime:runtime-livedata:${parent.ext.composeWearVersion}"
-    implementation "androidx.compose.ui:ui-tooling-preview:${parent.ext.composeWearVersion}"
+    implementation "androidx.compose.ui:ui-tooling-preview:${this.ext.composeVersion}"
     implementation "androidx.compose.material:material-icons-extended:${this.ext.materialVersion}"
-    debugImplementation "androidx.compose.ui:ui-tooling:${parent.ext.composeWearVersion}"
+    debugImplementation "androidx.compose.ui:ui-tooling:${this.ext.composeVersion}"
 
     // coil (gif)
     implementation "io.coil-kt:coil-compose:${this.ext.coilVersion}"

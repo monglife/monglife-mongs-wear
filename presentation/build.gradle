@@ -1,7 +1,5 @@
 buildscript {
     ext {
-        composeVersion          = "1.4.1"
-        composeWearVersion      = "1.8.3"
     }
 }
 
@@ -12,7 +10,7 @@ subprojects {
     apply plugin: "dagger.hilt.android.plugin"
 
     android {
-        compileSdk 35
+        compileSdk 36
 
         defaultConfig {
             minSdk 30

@@ -9,7 +9,7 @@ import com.monglife.mongs.application.battle.port.publish.MatchPublishPort
 import com.monglife.mongs.data.battle.publish.dto.MatchEnterEventDto
 import com.monglife.mongs.data.battle.publish.dto.MatchExitEventDto
 import com.monglife.mongs.data.battle.publish.dto.MatchPickEventDto
-import com.mongs.wear.data.core.R
+import com.mongs.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 

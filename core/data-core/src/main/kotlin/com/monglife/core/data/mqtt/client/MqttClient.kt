@@ -13,7 +13,7 @@ import com.monglife.core.data.mqtt.exception.InvalidPublishException
 import com.monglife.core.data.mqtt.exception.InvalidSubscribeException
 import com.monglife.core.data.mqtt.exception.UnKnownException
 import com.monglife.core.data.web.dto.response.ResponseDto
-import com.mongs.wear.data.core.R
+import com.mongs.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import info.mqtt.android.service.MqttAndroidClient
 import kotlinx.coroutines.CoroutineScope

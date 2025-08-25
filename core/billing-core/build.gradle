@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        billingClientVersion = "7.1.1"
+        billingClientVersion = "8.0.0"
     }
 }
 
@@ -12,7 +12,7 @@ apply plugin: "dagger.hilt.android.plugin"
 android {
     namespace "${rootProject.ext.namespace}.data.core"
 
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         minSdk 30

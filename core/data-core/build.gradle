@@ -14,7 +14,7 @@ apply plugin: "dagger.hilt.android.plugin"
 android {
     namespace "${rootProject.ext.namespace}.data.core"
 
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         minSdk 30
@@ -38,11 +38,11 @@ dependencies {
     implementation project(":domain:auth-domain")
 
     // gson
-    api 'com.google.code.gson:gson:2.11.0'
+    api 'com.google.code.gson:gson:2.13.1'
 
     // retrofit2 & coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
-    implementation 'com.squareup.okio:okio:3.9.0'
+    implementation 'com.squareup.okio:okio:3.16.0'
     implementation "com.squareup.retrofit2:retrofit:${this.ext.retrofitVersion}"
     implementation "com.squareup.retrofit2:converter-gson:${this.ext.retrofitVersion}"
 

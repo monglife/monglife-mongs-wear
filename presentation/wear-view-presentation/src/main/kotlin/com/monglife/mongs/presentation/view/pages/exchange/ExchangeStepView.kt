@@ -39,7 +39,7 @@ import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.view.dialog.common.PermissionDialog
 import com.monglife.mongs.presentation.viewmodel.pages.exchange.ExchangeStepViewModel
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 import kotlin.math.max
 
 @Composable

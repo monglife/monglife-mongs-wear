@@ -19,6 +19,7 @@ rootProject.name = "mongs"
 
 include ":app"
 include ":app:wear-app"
+include ':app:mobile-app'
 
 include ":application"
 include ":application:auth-application"
@@ -51,3 +52,4 @@ include ":domain:mong-domain"
 include ":presentation"
 include ":presentation:viewmodel-presentation"
 include ":presentation:wear-view-presentation"
+include ":presentation:mobile-view-presentation"

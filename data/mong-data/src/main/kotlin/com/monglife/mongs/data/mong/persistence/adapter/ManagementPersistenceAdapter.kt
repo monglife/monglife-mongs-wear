@@ -9,7 +9,7 @@ import com.monglife.mongs.data.mong.persistence.entity.MongEntity
 import com.monglife.mongs.data.mong.persistence.entity.MongOptionEntity
 import com.monglife.mongs.domain.mong.model.Mong
 import com.monglife.mongs.domain.mong.model.MongOption
-import com.mongs.wear.data.core.R
+import com.mongs.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

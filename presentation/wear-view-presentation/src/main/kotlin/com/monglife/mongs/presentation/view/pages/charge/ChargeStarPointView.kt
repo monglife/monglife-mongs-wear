@@ -46,7 +46,7 @@ import com.monglife.mongs.presentation.view.component.common.pagenation.PageIndi
 import com.monglife.mongs.presentation.view.component.common.textbox.StarPointBox
 import com.monglife.mongs.presentation.view.utils.NumberUtil
 import com.monglife.mongs.presentation.viewmodel.pages.charge.ChargeStarPointViewModel
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min

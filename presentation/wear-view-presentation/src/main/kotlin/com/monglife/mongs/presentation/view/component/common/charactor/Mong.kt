@@ -19,7 +19,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.decode.ImageDecoderDecoder
 import com.monglife.mongs.domain.mong.enums.MongStatusCode
 import com.monglife.mongs.presentation.view.assets.MongResourceCode
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 @Composable
 internal fun Mong(

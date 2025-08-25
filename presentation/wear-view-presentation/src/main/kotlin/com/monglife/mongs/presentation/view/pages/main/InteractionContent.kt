@@ -22,7 +22,7 @@ import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.CircleImageButton
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainInteractionViewModel
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable

@@ -29,7 +29,7 @@ import com.monglife.mongs.presentation.view.assets.MongResourceCode
 import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.monglife.mongs.presentation.view.component.common.charactor.Mong
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 
 @Composable

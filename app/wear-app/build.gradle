@@ -6,9 +6,9 @@ apply plugin: "com.google.gms.google-services"
 apply plugin: "org.jetbrains.kotlin.plugin.compose"
 
 android {
-    namespace "${rootProject.ext.namespace}"
+    namespace "${rootProject.ext.namespace}.wear"
 
-    compileSdk 35
+    compileSdk 36
 
     compileOptions {
         sourceCompatibility rootProject.ext.javaVersion
@@ -26,8 +26,8 @@ android {
     defaultConfig {
         minSdk          30
         targetSdk       34
-        versionCode     27
-        versionName     "2.1.0"
+        versionCode     28
+        versionName     "2.1.1"
         vectorDrawables {
             useSupportLibrary true
         }
@@ -73,9 +73,6 @@ dependencies {
 
     // presentation layer
     implementation project(":presentation:wear-view-presentation")
-
-    // service
-    implementation "androidx.lifecycle:lifecycle-service:2.9.1"
 
     // dagger & hilt
     implementation group: "javax.inject", name: "javax.inject", version: "1"

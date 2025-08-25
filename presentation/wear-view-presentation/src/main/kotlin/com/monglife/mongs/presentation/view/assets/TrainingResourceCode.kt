@@ -1,6 +1,6 @@
 package com.monglife.mongs.presentation.view.assets
 
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 /**
  * 훈련 리소스

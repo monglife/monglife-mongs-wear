@@ -1,0 +1,36 @@
+buildscript {
+    ext {
+        composeVersion          = "1.8.3"
+        composeNavigateVersion  = "2.9.3"
+        hiltNavigationVersion   = "1.2.0"
+        materialVersion         = "1.7.6"
+        coilVersion             = "2.7.0"
+    }
+}
+
+apply plugin: "org.jetbrains.kotlin.plugin.compose"
+
+android {
+    namespace "${rootProject.ext.namespace}.presentation.view.mobile"
+
+    buildFeatures {
+        compose true
+    }
+}
+
+dependencies {
+    // compose
+    api "androidx.compose.material:material:${this.ext.composeVersion}"
+    api "androidx.compose.foundation:foundation-layout:${this.ext.composeVersion}"
+    api "androidx.navigation:navigation-compose:${this.ext.composeNavigateVersion}"
+    implementation "androidx.compose.ui:ui:${this.ext.composeVersion}"
+
+    implementation "androidx.hilt:hilt-navigation-compose:${this.ext.hiltNavigationVersion}"
+    implementation "androidx.compose.ui:ui-tooling-preview:${this.ext.composeVersion}"
+    implementation "androidx.compose.material:material-icons-extended:${this.ext.materialVersion}"
+    debugImplementation "androidx.compose.ui:ui-tooling:${this.ext.composeVersion}"
+
+    // coil (gif)
+    implementation "io.coil-kt:coil-compose:${this.ext.coilVersion}"
+    implementation "io.coil-kt:coil-gif:${this.ext.coilVersion}"
+}

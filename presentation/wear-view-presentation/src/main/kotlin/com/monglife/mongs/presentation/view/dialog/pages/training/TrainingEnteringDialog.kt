@@ -30,7 +30,7 @@ import com.monglife.mongs.application.mong.vo.TrainingTypeVo
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
 import com.monglife.mongs.presentation.view.assets.MongsPink200
 import com.monglife.mongs.presentation.view.assets.MongsWhite
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 @Composable
 fun TrainingEnteringDialog(

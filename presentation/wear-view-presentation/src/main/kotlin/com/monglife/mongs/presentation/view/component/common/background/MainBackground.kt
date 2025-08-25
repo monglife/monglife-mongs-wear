@@ -19,7 +19,7 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.ImageDecoderDecoder
 import com.monglife.mongs.presentation.view.assets.MapResourceCode
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 import kotlin.math.absoluteValue
 
 @Composable

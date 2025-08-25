@@ -7,7 +7,7 @@ import com.monglife.mongs.data.battle.persistence.dto.MatchEventDto
 import com.monglife.mongs.domain.battle.enums.MatchStateCode
 import com.monglife.mongs.domain.battle.model.Match
 import com.monglife.mongs.domain.battle.model.MatchPlayer
-import com.mongs.wear.data.core.R
+import com.mongs.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

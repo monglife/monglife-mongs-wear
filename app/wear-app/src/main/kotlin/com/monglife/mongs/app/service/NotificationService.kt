@@ -12,7 +12,7 @@ import com.monglife.mongs.app.activity.MainActivity
 import com.monglife.mongs.app.module.NotificationModule
 import com.monglife.mongs.application.auth.usecase.SyncUserDeviceUseCase
 import com.monglife.mongs.application.device.usecase.GetNotificationOptionUseCase
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

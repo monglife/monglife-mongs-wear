@@ -9,7 +9,7 @@ import com.monglife.core.data.persistence.datastore.SessionDataStore
 import com.monglife.core.data.web.client.AuthWebClient
 import com.monglife.core.data.web.interceptor.AuthorizationInterceptor
 import com.monglife.core.data.web.interceptor.HttpLogInterceptor
-import com.mongs.wear.data.core.R
+import com.mongs.data.core.R
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

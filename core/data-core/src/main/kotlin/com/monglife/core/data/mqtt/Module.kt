@@ -1,7 +1,7 @@
 package com.monglife.core.data.mqtt
 
 import android.content.Context
-import com.mongs.wear.data.core.R
+import com.mongs.data.core.R
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

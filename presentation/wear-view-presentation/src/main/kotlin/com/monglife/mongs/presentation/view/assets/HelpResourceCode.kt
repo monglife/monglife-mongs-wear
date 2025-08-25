@@ -1,6 +1,6 @@
 package com.monglife.mongs.presentation.view.assets
 
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 /**
  * 도움말 리소스

@@ -22,7 +22,7 @@ import androidx.compose.ui.zIndex
 import com.monglife.mongs.presentation.view.component.pages.training.runner.Hurdle
 import com.monglife.mongs.presentation.view.component.pages.training.runner.Player
 import com.monglife.mongs.presentation.viewmodel.pages.training.runner.TrainingRunnerViewModel
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 @Composable
 fun RunnerSection(

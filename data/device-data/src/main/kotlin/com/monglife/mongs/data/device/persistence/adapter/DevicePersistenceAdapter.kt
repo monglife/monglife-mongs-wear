@@ -14,7 +14,7 @@ import com.monglife.mongs.data.device.persistence.entity.StepEntity
 import com.monglife.mongs.data.device.persistence.manager.StepSensorManager
 import com.monglife.mongs.domain.device.model.DeviceOption
 import com.monglife.mongs.domain.device.model.Step
-import com.mongs.wear.data.core.R
+import com.mongs.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -20,14 +20,6 @@ dependencies {
     implementation project(":data:member-data")
     implementation project(":data:mong-data")
 
-    // livedata
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:${rootProject.ext.lifecycleVersion}"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:${rootProject.ext.lifecycleVersion}"
-
-    // viewmodel
-    implementation "androidx.wear.compose:compose-foundation:${parent.ext.composeVersion}"
-    implementation "androidx.wear.compose:compose-navigation:${parent.ext.composeVersion}"
-
     // google-auth & firebase-fcm & google-location
     implementation "com.google.firebase:firebase-auth"
     implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")

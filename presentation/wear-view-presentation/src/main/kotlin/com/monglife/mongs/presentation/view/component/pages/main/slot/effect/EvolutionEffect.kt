@@ -34,7 +34,7 @@ import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
 import com.monglife.mongs.presentation.view.assets.MongResourceCode
 import com.monglife.mongs.presentation.view.assets.MongsWhite
 import com.monglife.mongs.presentation.view.component.common.charactor.Mong
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 import kotlinx.coroutines.delay
 
 private val EVOLUTION_EFFECTS = listOf(R.drawable.effect_evolution_1, R.drawable.effect_evolution_2, R.drawable.effect_evolution_3)

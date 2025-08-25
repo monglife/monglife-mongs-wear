@@ -40,7 +40,7 @@ import com.monglife.mongs.presentation.view.component.common.button.YellowButton
 import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.viewmodel.pages.exchange.ExchangeStarPointViewModel
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 @Composable
 internal fun ExchangeStarPointView(

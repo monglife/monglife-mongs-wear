@@ -12,7 +12,7 @@ apply plugin: "dagger.hilt.android.plugin"
 android {
     namespace "${rootProject.ext.namespace}.core.presentation"
 
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         minSdk 30

@@ -11,7 +11,7 @@ import androidx.compose.ui.res.painterResource
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.ImageDecoderDecoder
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 @Composable
 internal fun RandomDrawBackground(

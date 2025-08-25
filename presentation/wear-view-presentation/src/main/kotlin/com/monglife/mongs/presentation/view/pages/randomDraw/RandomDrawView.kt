@@ -34,7 +34,7 @@ import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.view.dialog.pages.randomDraw.RandomDrawEnteringDialog
 import com.monglife.mongs.presentation.view.dialog.pages.randomDraw.RandomDrawOverDialog
 import com.monglife.mongs.presentation.viewmodel.pages.randomDraw.RandomDrawViewModel
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 @Composable
 internal fun RandomDrawView(

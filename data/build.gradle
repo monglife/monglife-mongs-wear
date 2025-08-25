@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        retrofitVersion   = "2.9.0"
+        retrofitVersion   = "3.0.0"
         dataStoreVersion  = "1.1.2"
         roomVersion       = "2.6.1"
     }
@@ -13,7 +13,7 @@ subprojects {
     apply plugin: "dagger.hilt.android.plugin"
 
     android {
-        compileSdk 35
+        compileSdk 36
 
         defaultConfig {
             minSdk 30
@@ -44,7 +44,7 @@ subprojects {
         implementation "androidx.lifecycle:lifecycle-livedata-ktx:${rootProject.ext.lifecycleVersion}"
 
         // test
-        testImplementation "androidx.test:core:1.6.1"
+        testImplementation "androidx.test:core:1.7.0"
         testImplementation "junit:junit:${rootProject.ext.jupiterVersion}"
         testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
         testImplementation "org.mockito.kotlin:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"

@@ -10,7 +10,7 @@ import com.monglife.mongs.data.member.player.persistence.dto.PlayerSlotCountEven
 import com.monglife.mongs.data.member.player.persistence.dto.PlayerStarPointEventDto
 import com.monglife.mongs.data.member.player.persistence.entity.PlayerEntity
 import com.monglife.mongs.domain.member.player.model.Player
-import com.mongs.wear.data.core.R
+import com.mongs.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

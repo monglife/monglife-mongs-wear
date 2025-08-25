@@ -18,7 +18,7 @@ import com.monglife.mongs.application.battle.vo.MatchVo
 import com.monglife.mongs.domain.battle.enums.MatchRoundCode
 import com.monglife.mongs.presentation.view.assets.MongResourceCode
 import com.monglife.mongs.presentation.view.component.common.charactor.Mong
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 
 @Composable

@@ -18,7 +18,7 @@ import androidx.navigation.NavController
 import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.button.CircleTextButton
 import com.monglife.mongs.presentation.view.component.common.button.CircleImageButton
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 @Composable
 internal fun ConfigureContent(

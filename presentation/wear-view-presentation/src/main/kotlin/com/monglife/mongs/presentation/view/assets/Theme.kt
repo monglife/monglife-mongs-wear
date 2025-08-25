@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Shapes
 import androidx.wear.compose.material.Typography
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 // 폰트
 val DAL_MU_RI = FontFamily(Font(R.font.dalmoori))

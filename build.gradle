@@ -1,13 +1,13 @@
 buildscript {
     ext {
-        namespace               = "com.mongs.wear"
+        namespace               = "com.mongs"
         javaVersion             = JavaVersion.VERSION_17
         androidVersion          = "8.10.1"
         kotlinVersion           = "2.1.21"
         kspVersion              = "2.1.21-2.0.1"
-        hiltVersion             = "2.54"
-        hiltWorkerVersion       = "1.3.0-alpha01"
-        workerVersion           = "2.10.2"
+        hiltVersion             = "2.57.1"
+        hiltWorkerVersion       = "1.3.0-beta01"
+        workerVersion           = "2.10.3"
         lifecycleVersion        = "2.9.2"
         firebaseVersion         = "33.8.0"
         fcmVersion              = "24.1.2"
@@ -15,8 +15,8 @@ buildscript {
         gmsAuthVersion          = "21.4.0"
         gmsLocationVersion      = "21.3.0"
         jupiterVersion          = "4.13.2"
-        mockitoVersion          = "5.14.2"
-        mockitoKotlinVersion    = "5.2.1"
+        mockitoVersion          = "5.19.0"
+        mockitoKotlinVersion    = "6.0.0"
         composePluginVersion    = "2.0.0"
     }
 }

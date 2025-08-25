@@ -41,7 +41,7 @@ import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.viewmodel.pages.battle.BattleMenuViewModel
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 
 @Composable
 internal fun BattleMenuView(

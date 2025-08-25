@@ -31,7 +31,7 @@ import com.monglife.mongs.presentation.view.component.common.button.CircleImageB
 import com.monglife.mongs.presentation.view.component.common.button.CircleTextButton
 import com.monglife.mongs.presentation.view.dialog.pages.collection.CollectionMapDetailDialog
 import com.monglife.mongs.presentation.viewmodel.pages.collection.CollectionMapViewModel
-import com.mongs.wear.presentation.view.wear.R
+import com.mongs.presentation.view.wear.R
 import kotlin.math.min
 
 @Composable
