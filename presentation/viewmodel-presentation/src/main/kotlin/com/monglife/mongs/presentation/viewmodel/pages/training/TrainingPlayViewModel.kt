@@ -24,12 +24,18 @@ class TrainingPlayViewModel @Inject constructor(
         val enteringLoadingBar: Boolean = false,
         val runnerContent: Boolean = false,
         val basketballContent: Boolean = false,
+        val rockPagerScissorsContent: Boolean = false,
+        val soccerContent: Boolean = false,
+        val chamContent: Boolean = false,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
         data object Entering : UiState(enteringLoadingBar = true)
         data object Runner : UiState(runnerContent = true)
         data object Basketball : UiState(basketballContent = true)
+        data object RockPagerScissors : UiState(rockPagerScissorsContent = true)
+        data object Soccer : UiState(soccerContent = true)
+        data object Cham : UiState(chamContent = true)
     }
 
     /**
@@ -67,6 +73,9 @@ class TrainingPlayViewModel @Inject constructor(
                 _uiState.value = when (it) {
                     "TR000" -> UiState.Runner
                     "TR001" -> UiState.Basketball
+                    "TR002" -> UiState.RockPagerScissors
+                    "TR003" -> UiState.Soccer
+                    "TR004" -> UiState.Cham
                     else -> UiState.Idle
                 }
             } ?: run {

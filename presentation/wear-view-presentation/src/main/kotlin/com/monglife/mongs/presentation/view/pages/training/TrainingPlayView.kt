@@ -40,6 +40,12 @@ internal fun TrainingPlayView(
                     TrainingRunnerContent(trainingCode = trainingCode, navController = navController)
                 } else if (uiState.value.basketballContent) {
                     TrainingBasketballContent(trainingCode = trainingCode, navController = navController)
+                } else if (uiState.value.rockPagerScissorsContent) {
+                    TrainingRockPaperScissorsContent(trainingCode = trainingCode, navController = navController)
+                } else if (uiState.value.soccerContent) {
+                    TrainingSoccerContent(trainingCode = trainingCode, navController = navController)
+                } else if (uiState.value.chamContent) {
+                    TrainingChamContent(trainingCode = trainingCode, navController = navController)
                 }
             }
         }
