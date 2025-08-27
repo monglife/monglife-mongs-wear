@@ -218,7 +218,7 @@ class TrainingRockPaperScissorsViewModel @Inject constructor(
 
             delay(END_DELAY)
 
-            if (_uiState.value != UiState.End) {
+            if (_isProcess.value) {
                 _uiState.value = UiState.Pick
             }
         }
@@ -240,6 +240,8 @@ class TrainingRockPaperScissorsViewModel @Inject constructor(
      */
     fun end(mongId: Long, trainingCode: String, score: Int) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
+
+            delay(END_DELAY)
 
             _uiState.value = UiState.Loading
 
