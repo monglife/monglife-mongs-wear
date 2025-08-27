@@ -1,4 +1,4 @@
-package com.monglife.mongs.presentation.viewmodel.pages.training.rockPagerScissors
+package com.monglife.mongs.presentation.viewmodel.pages.training.rockPaperScissors
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.mong.exception.InvalidTrainingException
@@ -11,6 +11,8 @@ import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMong
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.application.mong.vo.TrainingEndVo
 import com.monglife.mongs.application.mong.vo.TrainingTypeVo
+import com.monglife.mongs.presentation.viewmodel.pages.training.rockPaperScissors.enums.RockPaperScissorsPickCode
+import com.monglife.mongs.presentation.viewmodel.pages.training.rockPaperScissors.vo.RockPaperScissorsVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -25,7 +27,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class TrainingRockPagerScissorsViewModel @Inject constructor(
+class TrainingRockPaperScissorsViewModel @Inject constructor(
     private val getTrainingUseCase: GetTrainingUseCase,
     private val getCurrentMongUseCase: GetCurrentMongUseCase,
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
@@ -33,7 +35,7 @@ class TrainingRockPagerScissorsViewModel @Inject constructor(
 ) : BaseViewModel() {
 
     companion object {
-        private const val END_DELAY = 600L
+        private const val END_DELAY = 1800L
     }
 
     /**
@@ -42,13 +44,17 @@ class TrainingRockPagerScissorsViewModel @Inject constructor(
     sealed class UiState(
         val loadingBar: Boolean = false,
         val enteringDialog: Boolean = false,
+        val pickDialog: Boolean = false,
+        val pickEndLoadingBar: Boolean = false,
         val playSection: Boolean = false,
         val endDialog: Boolean = false,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
         data object Entering: UiState(enteringDialog = true)
-        data object Running: UiState(playSection = true)
+        data object Pick: UiState(pickDialog = true)
+        data object PickEnd: UiState(pickEndLoadingBar = true)
+        data object Play: UiState(playSection = true)
         data object End: UiState(endDialog = true)
     }
 
@@ -83,6 +89,18 @@ class TrainingRockPagerScissorsViewModel @Inject constructor(
 
     private val _currentMongVo = MutableStateFlow<MongVo?>(null)
     val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
+
+    private val _rockPaperScissorsVo = MutableStateFlow<RockPaperScissorsVo?>(null)
+    val rockPaperScissorsVo: StateFlow<RockPaperScissorsVo?> = _rockPaperScissorsVo.asStateFlow()
+
+    private val _isStart = MutableStateFlow(false)
+    val isStart: StateFlow<Boolean> = _isStart.asStateFlow()
+
+    private val _isProcess = MutableStateFlow(false)
+    val isProcess: StateFlow<Boolean> = _isProcess.asStateFlow()
+
+    private val _timeMillis = MutableStateFlow(0F)
+    val timeMillis: StateFlow<Float> = _timeMillis.asStateFlow()
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
@@ -131,9 +149,78 @@ class TrainingRockPagerScissorsViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             withContext(Dispatchers.IO) {
                 // 게임 엔진 초기 설정
+                _isStart.value = true
+                _isProcess.value = true
+                _timeMillis.value = 0F
+
+                _rockPaperScissorsVo.value = RockPaperScissorsVo(
+                    randomPickCode = null,
+                    pickCode = null,
+                    result = 0,
+                    score = 0,
+                )
+
+                _uiState.value = UiState.Pick
+
+                // 타이머 실행
+                while (_isProcess.value) {
+                    delay(100)
+                    _timeMillis.value += 100F
+                }
+            }
+        }
+    }
+
+    /**
+     * 선택
+     */
+    fun pick(pickCode: RockPaperScissorsPickCode) {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+
+            _uiState.value = UiState.PickEnd
+
+            val randomPickCode = RockPaperScissorsPickCode.entries.toTypedArray().random()
+
+            val result = if (randomPickCode == pickCode) {
+                0
+            } else if (randomPickCode == RockPaperScissorsPickCode.ROCK) {
+                if (pickCode == RockPaperScissorsPickCode.PAPER) 1 else -1
+            } else if (randomPickCode == RockPaperScissorsPickCode.PAPER) {
+                if (pickCode == RockPaperScissorsPickCode.SCISSORS) 1 else -1
+            } else {
+                if (pickCode == RockPaperScissorsPickCode.ROCK) 1 else -1
             }
 
-            _uiState.value = UiState.Running
+            _rockPaperScissorsVo.value = RockPaperScissorsVo(
+                randomPickCode = randomPickCode,
+                pickCode = pickCode,
+                result = result,
+                score = _rockPaperScissorsVo.value?.score ?: 0,
+            )
+
+            _uiState.value = UiState.Play
+        }
+    }
+
+    /**
+     * 결과
+     */
+    fun over() {
+        viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            _rockPaperScissorsVo.value?.let {
+                _rockPaperScissorsVo.value = RockPaperScissorsVo(
+                    randomPickCode = it.randomPickCode,
+                    pickCode = it.pickCode,
+                    result = it.result,
+                    score = it.score + if (it.result == 1) 1 else 0
+                )
+            }
+
+            delay(END_DELAY)
+
+            if (_uiState.value != UiState.End) {
+                _uiState.value = UiState.Pick
+            }
         }
     }
 
@@ -143,6 +230,7 @@ class TrainingRockPagerScissorsViewModel @Inject constructor(
     fun stop() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             withContext(Dispatchers.IO) {
+                _isProcess.value = false
             }
         }
     }
@@ -152,7 +240,6 @@ class TrainingRockPagerScissorsViewModel @Inject constructor(
      */
     fun end(mongId: Long, trainingCode: String, score: Int) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            delay(END_DELAY)
 
             _uiState.value = UiState.Loading
 
