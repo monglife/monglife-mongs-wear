@@ -46,11 +46,9 @@ class LoginViewModel @Inject constructor(
     sealed class UiState(
         val loadingBar: Boolean = false,
         val signInButton: Boolean = false,
-        val notFoundGoogleAccountDialogOpen: Boolean = false,
     ) {
         data object Idle : UiState(signInButton = true)
         data object Loading : UiState(loadingBar = true)
-        data object NotFoundGoogleAccount : UiState(notFoundGoogleAccountDialogOpen = true)
     }
 
     /**
@@ -146,10 +144,6 @@ class LoginViewModel @Inject constructor(
                     }
                 }
             }
-//            else if (googleSignInResult.resultCode == Activity.RESULT_CANCELED) {
-//                _uiState.value = UiState.NotFoundGoogleAccount
-//                return@launch
-//            }
 
             _uiState.value = UiState.Idle
         }
