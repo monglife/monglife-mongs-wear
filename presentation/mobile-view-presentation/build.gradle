@@ -19,6 +19,9 @@ android {
 }
 
 dependencies {
+    // application layer
+    api project(":presentation:viewmodel-presentation")
+
     // compose
     api "androidx.compose.material:material:${this.ext.composeVersion}"
     api "androidx.compose.foundation:foundation-layout:${this.ext.composeVersion}"

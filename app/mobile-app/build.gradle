@@ -6,7 +6,7 @@ apply plugin: "com.google.gms.google-services"
 apply plugin: "org.jetbrains.kotlin.plugin.compose"
 
 android {
-    namespace "${rootProject.ext.namespace}.wear"
+    namespace "${rootProject.ext.namespace}.mobile"
 
     compileSdk 36
 
