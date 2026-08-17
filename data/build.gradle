@@ -2,7 +2,7 @@ buildscript {
     ext {
         retrofitVersion   = "3.0.0"
         dataStoreVersion  = "1.1.2"
-        roomVersion       = "2.6.1"
+        roomVersion       = "2.8.4"
     }
 }
 
