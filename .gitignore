@@ -28,3 +28,10 @@ local.properties
 # configs 서브모듈에서 복사되는 파일이 아니라 저장소가 직접 관리하는 R8 룰
 !core/data-core/consumer-rules.pro
 !proguard/*.pro
+
+# buildType 별 네트워크 보안 설정 (configs 가 덮어쓰는 res/values 와 무관한 경로)
+!**/res/xml/*.xml
+
+# 매니페스트는 configs 서브모듈이 주는 파일이 아니라 저장소 소스다.
+# (이 예외가 없어서 mobile-app 의 매니페스트가 커밋된 적이 없었다)
+!**/AndroidManifest.xml

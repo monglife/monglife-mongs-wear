@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    릴리스: 평문 HTTP 전면 차단.
+    프로덕션 API 는 https 라서 영향이 없다.
+
+    MQTT 는 영향을 받지 않는다. paho 의 TCPNetworkModule 이
+    javax.net.SocketFactory.createSocket() 으로 raw java.net.Socket 을 쓰는데,
+    raw 소켓은 NetworkSecurityPolicy 적용 대상이 아니다.
+    (즉 tcp://...:1883 평문 연결은 이 설정과 무관하게 그대로 동작한다)
+
+    dev / stg 는 http API 를 쓰므로 src/debug 의 같은 이름 파일이 이 설정을 대체한다.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>
