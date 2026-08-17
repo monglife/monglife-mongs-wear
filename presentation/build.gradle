@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 buildscript {
     ext {
     }
@@ -21,8 +23,11 @@ subprojects {
             targetCompatibility rootProject.ext.javaVersion
         }
 
-        kotlinOptions {
-            jvmTarget = rootProject.ext.javaVersion.toString()
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.fromTarget(rootProject.ext.javaVersion.toString())
         }
     }
 

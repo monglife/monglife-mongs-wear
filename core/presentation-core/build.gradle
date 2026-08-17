@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 buildscript {
     ext {
         composeVersion          = "1.4.1"
@@ -23,8 +25,11 @@ android {
         targetCompatibility rootProject.ext.javaVersion
     }
 
-    kotlinOptions {
-        jvmTarget = rootProject.ext.javaVersion.toString()
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget(rootProject.ext.javaVersion.toString())
     }
 }
 

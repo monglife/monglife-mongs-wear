@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 apply plugin: "com.android.application"
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "dagger.hilt.android.plugin"
@@ -13,10 +15,6 @@ android {
     compileOptions {
         sourceCompatibility rootProject.ext.javaVersion
         targetCompatibility rootProject.ext.javaVersion
-    }
-
-    kotlinOptions {
-        jvmTarget = rootProject.ext.javaVersion.toString()
     }
 
     buildFeatures {
@@ -58,6 +56,12 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             signingConfig signingConfigs.release
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget(rootProject.ext.javaVersion.toString())
     }
 }
 
