@@ -5,7 +5,8 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.zIndex
@@ -19,6 +20,8 @@ import com.monglife.mongs.presentation.view.component.pages.training.runner.sect
 import com.monglife.mongs.presentation.view.dialog.pages.training.TrainingEnteringDialog
 import com.monglife.mongs.presentation.view.dialog.pages.training.TrainingOverDialog
 import com.monglife.mongs.presentation.viewmodel.pages.training.runner.TrainingRunnerViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 
 @Composable
 internal fun TrainingRunnerContent(
@@ -27,11 +30,11 @@ internal fun TrainingRunnerContent(
     trainingRunnerViewModel: TrainingRunnerViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = trainingRunnerViewModel.uiState.collectAsState()
-    val currentMongVo = trainingRunnerViewModel.currentMongVo.collectAsState()
-    val runnerVo = trainingRunnerViewModel.runnerVo.collectAsState()
-    val trainingTypeVo = trainingRunnerViewModel.trainingTypeVo.collectAsState()
-    val trainingEndVo = trainingRunnerViewModel.trainingEndVo.collectAsState()
+    val uiState = trainingRunnerViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = trainingRunnerViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val runnerVo = trainingRunnerViewModel.runnerVo.collectAsStateWithLifecycle()
+    val trainingTypeVo = trainingRunnerViewModel.trainingTypeVo.collectAsStateWithLifecycle()
+    val trainingEndVo = trainingRunnerViewModel.trainingEndVo.collectAsStateWithLifecycle()
 
     Box {
         if (uiState.value.loadingBar) {
@@ -97,16 +100,23 @@ internal fun TrainingRunnerContent(
         }
     }
 
-    LaunchedEffect(runnerVo.value) {
-        runnerVo.value?.let {
-            trainingTypeVo.value?.let { trainingTypeVo ->
-                if (it.isStart) {
-                    if (it.score >= trainingTypeVo.score) {
-                        trainingRunnerViewModel.stop()
-                    }
-                }
-            }
+    /**
+     * 목표 점수 도달 감시
+     *
+     * 이전에는 LaunchedEffect(runnerVo.value) 였는데, 엔진이 16ms 마다 새 VO 를 emit 하므로
+     * 초당 62.5회 코루틴이 취소·재시작됐다. snapshotFlow 로 조건만 관찰하면
+     * 컴포지션을 건드리지 않고 조건이 바뀔 때만 반응한다.
+     */
+    LaunchedEffect(Unit) {
+        snapshotFlow {
+            val vo = runnerVo.value
+            val trainingType = trainingTypeVo.value
+
+            vo != null && trainingType != null && vo.isStart && vo.score >= trainingType.score
         }
+            .distinctUntilChanged()
+            .filter { it }
+            .collect { trainingRunnerViewModel.stop() }
     }
 
     LaunchedEffect(Unit) {

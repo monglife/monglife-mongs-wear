@@ -3,7 +3,7 @@ package com.monglife.mongs.presentation.view.component.pages.training.runner.sec
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.monglife.mongs.presentation.view.assets.MongsDarkYellow
@@ -16,8 +16,8 @@ fun RunnerTimerSection(
     modifier: Modifier = Modifier,
     trainingRunnerViewModel: TrainingRunnerViewModel,
 ) {
-    val trainingTypeVo = trainingRunnerViewModel.trainingTypeVo.collectAsState()
-    val runnerVo = trainingRunnerViewModel.runnerVo.collectAsState()
+    val trainingTypeVo = trainingRunnerViewModel.trainingTypeVo.collectAsStateWithLifecycle()
+    val runnerVo = trainingRunnerViewModel.runnerVo.collectAsStateWithLifecycle()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -26,7 +26,7 @@ fun RunnerTimerSection(
         trainingTypeVo.value?.let { trainingTypeVo ->
             runnerVo.value?.let { runnerVo ->
                 ProgressIndicator(
-                    progress = runnerVo.timeMillis / (trainingTypeVo.timeout.toFloat() * 1000L) * 100,
+                    progress = { runnerVo.timeMillis / (trainingTypeVo.timeout.toFloat() * 1000L) * 100 },
                     indicatorColor = MongsDarkYellow,
                 )
             }

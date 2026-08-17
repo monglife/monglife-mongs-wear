@@ -5,7 +5,8 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -22,6 +23,8 @@ import com.monglife.mongs.presentation.view.component.pages.training.basketball.
 import com.monglife.mongs.presentation.view.dialog.pages.training.TrainingEnteringDialog
 import com.monglife.mongs.presentation.view.dialog.pages.training.TrainingOverDialog
 import com.monglife.mongs.presentation.viewmodel.pages.training.basketball.TrainingBasketballViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 
 @Composable
 internal fun TrainingBasketballContent(
@@ -31,11 +34,11 @@ internal fun TrainingBasketballContent(
     context: Context = LocalContext.current,
     windowInfo: WindowInfo = LocalWindowInfo.current,
 ) {
-    val uiState = trainingBasketballViewModel.uiState.collectAsState()
-    val currentMongVo = trainingBasketballViewModel.currentMongVo.collectAsState()
-    val basketballVo = trainingBasketballViewModel.basketballVo.collectAsState()
-    val trainingTypeVo = trainingBasketballViewModel.trainingTypeVo.collectAsState()
-    val trainingEndVo = trainingBasketballViewModel.trainingEndVo.collectAsState()
+    val uiState = trainingBasketballViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = trainingBasketballViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val basketballVo = trainingBasketballViewModel.basketballVo.collectAsStateWithLifecycle()
+    val trainingTypeVo = trainingBasketballViewModel.trainingTypeVo.collectAsStateWithLifecycle()
+    val trainingEndVo = trainingBasketballViewModel.trainingEndVo.collectAsStateWithLifecycle()
 
     Box {
         if (uiState.value.loadingBar) {
@@ -109,16 +112,24 @@ internal fun TrainingBasketballContent(
         }
     }
 
-    LaunchedEffect(basketballVo.value) {
-        basketballVo.value?.let {
-            trainingTypeVo.value?.let { trainingTypeVo ->
-                if (it.isStart) {
-                    if (it.score >= trainingTypeVo.score || it.timeMillis >= trainingTypeVo.timeout * 1000L) {
-                        trainingBasketballViewModel.stop()
-                    }
-                }
-            }
+    /**
+     * 목표 점수·제한 시간 도달 감시
+     *
+     * 이전에는 LaunchedEffect(basketballVo.value) 였는데, 엔진이 16ms 마다 새 VO 를 emit 하므로
+     * 초당 62.5회 코루틴이 취소·재시작됐다. snapshotFlow 로 조건만 관찰하면
+     * 컴포지션을 건드리지 않고 조건이 바뀔 때만 반응한다.
+     */
+    LaunchedEffect(Unit) {
+        snapshotFlow {
+            val vo = basketballVo.value
+            val trainingType = trainingTypeVo.value
+
+            vo != null && trainingType != null && vo.isStart &&
+                (vo.score >= trainingType.score || vo.timeMillis >= trainingType.timeout * 1000L)
         }
+            .distinctUntilChanged()
+            .filter { it }
+            .collect { trainingBasketballViewModel.stop() }
     }
 
     LaunchedEffect(Unit) {

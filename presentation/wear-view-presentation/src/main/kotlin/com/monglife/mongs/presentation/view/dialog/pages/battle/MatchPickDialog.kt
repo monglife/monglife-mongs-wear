@@ -65,7 +65,7 @@ fun MatchPickDialog(
             .fillMaxSize()
     ) {
         ProgressIndicator(
-            progress = progress.floatValue,
+            progress = { progress.floatValue },
             modifier = Modifier.zIndex(2f)
         )
 

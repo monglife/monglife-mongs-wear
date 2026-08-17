@@ -3,7 +3,7 @@ package com.monglife.mongs.presentation.view.component.pages.training.basketball
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.monglife.mongs.presentation.view.assets.MongsDarkYellow
@@ -15,8 +15,8 @@ fun BasketballTimerSection(
     modifier: Modifier = Modifier,
     trainingBasketballViewModel: TrainingBasketballViewModel,
 ) {
-    val trainingTypeVo = trainingBasketballViewModel.trainingTypeVo.collectAsState()
-    val basketballVo = trainingBasketballViewModel.basketballVo.collectAsState()
+    val trainingTypeVo = trainingBasketballViewModel.trainingTypeVo.collectAsStateWithLifecycle()
+    val basketballVo = trainingBasketballViewModel.basketballVo.collectAsStateWithLifecycle()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -25,7 +25,7 @@ fun BasketballTimerSection(
         trainingTypeVo.value?.let { trainingTypeVo ->
             basketballVo.value?.let { basketballVo ->
                 ProgressIndicator(
-                    progress = basketballVo.timeMillis / (trainingTypeVo.timeout.toFloat() * 1000L) * 100,
+                    progress = { basketballVo.timeMillis / (trainingTypeVo.timeout.toFloat() * 1000L) * 100 },
                     indicatorColor = MongsDarkYellow,
                 )
             }

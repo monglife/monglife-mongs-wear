@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,10 +36,10 @@ internal fun ConditionContent(
 ) {
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
-    val isPagerChange = mainPagerViewModel.isPagerChange.collectAsState()
+    val isPagerChange = mainPagerViewModel.isPagerChange.collectAsStateWithLifecycle()
 
-    val uiState = mainConditionViewModel.uiState.collectAsState()
-    val currentMongVo = mainConditionViewModel.currentMongVo.collectAsState()
+    val uiState = mainConditionViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = mainConditionViewModel.currentMongVo.collectAsStateWithLifecycle()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -52,7 +52,7 @@ internal fun ConditionContent(
                 if (!isPagerChange.value) {
                     ProgressIndicator(
                         modifier = Modifier.zIndex(1f),
-                        progress = it.expRatio.toFloat(),
+                        progress = { it.expRatio.toFloat() },
                     )
                 }
 

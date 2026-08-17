@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -45,11 +45,11 @@ internal fun SlotContent(
 ) {
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
-    val isPagerChange = mainPagerViewModel.isPagerChange.collectAsState()
+    val isPagerChange = mainPagerViewModel.isPagerChange.collectAsStateWithLifecycle()
 
     val mainSlotViewModel: MainSlotViewModel = hiltViewModel<MainSlotViewModel>(parentEntry)
-    val uiState = mainSlotViewModel.uiState.collectAsState()
-    val currentMongVo = mainSlotViewModel.currentMongVo.collectAsState()
+    val uiState = mainSlotViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = mainSlotViewModel.currentMongVo.collectAsStateWithLifecycle()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -69,7 +69,7 @@ internal fun SlotContent(
                         )
 
                         if (!isPagerChange.value) {
-                            ProgressIndicator(progress = progress.floatValue)
+                            ProgressIndicator(progress = { progress.floatValue })
                         }
                     }
                 }

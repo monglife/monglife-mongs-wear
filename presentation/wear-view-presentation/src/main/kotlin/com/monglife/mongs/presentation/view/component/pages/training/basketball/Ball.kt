@@ -14,35 +14,44 @@ import androidx.compose.ui.unit.IntSize
 import com.monglife.mongs.presentation.viewmodel.pages.training.basketball.vo.BallVo
 import com.mongs.presentation.view.wear.R
 
+/**
+ * 공을 그린다.
+ *
+ * BallVo 를 값이 아니라 람다로 받는다.
+ * 값으로 받으면 물리 틱(16ms)마다 이 컴포저블이 리컴포지션되지만,
+ * 람다로 받아 DrawScope 안에서 읽으면 draw 단계만 다시 돈다.
+ */
 @Composable
 internal fun Ball(
     modifier: Modifier = Modifier,
-    ballVo: BallVo,
+    ballVo: () -> BallVo?,
 ) {
     val image = ImageBitmap.imageResource(R.drawable.btn_icon_basketball)
 
     Canvas(
         modifier = modifier.fillMaxSize()
     ) {
+        val vo = ballVo() ?: return@Canvas
+
         drawCircle(
             color = Color.Black,
-            radius = ballVo.radius.minus(2.5f),
+            radius = vo.radius.minus(2.5f),
             center = Offset(
-                x = ballVo.px,
-                y = ballVo.py
+                x = vo.px,
+                y = vo.py
             ),
         )
 
-        rotate(degrees = ballVo.degree, pivot = Offset(ballVo.px, ballVo.py)) {
+        rotate(degrees = vo.degree, pivot = Offset(vo.px, vo.py)) {
             drawImage(
                 image = image,
                 dstSize = IntSize(
-                    width = ballVo.radius.toInt() * 2,
-                    height = ballVo.radius.toInt() * 2,
+                    width = vo.radius.toInt() * 2,
+                    height = vo.radius.toInt() * 2,
                 ),
                 dstOffset = IntOffset(
-                    x = (ballVo.px - ballVo.radius).toInt(),
-                    y = (ballVo.py - ballVo.radius).toInt()
+                    x = (vo.px - vo.radius).toInt(),
+                    y = (vo.py - vo.radius).toInt()
                 ),
             )
         }
