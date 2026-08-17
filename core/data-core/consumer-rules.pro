@@ -13,6 +13,13 @@
 -keepattributes EnclosingMethod
 
 # Gson 이 역직렬화하는 타입 (HTTP 응답 DTO, MQTT 이벤트 DTO, 요청 DTO)
+#
+# 주의: 인증 DTO 는 com.monglife.core.data.* 네임스페이스에 있다.
+# 아래 mongs.data.** 패턴으로는 잡히지 않아 통째로 축소되고 있었다.
+# (usage.txt 실측: LoginResponseDto / ReissueResponseDto / JoinRequestDto /
+#  LoginRequestDto 의 필드와 생성자가 전부 제거됨 → 릴리스에서 로그인·토큰 재발행 실패)
+-keep class com.monglife.core.data.web.client.request.** { *; }
+-keep class com.monglife.core.data.web.client.response.** { *; }
 -keep class com.monglife.core.data.web.dto.** { *; }
 -keep class com.monglife.mongs.data.**.dto.** { *; }
 -keep class com.monglife.mongs.data.**.web.client.request.** { *; }
@@ -28,12 +35,9 @@
     public static ** valueOf(java.lang.String);
 }
 
-# Gson TypeAdapter / TypeToken
--keep class com.google.gson.reflect.TypeToken { *; }
--keep class * extends com.google.gson.TypeAdapter
--keepclassmembers,allowobfuscation class * {
-    @com.google.gson.annotations.SerializedName <fields>;
-}
+# Gson TypeAdapter / TypeToken 관련 룰은 gson 이 META-INF/proguard/gson.pro 로
+# 직접 배포하므로(TypeToken 하위 keep, TypeAdapter/JsonSerializer/JsonDeserializer 의
+# 기본 생성자 keep, @SerializedName 필드 keep) 여기서 중복 선언하지 않는다.
 
 # ---------------------------------------------------------------------------
 # Retrofit — 인터페이스의 제네릭 시그니처와 애노테이션이 필요하다.
