@@ -19,6 +19,19 @@ android {
     }
 }
 
+composeCompiler {
+    // application/viewmodel/domain 모듈의 VO 를 안정 타입으로 선언 (값 비교로 전환)
+    stabilityConfigurationFiles.add(
+        rootProject.layout.projectDirectory.file("compose_stability.conf")
+    )
+
+    // 리컴포지션 개선 계측용 리포트 (-PcomposeReports 를 붙였을 때만 생성)
+    if (project.hasProperty("composeReports")) {
+        reportsDestination = layout.buildDirectory.dir("compose-reports")
+        metricsDestination = layout.buildDirectory.dir("compose-metrics")
+    }
+}
+
 dependencies {
     // application layer
     api project(":presentation:viewmodel-presentation")

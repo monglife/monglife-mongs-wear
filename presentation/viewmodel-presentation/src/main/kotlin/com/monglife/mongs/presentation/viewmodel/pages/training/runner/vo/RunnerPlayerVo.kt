@@ -5,8 +5,8 @@ import com.monglife.mongs.presentation.viewmodel.pages.training.runner.engine.Ru
 data class RunnerPlayerVo(
     val height: Int,
     val width: Int,
-    var py: Float,
-    var px: Float,
+    val py: Float,
+    val px: Float,
 ) {
     companion object {
         fun of(runnerPlayer: RunnerPlayer) = RunnerPlayerVo(
