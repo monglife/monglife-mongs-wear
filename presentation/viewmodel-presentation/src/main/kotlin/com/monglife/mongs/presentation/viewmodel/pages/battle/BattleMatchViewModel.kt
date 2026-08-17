@@ -131,11 +131,29 @@ class BattleMatchViewModel @Inject constructor(
                         playerId = playerId,
                     )
                 ).let { flow ->
-                    observeForever(flow, _matchVo)
-                    observeForever(flow.map { matchVo -> matchVo?.matchPlayers?.first { it.isMe } }, _matchPlayerVo)
-                    _matchPlayerMaxHp.value = _matchPlayerVo.value?.hp ?: 5000f
-                    observeForever(flow.map { matchVo -> matchVo?.matchPlayers?.first { !it.isMe } }, _targetMatchPlayerVo)
-                    _targetMatchPlayerMaxHp.value = _targetMatchPlayerVo.value?.hp ?: 5000f
+                    /**
+                     * 원본 flow 는 한 번만 구독한다.
+                     * 이전에는 파생 상태마다 observeForever 를 걸어 같은 cold flow 를 3번 구독했고,
+                     * 그 결과 MQTT 구독과 Room 쿼리가 3배로 발생했다.
+                     */
+                    var maxHpInitialized = false
+
+                    observeForever(flow) { matchVo ->
+                        _matchVo.value = matchVo
+
+                        val me = matchVo?.matchPlayers?.firstOrNull { it.isMe }
+                        val target = matchVo?.matchPlayers?.firstOrNull { !it.isMe }
+
+                        _matchPlayerVo.value = me
+                        _targetMatchPlayerVo.value = target
+
+                        // 최대 HP 는 첫 수신 값으로 한 번만 고정한다 (기존 동작과 동일)
+                        if (!maxHpInitialized) {
+                            maxHpInitialized = true
+                            _matchPlayerMaxHp.value = me?.hp ?: 5000f
+                            _targetMatchPlayerMaxHp.value = target?.hp ?: 5000f
+                        }
+                    }
                 }
 
                 delay(EFFECT_DELAY)

@@ -8,10 +8,11 @@ import com.monglife.mongs.domain.mong.model.MongOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,21 +30,37 @@ class ObserveCurrentMongUseCase @Inject constructor(
         return devicePersistencePort.getCurrentMongIdFlow()
             .flatMapLatest { mongId ->
                 mongId?.let {
-                    managementPersistencePort.getMongFlow(mongId = mongId)
-                        .map { mong ->
-                            mong?.let {
-                                val mongOption = managementPersistencePort.getMongOption(mongId = it.mongId)
-                                    ?: managementPersistencePort.saveMongOption(
-                                        mongOption = MongOption(
-                                            mongId = it.mongId,
-                                            graduateCheck = false,
-                                        )
-                                    )
+                    /**
+                     * 몽 옵션을 Flow 로 결합한다.
+                     * 이전에는 map 안에서 emission 마다 getMongOption 을 호출해
+                     * MQTT 푸시 1건마다 DB 왕복이 한 번씩 더 발생했다.
+                     */
+                    ensureMongOption(mongId = mongId)
 
-                                MongVo.of(mong = it, mongOption = mongOption)
-                            }
-                        }
+                    combine(
+                        managementPersistencePort.getMongFlow(mongId = mongId),
+                        managementPersistencePort.getMongOptionFlow(mongId = mongId),
+                    ) { mong, mongOption ->
+                        if (mong == null || mongOption == null) null
+                        else MongVo.of(mong = mong, mongOption = mongOption)
+                    }
                 } ?: flowOf(null)
-            }.flowOn(Dispatchers.IO)
+            }
+            .distinctUntilChanged()
+            .flowOn(Dispatchers.IO)
+    }
+
+    /**
+     * 몽 옵션이 없으면 기본값으로 만들어 둔다.
+     */
+    private suspend fun ensureMongOption(mongId: Long) {
+        if (managementPersistencePort.getMongOption(mongId = mongId) == null) {
+            managementPersistencePort.saveMongOption(
+                mongOption = MongOption(
+                    mongId = mongId,
+                    graduateCheck = false,
+                )
+            )
+        }
     }
 }

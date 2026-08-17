@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.monglife.core.common.exception.ErrorException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -89,14 +89,36 @@ abstract class BaseViewModel : ViewModel() {
      * View Model 에서의 Flow 구독 등록
      */
     protected suspend fun <T> observeForever(flow: Flow<T>, state: MutableStateFlow<T>) =
+        observeForever(flow = flow) { state.emit(it) }
+
+    /**
+     * View Model 에서의 Flow 구독 등록 (여러 파생 상태를 한 번의 구독으로 갱신)
+     *
+     * 파생 상태 개수만큼 observeForever 를 거는 대신 이 오버로드를 쓰면
+     * cold flow 를 한 번만 구독한다.
+     */
+    protected suspend fun <T> observeForever(flow: Flow<T>, onEach: suspend (T) -> Unit) =
         UUID.randomUUID().toString().also { key ->
+            /**
+             * 첫 값 수신까지 대기하되 구독은 한 번만 한다.
+             * 이전에는 collect 와 별개로 flow.first() 를 한 번 더 호출해
+             * cold flow 를 두 번 구독했고, 그 탓에 MQTT 구독/해제와 DB 조회가 중복 발생했다.
+             */
+            val firstEmitted = CompletableDeferred<Unit>()
+
             observeForeverJobMap[key] = viewModelScopeWithHandler.launch(Dispatchers.IO) {
-                flow.collect {
-                    state.emit(it)
+                try {
+                    flow.collect {
+                        onEach(it)
+                        firstEmitted.complete(Unit)
+                    }
+                } finally {
+                    // 값 없이 종료·취소되어도 호출자가 영구 대기하지 않도록 해제
+                    firstEmitted.complete(Unit)
                 }
             }
 
-            state.value = flow.first()
+            firstEmitted.await()
         }
 
     /**
