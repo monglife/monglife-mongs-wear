@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,12 +42,12 @@ internal fun StepContent(
 ) {
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
-    val isPagerChange = mainPagerViewModel.isPagerChange.collectAsState()
+    val isPagerChange = mainPagerViewModel.isPagerChange.collectAsStateWithLifecycle()
 
-    val uiState = mainStepViewModel.uiState.collectAsState()
-    val currentMongVo = mainStepViewModel.currentMongVo.collectAsState()
-    val currentWalkingCount = mainStepViewModel.currentWalkingCount.collectAsState()
-    val activityPermission = mainStepViewModel.activityPermission.collectAsState()
+    val uiState = mainStepViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = mainStepViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val currentWalkingCount = mainStepViewModel.currentWalkingCount.collectAsStateWithLifecycle()
+    val activityPermission = mainStepViewModel.activityPermission.collectAsStateWithLifecycle()
 
     Box(
         contentAlignment = Alignment.Center,

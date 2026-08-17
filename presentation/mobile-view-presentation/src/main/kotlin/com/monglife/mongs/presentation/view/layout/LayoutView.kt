@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.monglife.core.presentation.viewmodel.BaseViewModel
@@ -21,8 +21,8 @@ fun LayoutView (
     layoutViewModel: LayoutViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = layoutViewModel.uiState.collectAsState()
-    val isLogin = layoutViewModel.isLogin.collectAsState()
+    val uiState = layoutViewModel.uiState.collectAsStateWithLifecycle()
+    val isLogin = layoutViewModel.isLogin.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { }

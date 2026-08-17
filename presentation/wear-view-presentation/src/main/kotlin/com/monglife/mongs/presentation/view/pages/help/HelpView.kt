@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,8 +33,8 @@ import com.monglife.mongs.presentation.viewmodel.pages.help.HelpViewModel
 internal fun HelpView(
     helpViewModel: HelpViewModel = hiltViewModel(),
 ) {
-    val uiState = helpViewModel.uiState.collectAsState()
-    val currentHelpVo = helpViewModel.currentHelpVo.collectAsState()
+    val uiState = helpViewModel.uiState.collectAsStateWithLifecycle()
+    val currentHelpVo = helpViewModel.currentHelpVo.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -66,7 +66,7 @@ private fun HelpContent(
     modifier: Modifier = Modifier,
     helpViewModel: HelpViewModel,
 ) {
-    val helpVos = helpViewModel.helpVos.collectAsState()
+    val helpVos = helpViewModel.helpVos.collectAsStateWithLifecycle()
     val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
 
     Box(

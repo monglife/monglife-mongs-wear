@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -42,10 +42,10 @@ internal fun RandomDrawView(
     randomDrawViewModel: RandomDrawViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = randomDrawViewModel.uiState.collectAsState()
-    val currentMongVo = randomDrawViewModel.currentMongVo.collectAsState()
-    val randomDrawVo = randomDrawViewModel.randomDrawVo.collectAsState()
-    val randomDrawPayPoint = randomDrawViewModel.randomDrawPayPoint.collectAsState()
+    val uiState = randomDrawViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = randomDrawViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val randomDrawVo = randomDrawViewModel.randomDrawVo.collectAsStateWithLifecycle()
+    val randomDrawPayPoint = randomDrawViewModel.randomDrawPayPoint.collectAsStateWithLifecycle()
 
     Box {
         RandomDrawBackground()
@@ -111,7 +111,7 @@ private fun RandomDrawContent(
     modifier: Modifier = Modifier,
     randomDrawViewModel: RandomDrawViewModel
 ) {
-    val uiState = randomDrawViewModel.uiState.collectAsState()
+    val uiState = randomDrawViewModel.uiState.collectAsStateWithLifecycle()
 
     // animation
     val currentRotation = remember { mutableFloatStateOf(0f) }

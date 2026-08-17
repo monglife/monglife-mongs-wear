@@ -9,7 +9,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -37,9 +37,9 @@ internal fun MainView(
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
 
-    val uiState = mainViewModel.uiState.collectAsState()
-    val currentMongVo = mainViewModel.currentMongVo.collectAsState()
-    val backgroundMapCode = mainViewModel.backgroundMapCode.collectAsState()
+    val uiState = mainViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = mainViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val backgroundMapCode = mainViewModel.backgroundMapCode.collectAsStateWithLifecycle()
 
     val emptyPagerState = rememberPagerState(MainPagerViewModel.EMPTY_PAGER_STATE_INIT, 0f) { MainPagerViewModel.EMPTY_PAGER_STATE_SIZE }
     val normalPagerState = rememberPagerState(MainPagerViewModel.NORMAL_PAGER_STATE_INIT, 0f) { MainPagerViewModel.NORMAL_PAGER_STATE_SIZE }

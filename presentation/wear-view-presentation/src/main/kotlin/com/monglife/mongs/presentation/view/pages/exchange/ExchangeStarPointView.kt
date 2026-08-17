@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -48,10 +48,10 @@ internal fun ExchangeStarPointView(
     exchangeStarPointViewModel: ExchangeStarPointViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = exchangeStarPointViewModel.uiState.collectAsState()
-    val currentMongVo = exchangeStarPointViewModel.currentMongVo.collectAsState()
-    val exchangeCount = exchangeStarPointViewModel.exchangeCount.collectAsState()
-    val chargePayPoint = exchangeStarPointViewModel.chargePayPoint.collectAsState()
+    val uiState = exchangeStarPointViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = exchangeStarPointViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val exchangeCount = exchangeStarPointViewModel.exchangeCount.collectAsStateWithLifecycle()
+    val chargePayPoint = exchangeStarPointViewModel.chargePayPoint.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -104,10 +104,10 @@ private fun ExchangeStarPointContent(
     modifier: Modifier = Modifier,
     exchangeStarPointViewModel: ExchangeStarPointViewModel,
 ) {
-    val currentMongVo = exchangeStarPointViewModel.currentMongVo.collectAsState()
-    val starPoint = exchangeStarPointViewModel.starPoint.collectAsState()
-    val exchangeCount = exchangeStarPointViewModel.exchangeCount.collectAsState()
-    val chargePayPoint = exchangeStarPointViewModel.chargePayPoint.collectAsState()
+    val currentMongVo = exchangeStarPointViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val starPoint = exchangeStarPointViewModel.starPoint.collectAsStateWithLifecycle()
+    val exchangeCount = exchangeStarPointViewModel.exchangeCount.collectAsStateWithLifecycle()
+    val chargePayPoint = exchangeStarPointViewModel.chargePayPoint.collectAsStateWithLifecycle()
 
     Box(
         contentAlignment = Alignment.Center,

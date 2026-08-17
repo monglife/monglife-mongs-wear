@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,8 +40,8 @@ internal fun CollectionMongView(
     collectionMongViewModel: CollectionMongViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = collectionMongViewModel.uiState.collectAsState()
-    val detailCollectionMongVo = collectionMongViewModel.detailCollectionMongVo.collectAsState()
+    val uiState = collectionMongViewModel.uiState.collectAsStateWithLifecycle()
+    val detailCollectionMongVo = collectionMongViewModel.detailCollectionMongVo.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -87,7 +87,7 @@ private fun CollectionMongContent(
     collectionMongViewModel: CollectionMongViewModel,
     context: Context = LocalContext.current,
 ) {
-    val collectionMongVos = collectionMongViewModel.collectionMongVos.collectAsState()
+    val collectionMongVos = collectionMongViewModel.collectionMongVos.collectAsStateWithLifecycle()
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = 0)
 
     Box(

@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,9 +61,9 @@ internal fun FeedFoodView(
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainSlotViewModel: MainSlotViewModel = hiltViewModel<MainSlotViewModel>(parentEntry)
 
-    val uiState = feedFoodViewModel.uiState.collectAsState()
-    val currentMongVo = feedFoodViewModel.currentMongVo.collectAsState()
-    val currentFoodVo = feedFoodViewModel.currentFoodVo.collectAsState()
+    val uiState = feedFoodViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = feedFoodViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val currentFoodVo = feedFoodViewModel.currentFoodVo.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -128,10 +128,10 @@ private fun FeedFoodContent(
     modifier: Modifier = Modifier,
     feedFoodViewModel: FeedFoodViewModel,
 ) {
-    val currentMongVo = feedFoodViewModel.currentMongVo.collectAsState()
-    val currentFoodVo = feedFoodViewModel.currentFoodVo.collectAsState()
-    val foodVos = feedFoodViewModel.foodVos.collectAsState()
-    val foodVoIndex = feedFoodViewModel.foodVoIndex.collectAsState()
+    val currentMongVo = feedFoodViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val currentFoodVo = feedFoodViewModel.currentFoodVo.collectAsStateWithLifecycle()
+    val foodVos = feedFoodViewModel.foodVos.collectAsStateWithLifecycle()
+    val foodVoIndex = feedFoodViewModel.foodVoIndex.collectAsStateWithLifecycle()
     val pageIndicatorState: PageIndicatorState = remember {
         object : PageIndicatorState {
             override val pageOffset: Float

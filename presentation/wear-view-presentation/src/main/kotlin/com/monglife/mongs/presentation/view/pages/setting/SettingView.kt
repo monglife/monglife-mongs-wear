@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,7 +42,7 @@ internal fun SettingView(
     settingViewModel: SettingViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = settingViewModel.uiState.collectAsState()
+    val uiState = settingViewModel.uiState.collectAsStateWithLifecycle()
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         settingViewModel.verifyPermission()
     }
@@ -92,10 +92,10 @@ private fun SettingContent(
     settingViewModel: SettingViewModel,
 ) {
     val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
-    val notificationOption = settingViewModel.notificationOption.collectAsState()
-    val notificationPermission = settingViewModel.notificationPermission.collectAsState()
-    val activityPermission = settingViewModel.activityPermission.collectAsState()
-    val locationPermission = settingViewModel.locationPermission.collectAsState()
+    val notificationOption = settingViewModel.notificationOption.collectAsStateWithLifecycle()
+    val notificationPermission = settingViewModel.notificationPermission.collectAsStateWithLifecycle()
+    val activityPermission = settingViewModel.activityPermission.collectAsStateWithLifecycle()
+    val locationPermission = settingViewModel.locationPermission.collectAsStateWithLifecycle()
 
     Box(
         contentAlignment = Alignment.Center,

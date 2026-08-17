@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -51,12 +51,12 @@ internal fun BattleMatchView(
     battleMatchViewModel: BattleMatchViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = battleMatchViewModel.uiState.collectAsState()
-    val matchVo = battleMatchViewModel.matchVo.collectAsState()
-    val matchPlayerVo = battleMatchViewModel.matchPlayerVo.collectAsState()
-    val targetMatchPlayerVo = battleMatchViewModel.targetMatchPlayerVo.collectAsState()
-    val winMatchPlayerVo = battleMatchViewModel.winMatchPlayerVo.collectAsState()
-    val maxSeconds = battleMatchViewModel.maxSeconds.collectAsState()
+    val uiState = battleMatchViewModel.uiState.collectAsStateWithLifecycle()
+    val matchVo = battleMatchViewModel.matchVo.collectAsStateWithLifecycle()
+    val matchPlayerVo = battleMatchViewModel.matchPlayerVo.collectAsStateWithLifecycle()
+    val targetMatchPlayerVo = battleMatchViewModel.targetMatchPlayerVo.collectAsStateWithLifecycle()
+    val winMatchPlayerVo = battleMatchViewModel.winMatchPlayerVo.collectAsStateWithLifecycle()
+    val maxSeconds = battleMatchViewModel.maxSeconds.collectAsStateWithLifecycle()
 
     Box {
         BattleBackground()
@@ -162,13 +162,13 @@ private fun BattleMatchContent(
     modifier: Modifier = Modifier,
     battleMatchViewModel: BattleMatchViewModel,
 ) {
-    val uiState = battleMatchViewModel.uiState.collectAsState()
-    val matchVo = battleMatchViewModel.matchVo.collectAsState()
-    val matchPlayerVo = battleMatchViewModel.matchPlayerVo.collectAsState()
-    val matchPlayerMaxHp = battleMatchViewModel.matchPlayerMaxHp.collectAsState()
-    val targetMatchPlayerVo = battleMatchViewModel.targetMatchPlayerVo.collectAsState()
-    val targetMatchPlayerMaxHp = battleMatchViewModel.targetMatchPlayerMaxHp.collectAsState()
-    val maxRound = battleMatchViewModel.maxRound.collectAsState()
+    val uiState = battleMatchViewModel.uiState.collectAsStateWithLifecycle()
+    val matchVo = battleMatchViewModel.matchVo.collectAsStateWithLifecycle()
+    val matchPlayerVo = battleMatchViewModel.matchPlayerVo.collectAsStateWithLifecycle()
+    val matchPlayerMaxHp = battleMatchViewModel.matchPlayerMaxHp.collectAsStateWithLifecycle()
+    val targetMatchPlayerVo = battleMatchViewModel.targetMatchPlayerVo.collectAsStateWithLifecycle()
+    val targetMatchPlayerMaxHp = battleMatchViewModel.targetMatchPlayerMaxHp.collectAsStateWithLifecycle()
+    val maxRound = battleMatchViewModel.maxRound.collectAsStateWithLifecycle()
 
     Box(
         contentAlignment = Alignment.Center,

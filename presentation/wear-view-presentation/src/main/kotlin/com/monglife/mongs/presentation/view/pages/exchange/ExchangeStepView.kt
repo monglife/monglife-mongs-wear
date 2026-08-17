@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -48,11 +48,11 @@ internal fun ExchangeStepView(
     exchangeStepViewModel: ExchangeStepViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = exchangeStepViewModel.uiState.collectAsState()
-    val currentMongVo = exchangeStepViewModel.currentMongVo.collectAsState()
-    val exchangeCount = exchangeStepViewModel.exchangeCount.collectAsState()
-    val chargePayPoint = exchangeStepViewModel.chargePayPoint.collectAsState()
-    val permission = exchangeStepViewModel.permission.collectAsState()
+    val uiState = exchangeStepViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = exchangeStepViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val exchangeCount = exchangeStepViewModel.exchangeCount.collectAsStateWithLifecycle()
+    val chargePayPoint = exchangeStepViewModel.chargePayPoint.collectAsStateWithLifecycle()
+    val permission = exchangeStepViewModel.permission.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -112,10 +112,10 @@ private fun ExchangeStepContent(
     modifier: Modifier = Modifier,
     exchangeStepViewModel: ExchangeStepViewModel,
 ) {
-    val currentMongVo = exchangeStepViewModel.currentMongVo.collectAsState()
-    val walkingCount = exchangeStepViewModel.walkingCount.collectAsState()
-    val exchangeCount = exchangeStepViewModel.exchangeCount.collectAsState()
-    val chargePayPoint = exchangeStepViewModel.chargePayPoint.collectAsState()
+    val currentMongVo = exchangeStepViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val walkingCount = exchangeStepViewModel.walkingCount.collectAsStateWithLifecycle()
+    val exchangeCount = exchangeStepViewModel.exchangeCount.collectAsStateWithLifecycle()
+    val chargePayPoint = exchangeStepViewModel.chargePayPoint.collectAsStateWithLifecycle()
 
     Box(
         contentAlignment = Alignment.Center,

@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -55,9 +55,9 @@ internal fun SearchMapView(
     searchMapViewModel: SearchMapViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = searchMapViewModel.uiState.collectAsState()
-    val collectionMapVo = searchMapViewModel.collectionMapVo.collectAsState()
-    val permission = searchMapViewModel.permission.collectAsState()
+    val uiState = searchMapViewModel.uiState.collectAsStateWithLifecycle()
+    val collectionMapVo = searchMapViewModel.collectionMapVo.collectAsStateWithLifecycle()
+    val permission = searchMapViewModel.permission.collectAsStateWithLifecycle()
 
     Box {
         SearchMapBackground()
@@ -120,7 +120,7 @@ private fun SearchMapContent(
     modifier: Modifier = Modifier,
     searchMapViewModel: SearchMapViewModel,
 ) {
-    val uiState = searchMapViewModel.uiState.collectAsState()
+    val uiState = searchMapViewModel.uiState.collectAsStateWithLifecycle()
 
     // animation
     val currentSize = remember { Animatable(SEARCH_MIN_SIZE) }

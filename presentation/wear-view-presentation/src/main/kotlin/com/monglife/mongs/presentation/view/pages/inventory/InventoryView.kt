@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,9 +53,9 @@ internal fun InventoryView(
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainSlotViewModel: MainSlotViewModel = hiltViewModel<MainSlotViewModel>(parentEntry)
 
-    val uiState = inventoryViewModel.uiState.collectAsState()
-    val currentMongVo = inventoryViewModel.currentMongVo.collectAsState()
-    val currentInventoryVo = inventoryViewModel.currentInventoryVo.collectAsState()
+    val uiState = inventoryViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = inventoryViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val currentInventoryVo = inventoryViewModel.currentInventoryVo.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -119,9 +119,9 @@ private fun InventoryContent(
     modifier: Modifier = Modifier,
     inventoryViewModel: InventoryViewModel,
 ) {
-    val page = inventoryViewModel.page.collectAsState()
-    val totalPage = inventoryViewModel.totalPage.collectAsState()
-    val inventoryVos = inventoryViewModel.inventoryVos.collectAsState()
+    val page = inventoryViewModel.page.collectAsStateWithLifecycle()
+    val totalPage = inventoryViewModel.totalPage.collectAsStateWithLifecycle()
+    val inventoryVos = inventoryViewModel.inventoryVos.collectAsStateWithLifecycle()
     val pageIndicatorState: PageIndicatorState = remember {
         object : PageIndicatorState {
             override val pageOffset: Float

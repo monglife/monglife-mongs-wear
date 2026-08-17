@@ -5,7 +5,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -28,10 +28,10 @@ internal fun TrainingChamContent(
     context: Context = LocalContext.current,
     windowInfo: WindowInfo = LocalWindowInfo.current,
 ) {
-    val uiState = trainingChamViewModel.uiState.collectAsState()
-    val currentMongVo = trainingChamViewModel.currentMongVo.collectAsState()
-    val trainingTypeVo = trainingChamViewModel.trainingTypeVo.collectAsState()
-    val trainingEndVo = trainingChamViewModel.trainingEndVo.collectAsState()
+    val uiState = trainingChamViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = trainingChamViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val trainingTypeVo = trainingChamViewModel.trainingTypeVo.collectAsStateWithLifecycle()
+    val trainingEndVo = trainingChamViewModel.trainingEndVo.collectAsStateWithLifecycle()
 
     Box {
         if (uiState.value.loadingBar) {

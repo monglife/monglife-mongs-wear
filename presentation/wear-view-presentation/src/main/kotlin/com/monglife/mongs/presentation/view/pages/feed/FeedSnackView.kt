@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,9 +61,9 @@ internal fun FeedSnackView(
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainSlotViewModel: MainSlotViewModel = hiltViewModel<MainSlotViewModel>(parentEntry)
 
-    val uiState = feedSnackViewModel.uiState.collectAsState()
-    val currentMongVo = feedSnackViewModel.currentMongVo.collectAsState()
-    val currentSnackVo = feedSnackViewModel.currentSnackVo.collectAsState()
+    val uiState = feedSnackViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = feedSnackViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val currentSnackVo = feedSnackViewModel.currentSnackVo.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -127,10 +127,10 @@ private fun FeedSnackContent(
     modifier: Modifier = Modifier,
     feedSnackViewModel: FeedSnackViewModel,
 ) {
-    val currentMongVo = feedSnackViewModel.currentMongVo.collectAsState()
-    val currentSnackVo = feedSnackViewModel.currentSnackVo.collectAsState()
-    val snackVos = feedSnackViewModel.snackVos.collectAsState()
-    val snackVoIndex = feedSnackViewModel.snackVoIndex.collectAsState()
+    val currentMongVo = feedSnackViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val currentSnackVo = feedSnackViewModel.currentSnackVo.collectAsStateWithLifecycle()
+    val snackVos = feedSnackViewModel.snackVos.collectAsStateWithLifecycle()
+    val snackVoIndex = feedSnackViewModel.snackVoIndex.collectAsStateWithLifecycle()
     val pageIndicatorState: PageIndicatorState = remember {
         object : PageIndicatorState {
             override val pageOffset: Float

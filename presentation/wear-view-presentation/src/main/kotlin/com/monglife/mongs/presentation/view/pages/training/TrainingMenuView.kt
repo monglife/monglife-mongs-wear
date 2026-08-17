@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,7 +32,7 @@ internal fun TrainingMenuView(
     trainingMenuViewModel: TrainingMenuViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = trainingMenuViewModel.uiState.collectAsState()
+    val uiState = trainingMenuViewModel.uiState.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -70,7 +70,7 @@ private fun TrainingMenuContent(
     navController: NavController,
     trainingMenuViewModel: TrainingMenuViewModel,
 ) {
-    val trainingTypeVos = trainingMenuViewModel.trainingTypeVos.collectAsState()
+    val trainingTypeVos = trainingMenuViewModel.trainingTypeVos.collectAsStateWithLifecycle()
 
     val listState = rememberScalingLazyListState(initialCenterItemIndex = 0)
 

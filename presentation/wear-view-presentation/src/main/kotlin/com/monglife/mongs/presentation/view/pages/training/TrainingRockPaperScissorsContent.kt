@@ -5,7 +5,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.zIndex
@@ -30,14 +30,14 @@ internal fun TrainingRockPaperScissorsContent(
     trainingRockPaperScissorsViewModel: TrainingRockPaperScissorsViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = trainingRockPaperScissorsViewModel.uiState.collectAsState()
-    val currentMongVo = trainingRockPaperScissorsViewModel.currentMongVo.collectAsState()
-    val trainingTypeVo = trainingRockPaperScissorsViewModel.trainingTypeVo.collectAsState()
-    val trainingEndVo = trainingRockPaperScissorsViewModel.trainingEndVo.collectAsState()
-    val rockPaperScissorsVo = trainingRockPaperScissorsViewModel.rockPaperScissorsVo.collectAsState()
-    val isStart = trainingRockPaperScissorsViewModel.isStart.collectAsState()
-    val isProcess = trainingRockPaperScissorsViewModel.isProcess.collectAsState()
-    val timeMillis = trainingRockPaperScissorsViewModel.timeMillis.collectAsState()
+    val uiState = trainingRockPaperScissorsViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = trainingRockPaperScissorsViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val trainingTypeVo = trainingRockPaperScissorsViewModel.trainingTypeVo.collectAsStateWithLifecycle()
+    val trainingEndVo = trainingRockPaperScissorsViewModel.trainingEndVo.collectAsStateWithLifecycle()
+    val rockPaperScissorsVo = trainingRockPaperScissorsViewModel.rockPaperScissorsVo.collectAsStateWithLifecycle()
+    val isStart = trainingRockPaperScissorsViewModel.isStart.collectAsStateWithLifecycle()
+    val isProcess = trainingRockPaperScissorsViewModel.isProcess.collectAsStateWithLifecycle()
+    val timeMillis = trainingRockPaperScissorsViewModel.timeMillis.collectAsStateWithLifecycle()
 
     Box {
         if (uiState.value.loadingBar) {

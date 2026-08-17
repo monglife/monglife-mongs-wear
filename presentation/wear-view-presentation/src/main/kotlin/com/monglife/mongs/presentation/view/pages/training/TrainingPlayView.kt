@@ -5,7 +5,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.zIndex
@@ -23,7 +23,7 @@ internal fun TrainingPlayView(
     trainingPlayViewModel: TrainingPlayViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = trainingPlayViewModel.uiState.collectAsState()
+    val uiState = trainingPlayViewModel.uiState.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()

@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,8 +42,8 @@ internal fun NoticeView(
     noticeViewModel: NoticeViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = noticeViewModel.uiState.collectAsState()
-    val content = noticeViewModel.content.collectAsState()
+    val uiState = noticeViewModel.uiState.collectAsStateWithLifecycle()
+    val content = noticeViewModel.content.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -86,10 +86,10 @@ private fun NoticeContent(
     modifier: Modifier = Modifier,
     noticeViewModel: NoticeViewModel,
 ) {
-    val uiState = noticeViewModel.uiState.collectAsState()
-    val page = noticeViewModel.page.collectAsState()
-    val isLastPage = noticeViewModel.isLastPage.collectAsState()
-    val noticeVos = noticeViewModel.noticeVos.collectAsState()
+    val uiState = noticeViewModel.uiState.collectAsStateWithLifecycle()
+    val page = noticeViewModel.page.collectAsStateWithLifecycle()
+    val isLastPage = noticeViewModel.isLastPage.collectAsStateWithLifecycle()
+    val noticeVos = noticeViewModel.noticeVos.collectAsStateWithLifecycle()
     val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
 
     Box(

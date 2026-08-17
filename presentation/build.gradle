@@ -34,6 +34,9 @@ subprojects {
         // core layer
         implementation project(":core:presentation-core")
 
+        // 백그라운드/앰비언트에서 Flow 수집을 멈추기 위한 collectAsStateWithLifecycle
+        api "androidx.lifecycle:lifecycle-runtime-compose:${rootProject.ext.lifecycleVersion}"
+
         // dagger & hilt
         implementation group: "javax.inject", name: "javax.inject", version: "1"
         implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"

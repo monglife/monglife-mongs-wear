@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -39,7 +39,7 @@ internal fun RockPaperScissorsSection(
 ) {
     val rockPaperScissorsPickCode = remember { mutableStateOf<RockPaperScissorsPickCode?>(null) }
     val showResult = remember { mutableStateOf(false) }
-    val rockPaperScissorsVo = trainingRockPaperScissorsViewModel.rockPaperScissorsVo.collectAsState()
+    val rockPaperScissorsVo = trainingRockPaperScissorsViewModel.rockPaperScissorsVo.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         showResult.value = false

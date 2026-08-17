@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -30,8 +30,8 @@ internal fun InteractionContent(
     navController: NavController,
     mainInteractionViewModel: MainInteractionViewModel = hiltViewModel()
 ) {
-    val uiState = mainInteractionViewModel.uiState.collectAsState()
-    val currentMongVo = mainInteractionViewModel.currentMongVo.collectAsState()
+    val uiState = mainInteractionViewModel.uiState.collectAsStateWithLifecycle()
+    val currentMongVo = mainInteractionViewModel.currentMongVo.collectAsStateWithLifecycle()
 
     Box(
         contentAlignment = Alignment.Center,

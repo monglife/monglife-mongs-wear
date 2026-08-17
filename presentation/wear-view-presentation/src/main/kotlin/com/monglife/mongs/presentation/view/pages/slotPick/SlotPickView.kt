@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,8 +43,8 @@ internal fun SlotPickView(
     val parentEntry = remember { navController.getBackStackEntry(RouterPath.Root.route) }
     val mainPagerViewModel: MainPagerViewModel = hiltViewModel<MainPagerViewModel>(parentEntry)
 
-    val uiState = slotPickViewModel.uiState.collectAsState()
-    val currentSlotVo = slotPickViewModel.currentSlotVo.collectAsState()
+    val uiState = slotPickViewModel.uiState.collectAsStateWithLifecycle()
+    val currentSlotVo = slotPickViewModel.currentSlotVo.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -144,11 +144,11 @@ private fun SlotPickContent(
     modifier: Modifier = Modifier,
     slotPickViewModel: SlotPickViewModel,
 ) {
-    val starPoint = slotPickViewModel.starPoint.collectAsState()
-    val currentMongVo = slotPickViewModel.currentMongVo.collectAsState()
-    val slotIndex = slotPickViewModel.slotVoIndex.collectAsState()
-    val slotVos = slotPickViewModel.slotVos.collectAsState()
-    val currentSlotVo = slotPickViewModel.currentSlotVo.collectAsState()
+    val starPoint = slotPickViewModel.starPoint.collectAsStateWithLifecycle()
+    val currentMongVo = slotPickViewModel.currentMongVo.collectAsStateWithLifecycle()
+    val slotIndex = slotPickViewModel.slotVoIndex.collectAsStateWithLifecycle()
+    val slotVos = slotPickViewModel.slotVos.collectAsStateWithLifecycle()
+    val currentSlotVo = slotPickViewModel.currentSlotVo.collectAsStateWithLifecycle()
     val pageIndicatorState: PageIndicatorState = remember {
         object : PageIndicatorState {
             override val pageOffset: Float

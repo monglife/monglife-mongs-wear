@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,9 +34,9 @@ import com.monglife.mongs.presentation.viewmodel.pages.feedback.FeedbackViewMode
 internal fun FeedbackView(
     feedbackViewModel: FeedbackViewModel = hiltViewModel(),
 ) {
-    val uiState = feedbackViewModel.uiState.collectAsState()
-    val title = feedbackViewModel.title.collectAsState()
-    val content = feedbackViewModel.content.collectAsState()
+    val uiState = feedbackViewModel.uiState.collectAsStateWithLifecycle()
+    val title = feedbackViewModel.title.collectAsStateWithLifecycle()
+    val content = feedbackViewModel.content.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -87,7 +87,7 @@ private fun FeedbackContent(
     modifier: Modifier = Modifier,
     feedbackViewModel: FeedbackViewModel,
 ) {
-    val feedbackTypeVos = feedbackViewModel.feedbackTypeVos.collectAsState()
+    val feedbackTypeVos = feedbackViewModel.feedbackTypeVos.collectAsStateWithLifecycle()
     val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
 
     Box(

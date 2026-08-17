@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -57,7 +57,7 @@ internal fun ChargeStarPointView(
     chargeStarPointViewModel: ChargeStarPointViewModel = hiltViewModel(),
     context: Context = LocalContext.current
 ) {
-    val uiState = chargeStarPointViewModel.uiState.collectAsState()
+    val uiState = chargeStarPointViewModel.uiState.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -99,9 +99,9 @@ private fun ChargeStarPointContent(
     chargeStarPointViewModel: ChargeStarPointViewModel,
     context: Context = LocalContext.current
 ) {
-    val productVos = chargeStarPointViewModel.productVos.collectAsState()
+    val productVos = chargeStarPointViewModel.productVos.collectAsStateWithLifecycle()
     val productIndex = remember { mutableIntStateOf(0) }
-    val starPoint = chargeStarPointViewModel.starPoint.collectAsState()
+    val starPoint = chargeStarPointViewModel.starPoint.collectAsStateWithLifecycle()
     val currentProductVo = remember {
         derivedStateOf {
             if (productIndex.intValue < productVos.value.size) {

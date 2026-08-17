@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -33,7 +33,7 @@ internal fun LoginContent(
     loginViewModel: LoginViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
 ) {
-    val uiState = loginViewModel.uiState.collectAsState()
+    val uiState = loginViewModel.uiState.collectAsStateWithLifecycle()
     val googleLoginLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
         loginViewModel::login

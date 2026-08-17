@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,8 +40,8 @@ internal fun CollectionMapView(
     collectionMapViewModel: CollectionMapViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val uiState = collectionMapViewModel.uiState.collectAsState()
-    val detailCollectionMapVo = collectionMapViewModel.detailCollectionMapVo.collectAsState()
+    val uiState = collectionMapViewModel.uiState.collectAsStateWithLifecycle()
+    val detailCollectionMapVo = collectionMapViewModel.detailCollectionMapVo.collectAsStateWithLifecycle()
 
     Box {
         DefaultBackground()
@@ -96,7 +96,7 @@ private fun CollectionMapContent(
     collectionMapViewModel: CollectionMapViewModel,
     context: Context = LocalContext.current,
 ) {
-    val collectionMapVos = collectionMapViewModel.collectionMapVos.collectAsState()
+    val collectionMapVos = collectionMapViewModel.collectionMapVos.collectAsStateWithLifecycle()
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = 0)
 
     Box(
