@@ -1,11 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-buildscript {
-    ext {
-        composeVersion          = "1.4.1"
-    }
-}
-
 apply plugin: "com.android.library"
 apply plugin: "com.google.devtools.ksp"
 apply plugin: "dagger.hilt.android.plugin"
@@ -37,12 +31,14 @@ dependencies {
     api project(":core:common-core")
     implementation project(":core:application-core")
 
+    // lifecycle (BaseViewModel / viewModelScope)
+    // 이전에는 androidx.wear.compose 를 통해 전이 의존으로 딸려 왔다.
+    // 이 모듈은 wear/mobile 양쪽이 공유하므로 wear 전용 라이브러리를 의존하면 안 된다.
+    api "androidx.lifecycle:lifecycle-viewmodel-ktx:${rootProject.ext.lifecycleVersion}"
+
     // dagger & hilt
     implementation group: "javax.inject", name: "javax.inject", version: "1"
     implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
     ksp "com.google.dagger:dagger-compiler:${rootProject.ext.hiltVersion}"
     ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
-
-    implementation "androidx.wear.compose:compose-foundation:${this.ext.composeVersion}"
-    implementation "androidx.wear.compose:compose-navigation:${this.ext.composeVersion}"
 }
