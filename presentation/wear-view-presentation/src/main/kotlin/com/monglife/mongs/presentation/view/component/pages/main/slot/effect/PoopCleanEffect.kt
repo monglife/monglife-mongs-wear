@@ -8,20 +8,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
-import coil.decode.ImageDecoderDecoder
+import com.monglife.mongs.presentation.view.assets.LocalMongsImageLoader
 import com.mongs.presentation.view.wear.R
 
 @Composable
 internal fun PoopCleanEffect(
     modifier: Modifier = Modifier,
 ) {
-    val imageLoader = ImageLoader.Builder(LocalContext.current)
-        .components { add(ImageDecoderDecoder.Factory()) }
-        .build()
 
     Box(
         contentAlignment = Alignment.BottomCenter,
@@ -31,7 +26,7 @@ internal fun PoopCleanEffect(
         Image(
             painter = rememberAsyncImagePainter(
                 model = R.drawable.effect_vacuum,
-                imageLoader = imageLoader
+                imageLoader = LocalMongsImageLoader.current
             ),
             contentDescription = "PoopCleanEffect",
             modifier = Modifier

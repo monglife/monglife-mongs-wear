@@ -2,6 +2,8 @@ package com.monglife.mongs.presentation.view.assets
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -33,16 +35,21 @@ val MongsDarkBrown = Color(0xFF5D4037)
 
 @Composable
 fun MongsTheme(content: @Composable () -> Unit) {
-    val typography = Typography(defaultFontFamily = DAL_MU_RI)
-    val shapes = Shapes(
-        small = RoundedCornerShape(50.dp),
-        medium = RoundedCornerShape(50.dp),
-        large = RoundedCornerShape(50.dp)
-    )
+    val typography = remember { Typography(defaultFontFamily = DAL_MU_RI) }
+    val shapes = remember {
+        Shapes(
+            small = RoundedCornerShape(50.dp),
+            medium = RoundedCornerShape(50.dp),
+            large = RoundedCornerShape(50.dp)
+        )
+    }
 
-    MaterialTheme(
-        typography = typography,
-        shapes = shapes,
-        content = content
-    )
+    // ImageLoader 는 여기서 한 번만 만들어 컴포지션 전체가 공유한다.
+    CompositionLocalProvider(LocalMongsImageLoader provides rememberMongsImageLoader()) {
+        MaterialTheme(
+            typography = typography,
+            shapes = shapes,
+            content = content
+        )
+    }
 }

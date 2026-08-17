@@ -12,12 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.zIndex
-import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
-import coil.decode.ImageDecoderDecoder
+import com.monglife.mongs.presentation.view.assets.LocalMongsImageLoader
 import com.monglife.mongs.presentation.view.assets.MapResourceCode
 import com.mongs.presentation.view.mobile.R
 import kotlin.math.absoluteValue
@@ -46,9 +44,6 @@ internal fun MainBackground(
         }
 
         val mapResourceCode = MapResourceCode.getResource(code = it)
-        val imageLoader = ImageLoader.Builder(LocalContext.current)
-            .components { add(ImageDecoderDecoder.Factory()) }
-            .build()
 
         Box(
             contentAlignment = Alignment.Center,
@@ -63,7 +58,7 @@ internal fun MainBackground(
                     Image(
                         painter = rememberAsyncImagePainter(
                             model = R.drawable.map_mp000_gif,
-                            imageLoader = imageLoader,
+                            imageLoader = LocalMongsImageLoader.current,
                             placeholder = painterResource(mapResourceCode.code),
                         ),
                         contentDescription = "MainPagerBackground",

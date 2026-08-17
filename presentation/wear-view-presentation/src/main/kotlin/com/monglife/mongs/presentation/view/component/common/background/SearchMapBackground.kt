@@ -6,20 +6,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
-import coil.decode.ImageDecoderDecoder
+import com.monglife.mongs.presentation.view.assets.LocalMongsImageLoader
 import com.mongs.presentation.view.wear.R
 
 @Composable
 internal fun SearchMapBackground(
     modifier: Modifier = Modifier,
 ) {
-    val imageLoader = ImageLoader.Builder(LocalContext.current)
-        .components { add(ImageDecoderDecoder.Factory()) }
-        .build()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -28,7 +23,7 @@ internal fun SearchMapBackground(
         Image(
             painter = rememberAsyncImagePainter(
                 model = R.drawable.bg_walking_gif,
-                imageLoader = imageLoader,
+                imageLoader = LocalMongsImageLoader.current,
                 placeholder = painterResource(R.drawable.bg_walking),
             ),
             contentDescription = "SearchMapBackground",

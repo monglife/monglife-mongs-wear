@@ -10,13 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
-import coil.decode.ImageDecoderDecoder
+import com.monglife.mongs.presentation.view.assets.LocalMongsImageLoader
 import com.monglife.mongs.domain.mong.enums.MongStatusCode
 import com.monglife.mongs.presentation.view.assets.MongResourceCode
 import com.mongs.presentation.view.wear.R
@@ -33,9 +31,6 @@ internal fun Mong(
     ratio: Float = 1f,
     isPng: Boolean = false,
 ) {
-    val imageLoader = ImageLoader.Builder(LocalContext.current)
-        .components { add(ImageDecoderDecoder.Factory()) }
-        .build()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -58,7 +53,7 @@ internal fun Mong(
                 Image(
                     painter = rememberAsyncImagePainter(
                         model = mong.gifCode,
-                        imageLoader = imageLoader
+                        imageLoader = LocalMongsImageLoader.current
                     ),
                     contentDescription = "Mong",
                     modifier = Modifier.size((120 * ratio).dp)
@@ -88,7 +83,7 @@ internal fun Mong(
                 }
 
                 Image(
-                    painter = rememberAsyncImagePainter(model = expression, imageLoader = imageLoader),
+                    painter = rememberAsyncImagePainter(model = expression, imageLoader = LocalMongsImageLoader.current),
                     contentDescription = "MongExpression",
                     modifier = Modifier
                         .align(Alignment.Center)

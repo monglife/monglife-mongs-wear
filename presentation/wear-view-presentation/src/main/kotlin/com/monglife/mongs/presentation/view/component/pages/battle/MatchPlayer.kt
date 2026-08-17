@@ -8,12 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
-import coil.decode.ImageDecoderDecoder
+import com.monglife.mongs.presentation.view.assets.LocalMongsImageLoader
 import com.monglife.mongs.application.battle.vo.MatchVo
 import com.monglife.mongs.domain.battle.enums.MatchRoundCode
 import com.monglife.mongs.presentation.view.assets.MongResourceCode
@@ -27,9 +25,6 @@ fun MatchPlayer(
     matchEffect: Boolean = true,
     effectAlignment: Alignment,
 ) {
-    val imageLoader = ImageLoader.Builder(LocalContext.current)
-        .components { add(ImageDecoderDecoder.Factory()) }
-        .build()
 
     Box {
         Mong(
@@ -50,7 +45,7 @@ fun MatchPlayer(
                         Image(
                             painter = rememberAsyncImagePainter(
                                 model = R.drawable.icon_healthy,    // TODO: 회복 이미지 구급 상자 아이콘으로 변경
-                                imageLoader = imageLoader
+                                imageLoader = LocalMongsImageLoader.current
                             ),
                             contentDescription = null,
                             modifier = Modifier
@@ -65,7 +60,7 @@ fun MatchPlayer(
                         Image(
                             painter = rememberAsyncImagePainter(
                                 model = R.drawable.icon_healthy,    // TODO: 회복 이미지 구급 상자 아이콘으로 변경
-                                imageLoader = imageLoader
+                                imageLoader = LocalMongsImageLoader.current
                             ),
                             contentDescription = null,
                             modifier = Modifier
@@ -77,7 +72,7 @@ fun MatchPlayer(
                         Image(
                             painter = rememberAsyncImagePainter(
                                 model = R.drawable.effect_attack,
-                                imageLoader = imageLoader
+                                imageLoader = LocalMongsImageLoader.current
                             ),
                             contentDescription = null,
                             modifier = Modifier
@@ -92,7 +87,7 @@ fun MatchPlayer(
                         Image(
                             painter = rememberAsyncImagePainter(
                                 model = R.drawable.effect_attack,
-                                imageLoader = imageLoader
+                                imageLoader = LocalMongsImageLoader.current
                             ),
                             contentDescription = null,
                             modifier = Modifier
@@ -107,7 +102,7 @@ fun MatchPlayer(
                         Image(
                             painter = rememberAsyncImagePainter(
                                 model = R.drawable.effect_defence,
-                                imageLoader = imageLoader
+                                imageLoader = LocalMongsImageLoader.current
                             ),
                             contentDescription = null,
                             modifier = Modifier

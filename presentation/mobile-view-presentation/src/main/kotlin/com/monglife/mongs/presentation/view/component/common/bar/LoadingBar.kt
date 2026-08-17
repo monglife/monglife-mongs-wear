@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
-import coil.decode.ImageDecoderDecoder
+import com.monglife.mongs.presentation.view.assets.LocalMongsImageLoader
 import com.mongs.presentation.view.mobile.R
 
 @Composable
@@ -25,13 +23,10 @@ internal fun LoadingBar(
         contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize(),
     ) {
-        val imageLoader = ImageLoader.Builder(LocalContext.current)
-            .components { add(ImageDecoderDecoder.Factory()) }
-            .build()
         val loading = R.drawable.icon_loading
 
         Image(
-            painter = rememberAsyncImagePainter(model = loading, imageLoader = imageLoader),
+            painter = rememberAsyncImagePainter(model = loading, imageLoader = LocalMongsImageLoader.current),
             contentDescription = null,
             modifier = Modifier
                 .height(height.dp)
