@@ -15,8 +15,8 @@ import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryProductDetailsParams.Product
+import com.android.billingclient.api.QueryProductDetailsResult
 import com.android.billingclient.api.QueryPurchasesParams
-import com.android.billingclient.api.queryProductDetails
 import com.monglife.core.billing.exception.AlreadyOwnedException
 import com.monglife.core.billing.exception.BillingConnectException
 import com.monglife.core.billing.exception.BillingNotSupportException
@@ -60,7 +60,7 @@ class GoogleBillingClient @Inject constructor(
                         } ?: run { close(InvalidBillingException()) }
                     }
                     BillingResponseCode.USER_CANCELED -> close(UserCancelException())
-                    BillingResponseCode.BILLING_UNAVAILABLE -> close(UserCancelException())
+                    BillingResponseCode.BILLING_UNAVAILABLE -> close(BillingNotSupportException())
                     BillingResponseCode.ITEM_ALREADY_OWNED -> close(AlreadyOwnedException())
                     BillingResponseCode.ERROR -> close(InvalidBillingException())
                     else -> close(BillingNotSupportException())
@@ -78,27 +78,24 @@ class GoogleBillingClient @Inject constructor(
             )
             .build()
 
-        billingClient.queryProductDetails(productDetailsParam).let {
-            if (it.billingResult.responseCode == BillingResponseCode.OK) {
-                it.productDetailsList?.let { productDetailsList ->
-                    val billingFlowParams = BillingFlowParams.newBuilder()
-                        .setProductDetailsParamsList(
-                            listOf(
-                                BillingFlowParams.ProductDetailsParams.newBuilder()
-                                    .setProductDetails(productDetailsList[0])
-                                    .build()
-                            )
-                        )
-                        .build()
+        queryProductDetails(
+            billingClient = billingClient,
+            params = productDetailsParam,
+        ).productDetailsList.firstOrNull()?.let { productDetails ->
+            val billingFlowParams = BillingFlowParams.newBuilder()
+                .setProductDetailsParamsList(
+                    listOf(
+                        BillingFlowParams.ProductDetailsParams.newBuilder()
+                            .setProductDetails(productDetails)
+                            .build()
+                    )
+                )
+                .build()
 
-                    billingClient.launchBillingFlow(activity, billingFlowParams)
+            billingClient.launchBillingFlow(activity, billingFlowParams)
 
-                } ?: run {
-                    close(InvalidBillingException())
-                }
-            } else {
-                close(InvalidBillingException())
-            }
+        } ?: run {
+            close(InvalidBillingException())
         }
 
         awaitClose {
@@ -142,11 +139,29 @@ class GoogleBillingClient @Inject constructor(
     }
 
     /**
+     * 상품 정보 조회
+     */
+    private suspend fun queryProductDetails(
+        billingClient: BillingClient,
+        params: QueryProductDetailsParams,
+    ): QueryProductDetailsResult = suspendCancellableCoroutine { cont ->
+
+        billingClient.queryProductDetailsAsync(params) { billingResult, queryProductDetailsResult ->
+            if (billingResult.responseCode == BillingResponseCode.OK) {
+                cont.resume(queryProductDetailsResult)
+            } else {
+                cont.resumeWithException(InvalidBillingException())
+            }
+        }
+    }
+
+    /**
      * Billing Client 생성
      */
     private suspend fun getBillingClient(listener: PurchasesUpdatedListener): BillingClient = suspendCancellableCoroutine { cont ->
 
         val billingClient = BillingClient.newBuilder(context)
+            .enableAutoServiceReconnection()
             .enablePendingPurchases(
                 PendingPurchasesParams.newBuilder()
                     .enableOneTimeProducts()

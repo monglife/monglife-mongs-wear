@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        billingClientVersion = "8.0.0"
+        billingClientVersion = "9.1.0"
     }
 }
 
@@ -10,7 +10,7 @@ apply plugin: 'com.google.devtools.ksp'
 apply plugin: "dagger.hilt.android.plugin"
 
 android {
-    namespace "${rootProject.ext.namespace}.data.core"
+    namespace "${rootProject.ext.namespace}.billing.core"
 
     compileSdk 36
 
@@ -38,5 +38,5 @@ dependencies {
     ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
 
     // billing
-    implementation "com.android.billingclient:billing-ktx:${this.ext.billingClientVersion}"
+    implementation "com.android.billingclient:billing:${this.ext.billingClientVersion}"
 }
