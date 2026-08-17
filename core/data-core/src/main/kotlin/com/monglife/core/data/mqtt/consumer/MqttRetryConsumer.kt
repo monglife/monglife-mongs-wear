@@ -8,11 +8,12 @@ import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttMessage
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class MqttRetryConsumer @Inject constructor(
+/**
+ * 연결 중단 감지 소비자
+ * Hilt 로 주입할 수 없는 파라미터를 받으므로 MqttClient 가 직접 생성한다.
+ */
+class MqttRetryConsumer(
     private val callbackMap: Map<String, MqttCallback>,
     private val onConnectLost: () -> Unit,
 ) : MqttCallback {

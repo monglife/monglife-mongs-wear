@@ -1,8 +1,6 @@
 package com.monglife.core.data.mqtt.consumer
 
-import com.google.gson.GsonBuilder
-import com.monglife.core.data.global.adapter.GsonLocalDateTimeFormatAdapter
-import com.monglife.core.data.global.adapter.GsonLocalTimeAdapter
+import com.google.gson.Gson
 import com.monglife.core.data.web.dto.response.ResponseDto
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,21 +12,16 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.lang.reflect.Type
-import java.time.LocalDateTime
-import java.time.LocalTime
 
 class MqttConsumer<T>(
     private val topic: String,
     private val classType: Class<T>,
+    private val gson: Gson,
     private val onReceive: suspend (ResponseDto<T>) -> Unit,
 ) : MqttCallback {
 
     private val mutex = Mutex()
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val gson = GsonBuilder()
-        .registerTypeAdapter(LocalDateTime::class.java, GsonLocalDateTimeFormatAdapter())
-        .registerTypeAdapter(LocalTime::class.java, GsonLocalTimeAdapter())
-        .create()
 
     override fun connectionLost(cause: Throwable?) {}
 
