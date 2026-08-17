@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.SystemClock
 import android.provider.Settings
 import com.google.firebase.messaging.FirebaseMessaging
+import com.monglife.core.data.flow.SharedFlowCache
 import com.monglife.core.data.mqtt.client.MqttClient
 import com.monglife.mongs.application.auth.exception.InvalidLogoutException
 import com.monglife.mongs.data.device.persistence.datastore.DeviceDataStore
@@ -16,16 +17,12 @@ import com.monglife.mongs.domain.device.model.DeviceOption
 import com.monglife.mongs.domain.device.model.Step
 import com.mongs.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.Instant
 import java.time.LocalDateTime
@@ -52,8 +49,13 @@ class DevicePersistenceAdapter @Inject constructor(
     com.monglife.mongs.application.member.feedback.port.persistence.DevicePersistencePort,
     com.monglife.mongs.application.mong.port.persistence.DevicePersistencePort {
 
-    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val subscribeCounterMap = ConcurrentHashMap<String, AtomicInteger>()
+
+    /**
+     * 걸음 수 SharedFlow 캐시 (키 없음)
+     * 호출할 때마다 shareIn 을 새로 하면 공유가 되지 않아 구독자마다 MQTT 구독이 중복된다.
+     */
+    private val stepFlowCache = SharedFlowCache<Unit, Step>()
 
     /**
      * 현재 몽 ID 조회
@@ -63,7 +65,12 @@ class DevicePersistenceAdapter @Inject constructor(
     /**
      * 현재 몽 ID Flow 조회
      */
-    override suspend fun getCurrentMongIdFlow(): Flow<Long?> = this.getDeviceOptionFlow().map { it.currentMongId }
+    override suspend fun getCurrentMongIdFlow(): Flow<Long?> =
+        this.getDeviceOptionFlow()
+            .map { it.currentMongId }
+            // 걸음 수와 같은 DataStore 를 쓰므로 값이 같아도 재발행된다.
+            // 상위 flatMapLatest 가 몽 구독을 취소/재생성하지 않도록 여기서 걸러 낸다.
+            .distinctUntilChanged()
 
     /**
      * 현재 몽 ID 수정
@@ -126,7 +133,10 @@ class DevicePersistenceAdapter @Inject constructor(
     /**
      * 걸음 수 Flow 객체 조회
      */
-    override suspend fun getStepFlow(): Flow<Step> = flow {
+    override suspend fun getStepFlow(): Flow<Step> =
+        stepFlowCache.getOrCreate(key = Unit) { createStepFlow() }
+
+    private fun createStepFlow(): Flow<Step> = flow {
         val deviceId = this@DevicePersistenceAdapter.getDeviceId()
 
         val subscribeCount = subscribeCounterMap.getOrPut(deviceId) { AtomicInteger(0) }
@@ -168,11 +178,7 @@ class DevicePersistenceAdapter @Inject constructor(
                 subscribeCounterMap.remove(deviceId)
             }
         }
-    }.shareIn(
-        scope = applicationScope,
-        started = SharingStarted.WhileSubscribed(),
-        replay = 1,
-    )
+    }
 
     /**
      * 걸음 수 로컬 동기화

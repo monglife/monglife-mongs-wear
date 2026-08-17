@@ -1,6 +1,7 @@
 package com.monglife.mongs.data.member.player.persistence.adapter
 
 import android.content.Context
+import com.monglife.core.data.flow.SharedFlowCache
 import com.monglife.core.data.mqtt.client.MqttClient
 import com.monglife.core.data.persistence.datastore.SessionDataStore
 import com.monglife.core.data.web.dto.response.ResponseDto
@@ -12,15 +13,10 @@ import com.monglife.mongs.data.member.player.persistence.entity.PlayerEntity
 import com.monglife.mongs.domain.member.player.model.Player
 import com.mongs.data.core.R
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -34,8 +30,13 @@ class PlayerPersistenceAdapter @Inject constructor(
     private val mqttClient: MqttClient,
 ) : PlayerPersistencePort {
 
-    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val subscribeCounterMap = ConcurrentHashMap<Long, AtomicInteger>()
+
+    /**
+     * 플레이어 SharedFlow 캐시 (키 없음)
+     * 호출할 때마다 shareIn 을 새로 하면 공유가 되지 않아 구독자마다 MQTT 구독이 중복된다.
+     */
+    private val playerFlowCache = SharedFlowCache<Unit, Player?>()
 
     /**
      * 플레이어 조회
@@ -54,7 +55,10 @@ class PlayerPersistenceAdapter @Inject constructor(
     /**
      * 플레이어 Flow 객체 조회
      */
-    override suspend fun getPlayerFlow(): Flow<Player?> = flow {
+    override suspend fun getPlayerFlow(): Flow<Player?> =
+        playerFlowCache.getOrCreate(key = Unit) { createPlayerFlow() }
+
+    private fun createPlayerFlow(): Flow<Player?> = flow {
         val playerEntity = playerDataStore.getPlayer() ?: sessionDataStore.getSession()?.let {
             playerDataStore.savePlayer(
                 playerEntity = PlayerEntity(
@@ -112,11 +116,7 @@ class PlayerPersistenceAdapter @Inject constructor(
                 }
             }
         }
-    }.shareIn(
-        scope = applicationScope,
-        started = SharingStarted.WhileSubscribed(),
-        replay = 1,
-    )
+    }
 
     /**
      * 플레이어 로컬 동기화

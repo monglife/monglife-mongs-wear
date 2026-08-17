@@ -13,6 +13,7 @@ import com.monglife.mongs.data.device.persistence.entity.StepEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,7 +60,7 @@ class DeviceDataStore @Inject constructor(
         } else {
             null
         }
-    }
+    }.distinctUntilChanged()
 
     /**
      * Step 저장
@@ -122,7 +123,7 @@ class DeviceDataStore @Inject constructor(
         } else {
             null
         }
-    }
+    }.distinctUntilChanged()
 
     /**
      * DeviceOption 저장

@@ -9,6 +9,7 @@ import com.monglife.mongs.data.member.player.persistence.entity.PlayerEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -53,7 +54,7 @@ class PlayerDataStore @Inject constructor(
         } else {
             null
         }
-    }
+    }.distinctUntilChanged()
 
     /**
      * 플레이어 저장

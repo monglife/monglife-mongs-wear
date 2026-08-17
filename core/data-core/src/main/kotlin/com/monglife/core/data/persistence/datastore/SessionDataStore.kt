@@ -9,6 +9,7 @@ import com.monglife.core.data.persistence.entity.SessionEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -66,7 +67,7 @@ class SessionDataStore @Inject constructor(
         } else {
             null
         }
-    }
+    }.distinctUntilChanged()
 
     /**
      * 세션 저장
