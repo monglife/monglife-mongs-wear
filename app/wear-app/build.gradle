@@ -46,15 +46,16 @@ android {
 
     buildTypes {
         debug {
+            // minifyEnabled false 면 R8 이 돌지 않아 proguardFiles 는 무시된다.
+            // 릴리스 룰을 여기 걸어두면 "디버그에서도 Log 가 지워지나?" 라는 오해만 만든다.
             minifyEnabled false
-            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),
-                    rootProject.file("proguard/mongs-release.pro"),
-                    "proguard-rules.pro"
         }
 
         release {
-            // R8 축소·최적화 활성화. keep 룰은 core:data-core 의 consumer-rules.pro 에 있다.
-            // (app 모듈의 proguard-rules.pro 는 copyPrivate* 태스크가 덮어쓰므로 그곳에 두면 안 된다)
+            // R8 축소·최적화 활성화. 룰은 두 곳으로 나뉘어 있다.
+            //  - proguard/mongs-release.pro          : 앱 전역 정책(난독화 속성, Log 제거, enum keep)
+            //  - core/data-core/consumer-rules.pro   : 라이브러리 리플렉션 keep(Gson/Retrofit/MQTT)
+            // app 모듈의 proguard-rules.pro 는 copyPrivate* 태스크가 덮어쓰므로 룰을 두면 안 된다.
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),

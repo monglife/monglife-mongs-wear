@@ -34,3 +34,18 @@
 -keepclassmembers enum com.monglife.mongs.presentation.view.assets.** {
     public static final <fields>;
 }
+
+# ---------------------------------------------------------------------------
+# 크래시 스택트레이스 역추적
+#
+# 두 지시어가 모두 있어야 mapping.txt 로 retrace 할 수 있다.
+# -keepattributes 만 넣고 -renamesourcefileattribute 를 빼면 원본 .kt 파일명이
+# 그대로 노출되어 난독화 목적에 역행한다.
+#
+# -renamesourcefileattribute 는 AGP 9 부터 라이브러리 consumer rules 에서
+# 금지된 전역 옵션이다(ConsumerRuleGlobalGuardian). 반드시 이 앱 전역 파일에 둬야 한다.
+#
+# 배포마다 app/*/build/outputs/mapping/release/mapping.txt 를 보관해야 의미가 있다.
+# ---------------------------------------------------------------------------
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
