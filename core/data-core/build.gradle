@@ -19,6 +19,9 @@ android {
 
     defaultConfig {
         minSdk 30
+
+        // R8 이 Gson/Retrofit/MQTT 리플렉션 대상까지 지우지 않도록 앱 모듈로 전파되는 keep 룰
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     compileOptions {

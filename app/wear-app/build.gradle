@@ -51,7 +51,10 @@ android {
         }
 
         release {
-            minifyEnabled false
+            // R8 축소·최적화 활성화. keep 룰은 core:data-core 의 consumer-rules.pro 에 있다.
+            // (app 모듈의 proguard-rules.pro 는 copyPrivate* 태스크가 덮어쓰므로 그곳에 두면 안 된다)
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             signingConfig signingConfigs.release
         }
