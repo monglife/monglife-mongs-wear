@@ -28,7 +28,9 @@ fun MatchPlayer(
 
     Box {
         Mong(
-            mong = MongResourceCode.valueOf(matchPlayerVo.mongCode),
+            // valueOf 를 직접 부르면 서버가 모르는 코드를 주거나 난독화로 이름이 바뀔 때
+            // IllegalArgumentException 이 나 배틀 화면이 죽는다. 폴백이 있는 쪽을 쓴다.
+            mong = MongResourceCode.getResource(code = matchPlayerVo.mongCode),
             ratio = 0.6f,
             modifier = Modifier.zIndex(1f)
         )

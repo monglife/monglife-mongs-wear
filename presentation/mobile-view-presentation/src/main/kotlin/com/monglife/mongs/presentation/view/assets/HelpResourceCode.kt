@@ -20,7 +20,12 @@ enum class HelpResourceCode (
     ;
 
     companion object {
-        fun getResource(code: String) = runCatching { HelpResourceCode.valueOf(code) }.getOrDefault(HP444)
+        fun getResource(code: String) = resolveResourceCode(
+            enumName = "HelpResourceCode",
+            code = code,
+            fallback = HP444,
+            valueOf = { HelpResourceCode.valueOf(it) },
+        )
         fun getResourceCode(code: String) = getResource(code = code).code
     }
 }

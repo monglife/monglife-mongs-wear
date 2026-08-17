@@ -82,7 +82,12 @@ enum class MongResourceCode(
     ;
 
     companion object {
-        fun getResource(code: String) = runCatching { MongResourceCode.valueOf(code) }.getOrDefault(CH444)
+        fun getResource(code: String) = resolveResourceCode(
+            enumName = "MongResourceCode",
+            code = code,
+            fallback = CH444,
+            valueOf = { MongResourceCode.valueOf(it) },
+        )
         fun getResourceCode(code: String) = getResource(code = code).gifCode
     }
 }

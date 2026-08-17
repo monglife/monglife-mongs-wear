@@ -19,7 +19,12 @@ enum class SnackResourceCode (
     ;
 
     companion object {
-        fun getResource(code: String) = runCatching { SnackResourceCode.valueOf(code) }.getOrDefault(SN444)
+        fun getResource(code: String) = resolveResourceCode(
+            enumName = "SnackResourceCode",
+            code = code,
+            fallback = SN444,
+            valueOf = { SnackResourceCode.valueOf(it) },
+        )
         fun getResourceCode(code: String) = getResource(code = code).code
     }
 }

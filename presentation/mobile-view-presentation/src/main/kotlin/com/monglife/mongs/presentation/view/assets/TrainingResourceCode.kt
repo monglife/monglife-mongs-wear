@@ -19,7 +19,12 @@ enum class TrainingResourceCode (
     ;
 
     companion object {
-        fun getResource(code: String) = runCatching { TrainingResourceCode.valueOf(code) }.getOrDefault(TR444)
+        fun getResource(code: String) = resolveResourceCode(
+            enumName = "TrainingResourceCode",
+            code = code,
+            fallback = TR444,
+            valueOf = { TrainingResourceCode.valueOf(it) },
+        )
         fun getResourceCode(code: String) = getResource(code = code).iconCode
     }
 }

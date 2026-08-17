@@ -43,7 +43,12 @@ enum class MapResourceCode (
     ;
 
     companion object {
-        fun getResource(code: String) = runCatching { MapResourceCode.valueOf(code) }.getOrDefault(MP444)
+        fun getResource(code: String) = resolveResourceCode(
+            enumName = "MapResourceCode",
+            code = code,
+            fallback = MP444,
+            valueOf = { MapResourceCode.valueOf(it) },
+        )
         fun getResourceCode(code: String) = getResource(code = code).code
     }
 }
