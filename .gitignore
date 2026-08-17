@@ -25,5 +25,6 @@ local.properties
 **/*.pro
 **/*.properties
 
-# configs 서브모듈에서 복사되는 파일이 아니라 저장소가 직접 관리하는 R8 keep 룰
+# configs 서브모듈에서 복사되는 파일이 아니라 저장소가 직접 관리하는 R8 룰
 !core/data-core/consumer-rules.pro
+!proguard/*.pro
