@@ -3,7 +3,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 apply plugin: "com.android.application"
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "dagger.hilt.android.plugin"
-apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: "com.google.gms.google-services"
 apply plugin: "org.jetbrains.kotlin.plugin.compose"
 
@@ -58,7 +57,7 @@ android {
         }
     }
 
-    packagingOptions {
+    packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }

@@ -8,7 +8,6 @@ buildscript {
 
 apply plugin: "com.android.library"
 apply plugin: "com.google.devtools.ksp"
-apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "dagger.hilt.android.plugin"
 
 android {
