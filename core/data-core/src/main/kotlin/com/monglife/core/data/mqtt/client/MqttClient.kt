@@ -3,6 +3,7 @@ package com.monglife.core.data.mqtt.client
 import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
+import com.monglife.core.data.global.isDebuggable
 import com.monglife.core.data.mqtt.consumer.MqttConsumer
 import com.monglife.core.data.mqtt.consumer.MqttLogConsumer
 import com.monglife.core.data.mqtt.consumer.MqttRetryConsumer
@@ -61,6 +62,11 @@ class MqttClient @Inject constructor(
             data class Publish(val topic: String, val payload: String) : MqttUserContext()
         }
     }
+
+    /**
+     * 성공 로그는 publish payload 전문을 포함하므로 릴리스에서는 남기지 않는다.
+     */
+    private val isDebuggable = context.isDebuggable()
 
     private val mutex = Mutex()
     private val callbackMap = ConcurrentHashMap<String, MqttCallback>()
@@ -293,6 +299,8 @@ class MqttClient @Inject constructor(
     }
 
     private fun logSuccess(userContext: Any?) {
+        if (!isDebuggable) return
+
         val out = when (userContext) {
             is MqttUserContext.Connect -> "연결"
 

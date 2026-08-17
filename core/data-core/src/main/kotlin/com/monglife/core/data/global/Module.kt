@@ -1,7 +1,6 @@
 package com.monglife.core.data.global
 
 import android.content.Context
-import android.content.pm.ApplicationInfo
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.monglife.core.data.global.adapter.GsonLocalDateTimeFormatAdapter
@@ -65,14 +64,6 @@ object RetrofitModule {
     fun provideHttpLogInterceptor(gson: Gson) : HttpLogInterceptor = HttpLogInterceptor(gson = gson)
 
     /**
-     * 디버그 빌드 여부
-     * HttpLogInterceptor 는 Authorization 헤더와 요청/응답 바디 전문을 로그로 남기므로
-     * 릴리스 빌드에서는 절대 붙이지 않는다.
-     */
-    private fun Context.isDebuggable(): Boolean =
-        (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
-
-    /**
      * 커넥션 풀 / Dispatcher 공유
      * 클라이언트마다 새로 만들면 커넥션 풀과 스레드풀이 두 벌씩 생긴다.
      */
@@ -112,6 +103,7 @@ object RetrofitModule {
     ): OkHttpClient = OkHttpClient.Builder()
         .applyCommon(context = context, connectionPool = connectionPool, dispatcher = dispatcher)
         .apply {
+            // Authorization 헤더와 요청/응답 바디 전문을 남기므로 릴리스에는 붙이지 않는다.
             if (context.isDebuggable()) {
                 addInterceptor(httpLogInterceptor)
             }
@@ -134,6 +126,7 @@ object RetrofitModule {
         .applyCommon(context = context, connectionPool = connectionPool, dispatcher = dispatcher)
         .addInterceptor(authorizationInterceptor)
         .apply {
+            // Authorization 헤더와 요청/응답 바디 전문을 남기므로 릴리스에는 붙이지 않는다.
             if (context.isDebuggable()) {
                 addInterceptor(httpLogInterceptor)
             }
