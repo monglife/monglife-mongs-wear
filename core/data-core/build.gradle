@@ -29,6 +29,15 @@ android {
         targetCompatibility rootProject.ext.javaVersion
     }
 
+    // 환경별 설정은 configs 서브모듈에서 flavor 소스셋으로 직접 읽는다. 복사하지 않는다.
+    // flavor 선언은 루트 build.gradle 의 subprojects 블록이 담당한다.
+    // 세 파일의 키 집합은 반드시 같아야 한다 - R 클래스가 배리언트별로 생성되므로
+    // 한 환경에만 있는 키는 다른 환경에서 unresolved reference 가 된다.
+    sourceSets {
+        dev.res.srcDir "$rootDir/configs/core/data-core/dev"
+        stg.res.srcDir "$rootDir/configs/core/data-core/stg"
+        prd.res.srcDir "$rootDir/configs/core/data-core/prd"
+    }
 }
 
 kotlin {

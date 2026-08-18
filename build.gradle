@@ -32,99 +32,23 @@ plugins {
 }
 
 subprojects {
-    // 개발 환경 파일 복사
-    tasks.register("copyPrivateDev", DefaultTask) {
-        def profile = "dev"
-        def configPath = "${rootDir}/configs"
-        def fullPath = project.path
-        def pathSegments = fullPath.tokenize(":")
-
-        if (pathSegments.size() > 1) {
-            def parentModule = pathSegments[-2]
-            def currentModule = pathSegments[-1]
-
-            doLast {
-                if (parentModule == 'app') {
-                    project.delete fileTree("src/main/res/values") {
-                        include("*.xml")
-                    }
-                    project.delete fileTree("./") {
-                        include("*.json")
-                        include("*.pro")
-                    }
-                    project.copy {
-                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
-                            include("*.xml")
-                        }
-                        into("src/main/res/values")
-                    }
-                    project.copy {
-                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
-                            include("*.json")
-                            include("*.pro")
-                        }
-                        into("./")
-                    }
-                } else {
-                    project.delete fileTree("src/main/res/values") {
-                        include("*.xml")
-                    }
-                    project.copy {
-                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
-                            include("*${profile}.xml")
-                        }
-                        into("src/main/res/values")
-                    }
-                }
-            }
-        }
-    }
-    // 프로덕트 환경 파일 복사
-    tasks.register("copyPrivatePrd", DefaultTask) {
-        def profile = "prd"
-        def configPath = "${rootDir}/configs"
-        def fullPath = project.path
-        def pathSegments = fullPath.tokenize(":")
-
-        if (pathSegments.size() > 1) {
-            def parentModule = pathSegments[-2]
-            def currentModule = pathSegments[-1]
-
-            doLast {
-                if (parentModule == 'app') {
-                    project.delete fileTree("src/main/res/values") {
-                        include("*.xml")
-                    }
-                    project.delete fileTree("./") {
-                        include("*.json")
-                        include("*.pro")
-                        include("*.properties")
-                    }
-                    project.copy {
-                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
-                            include("*.xml")
-                        }
-                        into("src/main/res/values")
-                    }
-                    project.copy {
-                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
-                            include("*.json")
-                            include("*.pro")
-                            include("*.properties")
-                        }
-                        into("./")
-                    }
-                } else {
-                    project.delete fileTree("src/main/res/values") {
-                        include("*.xml")
-                    }
-                    project.copy {
-                        from(configPath + "/" + parentModule + "/" + currentModule + "/") {
-                            include("*${profile}.xml")
-                        }
-                        into("src/main/res/values")
-                    }
-                }
+    // 환경 프로파일은 product flavor 로 가른다.
+    //
+    // core:data-core 가 flavor 를 가지면 이를 의존하는 data/*, presentation/*, app/* 도
+    // 같은 dimension 을 선언해야 variant resolution 이 성립한다. Android 플러그인 적용
+    // 지점이 app/*(각 모듈), data/* 와 presentation/*(각 그룹의 subprojects), core/*(각 모듈)
+    // 로 흩어져 있어 여기서 plugins.withId 로 한 번에 거는 게 유일하게 중복 없는 방법이다.
+    //
+    // 여기서 선언한 순서가 IDE 기본 배리언트를 정한다(devDebug).
+    // applicationIdSuffix 는 붙이지 마라 - google-services.json 의 package_name 이
+    // com.mongs.wear / com.mongs.mobile 단일이라 processXGoogleServices 가 실패한다.
+    plugins.withId("com.android.base") {
+        android {
+            flavorDimensions = ["profile"]
+            productFlavors {
+                dev { dimension "profile" }
+                stg { dimension "profile" }
+                prd { dimension "profile" }
             }
         }
     }
