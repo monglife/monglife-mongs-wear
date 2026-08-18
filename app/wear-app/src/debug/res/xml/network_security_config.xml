@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-    디버그 전용: dev / stg 게이트웨이가 http 라서 평문을 허용해야 한다.
-    buildType 소스셋이 main 을 대체하므로 릴리스에는 영향이 없다.
-    호스트명을 여기 적지 않기 위해 도메인별 예외 대신 buildType 으로만 가른다.
--->
-<network-security-config>
-    <base-config cleartextTrafficPermitted="true" />
-</network-security-config>

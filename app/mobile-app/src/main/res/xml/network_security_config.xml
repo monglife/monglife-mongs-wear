@@ -8,7 +8,7 @@
     raw 소켓은 NetworkSecurityPolicy 적용 대상이 아니다.
     (즉 tcp://...:1883 평문 연결은 이 설정과 무관하게 그대로 동작한다)
 
-    dev / stg 는 http API 를 쓰므로 src/debug 의 같은 이름 파일이 이 설정을 대체한다.
+    dev / stg 는 http API 를 쓰므로 src/dev, src/stg 의 같은 이름 파일이 이 설정을 대체한다.
 -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="false" />
