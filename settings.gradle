@@ -34,6 +34,7 @@ include ":core:presentation-core"
 include ":core:application-core"
 include ":core:data-core"
 include ":core:billing-core"
+include ":core:auth-core"
 
 include ":data"
 include ":data:auth-data"

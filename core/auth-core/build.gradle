@@ -1,0 +1,61 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+buildscript {
+    ext {
+        credentialsVersion            = "1.6.0"
+        googleIdVersion               = "1.1.1"
+        playServicesAuthVersion       = "21.4.0"
+        coroutinesPlayServicesVersion = "1.10.2"
+        activityVersion               = "1.9.0"
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: "dagger.hilt.android.plugin"
+
+android {
+    namespace "${rootProject.ext.namespace}.auth.core"
+
+    compileSdk 36
+
+    defaultConfig {
+        minSdk 30
+    }
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.javaVersion
+        targetCompatibility rootProject.ext.javaVersion
+    }
+
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget(rootProject.ext.javaVersion.toString())
+    }
+}
+
+dependencies {
+    // core layer
+    api project(":core:common-core")
+
+    // dagger-hilt
+    implementation group: "javax.inject", name: "javax.inject", version: "1"
+    implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
+    ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
+
+    // credential manager (sign in with google) - mobile
+    implementation "androidx.credentials:credentials:${this.ext.credentialsVersion}"
+    implementation "androidx.credentials:credentials-play-services-auth:${this.ext.credentialsVersion}"
+    implementation "com.google.android.libraries.identity.googleid:googleid:${this.ext.googleIdVersion}"
+
+    // legacy google sign in - wear
+    //
+    // credentials-play-services-auth 가 play-services-auth 21.1.1 을 runtime 으로 이미 끌고 온다.
+    // 명시 선언은 컴파일 가시성을 열고 그 전이 버전을 함께 끌어올리는 목적이다.
+    // Task.await() 는 coroutines-play-services 가, ActivityResultRegistry 는 activity 가 준다.
+    implementation "com.google.android.gms:play-services-auth:${this.ext.playServicesAuthVersion}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${this.ext.coroutinesPlayServicesVersion}"
+    implementation "androidx.activity:activity:${this.ext.activityVersion}"
+}
