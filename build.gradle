@@ -2,6 +2,14 @@ buildscript {
     ext {
         namespace               = "com.mongs"
         javaVersion             = JavaVersion.VERSION_17
+
+        // SDK 레벨의 단일 원본. 모듈별 build.gradle 에 리터럴을 다시 쓰지 마라 -
+        // 라이브러리와 앱의 compileSdk 가 어긋나면 매니페스트 병합에서 깨진다.
+        // minSdk 33 = Wear OS 4. 갤럭시 워치 4 는 최종 업데이트가 Wear OS 5(API 34) 라
+        // 하한 안에 들어오고, 그보다 오래된 Wear OS 3 기기만 제외된다.
+        androidCompileSdk       = 37
+        androidMinSdk           = 33
+        androidTargetSdk        = 37
         hiltWorkerVersion       = "1.4.0"
         workerVersion           = "2.10.3"
         lifecycleVersion        = "2.9.2"
@@ -34,23 +42,42 @@ plugins {
 ext.hiltVersion = libs.versions.hilt.get()
 
 subprojects {
-    // 환경 프로파일은 product flavor 로 가른다.
+    // 모든 Android 모듈에 공통으로 걸리는 설정 - SDK 레벨과 환경 프로파일(flavor).
     //
     // core:data-core 가 flavor 를 가지면 이를 의존하는 data/*, presentation/*, app/* 도
     // 같은 dimension 을 선언해야 variant resolution 이 성립한다. Android 플러그인 적용
     // 지점이 app/*(각 모듈), data/* 와 presentation/*(각 그룹의 subprojects), core/*(각 모듈)
     // 로 흩어져 있어 여기서 plugins.withId 로 한 번에 거는 게 유일하게 중복 없는 방법이다.
+    // compileSdk/minSdk 도 같은 이유로 여기서 건다 - 모듈마다 리터럴을 두면 하나만
+    // 어긋나도 매니페스트 병합/AAR 메타데이터 검사에서 깨진다.
     //
-    // 여기서 선언한 순서가 IDE 기본 배리언트를 정한다(devDebug).
+    // flavor 를 여기서 선언한 순서가 IDE 기본 배리언트를 정한다(devDebug).
     // applicationIdSuffix 는 붙이지 마라 - google-services.json 의 package_name 이
     // com.mongs.wear / com.mongs.mobile 단일이라 processXGoogleServices 가 실패한다.
     plugins.withId("com.android.base") {
         android {
+            compileSdk = rootProject.ext.androidCompileSdk
+
+            defaultConfig {
+                minSdk = rootProject.ext.androidMinSdk
+            }
+
             flavorDimensions = ["profile"]
             productFlavors {
                 dev { dimension "profile" }
                 stg { dimension "profile" }
                 prd { dimension "profile" }
+            }
+        }
+    }
+
+    // targetSdk 는 애플리케이션 모듈 전용 DSL 이다. AGP 8+ 라이브러리의 defaultConfig 에는
+    // targetSdk 가 없으므로(테스트용 testOptions.targetSdk 만 있다) 위의 com.android.base
+    // 훅에 같이 넣으면 data/*, presentation/*, core/* 에서 실패한다.
+    plugins.withId("com.android.application") {
+        android {
+            defaultConfig {
+                targetSdk = rootProject.ext.androidTargetSdk
             }
         }
     }

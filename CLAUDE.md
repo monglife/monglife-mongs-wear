@@ -161,7 +161,7 @@ Both apps have their own `NotificationModule.kt` / `NotificationService.kt` unde
 
 ### Kotlin/Android versions
 
-Versions live in two places, split by kind:
+Versions live in three places, split by kind:
 
 - **Plugin versions — `gradle/libs.versions.toml`** (the default `libs` catalog; `settings.gradle` needs
   no wiring for it). AGP 9.3.1, Kotlin 2.4.10, KSP 2.3.11, Hilt 2.60.1, google-services 4.4.2. The root
@@ -177,5 +177,13 @@ Versions live in two places, split by kind:
   `hiltVersion` is the one value both sides need, so the root script seeds it from the catalog
   (`ext.hiltVersion = libs.versions.hilt.get()`) and the ~12 `rootProject.ext.hiltVersion` call sites
   keep working unchanged.
-
-`compileSdk 36` / `minSdk 30` are declared per Android module, not centrally.
+- **SDK levels — root `build.gradle` `ext`**: `androidCompileSdk` (37), `androidMinSdk` (33),
+  `androidTargetSdk` (37) are the single source. The root `subprojects` block applies `compileSdk` and
+  `defaultConfig.minSdk` to every Android module through the same `plugins.withId("com.android.base")`
+  hook that declares the flavors, and a separate `plugins.withId("com.android.application")` hook sets
+  `targetSdk` — `targetSdk` is an application-only DSL (AGP 8+ library `defaultConfig` has no such
+  property), so it cannot go in the shared hook. Do not put SDK literals back into module build files:
+  one module drifting out of sync breaks manifest merging / AAR metadata checks.
+  `minSdk 33` is deliberate — it is Wear OS 4, and the Galaxy Watch 4 (the intended support floor) sits
+  above it since its final update is Wear OS 5 / API 34. `compileSdk 37` needs `platforms;android-37`
+  installed locally (API 37.0/37.1 are stable; 37.2 is still beta).

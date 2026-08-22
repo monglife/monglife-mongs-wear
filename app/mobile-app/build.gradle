@@ -12,8 +12,6 @@ def configDir = "$rootDir/configs/app/mobile-app"
 android {
     namespace "${rootProject.ext.namespace}.mobile"
 
-    compileSdk 36
-
     compileOptions {
         sourceCompatibility rootProject.ext.javaVersion
         targetCompatibility rootProject.ext.javaVersion
@@ -29,8 +27,6 @@ android {
     }
 
     defaultConfig {
-        minSdk          30
-        targetSdk       36
         versionCode     1
         versionName     "1.0.0"
         vectorDrawables {

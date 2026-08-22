@@ -7,12 +7,6 @@ apply plugin: "dagger.hilt.android.plugin"
 android {
     namespace "${rootProject.ext.namespace}.core.presentation"
 
-    compileSdk 36
-
-    defaultConfig {
-        minSdk 30
-    }
-
     compileOptions {
         sourceCompatibility rootProject.ext.javaVersion
         targetCompatibility rootProject.ext.javaVersion

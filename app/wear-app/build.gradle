@@ -12,8 +12,6 @@ def configDir = "$rootDir/configs/app/wear-app"
 android {
     namespace "${rootProject.ext.namespace}.wear"
 
-    compileSdk 36
-
     compileOptions {
         sourceCompatibility rootProject.ext.javaVersion
         targetCompatibility rootProject.ext.javaVersion
@@ -29,8 +27,6 @@ android {
     }
 
     defaultConfig {
-        minSdk          30
-        targetSdk       36
         versionCode     30
         versionName     "2.2.1"
         vectorDrawables {
