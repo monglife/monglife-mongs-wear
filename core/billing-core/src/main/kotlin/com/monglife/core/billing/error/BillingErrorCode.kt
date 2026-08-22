@@ -13,6 +13,7 @@ enum class BillingErrorCode(
     INVALID_BILLING("결제 완료 실패", true),
     ALREADY_OWNED("이미 보유중인 아이템", true),
     USER_CANCELED("구매 취소", true),
+    PENDING_PURCHASE("결제 승인 대기중", true),
     ;
 
     override fun getMessage(): String {

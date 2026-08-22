@@ -45,6 +45,16 @@ class AlreadyOwnedException(
 ) : ErrorException(code = code, message = message)
 
 /**
+ * 결제 승인 대기중 예외
+ *
+ * PENDING 구매는 아직 결제가 확정되지 않아 서버 소비 요청을 보낼 수 없다.
+ */
+class PendingPurchaseException(
+    override val code: ErrorCode = BillingErrorCode.PENDING_PURCHASE,
+    override val message: String = code.getMessage()
+) : ErrorException(code = code, message = message)
+
+/**
  * 사용자 구매 취소 예외
  */
 class UserCancelException(

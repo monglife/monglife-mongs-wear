@@ -63,7 +63,7 @@ class StoreWebAdapter @Inject constructor(
                 }.map {
                     GetNotConsumedOrderResponse(
                         socialOrderId = it.socialOrderId,
-                        productId = it.productId.uppercase(),
+                        productId = it.productId,
                         purchaseToken = it.purchaseToken,
                     )
                 }

@@ -41,7 +41,7 @@ class GetProductsUseCase @Inject constructor(
                 ProductVo.of(
                     product = product,
                     orderVos = notConsumedOrderVos.filter {
-                        it.productId == product.productId
+                        it.productId.equals(product.productId, ignoreCase = true)
                     }
                 )
             }

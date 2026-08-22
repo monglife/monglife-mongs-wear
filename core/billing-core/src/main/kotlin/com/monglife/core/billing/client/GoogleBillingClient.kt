@@ -20,6 +20,7 @@ import com.monglife.core.billing.exception.BillingConnectException
 import com.monglife.core.billing.exception.BillingNotSupportException
 import com.monglife.core.billing.exception.InvalidBillingException
 import com.monglife.core.billing.exception.InvalidGetConsumedOrdersException
+import com.monglife.core.billing.exception.PendingPurchaseException
 import com.monglife.core.billing.exception.UserCancelException
 import com.monglife.core.billing.vo.GoogleOrderVo
 import com.monglife.core.common.exception.ErrorException
@@ -54,19 +55,16 @@ class GoogleBillingClient @Inject constructor(
                          * 그러면 collector 의 first() 가 영구 대기해 로딩바가 고착된다.
                          */
                         val purchaseList = purchases.orEmpty()
+                        val googleOrderVos = purchaseList.mapNotNull { it.toGoogleOrderVoOrNull() }
 
-                        if (purchaseList.isEmpty()) {
-                            close(InvalidBillingException())
+                        if (googleOrderVos.isEmpty()) {
+                            close(
+                                // 구매는 있는데 소비 가능한 것이 없다 = 전부 승인 대기중
+                                if (purchaseList.isEmpty()) InvalidBillingException()
+                                else PendingPurchaseException()
+                            )
                         } else {
-                            purchaseList.forEach { purchase ->
-                                trySend(
-                                    GoogleOrderVo(
-                                        productId = purchase.products[0],
-                                        socialOrderId = purchase.orderId ?: "-",
-                                        purchaseToken = purchase.purchaseToken,
-                                    )
-                                )
-                            }
+                            googleOrderVos.forEach { trySend(it) }
                         }
                     }
                     else -> close(billingResult.toBillingException())
@@ -132,14 +130,7 @@ class GoogleBillingClient @Inject constructor(
                 { billingResult, purchases ->
                     when (billingResult.responseCode) {
                         BillingResponseCode.OK -> {
-                            cont.resume(
-                                purchases.map { purchase ->
-                                    GoogleOrderVo(
-                                        productId = purchase.products[0],
-                                        socialOrderId = purchase.orderId ?: "-",
-                                        purchaseToken = purchase.purchaseToken,
-                                    )
-                                })
+                            cont.resume(purchases.mapNotNull { it.toGoogleOrderVoOrNull() })
                         }
                         else -> {
                             cont.resumeWithException(InvalidGetConsumedOrdersException())
@@ -168,6 +159,25 @@ class GoogleBillingClient @Inject constructor(
             }
         }
     }
+
+    /**
+     * Purchase → GoogleOrderVo 변환
+     *
+     * - PURCHASED 가 아닌 구매(PENDING 등)는 아직 소비할 수 없으므로 null 로 걸러낸다.
+     * - Play 의 상품 ID 는 소문자, 서버/도메인 규약은 대문자다. Play 로 나갈 때만
+     *   lowercase 를 쓰고, 밖으로 내보내는 값은 여기서 uppercase 로 고정한다.
+     *   이 정규화가 어긋나면 GetProductsUseCase 의 productId 조인이 실패해
+     *   미소비 주문의 "소비" 버튼이 아예 뜨지 않는다.
+     */
+    private fun Purchase.toGoogleOrderVoOrNull(): GoogleOrderVo? =
+        takeIf { it.purchaseState == Purchase.PurchaseState.PURCHASED }
+            ?.let {
+                GoogleOrderVo(
+                    productId = it.products[0].uppercase(),
+                    socialOrderId = it.orderId ?: "-",
+                    purchaseToken = it.purchaseToken,
+                )
+            }
 
     /**
      * 응답 코드 → 예외 매핑
