@@ -17,10 +17,10 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:${parent.ext.retrofitVersion}"
 
     // google-location
-    implementation "com.google.firebase:firebase-auth"
-    implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
-    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsAuthVersion}"
+    // Task.await() 는 coroutines-play-services 가 준다. 예전에는 firebase-auth 를 통해
+    // 전이로 들어왔는데, 그 미사용 의존성을 걷어내면서 실제로 쓰는 것을 명시로 바꿨다.
     implementation "com.google.android.gms:play-services-location:${rootProject.ext.gmsLocationVersion}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2"
 
     // data store
     implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"

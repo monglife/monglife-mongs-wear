@@ -23,11 +23,6 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
     implementation "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
 
-    // google-auth & firebase-fcm & google-location
-    implementation "com.google.firebase:firebase-auth"
-    implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
-    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsAuthVersion}"
-
     // worker
     implementation "androidx.work:work-runtime-ktx:${rootProject.ext.workerVersion}"
     implementation "androidx.hilt:hilt-work:${rootProject.ext.hiltWorkerVersion}"
