@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.BillingResponseCode
-import com.android.billingclient.api.BillingClient.ConnectionState
 import com.android.billingclient.api.BillingClient.ProductType
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
@@ -23,6 +22,7 @@ import com.monglife.core.billing.exception.InvalidBillingException
 import com.monglife.core.billing.exception.InvalidGetConsumedOrdersException
 import com.monglife.core.billing.exception.UserCancelException
 import com.monglife.core.billing.vo.GoogleOrderVo
+import com.monglife.core.common.exception.ErrorException
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -46,8 +46,19 @@ class GoogleBillingClient @Inject constructor(
             getBillingClient(listener = { billingResult: BillingResult, purchases: MutableList<Purchase>? ->
                 when (billingResult.responseCode) {
                     BillingResponseCode.OK -> {
-                        purchases?.let {
-                            for (purchase in purchases) {
+                        /**
+                         * 어떤 응답이 와도 emit 하거나 close 하거나 둘 중 하나는 반드시 한다.
+                         *
+                         * 이전에는 purchases 가 non-null 이면서 빈 리스트일 때 for 문이 돌지 않고
+                         * 엘비스 분기도 타지 않아 emit 도 close 도 없이 flow 가 열린 채 남았다.
+                         * 그러면 collector 의 first() 가 영구 대기해 로딩바가 고착된다.
+                         */
+                        val purchaseList = purchases.orEmpty()
+
+                        if (purchaseList.isEmpty()) {
+                            close(InvalidBillingException())
+                        } else {
+                            purchaseList.forEach { purchase ->
                                 trySend(
                                     GoogleOrderVo(
                                         productId = purchase.products[0],
@@ -56,13 +67,9 @@ class GoogleBillingClient @Inject constructor(
                                     )
                                 )
                             }
-                        } ?: run { close(InvalidBillingException()) }
+                        }
                     }
-                    BillingResponseCode.USER_CANCELED -> close(UserCancelException())
-                    BillingResponseCode.BILLING_UNAVAILABLE -> close(BillingNotSupportException())
-                    BillingResponseCode.ITEM_ALREADY_OWNED -> close(AlreadyOwnedException())
-                    BillingResponseCode.ERROR -> close(InvalidBillingException())
-                    else -> close(BillingNotSupportException())
+                    else -> close(billingResult.toBillingException())
                 }
             })
 
@@ -91,7 +98,15 @@ class GoogleBillingClient @Inject constructor(
                 )
                 .build()
 
-            billingClient.launchBillingFlow(activity, billingFlowParams)
+            /**
+             * 반환값을 버리면 결제 UI 가 아예 뜨지 않은 경우(DEVELOPER_ERROR, Activity 종료 중 등)
+             * 리스너가 영영 호출되지 않아 flow 가 매달린다.
+             */
+            val launchResult = billingClient.launchBillingFlow(activity, billingFlowParams)
+
+            if (launchResult.responseCode != BillingResponseCode.OK) {
+                close(launchResult.toBillingException())
+            }
 
         } ?: run {
             close(InvalidBillingException())
@@ -155,6 +170,19 @@ class GoogleBillingClient @Inject constructor(
     }
 
     /**
+     * 응답 코드 → 예외 매핑
+     *
+     * 리스너와 launchBillingFlow 검사 두 곳에서 쓴다.
+     */
+    private fun BillingResult.toBillingException(): ErrorException = when (responseCode) {
+        BillingResponseCode.USER_CANCELED -> UserCancelException()
+        BillingResponseCode.BILLING_UNAVAILABLE -> BillingNotSupportException()
+        BillingResponseCode.ITEM_ALREADY_OWNED -> AlreadyOwnedException()
+        BillingResponseCode.ERROR -> InvalidBillingException()
+        else -> BillingNotSupportException()
+    }
+
+    /**
      * Billing Client 생성
      */
     private suspend fun getBillingClient(listener: PurchasesUpdatedListener): BillingClient = suspendCancellableCoroutine { cont ->
@@ -169,20 +197,33 @@ class GoogleBillingClient @Inject constructor(
             .setListener(listener)
             .build()
 
-        if (billingClient.connectionState == ConnectionState.DISCONNECTED) {
-            billingClient.startConnection(object : BillingClientStateListener {
-                override fun onBillingSetupFinished(billingResult: BillingResult) {
-                    if (billingResult.responseCode == BillingResponseCode.OK) {
-                        cont.resume(billingClient)
-                    } else {
-                        cont.resumeWithException(BillingConnectException())
-                    }
-                }
+        /**
+         * 갓 build 한 인스턴스는 항상 DISCONNECTED 라 connectionState 분기는 의미가 없었다.
+         * 그보다 중요한 것은 이 콜백이 "한 번만" 오지 않는다는 점이다.
+         *
+         * enableAutoServiceReconnection 을 켜면 라이브러리가 ServiceConnection 에
+         * BillingClientStateListener 를 보관해 두고(zzbz.zzb) 재연결마다 같은 인스턴스의
+         * onBillingSetupFinished 를 다시 호출한다. 그때 이미 resume 된 continuation 을
+         * 또 resume 하면 IllegalStateException 이 나는데, 라이브러리가 이를 삼키면서
+         * "Exception while calling onBillingSetupFinished." 로그만 남기고 결제 세션이 깨진다.
+         *
+         * 폰으로 결제가 넘어가면 앱이 백그라운드로 내려가 바인딩이 끊기기 쉬워 실제로 밟힌다.
+         */
+        billingClient.startConnection(object : BillingClientStateListener {
+            override fun onBillingSetupFinished(billingResult: BillingResult) {
+                if (!cont.isActive) return
 
-                override fun onBillingServiceDisconnected() {}
-            })
-        } else {
-            cont.resume(billingClient)
-        }
+                if (billingResult.responseCode == BillingResponseCode.OK) {
+                    cont.resume(billingClient)
+                } else {
+                    cont.resumeWithException(BillingConnectException())
+                }
+            }
+
+            override fun onBillingServiceDisconnected() {}
+        })
+
+        // 연결을 기다리는 동안 취소되면 클라이언트가 그대로 남으므로 여기서 정리한다.
+        cont.invokeOnCancellation { billingClient.endConnection() }
     }
 }
