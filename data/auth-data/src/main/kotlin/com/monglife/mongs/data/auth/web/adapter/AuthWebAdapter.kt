@@ -1,6 +1,9 @@
 package com.monglife.mongs.data.auth.web.adapter
 
+import com.monglife.core.data.web.client.AuthApiVariant
 import com.monglife.core.data.web.client.AuthWebClient
+import com.monglife.core.data.web.client.request.CredentialJoinRequestDto
+import com.monglife.core.data.web.client.request.CredentialLoginRequestDto
 import com.monglife.core.data.web.client.request.JoinRequestDto
 import com.monglife.core.data.web.client.request.LoginRequestDto
 import com.monglife.core.data.web.client.request.LogoutRequestDto
@@ -20,9 +23,16 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * 인증 웹 어댑터
+ *
+ * 앱이 쓰는 계약([AuthApiVariant])에 따라 호출할 엔드포인트가 갈린다.
+ * 기존 엔드포인트는 idToken 을 모르는 필드로 보고 거부하므로 같은 요청에 실어 보낼 수 없다.
+ */
 @Singleton
 class AuthWebAdapter @Inject constructor(
     private val authWebClient: AuthWebClient,
+    private val authApiVariant: AuthApiVariant,
 ): AuthWebPort {
 
     companion object {
@@ -54,14 +64,24 @@ class AuthWebAdapter @Inject constructor(
      * 회원 가입
      */
     @Throws(InvalidJoinException::class)
-    override suspend fun join(email: String, name: String, socialAccountId: String): Unit =
-        authWebClient.join(
-            joinRequestDto = JoinRequestDto(
-                email = email,
-                name = name,
-                socialAccountId = socialAccountId,
+    override suspend fun join(email: String, name: String, socialAccountId: String, idToken: String): Unit =
+        when (authApiVariant) {
+            AuthApiVariant.LEGACY -> authWebClient.join(
+                joinRequestDto = JoinRequestDto(
+                    email = email,
+                    name = name,
+                    socialAccountId = socialAccountId,
+                )
             )
-        ).let { response ->
+            AuthApiVariant.CREDENTIAL -> authWebClient.credentialJoin(
+                credentialJoinRequestDto = CredentialJoinRequestDto(
+                    email = email,
+                    name = name,
+                    socialAccountId = socialAccountId,
+                    idToken = idToken,
+                )
+            )
+        }.let { response ->
             response.takeIf { it.isSuccessful }?.body() ?: throw InvalidJoinException()
         }
 
@@ -73,19 +93,33 @@ class AuthWebAdapter @Inject constructor(
         deviceId: String,
         email: String,
         googleAccountId: String,
+        idToken: String,
         appPackageName: String,
         deviceName: String,
         buildVersion: String
-    ): LoginResponse = authWebClient.login(
-        loginRequestDto = LoginRequestDto(
-            deviceId = deviceId,
-            email = email,
-            socialAccountId = googleAccountId,
-            appPackageName = appPackageName,
-            deviceName = deviceName,
-            buildVersion = buildVersion,
+    ): LoginResponse = when (authApiVariant) {
+        AuthApiVariant.LEGACY -> authWebClient.login(
+            loginRequestDto = LoginRequestDto(
+                deviceId = deviceId,
+                email = email,
+                socialAccountId = googleAccountId,
+                appPackageName = appPackageName,
+                deviceName = deviceName,
+                buildVersion = buildVersion,
+            )
         )
-    ).let { response ->
+        AuthApiVariant.CREDENTIAL -> authWebClient.credentialLogin(
+            credentialLoginRequestDto = CredentialLoginRequestDto(
+                deviceId = deviceId,
+                email = email,
+                socialAccountId = googleAccountId,
+                idToken = idToken,
+                appPackageName = appPackageName,
+                deviceName = deviceName,
+                buildVersion = buildVersion,
+            )
+        )
+    }.let { response ->
 
         val body = response.takeIf { it.isSuccessful }?.body() ?: run {
             val errorBody = response.getErrorResponseDto()

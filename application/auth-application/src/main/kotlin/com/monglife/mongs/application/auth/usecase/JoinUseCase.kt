@@ -22,6 +22,7 @@ class JoinUseCase @Inject constructor(
                 email = command.email,
                 name = command.name,
                 socialAccountId = command.socialAccountId,
+                idToken = command.idToken,
             )
         }
     }
@@ -30,5 +31,6 @@ class JoinUseCase @Inject constructor(
         val socialAccountId: String,
         val email: String,
         val name: String,
+        val idToken: String,
     )
 }

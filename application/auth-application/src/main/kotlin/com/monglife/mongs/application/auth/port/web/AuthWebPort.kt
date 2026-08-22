@@ -20,13 +20,13 @@ interface AuthWebPort {
      * 회원 가입
      */
     @Throws(InvalidJoinException::class)
-    suspend fun join(email: String, name: String, socialAccountId: String)
+    suspend fun join(email: String, name: String, socialAccountId: String, idToken: String)
 
     /**
      * 로그인
      */
     @Throws(InvalidLoginException::class, NeedJoinException::class)
-    suspend fun login(deviceId: String, email: String, googleAccountId: String, appPackageName: String, deviceName: String, buildVersion: String): LoginResponse
+    suspend fun login(deviceId: String, email: String, googleAccountId: String, idToken: String, appPackageName: String, deviceName: String, buildVersion: String): LoginResponse
 
     /**
      * 로그 아웃

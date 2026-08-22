@@ -1,5 +1,6 @@
 package com.monglife.mongs.presentation.view.layout
 
+import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
@@ -34,10 +36,7 @@ internal fun LoginContent(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
 ) {
     val uiState = loginViewModel.uiState.collectAsStateWithLifecycle()
-    val googleLoginLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult(),
-        loginViewModel::login
-    )
+    val context = LocalContext.current
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
         loginViewModel.verifyPermissionIntentClose()
     }
@@ -64,9 +63,7 @@ internal fun LoginContent(
                 ) {
                     if (uiState.value.signInButton) {
                         GoogleSignInButton(onClick = {
-                            loginViewModel.googleLogin(
-                                googleLoginLauncher = googleLoginLauncher
-                            )
+                            loginViewModel.googleLogin(activity = context as Activity)
                         })
                     }
 

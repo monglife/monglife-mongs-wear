@@ -85,6 +85,7 @@ kotlin {
 
 dependencies {
     // core layer
+    implementation project(":core:auth-core")
     implementation project(":core:data-core")
 
     // presentation layer

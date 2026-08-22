@@ -4,6 +4,7 @@ android {
 
 dependencies {
     // core layer
+    implementation project(":core:auth-core")
     implementation project(":core:billing-core")
 
     // application layer
@@ -19,9 +20,4 @@ dependencies {
     implementation project(":data:device-data")
     implementation project(":data:member-data")
     implementation project(":data:mong-data")
-
-    // google-auth & firebase-fcm & google-location
-    implementation "com.google.firebase:firebase-auth"
-    implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
-    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.gmsAuthVersion}"
 }

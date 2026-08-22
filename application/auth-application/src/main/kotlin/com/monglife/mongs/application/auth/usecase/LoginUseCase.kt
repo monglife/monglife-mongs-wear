@@ -47,6 +47,7 @@ class LoginUseCase @Inject constructor(
             authWebPort.login(
                 email = command.email,
                 googleAccountId = command.googleAccountId,
+                idToken = command.idToken,
                 deviceId = deviceId,
                 appPackageName = appPackageName,
                 deviceName = deviceName,
@@ -68,5 +69,6 @@ class LoginUseCase @Inject constructor(
     data class Command(
         val googleAccountId: String,
         val email: String,
+        val idToken: String,
     )
 }
