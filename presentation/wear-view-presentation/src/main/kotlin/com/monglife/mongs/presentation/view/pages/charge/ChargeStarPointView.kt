@@ -61,11 +61,15 @@ internal fun ChargeStarPointView(
 
     Box {
         DefaultBackground()
-        if (uiState.value.loadingBar) {
-            LoadingBar()
-        } else {
+        // 배타 분기가 아니다. 결제 중에는 컨텐츠를 유지한 채 로딩바를 위에 겹친다.
+        if (uiState.value.content) {
             Box(modifier = Modifier.zIndex(1f)) {
                 ChargeStarPointContent(chargeStarPointViewModel = chargeStarPointViewModel)
+            }
+        }
+        if (uiState.value.loadingBar) {
+            Box(modifier = Modifier.zIndex(2f)) {
+                LoadingBar()
             }
         }
     }

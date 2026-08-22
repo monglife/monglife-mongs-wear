@@ -38,9 +38,20 @@ class ChargeStarPointViewModel @Inject constructor(
      */
     sealed class UiState(
         val loadingBar: Boolean = false,
+        val content: Boolean = true,
     ) {
         data object Idle : UiState()
-        data object Loading : UiState(loadingBar = true)
+
+        /** 최초 진입 · 재조회 — 아직 표시할 데이터가 없다 */
+        data object Loading : UiState(loadingBar = true, content = false)
+
+        /**
+         * 결제 진행 중 — 데이터는 이미 있으므로 화면을 유지한 채 오버레이만 띄운다.
+         *
+         * Loading 으로 화면을 통째로 가리면 미소비 주문의 "소비" 버튼도 함께 사라져,
+         * 결제 콜백이 오지 않을 때 사용자가 복구할 방법이 없어진다.
+         */
+        data object Billing : UiState(loadingBar = true, content = true)
     }
 
     /**
@@ -78,20 +89,22 @@ class ChargeStarPointViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
-            withContext(Dispatchers.IO) {
-                getProductsUseCase().let {
-                    if (it.isNotEmpty()) {
-                        _productVos.value = it
-                    } else {
-                        delay(NAVIGATE_DELAY)
-                        _uiEvent.emit(UiEvent.NavMain("인앱 상품 없음"))
+            try {
+                withContext(Dispatchers.IO) {
+                    getProductsUseCase().let {
+                        if (it.isNotEmpty()) {
+                            _productVos.value = it
+                        } else {
+                            delay(NAVIGATE_DELAY)
+                            _uiEvent.emit(UiEvent.NavMain("인앱 상품 없음"))
+                        }
                     }
+
+                    observeForever(observePlayerUseCase().map {  it.starPoint }, _starPoint)
                 }
-
-                observeForever(observePlayerUseCase().map {  it.starPoint }, _starPoint)
+            } finally {
+                _uiState.value = UiState.Idle
             }
-
-            _uiState.value = UiState.Idle
         }
     }
 
@@ -99,26 +112,35 @@ class ChargeStarPointViewModel @Inject constructor(
      * 인앱 상품 주문 및 소비
      */
     fun orderAndConsume(productId: String, activity: Activity) {
+        // 결제 중에도 화면이 보이므로 버튼 재탭으로 결제가 중복 실행되지 않게 막는다
+        if (_uiState.value is UiState.Billing) return
+
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Loading
+            _uiState.value = UiState.Billing
 
-            val googleOrderVo = billingClient.billing(activity = activity, productId = productId)
-                .first()
+            try {
+                val googleOrderVo = billingClient.billing(activity = activity, productId = productId)
+                    .first()
 
-            withContext(Dispatchers.IO) {
-                consumeProductOrderUseCase(
-                    command = ConsumeProductOrderUseCase.Command(
-                        productId = googleOrderVo.productId,
-                        socialOrderId = googleOrderVo.socialOrderId,
-                        purchaseToken = googleOrderVo.purchaseToken,
+                withContext(Dispatchers.IO) {
+                    consumeProductOrderUseCase(
+                        command = ConsumeProductOrderUseCase.Command(
+                            productId = googleOrderVo.productId,
+                            socialOrderId = googleOrderVo.socialOrderId,
+                            purchaseToken = googleOrderVo.purchaseToken,
+                        )
                     )
-                )
 
-                _productVos.value = getProductsUseCase()
-                _uiEvent.emit(UiEvent.Buy("충전 완료"))
+                    _productVos.value = getProductsUseCase()
+                    _uiEvent.emit(UiEvent.Buy("충전 완료"))
+                }
+            } finally {
+                /**
+                 * 예외뿐 아니라 취소로도 여기를 지나야 한다.
+                 * suspend 호출(_uiEvent.emit, delay)은 취소 상태에서 실행되지 않으므로 두지 않는다.
+                 */
+                _uiState.value = UiState.Idle
             }
-
-            _uiState.value = UiState.Idle
         }
     }
 
@@ -129,20 +151,22 @@ class ChargeStarPointViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
-            withContext(Dispatchers.IO) {
-                consumeProductOrderUseCase(
-                    command = ConsumeProductOrderUseCase.Command(
-                        productId = orderVo.productId,
-                        socialOrderId = orderVo.socialOrderId,
-                        purchaseToken = orderVo.purchaseToken,
+            try {
+                withContext(Dispatchers.IO) {
+                    consumeProductOrderUseCase(
+                        command = ConsumeProductOrderUseCase.Command(
+                            productId = orderVo.productId,
+                            socialOrderId = orderVo.socialOrderId,
+                            purchaseToken = orderVo.purchaseToken,
+                        )
                     )
-                )
 
-                _productVos.value = getProductsUseCase()
-                _uiEvent.emit(UiEvent.Consume("소비 완료"))
+                    _productVos.value = getProductsUseCase()
+                    _uiEvent.emit(UiEvent.Consume("소비 완료"))
+                }
+            } finally {
+                _uiState.value = UiState.Idle
             }
-
-            _uiState.value = UiState.Idle
         }
     }
 
@@ -153,11 +177,13 @@ class ChargeStarPointViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
-            withContext(Dispatchers.IO) {
-                _productVos.value = getProductsUseCase()
+            try {
+                withContext(Dispatchers.IO) {
+                    _productVos.value = getProductsUseCase()
+                }
+            } finally {
+                _uiState.value = UiState.Idle
             }
-
-            _uiState.value = UiState.Idle
         }
     }
 
