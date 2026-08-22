@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -47,7 +45,6 @@ import com.monglife.mongs.presentation.view.component.common.button.YellowButton
 import com.monglife.mongs.presentation.view.component.common.pagenation.PageIndicator
 import com.monglife.mongs.presentation.view.component.common.textbox.StarPointBox
 import com.monglife.mongs.presentation.view.utils.NumberUtil
-import com.monglife.mongs.presentation.view.utils.ViewLifeCycle
 import com.monglife.mongs.presentation.viewmodel.pages.charge.ChargeStarPointViewModel
 import com.mongs.presentation.view.wear.R
 import kotlin.math.ceil
@@ -58,8 +55,7 @@ import kotlin.math.min
 internal fun ChargeStarPointView(
     navController: NavController,
     chargeStarPointViewModel: ChargeStarPointViewModel = hiltViewModel(),
-    context: Context = LocalContext.current,
-    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    context: Context = LocalContext.current
 ) {
     val uiState = chargeStarPointViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -99,12 +95,6 @@ internal fun ChargeStarPointView(
             }
         }
     }
-
-    // 폰에서 결제를 마치고 돌아왔을 때 대기 중인 결제를 끊고 미소비 주문을 회수한다
-    ViewLifeCycle(
-        lifecycleOwner = lifecycleOwner,
-        onResume = chargeStarPointViewModel::onResume,
-    )
 }
 
 @Composable
