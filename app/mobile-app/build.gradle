@@ -115,7 +115,7 @@ dependencies {
 // 다만 GoogleServicesTask.googleServicesJsonFiles 가 @InputFiles 로 노출된 public 프로퍼티라
 // 복사 없이 configs 를 직접 가리킬 수 있다. @CacheableTask 이므로 up-to-date/빌드캐시도 정상이다.
 // google-services.json 은 환경 공용이라 flavor 별로 나누지 않는다.
-// gmsPluginVersion 을 올릴 때 이 배선이 유효한지 반드시 재확인해라.
+// gradle/libs.versions.toml 의 [versions] gms 를 올릴 때 이 배선이 유효한지 반드시 재확인해라.
 //
 // afterEvaluate 로 감싸는 게 핵심이다. 컨테이너 레벨 configureEach 액션은 태스크가 realize 될 때
 // tasks.register(name) { ... } 의 설정 블록보다 "먼저" 돌아서, 여기서 값을 넣어도 플러그인이

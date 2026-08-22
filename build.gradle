@@ -2,33 +2,36 @@ buildscript {
     ext {
         namespace               = "com.mongs"
         javaVersion             = JavaVersion.VERSION_17
-        androidVersion          = "9.3.1"
-        kotlinVersion           = "2.4.10"
-        kspVersion              = "2.3.11"
-        hiltVersion             = "2.60.1"
         hiltWorkerVersion       = "1.4.0"
         workerVersion           = "2.10.3"
         lifecycleVersion        = "2.9.2"
         firebaseVersion         = "33.8.0"
         fcmVersion              = "24.1.2"
-        gmsPluginVersion        = "4.4.2"
         gmsLocationVersion      = "21.3.0"
         jupiterVersion          = "4.13.2"
         mockitoVersion          = "5.19.0"
         mockitoKotlinVersion    = "6.0.0"
-        composePluginVersion    = "2.4.10"
     }
 }
 
+// 플러그인 버전은 gradle/libs.versions.toml 이 단일 원본이다.
+// 여기에 id "..." version "${someExtKey}" 형태를 다시 쓰지 마라 - lint 의 GroovyGradleVisitor 가
+// 소스 문자열을 그대로 잘라 읽어 보간을 해석하지 못하고, 버전이 7.1.0 미만이라며
+// GradlePluginVersion(ERROR) 을 오검출한다.
 plugins {
-    id "com.android.library"                 version "${androidVersion}"        apply false
-    id "com.android.application"             version "${androidVersion}"        apply false
-    id "org.jetbrains.kotlin.jvm"            version "${kotlinVersion}"         apply false
-    id "com.google.devtools.ksp"             version "${kspVersion}"            apply false
-    id "com.google.dagger.hilt.android"      version "${hiltVersion}"           apply false
-    id "com.google.gms.google-services"      version "${gmsPluginVersion}"      apply false
-    id "org.jetbrains.kotlin.plugin.compose" version "${composePluginVersion}"  apply false
+    alias(libs.plugins.android.library)     apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.jvm)          apply false
+    alias(libs.plugins.kotlin.compose)      apply false
+    alias(libs.plugins.ksp)                 apply false
+    alias(libs.plugins.hilt.android)        apply false
+    alias(libs.plugins.google.services)     apply false
 }
+
+// hilt 만 플러그인 ID 와 라이브러리 좌표를 함께 쓴다. 버전 리터럴을 두 곳에 두지 않도록
+// 카탈로그에서 읽어 ext 에 심는다. 하위 모듈은 루트 스크립트 평가 이후에 구성되므로
+// 기존 rootProject.ext.hiltVersion 참조(core/*, data/*, presentation/*, app/*)는 그대로 동작한다.
+ext.hiltVersion = libs.versions.hilt.get()
 
 subprojects {
     // 환경 프로파일은 product flavor 로 가른다.

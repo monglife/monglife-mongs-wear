@@ -62,7 +62,7 @@ How each one is wired:
 - **`google-services.json`** — the plugin ignores source sets and offers no path setting, but
   `GoogleServicesTask.googleServicesJsonFiles` is a public input property, so the app modules override it
   inside `afterEvaluate` (earlier than that and the plugin's own default overwrites it). Re-verify this
-  wiring when bumping `gmsPluginVersion`.
+  wiring when bumping `[versions] gms` in `gradle/libs.versions.toml`.
 - **`applicationIdSuffix` must stay off.** Each `google-services.json` holds a single client
   (`com.mongs.wear` / `com.mongs.mobile`) matched exactly by package name; a suffix fails the build.
   Use `versionNameSuffix` if you need to tell builds apart.
@@ -161,7 +161,21 @@ Both apps have their own `NotificationModule.kt` / `NotificationService.kt` unde
 
 ### Kotlin/Android versions
 
-Centralized in root `build.gradle` (`ext` block): Kotlin 2.4.10, AGP 9.3.1, Hilt 2.60.1, Java 17,
-`compileSdk 36`, `minSdk 30`. Per-module `buildscript.ext` blocks add module-specific library versions
-(Compose, Retrofit, Room, etc.) — check the relevant module's `build.gradle` before assuming a shared
-version applies.
+Versions live in two places, split by kind:
+
+- **Plugin versions — `gradle/libs.versions.toml`** (the default `libs` catalog; `settings.gradle` needs
+  no wiring for it). AGP 9.3.1, Kotlin 2.4.10, KSP 2.3.11, Hilt 2.60.1, google-services 4.4.2. The root
+  `plugins {}` block applies them as `alias(libs.plugins.<name>) apply false`; every other module just
+  does `apply plugin: "<id>"` with no version.
+  **Do not move plugin versions back into `ext` interpolation** (`id "..." version "${androidVersion}"`):
+  lint's `GroovyGradleVisitor` reads the build file by slicing the raw source text, so it never resolves
+  the interpolation, parses the version as the literal `${androidVersion}`, decides it is below 7.1.0, and
+  raises `GradlePluginVersion` at ERROR severity — which fails `lint*` and lights up the IDE editor.
+- **Library versions — root `build.gradle` `ext` block** (Java 17, Firebase/FCM, Work, Mockito, …), plus
+  per-module `buildscript.ext` blocks for module-specific ones (Compose, Retrofit, Room, etc.). Check the
+  relevant module's `build.gradle` before assuming a shared version applies.
+  `hiltVersion` is the one value both sides need, so the root script seeds it from the catalog
+  (`ext.hiltVersion = libs.versions.hilt.get()`) and the ~12 `rootProject.ext.hiltVersion` call sites
+  keep working unchanged.
+
+`compileSdk 36` / `minSdk 30` are declared per Android module, not centrally.
