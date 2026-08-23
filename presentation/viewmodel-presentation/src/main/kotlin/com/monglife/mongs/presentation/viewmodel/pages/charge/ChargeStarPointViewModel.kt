@@ -12,6 +12,7 @@ import com.monglife.mongs.application.member.store.vo.OrderVo
 import com.monglife.mongs.application.member.store.vo.ProductVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,6 +86,20 @@ class ChargeStarPointViewModel @Inject constructor(
     private val _productVos = MutableStateFlow<List<ProductVo>>(emptyList())
     val productVos: StateFlow<List<ProductVo>> = _productVos.asStateFlow()
 
+    private var resumeJob: Job? = null
+
+    /** 최초 ON_RESUME 은 init 의 조회와 겹치므로 한 번 건너뛴다. */
+    private var isFirstResume = true
+
+    /**
+     * 소비를 시도한 purchaseToken.
+     *
+     * 실시간 리스너 경로(orderAndConsume)와 회수 경로(autoConsume)가 같은 주문을
+     * 각각 잡을 수 있으므로 가드를 공유한다. 기록은 요청 "전에" 남겨, 실패로
+     * 빠져나가도 자동 재시도가 돌지 않게 한다.
+     */
+    private val consumeAttemptedTokens = mutableSetOf<String>()
+
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
@@ -101,6 +116,8 @@ class ChargeStarPointViewModel @Inject constructor(
                     }
 
                     observeForever(observePlayerUseCase().map {  it.starPoint }, _starPoint)
+
+                    autoConsume()
                 }
             } finally {
                 _uiState.value = UiState.Idle
@@ -123,16 +140,18 @@ class ChargeStarPointViewModel @Inject constructor(
                     .first()
 
                 withContext(Dispatchers.IO) {
-                    consumeProductOrderUseCase(
-                        command = ConsumeProductOrderUseCase.Command(
-                            productId = googleOrderVo.productId,
-                            socialOrderId = googleOrderVo.socialOrderId,
-                            purchaseToken = googleOrderVo.purchaseToken,
-                        )
+                    // 회수 경로가 이미 소비했다면 여기서는 건너뛴다
+                    val consumed = consumeOnce(
+                        productId = googleOrderVo.productId,
+                        socialOrderId = googleOrderVo.socialOrderId,
+                        purchaseToken = googleOrderVo.purchaseToken,
                     )
 
                     _productVos.value = getProductsUseCase()
-                    _uiEvent.emit(UiEvent.Buy("충전 완료"))
+
+                    if (consumed) {
+                        _uiEvent.emit(UiEvent.Buy("충전 완료"))
+                    }
                 }
             } finally {
                 /**
@@ -153,12 +172,12 @@ class ChargeStarPointViewModel @Inject constructor(
 
             try {
                 withContext(Dispatchers.IO) {
-                    consumeProductOrderUseCase(
-                        command = ConsumeProductOrderUseCase.Command(
-                            productId = orderVo.productId,
-                            socialOrderId = orderVo.socialOrderId,
-                            purchaseToken = orderVo.purchaseToken,
-                        )
+                    // 사용자가 직접 누른 재시도이므로 자동 소비 가드를 우회한다
+                    consumeOnce(
+                        productId = orderVo.productId,
+                        socialOrderId = orderVo.socialOrderId,
+                        purchaseToken = orderVo.purchaseToken,
+                        force = true,
                     )
 
                     _productVos.value = getProductsUseCase()
@@ -168,6 +187,112 @@ class ChargeStarPointViewModel @Inject constructor(
                 _uiState.value = UiState.Idle
             }
         }
+    }
+
+    /**
+     * 화면 복귀 처리
+     *
+     * 폰에서 완료된 결제가 워치의 PurchasesUpdatedListener 로 오지 않는 경우가 실재한다.
+     * Google 권장 모델대로 queryPurchasesAsync(= getProductsUseCase 경로)를 정합성의
+     * 근원으로 삼아 미소비 주문을 회수한다.
+     *
+     * 진행 중인 결제에는 간섭하지 않는다. 대기 중인 코루틴을 취소하면 실시간 경로가
+     * 죽어버리므로, 재조회만 얹고 결제는 그대로 둔다.
+     */
+    fun onResume() {
+        /**
+         * getProductsUseCase 는 BillingClient 연결과 서버 POST 를 동반하므로
+         * init 의 조회와 겹치는 최초 1회는 건너뛴다.
+         */
+        if (isFirstResume) {
+            isFirstResume = false
+            return
+        }
+
+        if (resumeJob?.isActive == true) return
+
+        resumeJob = viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            // 결제 진행 중이면 Billing 상태를 유지한다
+            val isBilling = _uiState.value is UiState.Billing
+
+            if (!isBilling) {
+                _uiState.value = UiState.Loading
+            }
+
+            try {
+                withContext(Dispatchers.IO) {
+                    _productVos.value = getProductsUseCase()
+
+                    autoConsume()
+                }
+            } finally {
+                if (!isBilling) {
+                    _uiState.value = UiState.Idle
+                }
+            }
+        }
+    }
+
+    /**
+     * 가드를 통과한 주문만 실제로 소비한다.
+     *
+     * @param force 사용자가 직접 누른 재시도. 세션 내 1회 제한을 우회한다.
+     * @return 실제로 소비 요청을 보냈으면 true
+     */
+    private suspend fun consumeOnce(
+        productId: String,
+        socialOrderId: String,
+        purchaseToken: String,
+        force: Boolean = false,
+    ): Boolean {
+        // orderId 가 null 인 구매(프로모·테스트)는 socialOrderId 가 "-" 라 서버가 식별할 수 없다
+        if (socialOrderId == "-") return false
+
+        val isNew = consumeAttemptedTokens.add(purchaseToken)
+        if (!isNew && !force) return false
+
+        consumeProductOrderUseCase(
+            command = ConsumeProductOrderUseCase.Command(
+                productId = productId,
+                socialOrderId = socialOrderId,
+                purchaseToken = purchaseToken,
+            )
+        )
+
+        return true
+    }
+
+    /**
+     * 미소비 주문 자동 소비
+     *
+     * 호출 지점은 init 과 onResume 뿐이다. initialize() 나 exceptionHandler 에 넣으면
+     * 소비 실패 -> exceptionHandler -> initialize() -> 소비 실패 로 무한 루프가 된다
+     * (BaseViewModel 의 핸들러는 별도 CoroutineScope 라 VM clear 이후에도 돈다).
+     * 자동 소비가 실패하면 initialize() 가 상품을 다시 그려 "소비" 버튼이 수동 폴백으로 남는다.
+     */
+    private suspend fun autoConsume() {
+        val orderVos = _productVos.value
+            .flatMap { it.orderVos }
+            .distinctBy { it.purchaseToken }
+
+        var consumedAny = false
+
+        orderVos.forEach { orderVo ->
+            val consumed = consumeOnce(
+                productId = orderVo.productId,
+                socialOrderId = orderVo.socialOrderId,
+                purchaseToken = orderVo.purchaseToken,
+            )
+
+            if (consumed) {
+                consumedAny = true
+            }
+        }
+
+        if (!consumedAny) return
+
+        _productVos.value = getProductsUseCase()
+        _uiEvent.emit(UiEvent.Buy("충전 완료"))
     }
 
     /**
