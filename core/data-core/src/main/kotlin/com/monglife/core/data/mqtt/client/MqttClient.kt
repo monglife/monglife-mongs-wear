@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -28,6 +29,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.eclipse.paho.client.mqttv3.IMqttActionListener
 import org.eclipse.paho.client.mqttv3.IMqttToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
@@ -53,6 +56,13 @@ class MqttClient @Inject constructor(
         private const val SUBSCRIBE_RETRY_DELAY = 10000L
         private const val SUBSCRIBE_RETRY_MAX_DELAY = 300000L
         private const val SUBSCRIBE_RETRY_MAX_ATTEMPT = 10
+
+        /**
+         * 정리(구독 해제 / 연결 해제) 응답 대기 상한
+         * NonCancellable 안에서는 취소로 빠져나올 수 없으므로 상한이 없으면
+         * 브로커가 응답하지 않을 때 호출자(shareIn 정지 코루틴 등)가 영구 정지한다.
+         */
+        private const val CLEAN_UP_TIMEOUT = 3000L
 
         private sealed class MqttUserContext {
             data object Connect : MqttUserContext()
@@ -233,25 +243,36 @@ class MqttClient @Inject constructor(
 
     /**
      * Mqtt 구독 해제
+     *
+     * 호출 지점이 대부분 Flow 의 finally 라 이미 취소된 코루틴 위에서 실행된다.
+     * (shareIn 의 WhileSubscribed 가 STOP 되면 업스트림이 ChildCancelledException 으로 취소된다.)
+     * NonCancellable 이 없으면 첫 suspend 지점인 await() 에서 즉시 취소 예외로 재개되어
+     * 브로커에 UNSUBSCRIBE 가 나가지 않고 callbackMap 정리도 건너뛴 채 실패 로그만 남는다.
      */
     suspend fun disSubscribe(topic: String) {
-        runCatching {
+        withContext(NonCancellable) {
             retrySubscribeJobMap.remove(topic)?.cancel()
 
-            // 연결 중인 경우만 구독 해제
-            this.mqttAndroidClient.takeIf { it.isConnected }?.let {
-                mqttAndroidClient.unsubscribe(
-                    topic = topic,
-                    userContext = MqttUserContext.DisSubscribe(topic = topic),
-                    callback = null
-                ).await()
+            runCatching {
+                // 연결 중인 경우만 구독 해제
+                mqttAndroidClient.takeIf { it.isConnected }?.let {
+                    withTimeout(CLEAN_UP_TIMEOUT) {
+                        it.unsubscribe(
+                            topic = topic,
+                            userContext = MqttUserContext.DisSubscribe(topic = topic),
+                            callback = null
+                        ).await()
+                    }
+                }
+            }.onFailure {
+                Log.w(TAG, "MQTT >> 토픽 구독 해제 실패\n  - topic         => $topic", it)
             }
 
+            // 브로커 응답과 무관하게 로컬 소비자는 반드시 정리한다.
+            // 남겨 두면 subscribe() 가 중복 등록으로 보고 조기 return 해 재구독이 막힌다.
             callbackMap.remove(topic)?.let {
                 mqttAndroidClient.removeCallback(callback = it)
             }
-        }.onFailure {
-            Log.w(TAG, "MQTT >> 토픽 구독 해제 실패\n  - topic         => $topic", it)
         }
     }
 
@@ -259,7 +280,7 @@ class MqttClient @Inject constructor(
      * Mqtt 연결 해제
      */
     suspend fun disconnect() {
-        runCatching {
+        withContext(NonCancellable) {
             retrySubscribeJobMap.values.forEach { it.cancel() }
             retrySubscribeJobMap.clear()
 
@@ -267,14 +288,18 @@ class MqttClient @Inject constructor(
             callbackMap.values.forEach { mqttAndroidClient.removeCallback(callback = it) }
             callbackMap.clear()
 
-            if (mqttAndroidClient.isConnected) {
-                mqttAndroidClient.disconnect(
-                    userContext = MqttUserContext.Disconnect,
-                    callback = null
-                ).await()
+            runCatching {
+                if (mqttAndroidClient.isConnected) {
+                    withTimeout(CLEAN_UP_TIMEOUT) {
+                        mqttAndroidClient.disconnect(
+                            userContext = MqttUserContext.Disconnect,
+                            callback = null
+                        ).await()
+                    }
+                }
+            }.onFailure {
+                Log.w(TAG, "MQTT >> 연결 해제 실패", it)
             }
-        }.onFailure {
-            Log.w(TAG, "MQTT >> 연결 해제 실패", it)
         }
     }
 
