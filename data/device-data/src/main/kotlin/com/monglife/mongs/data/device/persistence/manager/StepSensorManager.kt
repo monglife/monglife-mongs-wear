@@ -19,6 +19,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 
+/**
+ * `Sensor.TYPE_STEP_COUNTER` 접근
+ *
+ * 값은 "부팅 이후 누계" 이고 재부팅하면 0 으로 리셋된다. 앱이 죽어 있어도 OS 가 계속 세므로
+ * 주기적으로 읽기만 해도 그동안의 걸음을 회수할 수 있다 - 다만 재부팅 직전 구간은 복구할 수 없다.
+ * 그래서 이 경로는 Health Services 를 못 쓰는 기기의 폴백이다.
+ */
 @Singleton
 class StepSensorManager @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -30,18 +37,28 @@ class StepSensorManager @Inject constructor(
 
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
+    private val stepSensor: Sensor?
+        get() = runCatching { sensorManager.getDefaultSensor(STEP_SENSOR_TYPE) }.getOrNull()
+
     /**
-     * 전체 걸음 수 조회
+     * 걸음 센서 탑재 여부
      */
-    suspend fun getTotalWalkingCount(): Int? = suspendCancellableCoroutine { cont ->
-        // 타임 아웃 측정
+    fun isAvailable(): Boolean = stepSensor != null
+
+    /**
+     * 부팅 이후 누계 걸음 수 1회 조회
+     *
+     * on-change 센서라 등록 직후 현재 값이 한 번 내려온다. 그래도 값이 오지 않는 경우를 대비해
+     * 타임아웃을 두고, 그때는 null 을 돌려 호출부가 적립을 건너뛰게 한다.
+     */
+    suspend fun readTotalWalkingCount(): Int? = suspendCancellableCoroutine { cont ->
         val timeoutJob = CoroutineScope(Dispatchers.IO).launch {
             delay(STEP_LISTENER_TIMEOUT)
             if (cont.isActive) cont.resume(null)
         }
 
         runCatching {
-            sensorManager.getDefaultSensor(STEP_SENSOR_TYPE)?.let {
+            stepSensor?.let {
                 sensorManager.registerListener(object : SensorEventListener {
                     override fun onSensorChanged(event: SensorEvent?) {
                         if (event?.sensor?.type == STEP_SENSOR_TYPE && cont.isActive) {
@@ -52,7 +69,7 @@ class StepSensorManager @Inject constructor(
                         }
                     }
 
-                    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+                    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 
                 }, it, SensorManager.SENSOR_DELAY_FASTEST)
             } ?: run {
@@ -66,38 +83,30 @@ class StepSensorManager @Inject constructor(
     }
 
     /**
-     * 전체 걸음 수 Flow 조회
+     * 부팅 이후 누계 걸음 수 Flow 조회
+     *
+     * 센서를 못 읽는 경우에는 아무것도 방출하지 않는다. null 을 흘려 보내면 호출부마다
+     * "값 없음"을 다시 분기해야 하는데, 걸음 수집에서 그럴 일이 없다.
      */
-    fun getTotalWalkingCountFlow(): Flow<Int?> = callbackFlow {
-
+    fun observeTotalWalkingCount(): Flow<Int> = callbackFlow {
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
                 if (event?.sensor?.type == STEP_SENSOR_TYPE) {
-                    val totalWalkingCount = event.values[0].toInt()
-                    trySend(totalWalkingCount)
+                    trySend(event.values[0].toInt())
                 }
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
         }
 
-        runCatching {
-            trySend(null)
+        val registered = runCatching {
+            stepSensor?.let {
+                sensorManager.registerListener(listener, it, SensorManager.SENSOR_DELAY_NORMAL)
+            } ?: false
+        }.getOrDefault(false)
 
-            sensorManager.getDefaultSensor(STEP_SENSOR_TYPE)?.let {
-                sensorManager.registerListener(
-                    listener,
-                    it,
-                    SensorManager.SENSOR_DELAY_NORMAL
-                )
-            } ?: run {
-                trySend(null)
-            }
-        }.onFailure {
-            trySend(null)
-        }
+        if (!registered) close()
 
-        // 정리
         awaitClose {
             sensorManager.unregisterListener(listener)
         }

@@ -2,6 +2,7 @@ package com.monglife.mongs.application.device.usecase
 
 import com.monglife.core.application.usecase.BaseNoParamUseCase
 import com.monglife.mongs.application.device.port.persistence.DevicePersistencePort
+import com.monglife.mongs.application.device.vo.StepVo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -13,11 +14,11 @@ import javax.inject.Inject
  */
 class ObserveCurrentWalkingCountUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,
-) : BaseNoParamUseCase<Flow<Int>>() {
+) : BaseNoParamUseCase<Flow<StepVo>>() {
 
-    override suspend fun execute(): Flow<Int> {
+    override suspend fun execute(): Flow<StepVo> {
         return devicePersistencePort.getStepFlow()
-            .map { it.getCurrentWalkingCount() }
+            .map { StepVo.of(it) }
             .flowOn(Dispatchers.IO)
     }
 }

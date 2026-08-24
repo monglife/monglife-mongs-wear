@@ -3,6 +3,8 @@ package com.monglife.mongs.presentation.viewmodel.pages.main
 import com.monglife.core.presentation.utils.PermissionUtil
 import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.device.usecase.ObserveCurrentWalkingCountUseCase
+import com.monglife.mongs.application.device.usecase.StartStepCollectionUseCase
+import com.monglife.mongs.application.device.vo.StepVo
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.vo.MongVo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +20,7 @@ import javax.inject.Inject
 class MainStepViewModel @Inject constructor(
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
     private val observeCurrentWalkingCountUseCase: ObserveCurrentWalkingCountUseCase,
+    private val startStepCollectionUseCase: StartStepCollectionUseCase,
     private val permissionUtil: PermissionUtil,
 ) : BaseViewModel() {
 
@@ -46,8 +49,9 @@ class MainStepViewModel @Inject constructor(
     private val _currentMongVo = MutableStateFlow<MongVo?>(null)
     val currentMongVo: StateFlow<MongVo?> = _currentMongVo.asStateFlow()
 
-    private val _currentWalkingCount = MutableStateFlow(Int.MIN_VALUE)
-    val currentWalkingCount: StateFlow<Int> = _currentWalkingCount.asStateFlow()
+    // available = false 로 시작한다. 수집 경로가 정해지기 전에는 0 이 아니라 "-" 를 보여야 한다.
+    private val _stepVo = MutableStateFlow(StepVo(walkingCount = 0, exchangeableWalkingCount = 0, available = false))
+    val stepVo: StateFlow<StepVo> = _stepVo.asStateFlow()
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
@@ -58,7 +62,7 @@ class MainStepViewModel @Inject constructor(
                 _activityPermission.value = permissionUtil.verifyActivityPermission().isEmpty()
 
                 observeForever(observeCurrentMongUseCase(), _currentMongVo)
-                observeForever(observeCurrentWalkingCountUseCase(), _currentWalkingCount)
+                observeForever(observeCurrentWalkingCountUseCase(), _stepVo)
             }
 
             _uiState.value = UiState.Idle
@@ -70,7 +74,12 @@ class MainStepViewModel @Inject constructor(
      */
     fun verifyActivityPermission() {
         viewModelScopeWithHandler.launch(Dispatchers.IO) {
-            _activityPermission.value = permissionUtil.verifyActivityPermission().isEmpty()
+            val granted = permissionUtil.verifyActivityPermission().isEmpty()
+            _activityPermission.value = granted
+
+            // 권한이 없으면 수집 경로가 NONE 으로 내려가 있다. 방금 허용했다면 다시 해석해
+            // 곧바로 걸음을 세기 시작하게 한다. 멱등이라 이미 수집 중이어도 무해하다.
+            if (granted) startStepCollectionUseCase()
         }
     }
 

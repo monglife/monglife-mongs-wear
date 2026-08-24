@@ -23,6 +23,9 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:${parent.ext.dataStoreVersion}"
     implementation "androidx.datastore:datastore-preferences-core:${parent.ext.dataStoreVersion}"
 
+    // health services (wear os passive monitoring)
+    implementation "androidx.health:health-services-client:${rootProject.ext.healthServicesVersion}"
+
     // worker
     implementation "androidx.work:work-runtime-ktx:${rootProject.ext.workerVersion}"
     implementation "androidx.hilt:hilt-work:${rootProject.ext.hiltWorkerVersion}"

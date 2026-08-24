@@ -1,6 +1,7 @@
 package com.monglife.mongs.data.device.persistence.datastore
 
 import android.content.Context
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
@@ -8,12 +9,16 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.monglife.mongs.application.device.exception.InvalidExchangeWalkingCountException
 import com.monglife.mongs.data.device.persistence.entity.DeviceOptionEntity
-import com.monglife.mongs.data.device.persistence.entity.StepEntity
+import com.monglife.mongs.data.device.persistence.entity.StepStateEntity
+import com.monglife.mongs.domain.device.model.StepAccumulation
+import com.monglife.mongs.domain.device.model.StepCursor
+import com.monglife.mongs.domain.device.model.StepSource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,8 +30,22 @@ class DeviceDataStore @Inject constructor(
     private val Context.store by preferencesDataStore(name = "DEVICE")
 
     companion object {
-        private val WALKING_COUNT = intPreferencesKey("walkingCount")
-        private val CONSUME_WALKING_COUNT = intPreferencesKey("consumeWalkingCount")
+        /** 걸음 수 스키마 버전. 0(부재) = 서버가 잔액을 계산하던 구 스키마. */
+        private const val STEP_SCHEMA_CURRENT = 1
+
+        private val STEP_SCHEMA_VERSION = intPreferencesKey("stepSchemaVersion")
+        private val STEP_BALANCE = intPreferencesKey("stepBalance")
+        private val STEP_SOURCE = stringPreferencesKey("stepSource")
+        private val STEP_CURSOR_BOOT_MARK = longPreferencesKey("stepCursorBootMark")
+        private val STEP_CURSOR_END_DURATION = longPreferencesKey("stepCursorEndDuration")
+        private val STEP_CURSOR_DAILY_WINDOW = longPreferencesKey("stepCursorDailyWindow")
+        private val STEP_CURSOR_DAILY_VALUE = intPreferencesKey("stepCursorDailyValue")
+        private val STEP_CURSOR_SENSOR_TOTAL = intPreferencesKey("stepCursorSensorTotal")
+
+        /** 구 스키마 잔재. 서버가 내려 주던 값이라 새 지갑으로 환산할 방법이 없어 지우기만 한다. */
+        private val LEGACY_WALKING_COUNT = intPreferencesKey("walkingCount")
+        private val LEGACY_CONSUME_WALKING_COUNT = intPreferencesKey("consumeWalkingCount")
+
         private val CURRENT_MONG_ID = longPreferencesKey("currentMongId")
         private val BACKGROUND_MAP_CODE = stringPreferencesKey("backgroundMapCode")
         private val NOTIFICATION_OPTION = booleanPreferencesKey("notificationOption")
@@ -35,48 +54,104 @@ class DeviceDataStore @Inject constructor(
     }
 
     /**
-     * Step 조회
+     * 걸음 수 상태 조회
      */
-    suspend fun getStep(): StepEntity? = context.store.data.map {
-        if (it.contains(WALKING_COUNT) && it.contains(CONSUME_WALKING_COUNT)) {
-            StepEntity(
-                walkingCount = it[WALKING_COUNT]!!,
-                consumedWalkingCount = it[CONSUME_WALKING_COUNT]!!
-            )
-        } else {
-            null
-        }
-    }.first()
+    suspend fun getStepState(): StepStateEntity = context.store.data.map { it.readStepState() }.first()
 
     /**
-     * Step 조회
+     * 걸음 수 상태 Flow 조회
      */
-    fun getStepFlow(): Flow<StepEntity?> = context.store.data.map {
-        if (it.contains(WALKING_COUNT) && it.contains(CONSUME_WALKING_COUNT)) {
-            StepEntity(
-                walkingCount = it[WALKING_COUNT]!!,
-                consumedWalkingCount = it[CONSUME_WALKING_COUNT]!!
-            )
-        } else {
-            null
-        }
-    }.distinctUntilChanged()
+    fun getStepStateFlow(): Flow<StepStateEntity> =
+        context.store.data.map { it.readStepState() }.distinctUntilChanged()
 
     /**
-     * Step 저장
+     * 걸음 수 적립
+     *
+     * 읽기-계산-쓰기를 전부 edit 블록 안에서 한다. Health Services 서비스와 폴링 워커가 동시에
+     * 들어올 수 있는데, 밖에서 조회한 뒤 저장하면 그 사이 들어온 적립이 통째로 사라진다.
+     *
+     * [expectedSource] 게이트가 여기 있는 것도 같은 이유다. 수집 경로가 바뀌었는데 이전 경로가
+     * 아직 살아 있으면(예: 앱 업데이트 전에 등록해 둔 Health Services 리스너) 두 경로가 같은
+     * 걸음을 각자 적립해 그대로 두 배가 된다.
      */
-    suspend fun saveStep(stepEntity: StepEntity): StepEntity = context.store.let { store ->
-        store.edit { preferences ->
-            preferences[WALKING_COUNT] = stepEntity.walkingCount
-            preferences[CONSUME_WALKING_COUNT] = stepEntity.consumedWalkingCount
-        }
+    suspend fun creditStep(
+        expectedSource: StepSource,
+        accumulate: (StepCursor) -> StepAccumulation,
+    ): StepStateEntity = context.store.edit { preferences ->
+        val current = preferences.readStepState()
+        if (current.source != expectedSource) return@edit
 
-        store.data.map {
-            StepEntity(
-                walkingCount = it[WALKING_COUNT]!!,
-                consumedWalkingCount = it[CONSUME_WALKING_COUNT]!!
-            )
-        }.first()
+        val accumulation = accumulate(current.cursor)
+        preferences[STEP_BALANCE] = (current.balance.toLong() + accumulation.credited)
+            .coerceIn(0L, Int.MAX_VALUE.toLong())
+            .toInt()
+        preferences.writeCursor(accumulation.cursor)
+    }.readStepState()
+
+    /**
+     * 걸음 수 차감 (환전)
+     *
+     * 잔액이 모자라면 예외를 던져 edit 을 롤백한다.
+     */
+    suspend fun consumeStep(amount: Int): StepStateEntity = context.store.edit { preferences ->
+        val current = preferences.readStepState()
+        if (amount <= 0 || current.balance < amount) throw InvalidExchangeWalkingCountException()
+
+        preferences[STEP_BALANCE] = current.balance - amount
+    }.readStepState()
+
+    /**
+     * 걸음 수 수집 경로 변경
+     *
+     * 경로가 바뀌면 커서도 함께 비운다. 커서 칸은 경로마다 다른 의미를 갖는데 남겨 두면
+     * 전환 직후 첫 배치에서 엉뚱한 차분이 나온다.
+     */
+    suspend fun setStepSource(source: StepSource): StepStateEntity = context.store.edit { preferences ->
+        if (preferences.readStepState().source == source) return@edit
+
+        preferences[STEP_SOURCE] = source.name
+        preferences.writeCursor(StepCursor.EMPTY)
+    }.readStepState()
+
+    /**
+     * 걸음 수 스키마 마이그레이션
+     *
+     * 구 스키마의 walkingCount/consumeWalkingCount 는 서버가 계산해 내려 주던 값이라
+     * 로컬만으로는 잔액을 복원할 수 없다. 잔액 소실을 허용하기로 했으므로 0 에서 시작한다.
+     */
+    suspend fun migrateStepSchema() {
+        context.store.edit { preferences ->
+            if ((preferences[STEP_SCHEMA_VERSION] ?: 0) >= STEP_SCHEMA_CURRENT) return@edit
+
+            preferences[STEP_BALANCE] = 0
+            preferences[STEP_SOURCE] = StepSource.UNRESOLVED.name
+            preferences.writeCursor(StepCursor.EMPTY)
+            preferences.remove(LEGACY_WALKING_COUNT)
+            preferences.remove(LEGACY_CONSUME_WALKING_COUNT)
+            preferences[STEP_SCHEMA_VERSION] = STEP_SCHEMA_CURRENT
+        }
+    }
+
+    private fun Preferences.readStepState(): StepStateEntity = StepStateEntity(
+        balance = this[STEP_BALANCE] ?: 0,
+        source = this[STEP_SOURCE]
+            ?.let { name -> StepSource.entries.firstOrNull { it.name == name } }
+            ?: StepSource.UNRESOLVED,
+        cursor = StepCursor(
+            bootMarkMillis = this[STEP_CURSOR_BOOT_MARK] ?: -1L,
+            lastEndDurationFromBootMillis = this[STEP_CURSOR_END_DURATION] ?: -1L,
+            dailyWindowStartFromBootMillis = this[STEP_CURSOR_DAILY_WINDOW] ?: StepCursor.DAILY_WINDOW_UNSET,
+            dailyValue = this[STEP_CURSOR_DAILY_VALUE] ?: 0,
+            lastSensorTotal = this[STEP_CURSOR_SENSOR_TOTAL] ?: -1,
+        ),
+    )
+
+    private fun androidx.datastore.preferences.core.MutablePreferences.writeCursor(cursor: StepCursor) {
+        this[STEP_CURSOR_BOOT_MARK] = cursor.bootMarkMillis
+        this[STEP_CURSOR_END_DURATION] = cursor.lastEndDurationFromBootMillis
+        this[STEP_CURSOR_DAILY_WINDOW] = cursor.dailyWindowStartFromBootMillis
+        this[STEP_CURSOR_DAILY_VALUE] = cursor.dailyValue
+        this[STEP_CURSOR_SENSOR_TOTAL] = cursor.lastSensorTotal
     }
 
     /**

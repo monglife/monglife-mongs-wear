@@ -40,7 +40,6 @@ import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.view.dialog.common.PermissionDialog
 import com.monglife.mongs.presentation.viewmodel.pages.exchange.ExchangeStepViewModel
 import com.mongs.presentation.view.wear.R
-import kotlin.math.max
 
 @Composable
 internal fun ExchangeStepView(
@@ -113,7 +112,8 @@ private fun ExchangeStepContent(
     exchangeStepViewModel: ExchangeStepViewModel,
 ) {
     val currentMongVo = exchangeStepViewModel.currentMongVo.collectAsStateWithLifecycle()
-    val walkingCount = exchangeStepViewModel.walkingCount.collectAsStateWithLifecycle()
+    val maxExchangeUnits = exchangeStepViewModel.maxExchangeUnits.collectAsStateWithLifecycle()
+    val remainingWalkingCount = exchangeStepViewModel.remainingWalkingCount.collectAsStateWithLifecycle()
     val exchangeCount = exchangeStepViewModel.exchangeCount.collectAsStateWithLifecycle()
     val chargePayPoint = exchangeStepViewModel.chargePayPoint.collectAsStateWithLifecycle()
 
@@ -148,7 +148,7 @@ private fun ExchangeStepContent(
             ) {
                 SelectButton(
                     leftBtnDisabled = exchangeCount.value == 0,
-                    rightBtnDisabled = exchangeCount.value >= walkingCount.value / 1000,
+                    rightBtnDisabled = exchangeCount.value >= maxExchangeUnits.value,
                     leftBtnClick = exchangeStepViewModel::decreaseExchangeCount,
                     rightBtnClick = exchangeStepViewModel::increaseExchangeCount,
                 ) {
@@ -164,7 +164,7 @@ private fun ExchangeStepContent(
                                 .weight(0.5f)
                         ) {
                             Text(
-                                text = "${max(0, walkingCount.value - 1000 * exchangeCount.value)} 걸음",
+                                text = "${remainingWalkingCount.value} 걸음",
                                 textAlign = TextAlign.Center,
                                 fontFamily = DAL_MU_RI,
                                 fontWeight = FontWeight.Light,

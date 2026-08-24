@@ -46,7 +46,7 @@ internal fun StepContent(
 
     val uiState = mainStepViewModel.uiState.collectAsStateWithLifecycle()
     val currentMongVo = mainStepViewModel.currentMongVo.collectAsStateWithLifecycle()
-    val currentWalkingCount = mainStepViewModel.currentWalkingCount.collectAsStateWithLifecycle()
+    val stepVo = mainStepViewModel.stepVo.collectAsStateWithLifecycle()
     val activityPermission = mainStepViewModel.activityPermission.collectAsStateWithLifecycle()
 
     Box(
@@ -82,7 +82,7 @@ internal fun StepContent(
                         .weight(0.5f),
                 ) {
                     Text(
-                        text = if (currentWalkingCount.value < 0) "-" else "${currentWalkingCount.value} 걸음",
+                        text = if (!stepVo.value.available) "-" else "${stepVo.value.walkingCount} 걸음",
                         textAlign = TextAlign.Center,
                         fontFamily = DAL_MU_RI,
                         fontWeight = FontWeight.Light,

@@ -7,6 +7,11 @@ import kotlinx.coroutines.flow.Flow
 interface DevicePersistencePort {
 
     /**
+     * 걸음 수 수집 시작
+     */
+    suspend fun startStepCollection()
+
+    /**
      * 걸음 수 조회
      */
     suspend fun getStep(): Step
@@ -17,9 +22,9 @@ interface DevicePersistencePort {
     suspend fun getStepFlow(): Flow<Step>
 
     /**
-     * 걸음 수 저장
+     * 걸음 수 차감 (환전)
      */
-    suspend fun saveStep(step: Step): Step
+    suspend fun consumeWalkingCount(walkingCount: Int): Step
 
     /**
      * 기기 옵션 조회

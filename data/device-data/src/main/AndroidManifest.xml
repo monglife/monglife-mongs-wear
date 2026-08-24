@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <!--
+      Health Services 의 passive 등록은 재부팅을 넘어 유지되지 않는다(공식 문서 명시).
+      BOOT_COMPLETED 를 받아 다시 등록해야 하므로 이 권한이 필요하다. normal 권한이라 런타임 요청은 없다.
+    -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!--
+      android.hardware.type.watch 는 여기 넣지 마라. 이 모듈은 mobile-app 에도 병합되어
+      폰 앱의 배포 대상이 워치로 좁혀진다. 해당 선언은 wear-app 매니페스트에만 둔다.
+    -->
+
+    <application>
+        <!--
+          exported="true" 는 Health Services 가 바인드하려면 필수다. 대신 android:permission 으로
+          Health Services APK 만 가진 권한을 요구해 다른 앱은 바인드할 수 없게 막는다.
+          (health-services-client AAR 의 VersionApiService 도 같은 구조다.)
+        -->
+        <service
+            android:name="com.monglife.mongs.data.device.persistence.service.StepPassiveListenerService"
+            android:exported="true"
+            android:permission="com.google.android.wearable.healthservices.permission.PASSIVE_DATA_BINDING" />
+
+        <receiver
+            android:name="com.monglife.mongs.data.device.persistence.receiver.StepBootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
