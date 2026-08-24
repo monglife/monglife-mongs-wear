@@ -4,6 +4,7 @@ import android.util.Log
 import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.device.usecase.ObserveBackgroundMapCodeUseCase
 import com.monglife.mongs.application.device.usecase.StartStepCollectionUseCase
+import com.monglife.mongs.application.member.player.usecase.ObservePlayerUseCase
 import com.monglife.mongs.application.member.player.usecase.SyncRemotePlayerUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.SyncRemoteMongsUseCase
@@ -13,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -20,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val syncRemotePlayerUseCase: SyncRemotePlayerUseCase,
+    private val observePlayerUseCase: ObservePlayerUseCase,
     private val startStepCollectionUseCase: StartStepCollectionUseCase,
     private val syncRemoteMongsUseCase: SyncRemoteMongsUseCase,
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
@@ -51,6 +54,10 @@ class MainViewModel @Inject constructor(
     private val _backgroundMapCode = MutableStateFlow<String?>(null)
     val backgroundMapCode: StateFlow<String?> = _backgroundMapCode.asStateFlow()
 
+    // 스타 포인트는 몽이 아니라 계정에 붙는다. 몽이 없거나 죽어도 그대로 표시한다.
+    private val _starPoint = MutableStateFlow(0)
+    val starPoint: StateFlow<Int> = _starPoint.asStateFlow()
+
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
@@ -70,6 +77,7 @@ class MainViewModel @Inject constructor(
 
                 observeForever(observeCurrentMongUseCase(), _currentMongVo)
                 observeForever(observeBackgroundMapCodeUseCase(), _backgroundMapCode)
+                observeForever(observePlayerUseCase().map { it.starPoint }, _starPoint)
             }
 
             _uiState.value = UiState.Idle

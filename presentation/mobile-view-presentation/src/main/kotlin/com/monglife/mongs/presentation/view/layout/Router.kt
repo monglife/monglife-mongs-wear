@@ -6,8 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.monglife.mongs.presentation.view.assets.RouterPath
+import com.monglife.mongs.presentation.view.pages.common.NotReadyView
 import com.monglife.mongs.presentation.view.pages.main.MainView
-import com.monglife.mongs.presentation.view.utils.AlwaysOnScreen
 
 @Composable
 internal fun Router(
@@ -109,8 +109,38 @@ internal fun Router(
 //        }
         // 메인 페이지
         composable(route = RouterPath.Main.route) {
-            AlwaysOnScreen {
-                MainView(navController = navController)
+            MainView(navController = navController)
+        }
+
+        /**
+         * 아직 이식하지 않은 화면들의 자리표시자.
+         *
+         * 메인 화면의 버튼 16개가 여기로 navigate 한다. 등록해 두지 않으면
+         * 누르는 순간 IllegalArgumentException 이다.
+         * 실제 화면을 이식할 때 해당 줄만 지우면 된다.
+         *
+         * *Nested 도 지금은 평범한 composable 로 둔다. 라우트 문자열은 그냥 문자열이고,
+         * navigation {} 그래프는 실제 하위 화면과 함께 와야 의미가 있다.
+         */
+        listOf(
+            RouterPath.CollectionNested to "도감",
+            RouterPath.ExchangeNested to "환전",
+            RouterPath.ExchangeStep to "걸음 환전",
+            RouterPath.SearchMap to "맵 탐색",
+            RouterPath.SlotPick to "슬롯 선택",
+            RouterPath.RandomDraw to "랜덤 뽑기",
+            RouterPath.TrainingNested to "훈련",
+            RouterPath.BattleNested to "배틀",
+            RouterPath.Help to "도움말",
+            RouterPath.ChargeStarPoint to "충전",
+            RouterPath.Notice to "공지사항",
+            RouterPath.Feedback to "오류 신고",
+            RouterPath.Setting to "환경 설정",
+            RouterPath.Inventory to "인벤토리",
+            RouterPath.FeedNested to "먹이 주기",
+        ).forEach { (path, title) ->
+            composable(route = path.route) {
+                NotReadyView(navController = navController, title = title)
             }
         }
 //        // 공지사항
