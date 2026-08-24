@@ -126,7 +126,8 @@ internal fun MainView(
                 starPoint = starPoint,
                 payPoint = currentMongVo?.payPoint,
                 walkingCount = stepVo.walkingCount,
-                stepAvailable = stepVo.available && activityPermission,
+                stepAvailable = stepVo.available,
+                permissionGranted = activityPermission,
                 onStepClick = {
                     if (!activityPermission) {
                         permissionDialogOpen = true

@@ -48,6 +48,7 @@ internal fun MainHud(
     payPoint: Int?,
     walkingCount: Int,
     stepAvailable: Boolean,
+    permissionGranted: Boolean,
     onStepClick: () -> Unit,
 ) {
     val isEgg = hatchProgress != null
@@ -97,13 +98,25 @@ internal fun MainHud(
         )
 
         /**
-         * wear 는 권한이 없으면 전면 다이얼로그를 띄웠다. 단일 화면에서 그러면
-         * 화면 전체가 막히므로, 칩 자체를 요청 상태로 바꾸고 탭했을 때 연다.
+         * 세 가지 상태를 구분한다.
+         *
+         * 권한 없음     -> "권한 필요", 탭하면 안내를 연다.
+         *                 wear 는 전면 다이얼로그를 띄웠지만 단일 화면에서 그러면
+         *                 화면 전체가 막힌다.
+         * 수집 불가     -> "-". 권한은 있는데 걸음 센서가 없거나 아직 붙지 않은 경우다.
+         *                 (에뮬레이터에 TYPE_STEP_COUNTER 가 없을 때가 여기다)
+         *                 wear StepContent 와 같은 규칙이다.
+         * 정상          -> 걸음 수.
          */
         HudChip(
             icon = R.drawable.btn_icon_walking,
-            text = if (!stepAvailable) "권한 필요" else "${NumberUtil.formatAsCurrency(walkingCount)} 걸음",
-            background = if (!stepAvailable) MongsRed.copy(alpha = 0.35f) else Color.Black.copy(alpha = 0.3f),
+            text = when {
+                !permissionGranted -> "권한 필요"
+                !stepAvailable -> "-"
+                else -> "${NumberUtil.formatAsCurrency(walkingCount)} 걸음"
+            },
+            background = if (!permissionGranted) MongsRed.copy(alpha = 0.35f)
+                         else Color.Black.copy(alpha = 0.3f),
             onClick = onStepClick,
         )
     }
