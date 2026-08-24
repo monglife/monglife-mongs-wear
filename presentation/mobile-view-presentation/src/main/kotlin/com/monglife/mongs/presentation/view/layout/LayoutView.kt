@@ -50,11 +50,6 @@ fun LayoutView (
      * 오류 메시지 표출 이벤트 (Toast)
      * @see BaseViewModel.errorEvent
      */
-
-    /**
-     * 오류 메시지 표출 이벤트 (Toast)
-     * @see BaseViewModel.errorEvent
-     */
     LaunchedEffect(Unit) {
         BaseViewModel.errorEvent.collect { message ->
             Toast.makeText(

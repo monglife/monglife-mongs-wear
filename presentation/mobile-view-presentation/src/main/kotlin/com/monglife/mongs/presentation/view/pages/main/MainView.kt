@@ -36,11 +36,7 @@ internal fun MainView(
             DefaultBackground()
             LoadingBar()
         } else {
-            MainBackground(
-                backgroundMapCode = backgroundMapCode.value,
-                pagerState = normalPagerState,
-                pagerBrightnesses = MainPagerViewModel.NORMAL_PAGER_BRIGHTNESS,
-            )
+            MainBackground(backgroundMapCode = backgroundMapCode.value)
         }
     }
 }

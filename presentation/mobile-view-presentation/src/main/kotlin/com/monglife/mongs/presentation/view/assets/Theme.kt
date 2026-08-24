@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.darkColors
 import androidx.compose.material.Shapes
 import androidx.compose.material.Typography
 import com.mongs.presentation.view.mobile.R
@@ -44,9 +45,27 @@ fun MongsTheme(content: @Composable () -> Unit) {
         )
     }
 
+    /**
+     * colors 를 넘기지 않으면 Material2 기본 light 팔레트가 적용된다.
+     * 그러면 색을 지정하지 않은 Text 가 LocalContentColor = Black 으로 그려져
+     * 어두운 맵 배경 위에서 보이지 않는다. (wear 의 Text 는 onBackground = 흰색이었다)
+     */
+    val colors = remember {
+        darkColors(
+            primary = MongsPurple,
+            secondary = MongsBlue,
+            background = Color.Black,
+            surface = MongsNavy,
+            onPrimary = MongsNavy,
+            onBackground = MongsWhite,
+            onSurface = MongsWhite,
+        )
+    }
+
     // ImageLoader 는 여기서 한 번만 만들어 컴포지션 전체가 공유한다.
     CompositionLocalProvider(LocalMongsImageLoader provides rememberMongsImageLoader()) {
         MaterialTheme(
+            colors = colors,
             typography = typography,
             shapes = shapes,
             content = content

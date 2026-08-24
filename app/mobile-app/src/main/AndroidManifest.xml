@@ -22,8 +22,10 @@
         <activity
             android:name="com.monglife.mongs.app.activity.MainActivity"
             android:exported="true"
+            android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Material.NoActionBar"
-            android:taskAffinity="">
+            android:taskAffinity=""
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
