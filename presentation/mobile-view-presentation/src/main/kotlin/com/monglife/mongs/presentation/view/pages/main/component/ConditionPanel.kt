@@ -36,8 +36,8 @@ internal fun ConditionPanel(
             .width(MainDimens.PanelWidth)
             .fillMaxHeight()
             .mainPanel()
-            .padding(horizontal = 18.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            .padding(horizontal = 18.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(MainDimens.GaugeGap, Alignment.CenterVertically),
     ) {
         StatGauge(
             icon = R.drawable.icon_healthy,

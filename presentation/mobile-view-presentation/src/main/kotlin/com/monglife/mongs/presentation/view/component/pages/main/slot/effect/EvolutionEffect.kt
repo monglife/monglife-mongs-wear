@@ -79,7 +79,7 @@ internal fun EvolutionEffect(
             Image(
                 modifier = Modifier
                     .padding(bottom = MainDimens.GroundPadding)
-                    .size(300.dp),
+                    .size(250.dp),
                 painter = painterResource(EVOLUTION_EFFECTS[nowEffectIndex]),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,

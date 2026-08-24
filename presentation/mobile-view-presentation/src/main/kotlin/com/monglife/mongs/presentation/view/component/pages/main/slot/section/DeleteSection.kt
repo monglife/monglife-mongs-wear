@@ -49,7 +49,7 @@ internal fun DeleteSection(
             Image(
                 modifier = Modifier
                     .padding(bottom = MainDimens.GroundPadding)
-                    .size(195.dp),
+                    .size(162.dp),
                 painter = painterResource(R.drawable.mong_rip),
                 contentDescription = null
             )

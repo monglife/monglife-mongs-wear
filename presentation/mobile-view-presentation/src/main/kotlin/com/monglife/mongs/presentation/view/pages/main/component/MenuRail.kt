@@ -20,6 +20,7 @@ import com.mongs.presentation.view.mobile.R
  * 우측 메뉴 레일 — 3열 x 3행.
  *
  * wear 의 2/3/2 피라미드는 원 안에 7개 원을 내접시키려는 형태다.
+ * 3열 x 3행은 실측에서 세로가 2dp 밖에 안 남아 4열 x 2행으로 바꿨다.
  * disable 술어는 wear InteractionContent 원문 그대로 유지한다.
  */
 @Composable
@@ -51,7 +52,7 @@ internal fun MenuRail(
             .fillMaxHeight(),
         verticalArrangement = Arrangement.spacedBy(MainDimens.RailRowGap, Alignment.CenterVertically),
     ) {
-        items.chunked(3).forEach { row ->
+        items.chunked(4).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(MainDimens.ActionGap)) {
                 row.forEach { item ->
                     LabeledCircleButton(

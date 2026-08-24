@@ -99,7 +99,7 @@ internal fun MainView(
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.safeDrawing)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .padding(horizontal = 12.dp, vertical = 6.dp)
                 .zIndex(2f),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {

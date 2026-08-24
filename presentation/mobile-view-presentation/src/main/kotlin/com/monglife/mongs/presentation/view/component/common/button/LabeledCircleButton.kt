@@ -24,6 +24,8 @@ internal fun LabeledCircleButton(
     border: Int,
     label: String,
     size: Int = MainDimens.ActionSize,
+    // CircleImageButton 기본값은 size/2 지만 wear 는 54dp 버튼에 34dp 아이콘(0.63)을 썼다.
+    iconSize: Float = size * MainDimens.ICON_RATIO,
     disable: Boolean = false,
     onClick: () -> Unit,
 ) {
@@ -36,6 +38,7 @@ internal fun LabeledCircleButton(
             icon = icon,
             border = border,
             size = size,
+            iconSize = iconSize,
             disable = disable,
             onClick = onClick,
         )

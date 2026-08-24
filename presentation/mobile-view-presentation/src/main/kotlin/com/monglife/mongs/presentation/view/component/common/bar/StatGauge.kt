@@ -34,7 +34,7 @@ internal fun StatGauge(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(5.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -59,7 +59,7 @@ internal fun StatGauge(
             modifier = Modifier.fillMaxWidth(),
             progress = { progress },
             indicatorColor = indicatorColor.copy(alpha = if (dim) 0.35f else 1f),
-            height = 10.dp,
+            height = 8.dp,
         )
     }
 }

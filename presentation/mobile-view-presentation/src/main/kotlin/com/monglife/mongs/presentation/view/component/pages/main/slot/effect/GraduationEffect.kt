@@ -45,7 +45,7 @@ internal fun GraduationEffect(
         Image(
             modifier = Modifier
                 .padding(bottom = MainDimens.GroundPadding)
-                .size(210.dp),
+                .size(175.dp),
             painter = painterResource(imageList[nowStep]),
             contentDescription = null,
             contentScale = ContentScale.Fit,

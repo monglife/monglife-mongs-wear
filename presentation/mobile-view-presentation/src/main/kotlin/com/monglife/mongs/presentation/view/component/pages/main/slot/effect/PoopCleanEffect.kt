@@ -31,8 +31,8 @@ internal fun PoopCleanEffect(
             ),
             contentDescription = "PoopCleanEffect",
             modifier = Modifier
-                .size(210.dp)
-                .padding(bottom = 34.dp),
+                .size(175.dp)
+                .padding(bottom = 29.dp),
         )
     }
 }

@@ -29,7 +29,7 @@ internal fun HeartEffect(
         Image(
             modifier = Modifier
                 .padding(bottom = MainDimens.AboveMong)
-                .size(26.dp),
+                .size(21.dp),
             painter = painterResource(R.drawable.icon_heart),
             contentDescription = null
         )

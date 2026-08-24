@@ -29,7 +29,7 @@ internal fun GraduatedEffect(
         Image(
             modifier = Modifier
                 .padding(bottom = MainDimens.AboveMong)
-                .size(52.dp),
+                .size(44.dp),
             painter = painterResource(R.drawable.effect_graduate_3),
             contentDescription = null
         )
