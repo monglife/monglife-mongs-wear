@@ -29,6 +29,17 @@ internal object MainDimens {
     val ActionGap = 10.dp
     val ActionLabel = 11.sp
 
+    /**
+     * MenuRail 행 간격만 6dp 로 좁힌다.
+     *
+     * 세로 예산이 가장 빡빡한 지점이다. 393dp 화면에서
+     * 밴드 = 393 - 8(패딩) - 44(HUD) - 8 - 8(간격) - 84(하단) - 8(패딩) = 233dp,
+     * 레일 3행 = 3 x (56 + 4 + 11) + 2 x 6 = 225dp. 여유 8dp.
+     * ActionGap(10) 을 그대로 쓰면 233 대 233 으로 여유가 0 이 되어
+     * 반올림 한 번에 잘린다.
+     */
+    val RailRowGap = 6.dp
+
     /** 밴드 */
     val HudHeight = 44.dp
     val BottomHeight = 84.dp
