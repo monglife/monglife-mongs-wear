@@ -65,6 +65,7 @@ subprojects {
 
             flavorDimensions = ["profile"]
             productFlavors {
+                local { dimension "profile" }
                 dev { dimension "profile" }
                 stg { dimension "profile" }
                 prd { dimension "profile" }
