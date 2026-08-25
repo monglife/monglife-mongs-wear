@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.pages.common.NotReadyView
 import com.monglife.mongs.presentation.view.pages.main.MainView
+import com.monglife.mongs.presentation.view.pages.slotPick.SlotPickView
 
 @Composable
 internal fun Router(
@@ -112,6 +113,11 @@ internal fun Router(
             MainView(navController = navController)
         }
 
+        // 슬롯 선택
+        composable(route = RouterPath.SlotPick.route) {
+            SlotPickView(navController = navController)
+        }
+
         /**
          * 아직 이식하지 않은 화면들의 자리표시자.
          *
@@ -127,7 +133,6 @@ internal fun Router(
             RouterPath.ExchangeNested to "환전",
             RouterPath.ExchangeStep to "걸음 환전",
             RouterPath.SearchMap to "맵 탐색",
-            RouterPath.SlotPick to "슬롯 선택",
             RouterPath.RandomDraw to "랜덤 뽑기",
             RouterPath.TrainingNested to "훈련",
             RouterPath.BattleNested to "배틀",

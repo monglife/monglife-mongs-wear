@@ -86,8 +86,8 @@ internal fun SlotDetailDialog(
         Row(
             modifier = Modifier
                 .windowInsetsPadding(WindowInsets.safeDrawing)
-                .width(720.dp)
-                .height(300.dp)
+                .width(760.dp)
+                .height(340.dp)
                 .mainPanel()
                 .padding(24.dp),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
@@ -133,13 +133,13 @@ private fun SlotDetailProfile(
     Column(
         modifier = modifier.fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterVertically),
     ) {
         if (mongVo.stateCode == MongStateCode.DEAD) {
             Image(
                 painter = painterResource(R.drawable.mong_rip),
                 contentDescription = null,
-                modifier = Modifier.size(120.dp),
+                modifier = Modifier.size(104.dp),
             )
         } else {
             Mong(
