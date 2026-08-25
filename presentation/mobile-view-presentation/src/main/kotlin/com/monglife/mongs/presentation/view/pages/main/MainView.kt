@@ -37,6 +37,7 @@ import com.monglife.mongs.presentation.view.component.common.background.DefaultB
 import com.monglife.mongs.presentation.view.component.common.background.MainBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.dialog.common.PermissionDialog
+import com.monglife.mongs.presentation.view.dialog.pages.main.InitNotificationDialog
 import com.monglife.mongs.presentation.view.pages.main.component.ActionGrid
 import com.monglife.mongs.presentation.view.pages.main.component.BottomBar
 import com.monglife.mongs.presentation.view.pages.main.component.TopBar
@@ -203,6 +204,23 @@ internal fun MainView(
                     }
                 }
             }
+        }
+
+        /**
+         * 첫 진입 안내.
+         *
+         * MainSlotViewModel 은 첫 실행 시 UiState.InitNotification 으로 들어간다.
+         * 이걸 그리지 않으면 상태가 고착된다 — initialize() 는 그 상태를 벗어나기를 거부하고,
+         * "다시 보지 않기" 플래그도 저장되지 않아 콜드 스타트마다 같은 상태로 재진입한다.
+         *
+         * 무대 안이 아니라 여기(전체 화면)에 두는 이유는 스크림이 화면 전체를 덮어야 하기 때문이다.
+         */
+        if (slotUiState.initNotificationDialogOpen) {
+            InitNotificationDialog(
+                modifier = Modifier.zIndex(3f),
+                onCloseClick = mainSlotViewModel::initDialogClose,
+                onCloseForeverClick = mainSlotViewModel::initDialogCloseForever,
+            )
         }
 
         if (slotUiState.interactionDialogOpen) {
