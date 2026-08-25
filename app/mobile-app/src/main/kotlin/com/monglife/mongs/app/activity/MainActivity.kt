@@ -3,6 +3,7 @@ package com.monglife.mongs.app.activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -37,6 +38,22 @@ class MainActivity : ComponentActivity() {
         WindowInsetsControllerCompat(window, window.decorView).apply {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             hide(WindowInsetsCompat.Type.systemBars())
+        }
+
+        /**
+         * 키보드가 뜨면 플랫폼이 내비게이션 바를 같이 띄운다.
+         * 그건 transient 가 아니라서 키보드가 사라져도 그대로 남는다.
+         * 위의 hide 는 onCreate 에서 한 번뿐이라 다시 숨겨 줄 사람이 없다.
+         *
+         * Compose 는 ComposeView 에 리스너를 달기 때문에 decorView 리스너와 충돌하지 않는다.
+         * 인셋은 반드시 그대로 돌려준다.
+         */
+        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, insets ->
+            if (!insets.isVisible(WindowInsetsCompat.Type.ime())) {
+                WindowInsetsControllerCompat(window, window.decorView)
+                    .hide(WindowInsetsCompat.Type.systemBars())
+            }
+            insets
         }
 
         /**
