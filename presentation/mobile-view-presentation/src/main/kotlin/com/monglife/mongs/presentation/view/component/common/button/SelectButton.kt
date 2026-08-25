@@ -20,6 +20,9 @@ internal fun SelectButton(
     rightBtnDisabled: Boolean = false,
     leftBtnClick: () -> Unit,
     rightBtnClick: () -> Unit,
+    // wear 기본값은 18x35dp 다. 워치에서는 통했지만 폰에서는 터치 영역이 너무 작다.
+    btnWidth: Int = 18,
+    btnHeight: Int = 35,
     content: @Composable () -> Unit = {},
 ) {
     Box(
@@ -45,7 +48,7 @@ internal fun SelectButton(
                         .weight(0.15f)
                 ) {
                     if (!leftBtnDisabled) {
-                        LeftButton(onClick = leftBtnClick)
+                        LeftButton(width = btnWidth, height = btnHeight, onClick = leftBtnClick)
                     }
                 }
 
@@ -58,7 +61,8 @@ internal fun SelectButton(
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = modifier.fillMaxWidth()
+                        // 호출자의 modifier 를 여기서 또 적용하면 패딩/크기가 두 번 걸린다.
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         content()
                     }
@@ -72,7 +76,7 @@ internal fun SelectButton(
                         .weight(0.15f)
                 ) {
                     if (!rightBtnDisabled) {
-                        RightButton(onClick = rightBtnClick)
+                        RightButton(width = btnWidth, height = btnHeight, onClick = rightBtnClick)
                     }
                 }
 

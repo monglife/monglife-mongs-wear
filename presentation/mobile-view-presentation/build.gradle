@@ -5,6 +5,7 @@ buildscript {
         hiltNavigationVersion   = "1.2.0"
         materialVersion         = "1.7.6"
         coilVersion             = "2.7.0"
+        activityComposeVersion  = "1.10.1"
     }
 }
 
@@ -41,6 +42,9 @@ dependencies {
     api "androidx.navigation:navigation-compose:${this.ext.composeNavigateVersion}"
     implementation "androidx.compose.ui:ui:${this.ext.composeVersion}"
 
+    // BackHandler / rememberLauncherForActivityResult 가 여기서 온다.
+    // navigation-compose 를 통해 전이로 들어오고 있었지만, 직접 쓰므로 명시한다.
+    implementation "androidx.activity:activity-compose:${this.ext.activityComposeVersion}"
     implementation "androidx.hilt:hilt-navigation-compose:${this.ext.hiltNavigationVersion}"
     implementation "androidx.compose.ui:ui-tooling-preview:${this.ext.composeVersion}"
     implementation "androidx.compose.material:material-icons-extended:${this.ext.materialVersion}"
