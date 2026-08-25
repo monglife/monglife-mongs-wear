@@ -34,7 +34,7 @@ internal fun LoadingEffect(
             contentDescription = null,
             modifier = Modifier
                 .padding(bottom = MainDimens.AboveMong)
-                .size(31.dp),
+                .size(38.dp),
         )
     }
 }

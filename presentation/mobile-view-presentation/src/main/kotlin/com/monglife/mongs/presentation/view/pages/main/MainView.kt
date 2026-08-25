@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -20,6 +22,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,12 +37,14 @@ import com.monglife.mongs.presentation.view.component.common.background.DefaultB
 import com.monglife.mongs.presentation.view.component.common.background.MainBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.dialog.common.PermissionDialog
-import com.monglife.mongs.presentation.view.pages.main.component.CareBar
-import com.monglife.mongs.presentation.view.pages.main.component.ConditionPanel
-import com.monglife.mongs.presentation.view.pages.main.component.MainHud
-import com.monglife.mongs.presentation.view.pages.main.component.MenuRail
+import com.monglife.mongs.presentation.view.pages.main.component.ActionGrid
+import com.monglife.mongs.presentation.view.pages.main.component.BottomBar
+import com.monglife.mongs.presentation.view.pages.main.component.TopBar
+import com.monglife.mongs.presentation.view.pages.main.component.InteractionRing
 import com.monglife.mongs.presentation.view.pages.main.component.MongStage
-import com.monglife.mongs.presentation.view.pages.main.component.SystemBar
+import com.monglife.mongs.presentation.view.pages.main.component.SlotHeader
+import com.monglife.mongs.presentation.view.pages.main.component.StatPanel
+import com.monglife.mongs.presentation.view.pages.main.component.PanelDivider
 import com.monglife.mongs.presentation.view.pages.main.component.mainPanel
 import com.monglife.mongs.presentation.view.utils.Timer
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainSlotViewModel
@@ -80,6 +89,16 @@ internal fun MainView(
 
     var permissionDialogOpen by remember { mutableStateOf(false) }
 
+    /**
+     * 몽 중심의 화면 좌표.
+     *
+     * 원형 메뉴는 전체 화면 위에 떠야 하므로(무대 안에 두면 위쪽이 잘린다)
+     * 무대의 위치를 재서 몽 중심을 계산한다.
+     */
+    var stageBounds by remember { mutableStateOf<Rect?>(null) }
+    val density = LocalDensity.current
+    val mongCenterOffsetPx = with(density) { (MainDimens.GroundPadding + MainDimens.MongSize / 2).toPx() }
+
     Box(modifier = Modifier.fillMaxSize()) {
         if (uiState.loadingBar) {
             DefaultBackground()
@@ -99,14 +118,13 @@ internal fun MainView(
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.safeDrawing)
-                .padding(horizontal = 12.dp, vertical = 6.dp)
+                .padding(horizontal = 20.dp, vertical = 14.dp)
                 .zIndex(2f),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // 알은 경험치 대신 부화 진행률을 보여준다.
             val isEgg = currentMongVo?.level == 0
             val hatchProgress = remember { mutableFloatStateOf(0f) }
-            var hatchRemain by remember { mutableStateOf("") }
 
             currentMongVo?.takeIf { isEgg }?.let { mong ->
                 val elapsed = Duration.between(mong.createdAt, LocalDateTime.now()).toMillis()
@@ -115,16 +133,11 @@ internal fun MainView(
                     startTimeMillis = elapsed,
                     maxTimeMillis = HATCH_MILLIS,
                 )
-                hatchRemain = "부화까지"
             }
 
-            MainHud(
-                level = currentMongVo?.level,
-                expRatio = currentMongVo?.expRatio?.toFloat() ?: 0f,
-                hatchProgress = if (isEgg) ({ hatchProgress.floatValue }) else null,
-                hatchLabel = if (isEgg) hatchRemain else null,
+            TopBar(
+                navController = navController,
                 starPoint = starPoint,
-                payPoint = currentMongVo?.payPoint,
                 walkingCount = stepVo.walkingCount,
                 stepAvailable = stepVo.available,
                 permissionGranted = activityPermission,
@@ -137,43 +150,81 @@ internal fun MainView(
                 },
             )
 
+            // 스텟 : 슬롯 : 버튼 = 2 : 3 : 2
             Row(
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(MainDimens.BandGap),
             ) {
-                ConditionPanel(currentMongVo = currentMongVo)
-
-                MongStage(
-                    modifier = Modifier.weight(1f),
-                    uiState = slotUiState,
+                StatPanel(
+                    modifier = Modifier.weight(2f),
                     currentMongVo = currentMongVo,
-                    onMongClick = { currentMongVo?.let { mainSlotViewModel.strokeMong(it.mongId) } },
-                    onSlotPickClick = { navController.navigate(RouterPath.SlotPick.route) },
-                    onGraduateCheck = mainSlotViewModel::graduateMongCheck,
-                    onEvolutionClick = mainSlotViewModel::evolutionMong,
-                    onEvolutionFinish = mainSlotViewModel::evolutionMong,
+                    hatchProgress = if (isEgg) ({ hatchProgress.floatValue }) else null,
                 )
 
-                MenuRail(navController = navController, currentMongVo = currentMongVo)
+                Column(
+                    modifier = Modifier
+                        .weight(7f)
+                        .fillMaxHeight()
+                        .padding(top = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    SlotHeader(currentMongVo = currentMongVo)
+
+                    MongStage(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .onGloballyPositioned { stageBounds = it.boundsInRoot() },
+                        uiState = slotUiState,
+                        currentMongVo = currentMongVo,
+                        onMongClick = mainSlotViewModel::interactionDialogOpen,
+                        onSlotPickClick = { navController.navigate(RouterPath.SlotPick.route) },
+                        onGraduateCheck = mainSlotViewModel::graduateMongCheck,
+                        onEvolutionClick = mainSlotViewModel::evolutionMong,
+                        onEvolutionFinish = mainSlotViewModel::evolutionMong,
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .width(MainDimens.RailWidth)
+                        .fillMaxHeight()
+                        .mainPanel()
+                        .padding(horizontal = MainDimens.RailPadding, vertical = 12.dp),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    ActionGrid(navController = navController, currentMongVo = currentMongVo)
+
+                    // 구분선은 아래 묶음에 붙여야 빈 공간에 떠 있지 않다.
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        PanelDivider()
+                        BottomBar(navController = navController)
+                    }
+                }
             }
+        }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(MainDimens.BottomHeight)
-                    .mainPanel()
-                    .padding(horizontal = MainDimens.BottomPadding),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CareBar(
-                    navController = navController,
-                    currentMongVo = currentMongVo,
-                    onStroke = { currentMongVo?.let { mainSlotViewModel.strokeMong(it.mongId) } },
-                    onSleep = { currentMongVo?.let { mainSlotViewModel.sleepMong(it.mongId) } },
-                    onPoopClean = { currentMongVo?.let { mainSlotViewModel.poopCleanMong(it.mongId) } },
-                )
-                Box(modifier = Modifier.weight(1f))
-                SystemBar(navController = navController)
+        if (slotUiState.interactionDialogOpen) {
+            currentMongVo?.let { mong ->
+                stageBounds?.let { bounds ->
+                    InteractionRing(
+                        modifier = Modifier.zIndex(3f),
+                        centerInRoot = Offset(
+                            x = bounds.center.x,
+                            y = bounds.bottom - mongCenterOffsetPx,
+                        ),
+                        level = mong.level,
+                        stateCode = mong.stateCode,
+                        isSleep = mong.isSleep,
+                        onFeed = { navController.navigate(RouterPath.FeedNested.route) },
+                        onStroke = { mainSlotViewModel.strokeMong(mong.mongId) },
+                        onSleep = { mainSlotViewModel.sleepMong(mong.mongId) },
+                        onPoopClean = { mainSlotViewModel.poopCleanMong(mong.mongId) },
+                        onInventory = { navController.navigate(RouterPath.Inventory.route) },
+                        onClose = mainSlotViewModel::interactionDialogClose,
+                    )
+                }
             }
         }
 

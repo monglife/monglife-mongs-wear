@@ -46,7 +46,7 @@ internal fun EmptySection(
                 Image(
                     painter = painterResource(R.drawable.mong_body_blind),
                     contentDescription = null,
-                    modifier = Modifier.size(120.dp),
+                    modifier = Modifier.size(150.dp),
                 )
                 Text(
                     text = "!",

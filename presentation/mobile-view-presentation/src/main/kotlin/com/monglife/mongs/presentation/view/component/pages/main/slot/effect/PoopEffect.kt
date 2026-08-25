@@ -17,10 +17,10 @@ import com.mongs.presentation.view.mobile.R
 import kotlin.math.min
 
 private val poopPadding = arrayOf(
-    PaddingValues(end = 75.dp, bottom = 22.dp),
-    PaddingValues(start = 68.dp, bottom = 20.dp),
-    PaddingValues(end = 100.dp, bottom = 33.dp),
-    PaddingValues(start = 95.dp, bottom = 35.dp),
+    PaddingValues(end = 90.dp, bottom = 27.dp),
+    PaddingValues(start = 81.dp, bottom = 24.dp),
+    PaddingValues(end = 120.dp, bottom = 39.dp),
+    PaddingValues(start = 114.dp, bottom = 42.dp),
 )
 
 @Composable
@@ -36,7 +36,7 @@ internal fun PoopEffect(
             Image(
                 modifier = Modifier
                     .padding(poopPadding[count - 1])
-                    .size(31.dp)
+                    .size(38.dp)
                     .zIndex(-count.toFloat()),
                 painter = painterResource(R.drawable.icon_poop),
                 contentDescription = null

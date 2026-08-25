@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.zIndex
 import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.domain.mong.enums.MongStateCode
+import com.monglife.mongs.presentation.view.component.pages.main.slot.TapAffordance
 import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.EvolutionEffect
 import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.GraduatedEffect
 import com.monglife.mongs.presentation.view.component.pages.main.slot.effect.GraduationEffect
@@ -47,6 +48,11 @@ internal fun MongStage(
         contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize(),
     ) {
+        // 그림자 + "누를 수 있다" 표시
+        Box(modifier = Modifier.fillMaxSize().zIndex(0f)) {
+            TapAffordance(enabled = !uiState.isEvolving)
+        }
+
         currentMongVo?.let {
             // 캐릭터 레이어
             Box(modifier = Modifier.fillMaxSize().zIndex(1f)) {

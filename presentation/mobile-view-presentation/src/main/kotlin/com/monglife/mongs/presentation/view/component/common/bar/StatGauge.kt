@@ -34,23 +34,33 @@ internal fun StatGauge(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Image(
                 painter = painterResource(icon),
                 contentDescription = null,
                 alpha = if (dim) 0.35f else 1f,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(22.dp),
             )
             Text(
                 text = label,
                 fontFamily = DAL_MU_RI,
-                fontSize = 13.sp,
+                fontSize = 16.sp,
                 color = MongsWhite.copy(alpha = if (dim) 0.35f else 1f),
+                maxLines = 1,
+                modifier = Modifier.weight(1f),
+            )
+            // 막대만으로는 값을 읽을 수 없다.
+            Text(
+                text = if (dim) "-" else "${progress.toInt()}",
+                fontFamily = DAL_MU_RI,
+                fontSize = 16.sp,
+                color = indicatorColor.copy(alpha = if (dim) 0.35f else 1f),
                 maxLines = 1,
             )
         }
@@ -59,7 +69,7 @@ internal fun StatGauge(
             modifier = Modifier.fillMaxWidth(),
             progress = { progress },
             indicatorColor = indicatorColor.copy(alpha = if (dim) 0.35f else 1f),
-            height = 8.dp,
+            height = 12.dp,
         )
     }
 }

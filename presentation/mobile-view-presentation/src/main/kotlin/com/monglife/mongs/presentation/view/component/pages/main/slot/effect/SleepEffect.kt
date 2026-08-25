@@ -29,7 +29,7 @@ internal fun SleepEffect(
         Image(
             modifier = Modifier
                 .padding(bottom = MainDimens.AboveMong)
-                .size(21.dp),
+                .size(26.dp),
             painter = painterResource(R.drawable.icon_sleep),
             contentDescription = null
         )
