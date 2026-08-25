@@ -43,6 +43,7 @@ internal fun TopBar(
     walkingCount: Int,
     stepAvailable: Boolean,
     permissionGranted: Boolean,
+    exchangeDisabled: Boolean,
     onStepClick: () -> Unit,
 ) {
     Row(
@@ -79,6 +80,8 @@ internal fun TopBar(
             },
             background = if (!permissionGranted) MongsRed.copy(alpha = 0.42f)
                          else Color.Black.copy(alpha = 0.32f),
+            // 권한이 없으면 안내를 열어야 하므로 그때는 막지 않는다.
+            disable = permissionGranted && exchangeDisabled,
             onClick = onStepClick,
         )
 
@@ -98,6 +101,7 @@ private fun PointChip(
     text: String,
     alpha: Float = 1f,
     background: Color = Color.Black.copy(alpha = 0.32f),
+    disable: Boolean = false,
     onClick: () -> Unit,
 ) {
     Row(
@@ -107,7 +111,7 @@ private fun PointChip(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onClick,
+                onClick = { if (!disable) onClick() },
             )
             .padding(start = 14.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -116,14 +120,14 @@ private fun PointChip(
         Image(
             painter = painterResource(icon),
             contentDescription = null,
-            alpha = alpha,
+            alpha = alpha * if (disable) 0.4f else 1f,
             modifier = Modifier.size(22.dp),
         )
         Text(
             text = text,
             fontFamily = DAL_MU_RI,
             fontSize = 18.sp,
-            color = MongsWhite.copy(alpha = alpha),
+            color = MongsWhite.copy(alpha = alpha * if (disable) 0.4f else 1f),
             maxLines = 1,
             modifier = Modifier.weight(1f),
         )
@@ -132,7 +136,7 @@ private fun PointChip(
             text = ">",
             fontFamily = DAL_MU_RI,
             fontSize = 14.sp,
-            color = MongsWhite.copy(alpha = 0.5f),
+            color = MongsWhite.copy(alpha = if (disable) 0.2f else 0.5f),
         )
     }
 }

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.monglife.mongs.domain.mong.enums.MongStateCode
 import com.monglife.mongs.presentation.view.assets.MainDimens
 import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
@@ -142,6 +143,13 @@ internal fun MainView(
                 walkingCount = stepVo.walkingCount,
                 stepAvailable = stepVo.available,
                 permissionGranted = activityPermission,
+                /**
+                 * 죽었거나 삭제된 몽은 환전할 수 없다.
+                 * wear StepContent 가 환전 버튼을 disable 하던 조건이다 — 이식 중 빠졌었다.
+                 */
+                exchangeDisabled = currentMongVo?.let {
+                    it.stateCode in arrayOf(MongStateCode.DEAD, MongStateCode.DELETE)
+                } ?: true,
                 onStepClick = {
                     if (!activityPermission) {
                         permissionDialogOpen = true
