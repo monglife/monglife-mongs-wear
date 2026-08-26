@@ -67,6 +67,17 @@ class StepCollector @Inject constructor(
     }
 
     /**
+     * 환전 실패분 복구
+     *
+     * 적립 경로를 거치지 않는다. 센서가 센 걸음이 아니라 이미 차감했던 걸음을 되돌리는 것이라
+     * 수집 경로 게이트를 통과할 수 없고, 통과시켜서도 안 된다.
+     */
+    suspend fun restore(restoreWalkingCount: Int, eventId: String) {
+        val state = deviceDataStore.restoreStep(restoreWalkingCount, eventId)
+        Log.i(TAG, "restore walkingCount=$restoreWalkingCount balance=${state.balance} eventId=$eventId")
+    }
+
+    /**
      * 부팅 시각 추정
      *
      * elapsedRealtime 은 부팅 이후 단조 증가하므로 벽시계에서 빼면 부팅 시각이 나온다.

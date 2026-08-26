@@ -14,6 +14,7 @@ import com.monglife.mongs.data.device.persistence.entity.DeviceOptionEntity
 import com.monglife.mongs.data.device.persistence.entity.StepStateEntity
 import com.monglife.mongs.domain.device.model.StepAccumulation
 import com.monglife.mongs.domain.device.model.StepCursor
+import com.monglife.mongs.domain.device.model.StepRestore
 import com.monglife.mongs.domain.device.model.StepSource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -41,6 +42,16 @@ class DeviceDataStore @Inject constructor(
         private val STEP_CURSOR_DAILY_WINDOW = longPreferencesKey("stepCursorDailyWindow")
         private val STEP_CURSOR_DAILY_VALUE = intPreferencesKey("stepCursorDailyValue")
         private val STEP_CURSOR_SENSOR_TOTAL = intPreferencesKey("stepCursorSensorTotal")
+
+        /**
+         * 이미 반영한 복구 알림 식별자. 개수 제한과 중복 판정은 StepRestore 가 한다.
+         *
+         * Set 이 아니라 순서 있는 문자열로 두는 이유는 Preferences 의 Set 이 순서를 보장하지 않아
+         * "오래된 것부터 버리기" 를 할 수 없기 때문이다.
+         */
+        private val STEP_RESTORE_APPLIED_EVENT_IDS = stringPreferencesKey("stepRestoreAppliedEventIds")
+
+        private const val RESTORE_EVENT_ID_DELIMITER = ","
 
         /** 구 스키마 잔재. 서버가 내려 주던 값이라 새 지갑으로 환산할 방법이 없어 지우기만 한다. */
         private val LEGACY_WALKING_COUNT = intPreferencesKey("walkingCount")
@@ -101,6 +112,38 @@ class DeviceDataStore @Inject constructor(
     }.readStepState()
 
     /**
+     * 환전 실패분 걸음 수 복구
+     *
+     * 서버가 걸음 수를 보관하지 않으므로, 환전 후 페이 포인트 지급이 실패하면 서버는
+     * "이만큼 되돌려라" 를 알려 줄 수만 있다. 그 지시를 지갑에 반영한다.
+     *
+     * 적립([creditStep])이 아니라 별도 연산인 이유는, 적립 경로가 수집 커서와 경로 게이트를
+     * 타기 때문이다. 복구는 센서가 센 걸음이 아니라 이미 차감했던 걸음을 되돌리는 것이라
+     * 그 게이트를 통과할 수 없다.
+     *
+     * 중복 검사와 잔액 증가는 반드시 같은 edit 안에서 해야 한다. 나누면 같은 알림이 거의 동시에
+     * 두 번 도착했을 때 둘 다 통과한다.
+     */
+    suspend fun restoreStep(restoreWalkingCount: Int, eventId: String): StepStateEntity =
+        context.store.edit { preferences ->
+            val appliedEventIds = preferences[STEP_RESTORE_APPLIED_EVENT_IDS]
+                ?.split(RESTORE_EVENT_ID_DELIMITER)
+                ?.filter { it.isNotBlank() }
+                ?: emptyList()
+
+            val result = StepRestore.apply(appliedEventIds, restoreWalkingCount, eventId)
+            if (result.restoredWalkingCount <= 0) return@edit
+
+            preferences[STEP_BALANCE] =
+                (preferences.readStepState().balance.toLong() + result.restoredWalkingCount)
+                    .coerceIn(0L, Int.MAX_VALUE.toLong())
+                    .toInt()
+
+            preferences[STEP_RESTORE_APPLIED_EVENT_IDS] =
+                result.appliedEventIds.joinToString(RESTORE_EVENT_ID_DELIMITER)
+        }.readStepState()
+
+    /**
      * 걸음 수 수집 경로 변경
      *
      * 경로가 바뀌면 커서도 함께 비운다. 커서 칸은 경로마다 다른 의미를 갖는데 남겨 두면
@@ -126,6 +169,7 @@ class DeviceDataStore @Inject constructor(
             preferences[STEP_BALANCE] = 0
             preferences[STEP_SOURCE] = StepSource.UNRESOLVED.name
             preferences.writeCursor(StepCursor.EMPTY)
+            preferences.remove(STEP_RESTORE_APPLIED_EVENT_IDS)
             preferences.remove(LEGACY_WALKING_COUNT)
             preferences.remove(LEGACY_CONSUME_WALKING_COUNT)
             preferences[STEP_SCHEMA_VERSION] = STEP_SCHEMA_CURRENT

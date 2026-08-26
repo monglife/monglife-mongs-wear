@@ -5,24 +5,31 @@ import android.content.Context
 import android.provider.Settings
 import com.google.firebase.messaging.FirebaseMessaging
 import com.monglife.core.data.flow.SharedFlowCache
+import com.monglife.core.data.mqtt.client.MqttClient
 import com.monglife.mongs.application.auth.exception.InvalidLogoutException
 import com.monglife.mongs.data.device.persistence.collector.StepCollector
 import com.monglife.mongs.data.device.persistence.coordinator.StepCollectionCoordinator
 import com.monglife.mongs.data.device.persistence.datastore.DeviceDataStore
+import com.monglife.mongs.data.device.persistence.dto.StepRestoreEventDto
 import com.monglife.mongs.data.device.persistence.entity.DeviceOptionEntity
 import com.monglife.mongs.data.device.persistence.entity.StepStateEntity
 import com.monglife.mongs.data.device.persistence.manager.StepSensorManager
 import com.monglife.mongs.domain.device.model.DeviceOption
 import com.monglife.mongs.domain.device.model.Step
 import dagger.hilt.android.qualifiers.ApplicationContext
+import com.mongs.data.core.R
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -37,6 +44,7 @@ class DevicePersistenceAdapter @Inject constructor(
     private val stepCollector: StepCollector,
     private val stepCollectionCoordinator: StepCollectionCoordinator,
     private val deviceDataStore: DeviceDataStore,
+    private val mqttClient: MqttClient,
 ) : com.monglife.mongs.application.auth.port.persistence.DevicePersistencePort,
     com.monglife.mongs.application.battle.port.persistence.DevicePersistencePort,
     com.monglife.mongs.application.device.port.persistence.DevicePersistencePort,
@@ -48,6 +56,8 @@ class DevicePersistenceAdapter @Inject constructor(
      * 호출할 때마다 새로 만들면 화면 수만큼 센서 리스너가 중복 등록된다.
      */
     private val stepFlowCache = SharedFlowCache<Unit, Step>()
+
+    private val subscribeCounterMap = ConcurrentHashMap<String, AtomicInteger>()
 
     /**
      * 현재 몽 ID 조회
@@ -139,7 +149,39 @@ class DevicePersistenceAdapter @Inject constructor(
      * 센서 폴백 모드에서는 같은 Flow 가 적립까지 담당한다 (onEach). 활성 경로가 아닌 입력은
      * DataStore 트랜잭션 안의 게이트가 버리므로, Health Services 모드에서 이 호출은 무해하다.
      */
-    private fun createStepFlow(): Flow<Step> = merge(
+    private fun createStepFlow(): Flow<Step> = flow {
+        // 환전 실패 복구 알림은 화면과 무관하게 도착하지만, MQTT 연결 자체가 앱이 떠 있는 동안만
+        // 유지되므로 걸음 화면을 보는 동안 구독한다. 환전 직후가 복구가 도착하는 시점이라
+        // 실제로 필요한 구간은 덮인다. 앱이 꺼진 사이 온 복구는 유실된다 - 서버도 retained 를
+        // 쓰지 않으므로 이 채널은 최선 노력이다.
+        val deviceId = this@DevicePersistenceAdapter.getDeviceId()
+        val topic = "${context.getString(R.string.mongs_mqtt_topic)}/device/$deviceId/step/restore"
+        val subscribeCount = subscribeCounterMap.getOrPut(deviceId) { AtomicInteger(0) }
+
+        if (subscribeCount.getAndIncrement() == 0) {
+            mqttClient.subscribe(
+                topic = topic,
+                classType = StepRestoreEventDto::class.java,
+                onReceive = { responseDto ->
+                    stepCollector.restore(
+                        restoreWalkingCount = responseDto.result.restoreWalkingCount,
+                        eventId = responseDto.result.eventId,
+                    )
+                }
+            )
+        }
+
+        try {
+            emitAll(stepProgressFlow())
+        } finally {
+            if (subscribeCount.decrementAndGet() == 0) {
+                mqttClient.disSubscribe(topic = topic)
+                subscribeCounterMap.remove(deviceId)
+            }
+        }
+    }
+
+    private fun stepProgressFlow(): Flow<Step> = merge(
         deviceDataStore.getStepStateFlow().map { StepSignal.State(it) },
         stepSensorManager.observeTotalWalkingCount()
             .onEach { stepCollector.creditSensorTotal(it) }
