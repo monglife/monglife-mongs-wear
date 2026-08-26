@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    local / dev / stg 게이트웨이가 http 라서 평문을 허용해야 한다.
+
+    flavor 소스셋이 main 을 대체하므로 prd 는 영향을 받지 않는다.
+    buildType(src/debug) 이 아니라 flavor 로 가르는 이유는 평문 여부를 정하는 축이
+    디버그 여부가 아니라 환경이기 때문이다. buildType 으로 가르면 stgRelease 로
+    스테이지를 실기기 검증할 때 네트워크가 죽는다.
+
+    호스트명을 여기 적지 않기 위해 도메인별 예외 대신 환경으로만 가른다.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
