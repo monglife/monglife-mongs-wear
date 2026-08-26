@@ -106,14 +106,23 @@ class HealthServicesStepManager @Inject constructor(
 
     /**
      * 리스너 서비스 해제
+     *
+     * Health Services 가 없으면 아예 부르지 않는다.
+     * 예외는 아래에서 흡수되지만 그 전에 클라이언트가 바인드를 재시도하다 포기하면서
+     * ServiceConnection 이 스택 트레이스를 E 레벨로 남긴다. 폰에서는 권한이 없거나 센서가
+     * 없을 때마다 경로가 NONE 이 되어 이 해제가 호출되고, 15분 주기 워커까지 같은 경로를
+     * 타므로 있지도 않은 서비스를 향한 오류 로그가 계속 쌓인다.
+     * 애초에 등록된 적이 없으니 해제할 것도 없다.
      */
     suspend fun unregister() {
+        if (!isInstalled()) return
+
         try {
             passiveMonitoringClient.clearPassiveListenerService()
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            // Health Services 가 없는 기기에서는 실패가 정상이다.
+            // 등록된 적이 없으면 실패할 수 있다. 해제가 목적이므로 그대로 둔다.
         }
     }
 }
