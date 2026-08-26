@@ -2,6 +2,8 @@ package com.monglife.mongs.presentation.view.dialog.pages.slotPick
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,6 +73,7 @@ internal fun CreateSlotDialog(
     onCloseClick: () -> Unit,
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     var confirmOpen by remember { mutableStateOf(false) }
     val imeVisible = WindowInsets.isImeVisible
 
@@ -79,41 +83,31 @@ internal fun CreateSlotDialog(
             .fillMaxSize()
             // 스크림에는 imePadding 을 걸지 않는다. 걸면 키보드 뒤로 맵이 비친다.
             .background(color = Color.Black.copy(alpha = 0.88f))
+            /**
+             * 스크림이 터치를 삼켜야 한다.
+             * 없으면 카드 바깥, 즉 뒤에 있는 캐러셀 화살표와 빈 슬롯의 "생성" 버튼이 그대로 눌린다.
+             * 다른 다이얼로그는 전부 이걸 갖고 있는데 여기만 빠져 있었다.
+             *
+             * 다만 다른 다이얼로그와 달리 바깥 탭으로 닫지는 않는다. 입력하던 이름이 날아가기 때문이다.
+             * 키보드만 내린다.
+             */
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = { focusManager.clearFocus() },
+            )
     ) {
         Column(
             modifier = Modifier
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .imePadding()
-                .width(if (imeVisible) 600.dp else 640.dp)
+                .width(640.dp)
                 .mainPanel()
-                .padding(if (imeVisible) 16.dp else 24.dp)
+                .padding(horizontal = 24.dp, vertical = if (imeVisible) 16.dp else 24.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            if (imeVisible) {
-                /**
-                 * 키보드가 뜨면 이름만 남긴다.
-                 * 가로 411dp 화면에서 IME 가 210dp 안팎을 먹는데, 이 형태는 88dp 라 어떤 IME 에서도 들어간다.
-                 * 완료 키로 포커스를 놓으면 원래 카드로 돌아온다.
-                 */
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    InputTextBox(
-                        modifier = Modifier.weight(1f),
-                        text = name.value,
-                        placeholder = "최대 ${NAME_MAX}자",
-                        changeInput = { if (it.length <= NAME_MAX) name.value = it },
-                    )
-                    Text(
-                        text = "${name.value.length}/$NAME_MAX",
-                        fontFamily = DAL_MU_RI,
-                        fontSize = 16.sp,
-                        color = MongsWhite.copy(alpha = 0.6f),
-                    )
-                }
-            } else {
+            if (!imeVisible) {
                 Text(
                     text = "새로운 몽",
                     fontFamily = DAL_MU_RI,
@@ -121,18 +115,47 @@ internal fun CreateSlotDialog(
                     fontSize = 20.sp,
                     color = MongsWhite,
                 )
+            }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(20.dp),
-                ) {
-                    Field(label = "이름", modifier = Modifier.weight(1.6f)) {
+            /**
+             * 이 Row 와 첫 자식(이름 Field)은 조건 없이 호출한다.
+             *
+             * 처음에는 imeVisible 로 화면 전체를 if/else 로 갈랐는데, 그러면 키보드가 뜨는 순간
+             * isImeVisible 이 true 가 되면서 방금 포커스를 잡은 BasicTextField 가 컴포지션에서
+             * 사라진다 — 다른 분기의 필드는 생김새가 같아도 별개 노드다.
+             * 포커스가 풀리니 키보드가 곧바로 다시 닫혔고, 이름을 한 글자도 칠 수 없었다.
+             * 필드를 같은 호출 위치에 고정하고 주변 요소만 붙였다 떼야 포커스가 유지된다.
+             */
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+            ) {
+                Field(label = "이름", modifier = Modifier.weight(1.6f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
                         InputTextBox(
+                            modifier = Modifier.weight(1f),
                             text = name.value,
                             placeholder = "최대 ${NAME_MAX}자",
                             changeInput = { if (it.length <= NAME_MAX) name.value = it },
                         )
+                        Text(
+                            text = "${name.value.length}/$NAME_MAX",
+                            fontFamily = DAL_MU_RI,
+                            fontSize = 16.sp,
+                            color = MongsWhite.copy(alpha = 0.6f),
+                        )
                     }
+                }
+
+                /**
+                 * 키보드가 뜨면 시간 휠과 버튼을 접는다.
+                 * 411dp 높이에서 IME 가 210dp 안팎을 먹는데, 이름 줄만 남기면 어떤 IME 에서도 들어간다.
+                 * 완료 키나 바깥 탭으로 포커스를 놓으면 원래 카드로 돌아온다.
+                 */
+                if (!imeVisible) {
                     Field(label = "수면", modifier = Modifier.weight(1f)) {
                         TimeWheelPair(sleepHour, sleepMinute)
                     }
@@ -140,7 +163,9 @@ internal fun CreateSlotDialog(
                         TimeWheelPair(wakeHour, wakeMinute)
                     }
                 }
+            }
 
+            if (!imeVisible) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
