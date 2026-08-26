@@ -1,6 +1,7 @@
 package com.monglife.mongs.presentation.view.pages.main
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -90,6 +91,25 @@ internal fun MainView(
     val slotUiState by mainSlotViewModel.uiState.collectAsStateWithLifecycle()
 
     var permissionDialogOpen by remember { mutableStateOf(false) }
+
+    /**
+     * 열려 있는 오버레이를 뒤로가기로 닫는다.
+     *
+     * wear 는 스와이프 dismiss 였지만 폰은 enableOnBackInvokedCallback 이라
+     * 이게 없으면 원형 돌봄 메뉴가 열린 채 뒤로가기 시 메뉴가 아니라 앱이 그대로 종료된다.
+     * 메인은 백스택 루트라 pop 할 화면도 없다.
+     */
+    BackHandler(
+        enabled = permissionDialogOpen ||
+            slotUiState.interactionDialogOpen ||
+            slotUiState.initNotificationDialogOpen
+    ) {
+        when {
+            permissionDialogOpen -> permissionDialogOpen = false
+            slotUiState.interactionDialogOpen -> mainSlotViewModel.interactionDialogClose()
+            else -> mainSlotViewModel.initDialogClose()
+        }
+    }
 
     /**
      * 몽 중심의 화면 좌표.
