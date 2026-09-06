@@ -10,5 +10,5 @@
     호스트명을 여기 적지 않기 위해 도메인별 예외 대신 환경으로만 가른다.
 -->
 <network-security-config>
-    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>
+
