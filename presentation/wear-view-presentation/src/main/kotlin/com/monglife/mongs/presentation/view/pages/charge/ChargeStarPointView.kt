@@ -4,6 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +28,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -72,7 +76,25 @@ internal fun ChargeStarPointView(
             }
         }
         if (uiState.value.loadingBar) {
-            Box(modifier = Modifier.zIndex(2f)) {
+            /**
+             * 로딩 중에는 화면을 흐리게 덮고 터치를 막는다.
+             *
+             * 폰에서 결제를 마치면 onResume 재조회로 미소비 주문이 채워져 "소비" 버튼이
+             * 로딩바 위로 드러나는데, 그 탭이 이미 진행 중인 주문에 대한 중복 소비 요청이 되어
+             * "소비 실패" 가 떴다. 버튼 하나가 아니라 화면 전체를 막아 해결한다.
+             * 클릭만 소비하므로 손목 스와이프 뒤로가기는 그대로 동작한다.
+             */
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(2f)
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {},
+                    ),
+            ) {
                 LoadingBar()
             }
         }

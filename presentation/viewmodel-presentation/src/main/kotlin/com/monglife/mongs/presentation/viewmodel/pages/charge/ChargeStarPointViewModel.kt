@@ -47,10 +47,11 @@ class ChargeStarPointViewModel @Inject constructor(
         data object Loading : UiState(loadingBar = true, content = false)
 
         /**
-         * 결제 진행 중 — 데이터는 이미 있으므로 화면을 유지한 채 오버레이만 띄운다.
+         * 결제 진행 중 — 데이터는 이미 있으므로 화면을 유지한 채 흐리게 덮는다.
          *
-         * Loading 으로 화면을 통째로 가리면 미소비 주문의 "소비" 버튼도 함께 사라져,
-         * 결제 콜백이 오지 않을 때 사용자가 복구할 방법이 없어진다.
+         * 덮개는 터치를 모두 막는다. 폰 결제 직후 onResume 재조회로 미소비 주문이 채워지면
+         * "소비" 버튼이 로딩바 위로 드러나는데, 그 탭이 이미 진행 중인 주문에 대한
+         * 중복 소비 요청이 되어 "소비 실패" 가 떴다.
          */
         data object Billing : UiState(loadingBar = true, content = true)
     }
@@ -167,6 +168,10 @@ class ChargeStarPointViewModel @Inject constructor(
      * 인앱 상품 소비
      */
     fun consume(orderVo: OrderVo) {
+        // 로딩 중에는 화면 전체가 터치 차단되지만, 상태 전이 직전의 탭까지 막는다.
+        // force = true 라 토큰 가드를 우회하므로 중복 요청은 여기서 걸러야 한다
+        if (_uiState.value !is UiState.Idle) return
+
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
