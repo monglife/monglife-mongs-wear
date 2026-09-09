@@ -1,0 +1,40 @@
+// 모든 프로파일이 공유하는 설정
+//
+// ⚠️ xcconfig 에서 `//` 는 주석이다. URL 의 `http://` 를 그대로 쓰면 스킴 뒤가 통째로 잘린다.
+//    그래서 아래 프로파일 파일들은 `http:/$()/host` 형태로 슬래시 사이에 빈 변수를 끼워 넣는다.
+//    (Android 의 configs/core/data-core/<flavor>/values/config.xml 에 대응하는 자리다.)
+
+PRODUCT_NAME = Mongs
+PRODUCT_BUNDLE_IDENTIFIER = com.mongs.wear
+CURRENT_PROJECT_VERSION = 1
+MARKETING_VERSION = 0.1.0
+
+// 서버 앱 버전 검증(`GET public/auth/verify/version`)에 보낼 값.
+// 기본은 앱의 실제 버전이지만, 개발 서버에 이 버전 행이 없으면 로그인 자체가 막히므로
+// 프로파일에서 덮어쓸 수 있게 해 둔다. 서버에 iOS 버전이 등록되면 이 덮어쓰기는 지운다.
+MONGS_BUILD_VERSION = $(MARKETING_VERSION)
+
+WATCHOS_DEPLOYMENT_TARGET = 10.0
+SWIFT_VERSION = 6.0
+TARGETED_DEVICE_FAMILY = 4
+
+SWIFT_STRICT_CONCURRENCY = complete
+SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY = YES
+CLANG_ENABLE_MODULES = YES
+ENABLE_USER_SCRIPT_SANDBOXING = YES
+DEAD_CODE_STRIPPING = YES
+
+// 서명은 로컬 개발 기준 자동. 배포 파이프라인을 붙일 때 프로파일별로 갈라준다.
+CODE_SIGN_STYLE = Automatic
+CODE_SIGNING_ALLOWED = YES
+
+// 실기기 빌드에 필요한 DEVELOPMENT_TEAM 은 개발자마다 다르고 저장소에 남길 값이 아니다.
+// Configurations/Signing.local.xcconfig 에 각자 적는다 (gitignore 대상).
+// 파일이 없으면 `#include?` 가 조용히 넘어가므로 시뮬레이터 빌드는 그대로 된다.
+#include? "Signing.local.xcconfig"
+
+// Android 의 config.xml 타임아웃(초)과 동일한 값
+MONGS_CONNECT_TIMEOUT = 120
+MONGS_READ_TIMEOUT = 30
+MONGS_WRITE_TIMEOUT = 10
+MONGS_MQTT_KEEP_ALIVE = 180

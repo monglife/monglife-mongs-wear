@@ -1,0 +1,7 @@
+#include "Base.xcconfig"
+
+MONGS_PROFILE = dev
+MONGS_DISCOVERY_API_URL = http:/$()/100.0.0.10:8010/api/
+MONGS_GATEWAY_API_URL = http:/$()/100.0.0.10:8000/api/
+MONGS_MQTT_URL = tcp:/$()/100.0.0.10:1883
+MONGS_MQTT_TOPIC = mongs-dev

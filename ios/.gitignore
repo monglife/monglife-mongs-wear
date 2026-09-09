@@ -1,0 +1,31 @@
+# ── Xcode ─────────────────────────────────────────────────────────────
+# .xcodeproj 는 XcodeGen(project.yml)이 생성하므로 커밋하지 않는다.
+*.xcodeproj
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+DerivedData/
+build/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# ── Swift Package Manager ─────────────────────────────────────────────
+.build/
+.swiftpm/
+Packages/*/.build/
+Packages/*/.swiftpm/
+# Package.resolved 는 커밋한다 (의존성 버전 고정)
+
+# ── 서명 (개발자별 로컬 설정) ─────────────────────────────────────────
+# DEVELOPMENT_TEAM 은 사람마다 다르다. .example 만 커밋한다.
+Configurations/Signing.local.xcconfig
+
+# ── 기타 ──────────────────────────────────────────────────────────────
+.DS_Store
+*.log

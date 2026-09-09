@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Sign in with Apple.
+	  ⚠️ 이 capability 는 유료 Apple Developer Program 계정에서만 활성화할 수 있다.
+	  무료 Personal Team 으로 실기기에 올리면 프로비저닝 프로파일에 이 권한이 없어
+	  설치가 거부된다. 시뮬레이터 빌드는 영향받지 않는다.
+	-->
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
+
+	<!--
+	  HealthKit 걸음 읽기.
+	  ⚠️ 개인 테스트는 무료 계정으로 되지만 **배포에는 유료 Developer Program 이 필요**하다.
+	-->
+	<key>com.apple.developer.healthkit</key>
+	<true/>
+	<!-- 앱이 잠들어 있어도 걸음이 쌓이면 깨워 달라는 권한. HKObserverQuery 백그라운드 전달에 필요하다. -->
+	<key>com.apple.developer.healthkit.background-delivery</key>
+	<true/>
+</dict>
+</plist>

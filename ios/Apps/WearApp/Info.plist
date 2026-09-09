@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>ko</string>
+	<key>CFBundleDisplayName</key>
+	<string>Mongs</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+
+	<!-- watchOS 26 단일 타겟 앱. WatchKit Extension 은 Xcode 14 부터 없어졌다. -->
+	<key>WKApplication</key>
+	<true/>
+	<!--
+	  iOS 컴패니언 앱이 없는 standalone 앱이라는 선언.
+	  이 키가 없으면 watchOS 는 WKCompanionAppBundleIdentifier 를 요구하며 설치를 거부한다.
+	  (Android wear-app 의 <meta-data com.google.android.wearable.standalone=true /> 에 해당)
+	-->
+	<key>WKWatchOnly</key>
+	<true/>
+
+	<!--
+	  HealthKit 권한 설명. **이 문구가 없으면 권한 요청 순간 앱이 죽는다.**
+	  쓰기는 하지 않으므로 NSHealthUpdateUsageDescription 은 넣지 않는다.
+	-->
+	<key>NSHealthShareUsageDescription</key>
+	<string>걸음 수를 읽어 몽을 키우는 데 사용합니다.</string>
+
+	<!--
+	  App Transport Security — Android 의 플레이버별 network_security_config.xml 대응.
+
+	  Android 는 src/{local,dev,stg} 에만 평문 HTTP 를 허용하고 src/main 은 막는다.
+	  iOS 는 그렇게 프로파일별로 가를 수 없다. Info.plist 는 빌드 설정 치환 전에
+	  파싱되므로 `<$(VAR)/>` 로 불리언을 주입할 수 없기 때문이다.
+
+	  그래서 NSAllowsArbitraryLoads(전면 허용) 대신 **평문을 쓰는 호스트만 예외로 연다.**
+	  운영 서버는 전부 HTTPS 라 이 예외에 걸리지 않고, 심사에서도 전면 허용보다 설명하기 쉽다.
+	  개발 서버 주소가 바뀌면 여기도 함께 고쳐야 한다.
+	-->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- local 프로파일: 127.0.0.1 (맥에서 띄운 서버) -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<!-- dev 프로파일 서버 -->
+			<key>100.0.0.10</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
+
+	<!--
+	  Android 의 configs/core/data-core/<flavor>/values/config.xml 대응.
+	  값은 Configurations/*.xcconfig 에서 오고, MongsCore/AppConfig.swift 가 읽는다.
+	  MQTT username/password 는 비밀값이라 여기 없다 (README 참고).
+	-->
+	<!--
+	  픽셀 폰트. 파일을 번들에 넣는 것만으로는 부족하고 여기 이름을 적어야 등록된다.
+	  Android 는 Typography(defaultFontFamily = DAL_MU_RI) 로 전역 기본 폰트를 바꾸지만
+	  SwiftUI 에는 그런 스위치가 없어 .mongsFont(...) 를 쓰는 쪽에서 명시한다.
+	-->
+	<key>UIAppFonts</key>
+	<array>
+		<string>Fonts/dalmoori.ttf</string>
+	</array>
+
+	<key>MongsBuildVersion</key>
+	<string>$(MONGS_BUILD_VERSION)</string>
+	<key>MongsProfile</key>
+	<string>$(MONGS_PROFILE)</string>
+	<key>MongsDiscoveryAPIURL</key>
+	<string>$(MONGS_DISCOVERY_API_URL)</string>
+	<key>MongsGatewayAPIURL</key>
+	<string>$(MONGS_GATEWAY_API_URL)</string>
+	<key>MongsMQTTURL</key>
+	<string>$(MONGS_MQTT_URL)</string>
+	<key>MongsMQTTTopic</key>
+	<string>$(MONGS_MQTT_TOPIC)</string>
+	<key>MongsMQTTKeepAlive</key>
+	<string>$(MONGS_MQTT_KEEP_ALIVE)</string>
+	<key>MongsConnectTimeout</key>
+	<string>$(MONGS_CONNECT_TIMEOUT)</string>
+	<key>MongsReadTimeout</key>
+	<string>$(MONGS_READ_TIMEOUT)</string>
+	<key>MongsWriteTimeout</key>
+	<string>$(MONGS_WRITE_TIMEOUT)</string>
+</dict>
+</plist>

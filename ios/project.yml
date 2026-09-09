@@ -1,0 +1,109 @@
+# XcodeGen 프로젝트 정의
+#
+# `.xcodeproj` 는 이 파일에서 생성되며 커밋하지 않는다.
+#   xcodegen generate
+#
+# Android 의 flavor(local/dev/stg/prd) × buildType(debug/release) 조합을
+# Xcode configuration 8개로 그대로 옮겼다. 프로파일별 값은
+# Configurations/*.xcconfig 에 있다.
+
+name: MongsWear
+
+options:
+  bundleIdPrefix: com.mongs
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+  deploymentTarget:
+    watchOS: "10.0"
+  defaultConfig: Debug-Dev
+
+configs:
+  Debug-Local: debug
+  Release-Local: release
+  Debug-Dev: debug
+  Release-Dev: release
+  Debug-Stg: debug
+  Release-Stg: release
+  Debug-Prd: debug
+  Release-Prd: release
+
+# 프로젝트 레벨에서 프로파일별 xcconfig 를 물린다.
+configFiles:
+  Debug-Local: Configurations/Local.xcconfig
+  Release-Local: Configurations/Local.xcconfig
+  Debug-Dev: Configurations/Dev.xcconfig
+  Release-Dev: Configurations/Dev.xcconfig
+  Debug-Stg: Configurations/Stg.xcconfig
+  Release-Stg: Configurations/Stg.xcconfig
+  Debug-Prd: Configurations/Prd.xcconfig
+  Release-Prd: Configurations/Prd.xcconfig
+
+packages:
+  MongsKit:
+    path: Packages/MongsKit
+
+targets:
+  MongsWear:
+    type: application
+    platform: watchOS
+    sources:
+      - path: Apps/WearApp/Sources
+      - path: Apps/WearApp/Resources/Assets.xcassets
+      # 폴더 참조로 넣어야 번들 안에 Sprites/ 디렉토리 구조가 유지된다.
+      # 일반 그룹으로 넣으면 파일이 번들 루트에 평평하게 깔려
+      # Bundle.url(forResource:withExtension:subdirectory:) 가 찾지 못한다.
+      - path: Apps/WearApp/Resources/Sprites
+        type: folder
+      # 폰트도 폴더 참조다. Info.plist 의 UIAppFonts 경로(Fonts/dalmoori.ttf)와 맞춰야 한다.
+      - path: Apps/WearApp/Resources/Fonts
+        type: folder
+    settings:
+      base:
+        INFOPLIST_FILE: Apps/WearApp/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Apps/WearApp/MongsWear.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: NO
+    dependencies:
+      - package: MongsKit
+        products:
+          - MongsModel
+          - MongsService
+          - MongsViewModel
+
+schemes:
+  MongsWear-Local:
+    build:
+      targets: { MongsWear: all }
+    run: { config: Debug-Local }
+    test: { config: Debug-Local }
+    profile: { config: Release-Local }
+    analyze: { config: Debug-Local }
+    archive: { config: Release-Local }
+
+  MongsWear-Dev:
+    build:
+      targets: { MongsWear: all }
+    run: { config: Debug-Dev }
+    test: { config: Debug-Dev }
+    profile: { config: Release-Dev }
+    analyze: { config: Debug-Dev }
+    archive: { config: Release-Dev }
+
+  MongsWear-Stg:
+    build:
+      targets: { MongsWear: all }
+    run: { config: Debug-Stg }
+    test: { config: Debug-Stg }
+    profile: { config: Release-Stg }
+    analyze: { config: Debug-Stg }
+    archive: { config: Release-Stg }
+
+  MongsWear-Prd:
+    build:
+      targets: { MongsWear: all }
+    run: { config: Debug-Prd }
+    test: { config: Debug-Prd }
+    profile: { config: Release-Prd }
+    analyze: { config: Debug-Prd }
+    archive: { config: Release-Prd }
