@@ -11,6 +11,8 @@ import SwiftUI
 struct InteractionContentView: View {
 
     let mong: Mong?
+    /// 슬롯 관리 화면 열기
+    let onOpenSlotPick: () -> Void
 
     @Environment(SpriteLoader.self) private var loader
 
@@ -39,7 +41,8 @@ struct InteractionContentView: View {
             }
             HStack(spacing: 8) {
                 MongsCircleButton(iconName: "btn_icon_map_search", borderName: "btn_border_blue", iconSize: 34, isEnabled: isAlive) {}
-                MongsCircleButton(iconName: "btn_icon_slot_pick", borderName: "btn_border_red", iconSize: 34) {}
+                MongsCircleButton(iconName: "btn_icon_slot_pick", borderName: "btn_border_red", iconSize: 34,
+                                  action: onOpenSlotPick)
                 MongsCircleButton(iconName: "btn_icon_luck_draw", borderName: "btn_border_purple", iconSize: 34, isEnabled: isAlive) {}
             }
             HStack(spacing: 8) {

@@ -42,6 +42,25 @@ public actor MongService {
         await cache.mong()
     }
 
+    /// 몽 목록 전체를 조회한다. 슬롯 화면이 쓴다.
+    ///
+    /// 목록에는 죽은 몽·졸업한 몽도 들어 있다 — 슬롯 화면이 그 상태를 보여주고
+    /// 삭제/졸업 버튼을 띄워야 하므로 걸러내지 않는다.
+    public func allMongs() async throws -> [Mong] {
+        let responses: [MongResponse.Full] = try await api.request(
+            Endpoint(host: .gateway, method: .get, path: "character/management")
+        )
+        return responses.map(\.mong)
+    }
+
+    /// 현재 몽을 지정한다.
+    ///
+    /// Android 는 `currentMongId` 를 DataStore 에 저장하고 Room 에서 그 몽을 읽는다.
+    /// 여기서는 캐시가 곧 현재 몽이라 캐시를 갈아끼우는 것으로 끝난다.
+    public func select(_ mong: Mong) async {
+        await store(mong)
+    }
+
     /// 서버에서 몽 목록을 받아 현재 몽을 갱신한다.
     ///
     /// Android 는 슬롯이 여러 개고 `currentMongId` 로 고른다. 여기서는 v1 범위대로

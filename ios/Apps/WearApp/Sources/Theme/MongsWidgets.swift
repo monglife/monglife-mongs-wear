@@ -164,6 +164,74 @@ struct LoadingBar: View {
     }
 }
 
+/// 별가루 표시
+///
+/// Android `component/common/textbox/StarPointBox.kt` 이식.
+/// `PayPointBox` 와 같은 배경에 아이콘과 글자색만 다르다.
+struct StarPointBox: View {
+
+    let starPoint: Int
+    var width: CGFloat = 80
+    var height: CGFloat = 30
+
+    @Environment(SpriteLoader.self) private var loader
+
+    var body: some View {
+        ZStack {
+            AnimatedSprite(sprite: loader.sprite(named: "point_bg"))
+                .frame(width: width, height: height)
+
+            HStack(spacing: 0) {
+                AnimatedSprite(sprite: loader.sprite(named: "point_icon_star"))
+                    .frame(width: 12, height: 12)
+                    .frame(width: (width - 20) * 0.2)
+                Text("\(starPoint)")
+                    .mongsFont(14)
+                    .foregroundStyle(MongsColor.darkBrown)
+                    .lineLimit(1)
+                    .frame(width: (width - 20) * 0.8)
+            }
+            .padding(.horizontal, 10)
+        }
+        .frame(width: width, height: height)
+    }
+}
+
+/// 좌우 이동 버튼
+///
+/// Android `component/common/button/SelectButton.kt` + `LeftButton` / `RightButton` 이식.
+/// 화면 양끝에 화살표를 두고 가운데는 비운다 — 끝에 닿으면 그쪽 화살표가 사라진다.
+struct SelectButton: View {
+
+    var canGoPrevious: Bool
+    var canGoNext: Bool
+    let onPrevious: () -> Void
+    let onNext: () -> Void
+
+    @Environment(SpriteLoader.self) private var loader
+
+    var body: some View {
+        HStack(spacing: 0) {
+            arrow("btn_icon_left", isVisible: canGoPrevious, action: onPrevious)
+            Spacer(minLength: 0)
+            arrow("btn_icon_right", isVisible: canGoNext, action: onNext)
+        }
+        .padding(.horizontal, 15)
+    }
+
+    @ViewBuilder
+    private func arrow(_ name: String, isVisible: Bool, action: @escaping () -> Void) -> some View {
+        // 원본은 끝에 닿으면 버튼을 **그리지 않는다**(투명도를 낮추는 게 아니다).
+        // 자리는 유지해야 가운데 내용이 흔들리지 않으므로 크기는 남긴다.
+        Button(action: action) {
+            AnimatedSprite(sprite: isVisible ? loader.sprite(named: name) : nil)
+                .frame(width: 18, height: 35)
+        }
+        .buttonStyle(.plain)
+        .disabled(!isVisible)
+    }
+}
+
 /// 로고
 ///
 /// Android `component/common/logo/Logo.kt` 이식.

@@ -21,6 +21,7 @@ final class AppContainer {
     private let stepService: any StepService
     private let authService: AuthService?
     private let mongService: MongService?
+    private let playerService: PlayerService?
 
     init() {
         let configResult = Result { try AppConfig.load() }
@@ -41,10 +42,12 @@ final class AppContainer {
                 identity: Self.clientIdentity(secureStore: secureStore)
             )
             self.mongService = MongService(api: api, cache: MongCache())
+            self.playerService = PlayerService(api: api)
         } else {
             // 설정을 못 읽으면 네트워크 계층을 만들 수 없다. 앱은 오류 화면만 띄운다.
             self.authService = nil
             self.mongService = nil
+            self.playerService = nil
         }
 
         // 시뮬레이터에는 걸음 데이터가 없어 항상 0 이 나온다. 건강 앱에서 직접 넣거나
@@ -67,6 +70,11 @@ final class AppContainer {
 
     func makeMainSlotViewModel() -> MainSlotViewModel? {
         mongService.map { MainSlotViewModel(mongService: $0) }
+    }
+
+    func makeSlotPickViewModel() -> SlotPickViewModel? {
+        guard let mongService, let playerService else { return nil }
+        return SlotPickViewModel(mongService: mongService, playerService: playerService)
     }
 
     // MARK: - 기기 정보

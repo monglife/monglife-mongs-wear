@@ -84,6 +84,13 @@ public final class MainSlotViewModel: ErrorReportingViewModel {
         }
     }
 
+    /// 슬롯 화면에서 다른 몽을 고르고 돌아왔을 때 다시 읽는다.
+    ///
+    /// 캐시가 이미 새 몽으로 바뀌어 있으므로 서버를 다시 부르지 않는다.
+    public func reload() async {
+        mong = await mongService.currentMong()
+    }
+
     // MARK: - 상호작용
 
     /// 다이얼로그를 연다. 상호작용할 수 없는 상태면 열지 않는다.

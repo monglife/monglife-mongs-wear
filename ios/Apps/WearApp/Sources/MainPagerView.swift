@@ -20,6 +20,8 @@ struct MainPagerView: View {
     /// 슬롯과 컨디션이 같은 ViewModel 을 본다 — Android 도 부모 백스택에 스코프를 걸어 공유한다.
     @State private var slotViewModel: MainSlotViewModel?
     @State private var page: Int = 0
+    /// 슬롯 관리 화면. Android 는 라우터로 넘기지만 watchOS 는 전체 화면 시트가 자연스럽다.
+    @State private var isSlotPickPresented = false
 
     private enum Page {
         case step, condition, slot, interaction, configure
@@ -72,6 +74,15 @@ struct MainPagerView: View {
                 LoadingBar()
             }
         }
+        .fullScreenCover(isPresented: $isSlotPickPresented) {
+            if let viewModel = container.makeSlotPickViewModel() {
+                SlotPickView(viewModel: viewModel) {
+                    isSlotPickPresented = false
+                    // 고른 몽을 메인이 다시 읽는다.
+                    Task { await slotViewModel?.reload() }
+                }
+            }
+        }
         .task {
             // 메인 배경은 기본 맵의 애니메이션 버전이다 (원본 MainBackground 와 동일).
             await loader.preload(["map_mp000_gif", "icon_loading"])
@@ -103,9 +114,13 @@ struct MainPagerView: View {
         case .condition:
             ConditionContentView(viewModel: viewModel)
         case .slot:
-            SlotContentView(viewModel: viewModel)
+            SlotContentView(viewModel: viewModel) {
+                isSlotPickPresented = true
+            }
         case .interaction:
-            InteractionContentView(mong: viewModel.mong)
+            InteractionContentView(mong: viewModel.mong) {
+                isSlotPickPresented = true
+            }
         case .configure:
             ConfigureContentView()
         }

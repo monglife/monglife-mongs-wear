@@ -198,6 +198,68 @@ struct AuthServiceTests {
         #expect((json["fcmToken"] as? String)?.isEmpty == false)
     }
 
+    // MARK: - 서버 DTO 와의 계약
+    //
+    // 서버(`monglife-discovery`)의 AppleJoinRequestDto / AppleLoginRequestDto 는
+    // 필드를 @NotBlank 로 막아 두고 모르는 키는 무시한다.
+    // 키가 하나라도 어긋나면 400 이 나므로 **정확한 키 집합**을 여기서 고정한다.
+
+    @Test("가입 요청의 키 집합이 서버 DTO 와 정확히 일치한다")
+    func joinRequestMatchesServerContract() async throws {
+        let transport = StubTransport()
+        transport.stub("public/auth/login/apple", [
+            .status(404, #"{"code":"DISCOVERY-ACCOUNT-101","httpStatus":404}"#),
+            .ok(loginOK),
+        ])
+        transport.stub("public/auth/join/apple", [.ok(#"{"result":{}}"#)])
+        let (service, _) = makeService(transport: transport)
+
+        _ = try await service.signIn()
+
+        let body = try #require(
+            transport.requests.first { $0.url?.path.contains("join/apple") == true }?.httpBody
+        )
+        let json = try #require(try JSONSerialization.jsonObject(with: body) as? [String: Any])
+
+        #expect(Set(json.keys) == ["socialAccountId", "identityToken", "email", "name"])
+    }
+
+    @Test("로그인 요청의 키 집합이 서버 DTO 와 정확히 일치한다")
+    func loginRequestMatchesServerContract() async throws {
+        let transport = StubTransport()
+        transport.stub("public/auth/login/apple", [.ok(loginOK)])
+        let (service, _) = makeService(transport: transport)
+
+        _ = try await service.signIn()
+
+        let body = try #require(
+            transport.requests.first { $0.url?.path.contains("login/apple") == true }?.httpBody
+        )
+        let json = try #require(try JSONSerialization.jsonObject(with: body) as? [String: Any])
+
+        // ⚠️ email 이 없어야 한다. 서버는 검증된 토큰의 sub 로만 계정을 찾는다.
+        #expect(Set(json.keys) == [
+            "socialAccountId", "identityToken", "deviceId",
+            "appPackageName", "deviceName", "buildVersion",
+        ])
+    }
+
+    @Test("기기 등록 요청의 키 집합이 서버 DTO 와 정확히 일치한다")
+    func deviceRequestMatchesServerContract() async throws {
+        let transport = StubTransport()
+        transport.stub("public/auth/login/apple", [.ok(loginOK)])
+        let (service, _) = makeService(transport: transport)
+
+        _ = try await service.signIn()
+
+        let body = try #require(
+            transport.requests.first { $0.url?.path.contains("userDevice") == true }?.httpBody
+        )
+        let json = try #require(try JSONSerialization.jsonObject(with: body) as? [String: Any])
+
+        #expect(Set(json.keys) == ["deviceId", "deviceName", "appPackageName", "fcmToken"])
+    }
+
     @Test("강제 업데이트 여부를 읽는다")
     func verifiesAppVersion() async throws {
         let transport = StubTransport()

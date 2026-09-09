@@ -16,6 +16,8 @@ import SwiftUI
 struct SlotContentView: View {
 
     @Bindable var viewModel: MainSlotViewModel
+    /// 슬롯 관리 화면 열기
+    let onOpenSlotPick: () -> Void
 
     @Environment(SpriteLoader.self) private var loader
 
@@ -39,8 +41,9 @@ struct SlotContentView: View {
     /// 알에서 부화하기까지 걸리는 시간. 원본 `SlotContent` 의 `5 * 60 * 1000L`.
     private static let hatchDuration: TimeInterval = 5 * 60
 
-    init(viewModel: MainSlotViewModel) {
+    init(viewModel: MainSlotViewModel, onOpenSlotPick: @escaping () -> Void) {
         self.viewModel = viewModel
+        self.onOpenSlotPick = onOpenSlotPick
     }
 
     var body: some View {
@@ -100,6 +103,7 @@ struct SlotContentView: View {
             ZStack {
                 bottomSprite("mong_rip", size: 130)
                 notice("삭제되었습니다\n\n슬롯을 변경해주세요")
+                    .onTapGesture(perform: onOpenSlotPick)
             }
 
         case .graduate:
@@ -112,6 +116,7 @@ struct SlotContentView: View {
                         .padding(.bottom, 25)
                 }
                 notice("졸업한 몽입니다\n\n슬롯을 변경해주세요")
+                    .onTapGesture(perform: onOpenSlotPick)
             }
 
         default:
@@ -266,9 +271,7 @@ struct SlotContentView: View {
                     .mongsFont(25)
                     .foregroundStyle(MongsColor.white)
             }
-            MongsButton(title: "슬롯 선택", style: .blue, width: 90) {
-                // TODO: SlotPick 화면 (v1 후속)
-            }
+            MongsButton(title: "슬롯 선택", style: .blue, width: 90, action: onOpenSlotPick)
             .padding(.top, 8)
             Spacer().frame(height: 30)
         }
