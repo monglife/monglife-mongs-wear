@@ -32,6 +32,12 @@ public final class MainSlotViewModel: ErrorReportingViewModel {
     /// 쓰다듬기 직후 잠깐 기뻐하는 표정을 띄운다.
     public private(set) var isHappy = false
 
+    /// 먹이를 준 직후 잠깐 먹는 표정을 띄운다.
+    ///
+    /// Android `MainSlotViewModel.eatingEvent()` 대응 — 먹이/인벤토리 화면이
+    /// 메인으로 돌아오면서 이걸 부른다. 표정만 바꾸는 연출이라 서버와는 무관하다.
+    public private(set) var isEating = false
+
     /// 진화 연출이 도는 중인지.
     ///
     /// 원본은 이 값이 true 인 동안 몽을 **정적 PNG 로** 그리고 그 위에 이펙트 3장을
@@ -101,6 +107,13 @@ public final class MainSlotViewModel: ErrorReportingViewModel {
 
     public func closeInteractionDialog() {
         isInteractionDialogOpen = false
+    }
+
+    /// 먹이를 준 직후 호출한다. 원본 `EFFECT_DELAY` 와 같은 4초 동안 표정을 유지한다.
+    public func eatingEvent() async {
+        isEating = true
+        try? await Task.sleep(for: .seconds(4))
+        isEating = false
     }
 
     public func stroke() async {

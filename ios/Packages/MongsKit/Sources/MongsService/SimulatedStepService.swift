@@ -121,6 +121,15 @@ public actor SimulatedStepService: StepService {
         ))
     }
 
+    /// 시뮬레이터에는 되돌릴 서버 왕복이 없다. 잔액만 그대로 되돌려 준다.
+    public func applyRestore(walkingCount: Int, eventId: String) async {
+        publish(Step(
+            walkingCount: step.walkingCount + walkingCount,
+            pendingWalkingCount: step.pendingWalkingCount,
+            available: step.available
+        ))
+    }
+
     private func publish(_ next: Step) {
         step = next
         for continuation in continuations.values {

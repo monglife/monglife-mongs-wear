@@ -13,6 +13,8 @@ struct InteractionContentView: View {
     let mong: Mong?
     /// 슬롯 관리 화면 열기
     let onOpenSlotPick: () -> Void
+    /// 환전 메뉴 열기
+    let onOpenExchange: () -> Void
 
     @Environment(SpriteLoader.self) private var loader
 
@@ -37,7 +39,8 @@ struct InteractionContentView: View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
                 MongsCircleButton(iconName: "btn_icon_collection", borderName: "btn_border_orange", iconSize: 34) {}
-                MongsCircleButton(iconName: "point_icon_pay", borderName: "btn_border_purple_dark", isEnabled: isAlive) {}
+                MongsCircleButton(iconName: "point_icon_pay", borderName: "btn_border_purple_dark",
+                                  isEnabled: isAlive, action: onOpenExchange)
             }
             HStack(spacing: 8) {
                 MongsCircleButton(iconName: "btn_icon_map_search", borderName: "btn_border_blue", iconSize: 34, isEnabled: isAlive) {}

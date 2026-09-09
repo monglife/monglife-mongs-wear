@@ -158,9 +158,17 @@ Android 의 flavor × buildType 과 같은 구조다.
 
 ### 비밀값
 
-MQTT username/password 는 **xcconfig 에 넣지 않는다.** 이 저장소는 공개고, Android 는 그
-값들을 private 서브모듈 `configs`(= `monglife-mongs-wear-sub`)에 둔다.
-MQTT 를 붙일 때 그 서브모듈에 iOS 용 디렉토리를 추가해 거기서 읽는 방식으로 간다.
+MQTT username/password 는 **커밋되는 xcconfig 에 넣지 않는다.** 이 저장소는 공개고,
+Android 는 같은 값을 private 서브모듈 `configs`(= `monglife-mongs-wear-sub`)에 둔다.
+
+여기서는 gitignore 된 `Configurations/Secrets.local.xcconfig` 로 뺐다.
+`Base.xcconfig` 가 `#include?` 로 읽으므로 **파일이 없어도 빌드는 된다** —
+값이 빈 문자열이 되고 `MQTTBroker.isConfigured` 가 false 라 MQTT 만 꺼진다.
+
+```bash
+cp Configurations/Secrets.local.xcconfig.example Configurations/Secrets.local.xcconfig
+# 값을 채운 뒤 xcodegen generate
+```
 
 ---
 
@@ -312,9 +320,80 @@ Android 는 `PermissionUtil.verifyActivityPermission()` 으로 직접 확인할 
 (`HealthKitStepServiceTests`), **실제 HealthKit 동작과 백그라운드 전달 빈도는 실기기에서만**
 확인할 수 있다. UI 만 빠르게 보려면 `AppContainer` 에서 `SimulatedStepService()` 로 바꾼다.
 
+## MQTT 실시간 갱신
+
+Android `core/data-core/.../mqtt/client/MqttClient.kt` (381 LOC) + 어댑터 3곳의 구독을 옮겼다.
+
+| 만든 것 | Android 원본 |
+|---|---|
+| `MongsService/MQTTBroker.swift` | `MqttClient.kt` + `MqttConsumer` / `MqttRetryConsumer` |
+| `MongsService/RealtimeService.swift` | `ManagementPersistenceAdapter` / `PlayerPersistenceAdapter` / `DevicePersistenceAdapter` 의 구독 부분 |
+| `MongsModel/RealtimeEvent.swift` | `ManagementEventDto` / `PlayerEventDto` / `StepRestoreEventDto` |
+
+라이브러리는 **`swift-server-community/mqtt-nio`** 다. CocoaMQTT 는 watchOS 를 지원하지 않는다.
+
+### 토픽 4개
+
+`{MongsMQTTTopic}` 접두사가 붙는다 (`mongs-dev` 등).
+
+| 토픽 | 착지점 |
+|---|---|
+| `mong/management/{mongId}` | `MongService.apply(_:)` → 캐시 |
+| `member/{accountId}/starPoint` | `PlayerService.apply(starPoint:)` |
+| `member/{accountId}/slotCount` | `PlayerService.apply(slotCount:)` |
+| `device/{deviceId}/step/restore` | `StepService.applyRestore(walkingCount:eventId:)` |
+
+계정·기기 토픽은 로그인 뒤 `RealtimeService.start()` 가 한 번 연다.
+몽 토픽만 `observeMong(_:)` 로 갈아끼운다 — `MainPagerView` 가 현재 몽 id 변화를 보고 부른다.
+
+### 원본에서 그대로 가져온 것들
+
+Android 가 중복 구독·유실 버그를 겪고 넣은 장치들이다.
+
+- **구독 refcount + 공유 스트림.** 같은 토픽을 두 화면이 봐도 브로커 구독은 하나다
+  (원본 `subscribeCounterMap` + `SharedFlowCache`).
+- **정지 유예 5초.** 마지막 구독자가 사라져도 바로 UNSUBSCRIBE 하지 않는다.
+  0 이면 화면을 옮길 때마다 구독 해제 → 재구독 왕복이 생긴다
+  (`SharedFlowCache.DEFAULT_STOP_TIMEOUT_MILLIS`).
+- **재연결하면 다시 SUBSCRIBE 한다.** `cleanSession = true` 라 브로커에 구독이 남지 않는다
+  (원본 `MqttRetryConsumer.onConnectLost`).
+- **QoS 2 / cleanSession true / keepAlive 180.** Android 연결 옵션과 같은 값.
+
+### 알아 둘 것
+
+- 유예 5초 때문에 **슬롯을 바꾼 직후 이전 몽의 이벤트가 도착할 수 있다.**
+  `MongService.apply(_:)` 가 `mongId` 를 대조해 남의 상태를 버린다.
+- `clientId` 는 매번 새로 만든다. 같은 값으로 두 번 붙으면 브로커가 앞의 연결을 끊는다.
+- 페이로드는 HTTP 와 **같은 봉투**(`ResponseDto`)에 담겨 온다 — `APIResponse<T>` 를 그대로 쓴다.
+- 평문 TCP 라 `Info.plist` 의 `NSExceptionDomains` 에 브로커 호스트도 넣어야 한다.
+- **watchOS 는 백그라운드에서 연결이 끊긴다.** 다만 Android 도 `cleanSession = true` 에
+  retained 메시지가 없어 백그라운드 수신은 원래 안 된다 — 동작 패리티는 유지된다.
+
+---
+
+## 설정 화면 — iOS 에서 반만 옮겨지는 것
+
+원본 `SettingView` 는 알림·활동·위치 **세 권한의 부여 여부를 직접 읽어** 스위치에 그린다.
+iOS 는 그게 절반만 된다.
+
+| 원본 | 여기 |
+|---|---|
+| 알림 권한 | `UNUserNotificationCenter` 가 실제 상태를 준다 — 스위치 그대로 |
+| 활동 권한 | HealthKit **읽기** 권한은 언제나 `.notDetermined` 다. 스위치를 그리면 거짓말이라 "다시 요청" 줄로 바꿨다 |
+| 위치 권한 | 맵 탐색이 v1 범위 밖이라 아직 쓰지 않는다. 기능이 붙을 때 같이 넣는다 |
+
+알림 **옵션**(`DeviceOptionStore`)과 알림 **권한**은 다른 값이다. 권한이 있어도 사용자가
+앱 안에서 끌 수 있다. 원본처럼 권한이 없으면 옵션 스위치를 잠근다.
+
+로그아웃은 `RootViewModel.signOut()` 으로 올려 보낸다 — 게이트를 로그인 화면으로 되돌려야 하고,
+가는 길에 `AppContainer.stopRealtime()` 으로 MQTT 구독도 끊는다.
+
+---
+
 ## 화면 — Android 이식 현황
 
-로그인 + 메인 5쪽까지 원본 레이아웃 그대로 옮겼다. 에셋도 Android 원본을 그대로 쓴다.
+로그인 + 메인 5쪽 + 슬롯/환전/먹이/인벤토리/설정까지 원본 레이아웃 그대로 옮겼다.
+에셋도 Android 원본을 그대로 쓴다.
 
 | 화면 | Android 원본 |
 |---|---|
@@ -325,8 +404,56 @@ Android 는 `PermissionUtil.verifyActivityPermission()` 으로 직접 확인할 
 | `SlotContentView` | `pages/main/SlotContent.kt` |
 | `InteractionContentView` | `pages/main/InteractionContent.kt` (2/3/2 배치) |
 | `ConfigureContentView` | `pages/main/ConfigureContent.kt` (1/2/2 배치) |
+| `SlotPickView` 외 | `pages/slot/SlotPickView.kt` + 다이얼로그 2개 |
+| `ExchangeMenuView` / `ExchangeView` | `pages/exchange/ExchangeMenuView.kt` + `ExchangeStepView.kt` + `ExchangeStarPointView.kt` |
+| `FeedMenuView` / `FeedView` | `pages/feed/FeedMenuView.kt` + `FeedFoodView.kt` + `FeedSnackView.kt` |
+| `InventoryView` | `pages/inventory/InventoryView.kt` + `component/pages/inventory/InventoryItem.kt` |
+| `SettingView` | `pages/setting/SettingView.kt` |
 | `Theme/MongsButton.swift` | `component/common/button/*.kt` |
 | `Theme/MongsWidgets.swift` | `PayPointBox` · `ConditionSection` · `PageIndicator` · `LoadingBar` · `Logo` |
+
+### 두 화면을 하나로 합친 것들
+
+원본이 **경로와 필드명만 다르고 레이아웃이 완전히 같은** 화면을 둘씩 둔 자리가 있다.
+`diff` 로 확인하고 하나로 합쳤다.
+
+| 여기 | Android 원본 둘 | 가르는 값 |
+|---|---|---|
+| `FeedView` / `FeedViewModel` | `FeedFoodView` + `FeedSnackView` | `FeedItem.Kind` |
+| `ExchangeView` / `ExchangeViewModel` | `ExchangeStepView` + `ExchangeStarPointView` | `ExchangeViewModel.Kind` |
+
+**환전 쪽은 완전히 같지는 않다.** 합치면서 놓치기 쉬운 차이가 셋 있다:
+
+- 버튼 색이 다르다 — 걸음은 `BlueButton`, 별가루는 `YellowButton`
+- 가운데 위쪽 줄이 다르다 — 걸음은 글자만(`"N 걸음"`), 별가루는 아이콘 + `"x N"`
+- 페이포인트 아이콘 크기가 다르다 (걸음 24, 별가루 26)
+
+### ⚠️ 버튼 글자색은 스타일마다 다르다
+
+`YellowButton` 은 `MongsDarkBrown`, `BlueButton` 은 **`MongsNavy`** 다.
+한쪽 색으로 통일해 두면 파란 버튼이 전부 갈색 글자가 된다 (실제로 그렇게 새어 있었다).
+`MongsButton.Style.titleColor` 가 그 구분을 들고 있다.
+
+### ⚠️ 먹이 화면은 리스트가 아니라 캐러셀이다
+
+`ScrollView` 로 목록을 그리고 싶어지지만 원본은 **한 번에 한 종류만** 보여주고
+좌우 화살표(`SelectButton`)로 넘긴다. 아래 페이지 인디케이터의 점 개수가 곧 먹이 종류 수다.
+
+### ⚠️ 인벤토리 서랍은 세 겹이다
+
+`110×130` 짙은 회색(Compose `Color.LightGray` = `#CCCCCC`) 뒷판 위에
+밝은 회색(`#F0F0F0`) 탭과 본체를 얹는다. 탭은 **왼쪽 상단**이다 —
+원본 `Row` 가 `horizontalArrangement` 를 주지 않아 기본값이 Start 다.
+탭을 가운데 두거나 뒷판을 빼면 서랍 손잡이 모양이 사라진다.
+
+### `ScalingLazyColumn` → `List(.carousel)`
+
+중앙에서 멀수록 작아지고 흐려지는 Wear 의 리스트는 watchOS `List` 에
+`.listStyle(.carousel)` 하나로 대응된다. 크라운 스크롤과 위치 인디케이터도 따라온다.
+
+단, `Toggle` 에 `allowsHitTesting(false)` 를 걸어 그리기만 시키면 **그 영역이 죽는다.**
+원본은 Chip 전체와 Switch 양쪽이 같은 콜백을 받으므로,
+행 레이블에 `.contentShape(Rectangle())` 을 줘서 줄 전체를 탭 영역으로 만든다.
 
 ### 페이저 규칙 (Android `MainPagerViewModel` 상수)
 
@@ -418,7 +545,7 @@ Wear OS 만큼 넉넉하지 않아서, 라이브러리 선택이 아키텍처를
 
 | Android | watchOS | 상태 |
 |---|---|---|
-| Paho MQTT | `swift-server-community/mqtt-nio` | ⚠️ **CocoaMQTT 는 watchOS 미지원.** mqtt-nio 는 watchOS 6+ |
+| Paho MQTT | `swift-server-community/mqtt-nio` | ✅ 완료 — 위 MQTT 절 참고 (CocoaMQTT 는 watchOS 미지원) |
 | FCM | Firebase iOS SDK 또는 APNs 직접 | ⚠️ 스파이크 필요 — Firebase 의 watchOS 지원이 제한적 |
 | Google 로그인 (Legacy / Credential Manager) | GoogleSignIn-iOS 또는 `ASWebAuthenticationSession` | ⚠️ 스파이크 필요 — watchOS 지원 확인 |
 | Health Services Passive Monitoring | HealthKit `HKObserverQuery` + `enableBackgroundDelivery` | watchOS 엔 `PassiveListenerService` 대응물이 없다 |

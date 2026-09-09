@@ -26,6 +26,11 @@ public protocol StepService: Sendable {
     /// 그 왕복은 네트워크 레이어를 붙일 때 이 메서드 안에서 채운다.
     @discardableResult
     func exchange(units: Int) async throws -> ExchangeResult
+
+    /// 서버가 민 걸음 복구 이벤트를 반영한다.
+    ///
+    /// `eventId` 로 중복을 거른다 — MQTT QoS 2 라도 재전달은 일어난다.
+    func applyRestore(walkingCount: Int, eventId: String) async
 }
 
 /// 환전 결과

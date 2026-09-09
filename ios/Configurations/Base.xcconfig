@@ -33,6 +33,11 @@ CODE_SIGNING_ALLOWED = YES
 // 파일이 없으면 `#include?` 가 조용히 넘어가므로 시뮬레이터 빌드는 그대로 된다.
 #include? "Signing.local.xcconfig"
 
+// MQTT 자격증명. 공개 저장소에 남길 값이 아니라 따로 뺐다
+// (Android 가 같은 값을 private 서브모듈 configs 에 두는 것과 같은 이유).
+// Configurations/Secrets.local.xcconfig.example 을 복사해 채운다.
+#include? "Secrets.local.xcconfig"
+
 // Android 의 config.xml 타임아웃(초)과 동일한 값
 MONGS_CONNECT_TIMEOUT = 120
 MONGS_READ_TIMEOUT = 30

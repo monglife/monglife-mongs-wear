@@ -22,6 +22,9 @@ final class AppContainer {
     private let authService: AuthService?
     private let mongService: MongService?
     private let playerService: PlayerService?
+    /// MQTT 실시간 갱신. 자격증명이나 설정이 없으면 nil 이고, 그래도 앱은 그대로 돈다.
+    private let realtimeService: RealtimeService?
+    private let optionStore = DeviceOptionStore(store: UserDefaultsStore())
 
     init() {
         let configResult = Result { try AppConfig.load() }
@@ -33,6 +36,14 @@ final class AppContainer {
         // Keychain 은 앱 삭제 후에도 남지만, 세션까지 살아남으면 Android 와 동작이 달라진다.
         let tokenStore = TokenStore(store: secureStore, installMarker: UserDefaultsStore())
 
+        // 시뮬레이터에는 걸음 데이터가 없어 항상 0 이 나온다. 건강 앱에서 직접 넣거나
+        // 실기기로 확인해야 한다. `SimulatedStepService()` 로 바꾸면 UI 만 빠르게 볼 수 있다.
+        let stepService: any StepService = HealthKitStepService(
+            wallet: StepWalletStore(),
+            reader: HealthKitStepReader()
+        )
+        self.stepService = stepService
+
         if let config = try? configResult.get() {
             let api = APIClient(config: config, tokenStore: tokenStore)
             self.authService = AuthService(
@@ -41,21 +52,42 @@ final class AppContainer {
                 signInClient: AppleSignInClient(),
                 identity: Self.clientIdentity(secureStore: secureStore)
             )
-            self.mongService = MongService(api: api, cache: MongCache())
-            self.playerService = PlayerService(api: api)
+            let mongService = MongService(api: api, cache: MongCache())
+            let playerService = PlayerService(api: api)
+            self.mongService = mongService
+            self.playerService = playerService
+            self.realtimeService = RealtimeService(
+                broker: MQTTBroker(config: config),
+                mongService: mongService,
+                playerService: playerService,
+                stepService: stepService,
+                tokenStore: tokenStore,
+                deviceIdentifier: DeviceIdentifierStore(store: secureStore)
+            )
         } else {
             // 설정을 못 읽으면 네트워크 계층을 만들 수 없다. 앱은 오류 화면만 띄운다.
             self.authService = nil
             self.mongService = nil
             self.playerService = nil
+            self.realtimeService = nil
         }
+    }
 
-        // 시뮬레이터에는 걸음 데이터가 없어 항상 0 이 나온다. 건강 앱에서 직접 넣거나
-        // 실기기로 확인해야 한다. `SimulatedStepService()` 로 바꾸면 UI 만 빠르게 볼 수 있다.
-        self.stepService = HealthKitStepService(
-            wallet: StepWalletStore(),
-            reader: HealthKitStepReader()
-        )
+    // MARK: - 실시간 갱신
+
+    /// 로그인 뒤 메인이 뜰 때 시작한다.
+    func startRealtime() async {
+        await realtimeService?.start()
+    }
+
+    /// 현재 몽이 바뀔 때마다 구독을 갈아끼운다.
+    func observeRealtimeMong(_ mongId: Int64?) async {
+        await realtimeService?.observeMong(mongId)
+    }
+
+    /// 로그아웃 시 구독과 연결을 정리한다.
+    func stopRealtime() async {
+        await realtimeService?.stop()
     }
 
     var config: AppConfig? { try? configResult.get() }
@@ -70,6 +102,35 @@ final class AppContainer {
 
     func makeMainSlotViewModel() -> MainSlotViewModel? {
         mongService.map { MainSlotViewModel(mongService: $0) }
+    }
+
+    func makeExchangeViewModel(kind: ExchangeViewModel.Kind) -> ExchangeViewModel? {
+        guard let mongService, let playerService else { return nil }
+        return ExchangeViewModel(
+            kind: kind,
+            stepService: stepService,
+            playerService: playerService,
+            mongService: mongService
+        )
+    }
+
+    func makeSettingViewModel(signOut: @escaping @Sendable () async -> Void) -> SettingViewModel {
+        SettingViewModel(
+            optionStore: optionStore,
+            notification: NotificationPermission(),
+            stepService: stepService,
+            signOut: signOut
+        )
+    }
+
+    func makeFeedViewModel(kind: FeedItem.Kind) -> FeedViewModel? {
+        guard let mongService else { return nil }
+        return FeedViewModel(kind: kind, mongService: mongService)
+    }
+
+    func makeInventoryViewModel() -> InventoryViewModel? {
+        guard let mongService else { return nil }
+        return InventoryViewModel(mongService: mongService)
     }
 
     func makeSlotPickViewModel() -> SlotPickViewModel? {

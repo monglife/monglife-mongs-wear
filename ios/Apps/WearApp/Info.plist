@@ -58,6 +58,13 @@
 		<key>NSExceptionDomains</key>
 		<dict>
 			<!-- dev 프로파일 서버 -->
+			<key>100.0.0.20</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
 			<key>100.0.0.10</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
@@ -69,7 +76,7 @@
 	<!--
 	  Android 의 configs/core/data-core/<flavor>/values/config.xml 대응.
 	  값은 Configurations/*.xcconfig 에서 오고, MongsCore/AppConfig.swift 가 읽는다.
-	  MQTT username/password 는 비밀값이라 여기 없다 (README 참고).
+	  MQTT username/password 는 gitignore 된 Configurations/Secrets.local.xcconfig 에서 온다.
 	-->
 	<!--
 	  픽셀 폰트. 파일을 번들에 넣는 것만으로는 부족하고 여기 이름을 적어야 등록된다.
@@ -95,6 +102,10 @@
 	<string>$(MONGS_MQTT_TOPIC)</string>
 	<key>MongsMQTTKeepAlive</key>
 	<string>$(MONGS_MQTT_KEEP_ALIVE)</string>
+	<key>MongsMQTTUsername</key>
+	<string>$(MONGS_MQTT_USERNAME)</string>
+	<key>MongsMQTTPassword</key>
+	<string>$(MONGS_MQTT_PASSWORD)</string>
 	<key>MongsConnectTimeout</key>
 	<string>$(MONGS_CONNECT_TIMEOUT)</string>
 	<key>MongsReadTimeout</key>

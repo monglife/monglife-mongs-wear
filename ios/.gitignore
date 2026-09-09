@@ -26,6 +26,10 @@ Packages/*/.swiftpm/
 # DEVELOPMENT_TEAM 은 사람마다 다르다. .example 만 커밋한다.
 Configurations/Signing.local.xcconfig
 
+# ── 비밀값 ────────────────────────────────────────────────────────────
+# MQTT 자격증명. .example 만 커밋한다.
+Configurations/Secrets.local.xcconfig
+
 # ── 기타 ──────────────────────────────────────────────────────────────
 .DS_Store
 *.log

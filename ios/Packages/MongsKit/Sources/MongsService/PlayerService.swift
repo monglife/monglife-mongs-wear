@@ -58,6 +58,33 @@ public actor PlayerService {
         return publish(player)
     }
 
+    /// 별가루를 페이포인트로 환전한다.
+    ///
+    /// Android `POST user/player/exchange/starPoint`.
+    /// 몽의 페이포인트가 올라가므로 호출 쪽에서 몽도 다시 읽어야 한다.
+    @discardableResult
+    public func exchangeStarPoint(mongId: Int64, starPoint: Int) async throws -> Player {
+        struct Request: Encodable {
+            let mongId: Int64
+            let starPoint: Int
+        }
+        struct Result: Decodable, Sendable {
+            let accountId: Int64
+            let starPoint: Int
+        }
+
+        let result: Result = try await api.request(try Endpoint.json(
+            host: .gateway,
+            method: .post,
+            path: "user/player/exchange/starPoint",
+            body: Request(mongId: mongId, starPoint: starPoint)
+        ))
+
+        // 응답이 슬롯 수를 주지 않으므로 기존 값을 유지한다.
+        let slotCount = cached?.slotCount ?? 0
+        return publish(Player(accountId: result.accountId, slotCount: slotCount, starPoint: result.starPoint))
+    }
+
     /// MQTT 푸시를 반영한다. 서버가 슬롯 수/별가루만 보내므로 나머지는 유지한다.
     public func apply(slotCount: Int? = nil, starPoint: Int? = nil) {
         guard let current = cached else { return }

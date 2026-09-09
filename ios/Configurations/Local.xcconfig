@@ -6,7 +6,7 @@
 MONGS_PROFILE = local
 MONGS_DISCOVERY_API_URL = http:/$()/127.0.0.1:8010/api/
 MONGS_GATEWAY_API_URL = http:/$()/127.0.0.1:8000/api/
-MONGS_MQTT_URL = tcp:/$()/100.0.0.10:1883
+MONGS_MQTT_URL = tcp:/$()/100.0.0.20:1883
 MONGS_MQTT_TOPIC = mongs-dev
 
 // ⚠️ 임시. 로컬 discovery DB 에 com.mongs.wear 는 2.3.0 까지만 등록돼 있어서

@@ -11,12 +11,15 @@ struct StepContentView: View {
     @State private var viewModel: MainStepViewModel
     /// 페이포인트는 몽에 딸린 값이라 슬롯 쪽에서 받아온다.
     var mong: Mong?
+    /// 환전 화면 열기. 원본도 버튼이 화면으로 넘기는 메뉴 항목이다.
+    var onExchange: () -> Void = {}
 
     @Environment(SpriteLoader.self) private var loader
 
-    init(viewModel: MainStepViewModel, mong: Mong? = nil) {
+    init(viewModel: MainStepViewModel, mong: Mong? = nil, onExchange: @escaping () -> Void = {}) {
         _viewModel = State(initialValue: viewModel)
         self.mong = mong
+        self.onExchange = onExchange
     }
 
     var body: some View {
@@ -53,16 +56,13 @@ struct StepContentView: View {
                 VStack {
                     if mong != nil {
                         // 원본은 걸음 수와 무관하게 몽 상태(DEAD/DELETE)로만 잠근다 —
-                        // 버튼이 환전 화면으로 넘어가는 메뉴 항목이고, 금액 판단은 그 화면이 한다.
-                        // 환전 화면은 아직 없어서 여기서 바로 환전한다.
+                        // 버튼은 환전 화면으로 넘어가는 메뉴 항목이고, 금액 판단은 그 화면이 한다.
                         MongsButton(
                             title: "환전",
                             style: .blue,
                             width: 70,
                             isEnabled: mong?.isInteractable == true
-                        ) {
-                            Task { await viewModel.exchange() }
-                        }
+                        , action: onExchange)
                     }
                     Spacer(minLength: 0)
                 }

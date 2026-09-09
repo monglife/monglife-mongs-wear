@@ -18,6 +18,10 @@ struct SlotContentView: View {
     @Bindable var viewModel: MainSlotViewModel
     /// 슬롯 관리 화면 열기
     let onOpenSlotPick: () -> Void
+    /// 먹이 메뉴 열기
+    let onOpenFeed: () -> Void
+    /// 인벤토리 열기
+    let onOpenInventory: () -> Void
 
     @Environment(SpriteLoader.self) private var loader
 
@@ -41,9 +45,16 @@ struct SlotContentView: View {
     /// 알에서 부화하기까지 걸리는 시간. 원본 `SlotContent` 의 `5 * 60 * 1000L`.
     private static let hatchDuration: TimeInterval = 5 * 60
 
-    init(viewModel: MainSlotViewModel, onOpenSlotPick: @escaping () -> Void) {
+    init(
+        viewModel: MainSlotViewModel,
+        onOpenSlotPick: @escaping () -> Void,
+        onOpenFeed: @escaping () -> Void,
+        onOpenInventory: @escaping () -> Void
+    ) {
         self.viewModel = viewModel
         self.onOpenSlotPick = onOpenSlotPick
+        self.onOpenFeed = onOpenFeed
+        self.onOpenInventory = onOpenInventory
     }
 
     var body: some View {
@@ -155,7 +166,7 @@ struct SlotContentView: View {
             Spacer(minLength: 0)
             MongView(
                 code: mong.resource,
-                expression: mong.expression(isHappy: viewModel.isHappy),
+                expression: mong.expression(isEating: viewModel.isEating, isHappy: viewModel.isHappy),
                 bodySize: 120
             )
             .onTapGesture { viewModel.openInteractionDialog() }
@@ -254,7 +265,12 @@ struct SlotContentView: View {
     @ViewBuilder
     private func dialog(_ mong: Mong) -> some View {
         if viewModel.isInteractionDialogOpen {
-            InteractionDialogView(mong: mong, viewModel: viewModel)
+            InteractionDialogView(
+                mong: mong,
+                viewModel: viewModel,
+                onOpenFeed: onOpenFeed,
+                onOpenInventory: onOpenInventory
+            )
         }
     }
 

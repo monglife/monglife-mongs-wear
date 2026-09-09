@@ -13,6 +13,10 @@ struct InteractionDialogView: View {
 
     let mong: Mong
     let viewModel: MainSlotViewModel
+    /// 먹이 메뉴 열기
+    let onOpenFeed: () -> Void
+    /// 인벤토리 열기
+    let onOpenInventory: () -> Void
 
     @Environment(SpriteLoader.self) private var loader
 
@@ -70,17 +74,19 @@ struct InteractionDialogView: View {
                         ) { Task { await viewModel.cleanPoop() } }
                     }
 
-                    // 0.3 — 먹이주기 / 인벤토리 (이동할 화면은 v1 후속)
+                    // 0.3 — 먹이주기 / 인벤토리
                     buttonRow(height: available * 0.3) {
                         MongsCircleButton(
                             iconName: "btn_icon_feed", borderName: "btn_border_yellow",
-                            iconSize: 34, isEnabled: isHatched && !mong.isSleep && mong.isInteractable
-                        ) {}
+                            iconSize: 34, isEnabled: isHatched && !mong.isSleep && mong.isInteractable,
+                            action: onOpenFeed
+                        )
 
                         MongsCircleButton(
                             iconName: "btn_icon_inventory", borderName: "btn_border_green",
-                            iconSize: 34, isEnabled: isHatched && !mong.isSleep && mong.isInteractable
-                        ) {}
+                            iconSize: 34, isEnabled: isHatched && !mong.isSleep && mong.isInteractable,
+                            action: onOpenInventory
+                        )
                     }
 
                     Spacer().frame(height: 20)

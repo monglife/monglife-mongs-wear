@@ -126,6 +126,92 @@ public actor MongService {
         try await interact(MongResponse.Evolution.self, method: .put, path: "evolution") { $0.applying($1) }
     }
 
+    /// MQTT 푸시를 캐시에 반영한다.
+    ///
+    /// **다른 몽의 이벤트는 버린다.** 슬롯을 바꾼 직후엔 이전 몽의 구독이 유예(5초) 동안
+    /// 살아 있어서 남의 상태가 도착할 수 있다.
+    public func apply(_ event: RealtimeEvent.Management) async {
+        guard let current = await cache.mong(), current.mongId == event.mongId else { return }
+        await store(current.applying(event))
+    }
+
+    // MARK: - 먹이 / 인벤토리
+
+    /// 먹이 목록 조회.
+    ///
+    /// 서버가 밥과 간식을 다른 경로로 주고 필드명도 다르다(`foodCode` / `snackCode`).
+    /// 화면에서는 같은 목록이라 여기서 하나로 맞춘다.
+    public func feedItems(kind: FeedItem.Kind) async throws -> [FeedItem] {
+        guard let mong = await cache.mong() else { throw MongError.noMong }
+        let path = "character/interaction/\(kind.path)/\(mong.mongId)"
+        let endpoint = Endpoint(host: .gateway, method: .get, path: path)
+
+        switch kind {
+        case .food:
+            let list: [MongResponse.FoodList] = try await api.request(endpoint)
+            return list.map(\.item)
+        case .snack:
+            let list: [MongResponse.SnackList] = try await api.request(endpoint)
+            return list.map(\.item)
+        }
+    }
+
+    /// 먹이 주기. 응답이 바뀐 스탯을 주므로 캐시에 병합한다.
+    @discardableResult
+    public func feed(_ item: FeedItem) async throws -> Mong? {
+        guard let mong = await cache.mong() else { throw MongError.noMong }
+
+        // 요청 본문의 키 이름이 종류마다 다르다.
+        let body = [item.kind.codeField: item.code]
+        let response: MongResponse.Consume = try await api.request(try Endpoint.json(
+            host: .gateway,
+            method: .post,
+            path: "character/interaction/\(item.kind.path)/\(mong.mongId)",
+            body: body
+        ))
+
+        let base = await cache.mong() ?? mong
+        return await store(base.applying(response))
+    }
+
+    /// 인벤토리 목록 조회. 서버가 페이징으로 준다.
+    ///
+    /// `page` 는 **1-based** 다 — Android `InventoryViewModel.INIT_PAGE = 1` 과 맞춘다.
+    public func inventory(page: Int = 1, size: Int = 4) async throws -> InventoryPage {
+        guard let mong = await cache.mong() else { throw MongError.noMong }
+        let response: APIPageResponse<InventoryItem> = try await api.requestPage(
+            Endpoint(
+                host: .gateway,
+                method: .get,
+                path: "character/interaction/inventory/\(mong.mongId)",
+                query: ["page": "\(page)", "size": "\(size)"]
+            )
+        )
+        return InventoryPage(
+            items: response.result,
+            page: response.page ?? page,
+            totalPage: response.totalPage ?? 0,
+            isLastPage: response.isLastPage ?? true
+        )
+    }
+
+    /// 인벤토리 항목 사용.
+    @discardableResult
+    public func useInventory(_ item: InventoryItem) async throws -> Mong? {
+        guard let mong = await cache.mong() else { throw MongError.noMong }
+
+        struct Request: Encodable { let inventoryId: Int64 }
+        let response: MongResponse.Consume = try await api.request(try Endpoint.json(
+            host: .gateway,
+            method: .post,
+            path: "character/interaction/inventory/\(mong.mongId)",
+            body: Request(inventoryId: item.inventoryId)
+        ))
+
+        let base = await cache.mong() ?? mong
+        return await store(base.applying(response))
+    }
+
     /// 졸업. 몽이 떠나므로 캐시를 비운다.
     public func graduate() async throws {
         guard let mong = await cache.mong() else { throw MongError.noMong }

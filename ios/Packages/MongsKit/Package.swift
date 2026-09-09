@@ -28,11 +28,18 @@ let package = Package(
         .library(name: "MongsService", targets: ["MongsService"]),
         .library(name: "MongsViewModel", targets: ["MongsViewModel"]),
     ],
+    dependencies: [
+        // CocoaMQTT 는 watchOS 를 지원하지 않는다. mqtt-nio 는 watchOS 6+ 를 지원한다.
+        .package(url: "https://github.com/swift-server-community/mqtt-nio.git", from: "2.11.0"),
+    ],
     targets: [
         // ⚠️ dependencies 는 비어 있어야 한다. 모델은 아무것도 모른다.
         .target(name: "MongsModel"),
 
-        .target(name: "MongsService", dependencies: ["MongsModel"]),
+        .target(name: "MongsService", dependencies: [
+            "MongsModel",
+            .product(name: "MQTTNIO", package: "mqtt-nio"),
+        ]),
 
         // 뷰모델은 Service 를 직접 부른다. 그 아래(HTTP/HealthKit/MQTT)는 모른다.
         .target(name: "MongsViewModel", dependencies: ["MongsModel", "MongsService"]),

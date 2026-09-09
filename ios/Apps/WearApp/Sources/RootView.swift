@@ -52,7 +52,7 @@ struct RootView: View {
         case .signedOut:
             LoginView(viewModel: viewModel)
         case .signedIn:
-            MainPagerView()
+            MainPagerView(root: viewModel)
         }
     }
 }

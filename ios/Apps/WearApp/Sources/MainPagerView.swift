@@ -14,6 +14,9 @@ import SwiftUI
 /// 펫이 있는 쪽으로 시선을 모은다.
 struct MainPagerView: View {
 
+    /// 로그아웃은 루트 게이트를 로그인 화면으로 되돌려야 해서 루트 ViewModel 이 필요하다.
+    let root: RootViewModel
+
     @Environment(AppContainer.self) private var container
     @Environment(SpriteLoader.self) private var loader
 
@@ -22,6 +25,14 @@ struct MainPagerView: View {
     @State private var page: Int = 0
     /// 슬롯 관리 화면. Android 는 라우터로 넘기지만 watchOS 는 전체 화면 시트가 자연스럽다.
     @State private var isSlotPickPresented = false
+    /// 환전. nil 이면 닫힘, 값이 있으면 그 종류의 환전 화면이 열린다.
+    @State private var exchangeKind: ExchangeViewModel.Kind?
+    @State private var isExchangeMenuPresented = false
+    /// 먹이 메뉴 / 먹이 화면. nil 이면 닫힘.
+    @State private var isFeedMenuPresented = false
+    @State private var feedKind: FeedItem.Kind?
+    @State private var isInventoryPresented = false
+    @State private var isSettingPresented = false
 
     private enum Page {
         case step, condition, slot, interaction, configure
@@ -74,6 +85,63 @@ struct MainPagerView: View {
                 LoadingBar()
             }
         }
+        .fullScreenCover(isPresented: $isExchangeMenuPresented) {
+            ExchangeMenuView(
+                onSelect: { kind in
+                    isExchangeMenuPresented = false
+                    exchangeKind = kind
+                },
+                onClose: { isExchangeMenuPresented = false }
+            )
+        }
+        .fullScreenCover(item: $exchangeKind) { kind in
+            if let viewModel = container.makeExchangeViewModel(kind: kind) {
+                ExchangeView(viewModel: viewModel) {
+                    exchangeKind = nil
+                    Task { await slotViewModel?.reload() }
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $isSettingPresented) {
+            SettingView(
+                viewModel: container.makeSettingViewModel {
+                    // 세션이 끝나면 계정 토픽 구독도 끊어야 한다.
+                    await container.stopRealtime()
+                    await root.signOut()
+                }
+            ) {
+                isSettingPresented = false
+            }
+        }
+        .fullScreenCover(isPresented: $isFeedMenuPresented) {
+            FeedMenuView { kind in
+                isFeedMenuPresented = false
+                feedKind = kind
+            }
+        }
+        .fullScreenCover(item: $feedKind) { kind in
+            if let viewModel = container.makeFeedViewModel(kind: kind) {
+                FeedView(viewModel: viewModel) {
+                    feedKind = nil
+                    // 원본은 먹이 화면에서 메인까지 되돌아오며 먹는 표정을 띄운다.
+                    Task {
+                        await slotViewModel?.reload()
+                        await slotViewModel?.eatingEvent()
+                    }
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $isInventoryPresented) {
+            if let viewModel = container.makeInventoryViewModel() {
+                InventoryView(viewModel: viewModel) {
+                    isInventoryPresented = false
+                    Task {
+                        await slotViewModel?.reload()
+                        await slotViewModel?.eatingEvent()
+                    }
+                }
+            }
+        }
         .fullScreenCover(isPresented: $isSlotPickPresented) {
             if let viewModel = container.makeSlotPickViewModel() {
                 SlotPickView(viewModel: viewModel) {
@@ -94,6 +162,13 @@ struct MainPagerView: View {
             // ⚠️ 로딩은 페이저가 시작한다. 자식 뷰(SlotContentView)에 맡기면
             // "로딩이 끝나야 자식이 만들어지는데, 자식이 로딩을 시작하는" 순환이 된다.
             await viewModel?.observe()
+
+            // MQTT 는 로그인 뒤 메인이 뜰 때 붙는다. 계정·기기 토픽이 먼저 열리고,
+            // 몽 토픽은 아래 onChange 가 현재 몽을 보고 연다.
+            await container.startRealtime()
+        }
+        .onChange(of: slotViewModel?.mong?.mongId) { _, mongId in
+            Task { await container.observeRealtimeMong(mongId) }
         }
         // 페이저가 실제로 만들어진 뒤에 시작 쪽으로 맞춘다.
         // TabView 가 붙기 전에 selection 을 써 두면 TabView 가 자기 값으로 덮어쓴다.
@@ -109,20 +184,26 @@ struct MainPagerView: View {
         case .step:
             StepContentView(
                 viewModel: container.makeMainStepViewModel(),
-                mong: viewModel.mong
+                mong: viewModel.mong,
+                onExchange: { exchangeKind = .step }
             )
         case .condition:
             ConditionContentView(viewModel: viewModel)
         case .slot:
-            SlotContentView(viewModel: viewModel) {
-                isSlotPickPresented = true
-            }
+            SlotContentView(
+                viewModel: viewModel,
+                onOpenSlotPick: { isSlotPickPresented = true },
+                onOpenFeed: { isFeedMenuPresented = true },
+                onOpenInventory: { isInventoryPresented = true }
+            )
         case .interaction:
-            InteractionContentView(mong: viewModel.mong) {
-                isSlotPickPresented = true
-            }
+            InteractionContentView(
+                mong: viewModel.mong,
+                onOpenSlotPick: { isSlotPickPresented = true },
+                onOpenExchange: { isExchangeMenuPresented = true }
+            )
         case .configure:
-            ConfigureContentView()
+            ConfigureContentView(onOpenSetting: { isSettingPresented = true })
         }
     }
 }

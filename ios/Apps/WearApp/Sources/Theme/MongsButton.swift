@@ -18,6 +18,14 @@ struct MongsButton: View {
             case .blue: "bnt_bg_blue"
             }
         }
+
+        /// 글자색도 다르다 — `YellowButton` 은 MongsDarkBrown, `BlueButton` 은 MongsNavy.
+        var titleColor: Color {
+            switch self {
+            case .yellow: MongsColor.darkBrown
+            case .blue: MongsColor.navy
+            }
+        }
     }
 
     let title: String
@@ -37,7 +45,7 @@ struct MongsButton: View {
                     .frame(width: width, height: height)
                 Text(title)
                     .mongsFont(fontSize)
-                    .foregroundStyle(MongsColor.darkBrown)
+                    .foregroundStyle(style.titleColor)
                     .lineLimit(1)
                     .padding(.horizontal, 10)
             }
