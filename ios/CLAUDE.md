@@ -325,6 +325,64 @@ Android 는 `PermissionUtil.verifyActivityPermission()` 으로 직접 확인할 
 (`HealthKitStepServiceTests`), **실제 HealthKit 동작과 백그라운드 전달 빈도는 실기기에서만**
 확인할 수 있다. UI 만 빠르게 보려면 `AppContainer` 에서 `SimulatedStepService()` 로 바꾼다.
 
+## 인앱 결제 (StoreKit 2)
+
+Android `core/billing-core/.../GoogleBillingClient.kt` + `pages/charge/*` 이식.
+
+| 만든 것 | Android 원본 |
+|---|---|
+| `MongsService/PurchaseClient.swift` | `GoogleBillingClient.kt` |
+| `MongsService/StoreService.swift` | `StoreWebAdapter` + `GetProductsUseCase` |
+| `MongsViewModel/ChargeViewModel.swift` | `ChargeStarPointViewModel.kt` |
+| `Apps/WearApp/Sources/ChargeView.swift` | `ChargeStarPointView.kt` |
+| `MongsModel/Store.swift` | `Product` / `Order` / `*Vo` / `StoreRequestDto` / `StoreResponseDto` |
+
+### Google Play Billing → StoreKit 2 대응
+
+| Android | 여기 |
+|---|---|
+| `queryProductDetails` | `Product.products(for:)` |
+| `launchBillingFlow` + `PurchasesUpdatedListener` | `product.purchase()` — 결과가 그 자리에서 온다 |
+| `queryPurchasesAsync` (미소비 주문 회수) | `Transaction.unfinished` |
+| `consumeAsync` | `transaction.finish()` |
+| `orderId` | `Transaction.id` |
+| `purchaseToken` | 서명된 트랜잭션 **JWS** (`VerificationResult.jwsRepresentation`) |
+
+**소모품은 `finish()` 하기 전까지 `Transaction.unfinished` 에 남는다.**
+Android 가 `queryPurchasesAsync` 로 하던 회수 경로가 정확히 그 자리다.
+
+### 반드시 유지해야 하는 것들
+
+원본이 **중복 소비/미지급 사고를 겪고** 넣은 장치들이다. 결제는 되돌릴 수 없다.
+
+- **서버 지급이 끝난 뒤에만 `finish()` 한다.** 먼저 닫으면 서버가 실패했을 때 스토어에도
+  주문이 안 남아 **결제하고 못 받는** 상태가 된다.
+- **소비 시도 기록은 요청 *전에* 남긴다** (`attemptedOrderIds`). 실패로 빠져나가도 자동
+  재시도가 돌지 않게 — 사용자가 "소비" 버튼으로 직접 재시도한다.
+- **자동 소비는 진입과 복귀에서만.** 오류 복구 훅에 넣으면 실패 → 복구 → 재시도 → 실패
+  무한 루프가 된다.
+- **결제 중에는 화면 전체를 덮어 터치를 막는다.** 버튼 하나만 막았다가, 재조회로 "소비"
+  버튼이 로딩바 위로 드러나 중복 소비 요청이 나가는 사고가 있었다.
+- **로딩과 내용이 배타가 아니다.** 결제 중에는 목록을 유지한 채 덮개만 씌운다.
+- **미소비 주문이 있으면 "구매" 대신 "소비" 버튼**을 띄운다 — 자동 회수가 실패했을 때의 폴백.
+
+### ⚠️ 가격은 서버가 아니라 스토어가 정한다
+
+서버 `price` 는 원화 정수지만 사용자가 실제로 내는 금액과 통화는 App Store 가 정한다
+(지역·세금·환율). 서버 값은 상품 식별·정렬에만 쓰고, 화면에는
+`Product.displayPrice` 를 그린다. 스토어를 못 읽으면 서버 값으로 떨어진다.
+
+### 유료 계정 없이 검증하기
+
+`Configurations/Mongs.storekit` 이 App Store Connect 를 대신한다.
+`MongsWear-Local` 스킴에 연결해 뒀다.
+
+**⚠️ 스킴 설정이라 `simctl launch` 로는 적용되지 않는다.** 결제 흐름을 보려면
+**Xcode 에서 그 스킴으로 실행**해야 한다. `simctl` 로 띄우면 상품을 못 찾아
+표시가가 서버 값(`500원`)으로 떨어지고 구매 버튼은 오류가 난다.
+
+---
+
 ## 푸시 알림 (APNs)
 
 Android `app/wear-app/.../service/NotificationService.kt` (FCM) 대응.

@@ -27,6 +27,7 @@ final class AppContainer {
     private let optionStore = DeviceOptionStore(store: UserDefaultsStore())
     /// APNs. 설정을 못 읽으면 인증 서비스가 없어 nil 이다.
     private(set) var pushService: PushService?
+    private let storeService: StoreService?
 
     init() {
         let configResult = Result { try AppConfig.load() }
@@ -60,6 +61,11 @@ final class AppContainer {
             self.mongService = mongService
             self.playerService = playerService
             self.pushService = PushService(authService: authService, optionStore: optionStore)
+            self.storeService = StoreService(
+                api: api,
+                purchases: PurchaseClient(),
+                playerService: playerService
+            )
             self.realtimeService = RealtimeService(
                 broker: MQTTBroker(config: config),
                 mongService: mongService,
@@ -74,6 +80,7 @@ final class AppContainer {
             self.mongService = nil
             self.playerService = nil
             self.pushService = nil
+            self.storeService = nil
             self.realtimeService = nil
         }
     }
@@ -144,6 +151,11 @@ final class AppContainer {
                 await pushService?.notificationOptionChanged()
             }
         )
+    }
+
+    func makeChargeViewModel() -> ChargeViewModel? {
+        guard let storeService, let playerService else { return nil }
+        return ChargeViewModel(storeService: storeService, playerService: playerService)
     }
 
     func makeFeedViewModel(kind: FeedItem.Kind) -> FeedViewModel? {

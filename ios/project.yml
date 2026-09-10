@@ -75,7 +75,12 @@ schemes:
   MongsWear-Local:
     build:
       targets: { MongsWear: all }
-    run: { config: Debug-Local }
+    # 유료 계정 없이 결제를 검증하려면 StoreKit Configuration 파일이 필요하다.
+    # Xcode 에서 이 스킴으로 실행하면 App Store 대신 이 파일의 상품을 쓴다.
+    # ⚠️ 스킴 설정이라 `simctl launch` 로 띄우면 적용되지 않는다 — Xcode 로 실행해야 한다.
+    run:
+      config: Debug-Local
+      storeKitConfiguration: Configurations/Mongs.storekit
     test: { config: Debug-Local }
     profile: { config: Release-Local }
     analyze: { config: Debug-Local }

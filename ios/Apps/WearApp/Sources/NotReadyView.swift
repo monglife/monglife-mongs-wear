@@ -50,7 +50,6 @@ enum NotReadyDestination: String, Identifiable, CaseIterable {
     case training
     case battle
     case help
-    case charge
     case notice
     case feedback
 
@@ -65,7 +64,6 @@ enum NotReadyDestination: String, Identifiable, CaseIterable {
         case .training: "훈련"
         case .battle: "배틀"
         case .help: "도움말"
-        case .charge: "충전"
         case .notice: "공지사항"
         case .feedback: "오류 신고"
         }

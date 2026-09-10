@@ -33,6 +33,7 @@ struct MainPagerView: View {
     @State private var feedKind: FeedItem.Kind?
     @State private var isInventoryPresented = false
     @State private var isSettingPresented = false
+    @State private var isChargePresented = false
     /// 아직 이식하지 않은 화면. nil 이면 닫힘.
     @State private var notReady: NotReadyDestination?
 
@@ -102,6 +103,11 @@ struct MainPagerView: View {
                     exchangeKind = nil
                     Task { await slotViewModel?.reload() }
                 }
+            }
+        }
+        .fullScreenCover(isPresented: $isChargePresented) {
+            if let viewModel = container.makeChargeViewModel() {
+                ChargeView(viewModel: viewModel) { isChargePresented = false }
             }
         }
         .fullScreenCover(item: $notReady) { destination in
@@ -221,6 +227,7 @@ struct MainPagerView: View {
         case .configure:
             ConfigureContentView(
                 onOpenSetting: { isSettingPresented = true },
+                onOpenCharge: { isChargePresented = true },
                 onNotReady: { notReady = $0 }
             )
         }
