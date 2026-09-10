@@ -325,6 +325,54 @@ Android 는 `PermissionUtil.verifyActivityPermission()` 으로 직접 확인할 
 (`HealthKitStepServiceTests`), **실제 HealthKit 동작과 백그라운드 전달 빈도는 실기기에서만**
 확인할 수 있다. UI 만 빠르게 보려면 `AppContainer` 에서 `SimulatedStepService()` 로 바꾼다.
 
+## 배틀 (실시간 1:1)
+
+Android `data/battle-data` + `pages/battle/*` (2,293 LOC) 이식.
+**HTTP 와 MQTT 를 함께 쓰는 유일한 화면**이다.
+
+| 만든 것 | Android 원본 |
+|---|---|
+| `MongsModel/Battle.swift` | `MatchEventDto` / `MatchQueueEventDto` / enum 3종 |
+| `MongsService/BattleService.swift` | `data/battle-data/*` 어댑터 4개 |
+| `MongsViewModel/BattleViewModel.swift` | `BattleMenuViewModel` + `BattleMatchViewModel` |
+| `Apps/WearApp/Sources/BattleViews.swift` | `BattleMenuView` / `BattleMatchView` / 다이얼로그 |
+
+### 토픽 7종
+
+| 토픽 | 방향 |
+|---|---|
+| `battle/queue/{deviceId}` | 구독 — 매칭 성사 |
+| `battle/match/{matchId}` | 구독 — 라운드 갱신 |
+| `battle/match/over/{matchId}` | 구독 — 매치 종료 |
+| `battle/queue/{mongId}` | 발행 — 대기열 이탈 |
+| `battle/match/enter/{matchId}` | 발행 — 입장 |
+| `battle/match/pick/{matchId}` | 발행 — 선택 |
+| `battle/match/exit/{matchId}` | 발행 — 퇴장 |
+
+⚠️ **대기열은 구독이 `deviceId`, 발행이 `mongId` 다.** 접두사가 같아 헷갈리기 쉽다.
+
+`MQTTBroker` 는 `RealtimeService` 와 **같은 인스턴스를 공유한다** — 연결을 둘로 열지 않는다.
+
+### 반드시 지켜야 하는 것들
+
+- **구독을 먼저 걸고 등록/입장을 알린다.** 반대로 하면 바로 성사된 매칭이나
+  즉시 시작된 라운드를 놓친다.
+- **화면을 떠날 때 퇴장을 발행한다.** 안 보내면 상대가 끝까지 기다린다
+  (원본도 `onCleared` 에서 보낸다). `.onDisappear` 에 걸어 뒀다.
+- **최대 HP 는 첫 수신값으로 한 번만 고정한다.** HP 바의 분모라 매 라운드 갱신하면
+  바가 줄지 않는다.
+- 내가 누구인지는 **`deviceId` 로 가른다** — 서버가 따로 알려주지 않는다.
+
+### ⚠️ 로컬에서 검증하지 못한 부분
+
+`POST character/battle/queue/{mongId}` 가 **Redis 를 요구**하는데 로컬 서버에 안 떠 있어
+500 이 온다. 매칭이 성사되지 않아 **매치 화면 전체가 미검증**이다.
+(클라이언트는 오류 배너 → 대기 상태 복귀까지 설계대로 동작했다.)
+
+검증하려면 서버에 Redis 를 띄우고 **기기 두 대**가 필요하다.
+
+---
+
 ## 훈련 (미니게임 3종)
 
 Android `presentation/.../training/*` (4,518 LOC) 이식.
@@ -599,6 +647,7 @@ iOS 는 그게 절반만 된다.
 | `CollectionMenuView` / `CollectionGridView` | `pages/collection/*.kt` |
 | `MapSearchView` | `pages/map/SearchMapView.kt` |
 | `TrainingFlowView` 외 | `pages/training/*.kt` + 다이얼로그 2개 |
+| `BattleMenuView` / `BattleMatchView` | `pages/battle/*.kt` + 다이얼로그 2개 |
 | `NotReadyView` | `mobile-view-presentation/.../pages/common/NotReadyView.kt` |
 | `Theme/MongsButton.swift` | `component/common/button/*.kt` |
 | `Theme/MongsWidgets.swift` | `PayPointBox` · `ConditionSection` · `PageIndicator` · `LoadingBar` · `Logo` |
@@ -847,8 +896,8 @@ Wear OS 만큼 넉넉하지 않아서, 라이브러리 선택이 아키텍처를
 | Room | SwiftData | 캐시 용도(테이블 2개)라 충분 |
 | DataStore + Keystore AES-GCM | UserDefaults + Keychain (`kSecAttrAccessibleAfterFirstUnlock`) | |
 | Retrofit ×2 + `AuthorizationInterceptor` | `URLSession` + async/await + 재발급 미들웨어 | 401 시 mutex + version 카운터로 중복 refresh 막는 로직 그대로 이식 |
-| Play Billing | StoreKit 2 | |
-| Wear Compose 14k LOC + 스프라이트 408개 | SwiftUI 재구현 | 마이그레이션 비용의 대부분 |
+| Play Billing | StoreKit 2 | ✅ 완료 — 위 인앱 결제 절 참고 |
+| Wear Compose 14k LOC + 스프라이트 408개 | SwiftUI 재구현 | ✅ 화면 이식 완료 (도움말만 자리표시자) |
 
 ### 서버 API
 

@@ -44,7 +44,6 @@ struct NotReadyView: View {
 /// v1 범위 밖이라 아직 화면이 없는 것들만 있다 — 이식하면 케이스를 지운다.
 enum NotReadyDestination: String, Identifiable, CaseIterable {
 
-    case battle
     case help
 
     var id: String { rawValue }
@@ -52,7 +51,6 @@ enum NotReadyDestination: String, Identifiable, CaseIterable {
     /// 문구는 Android `Router.kt` 의 목록 그대로다.
     var title: String {
         switch self {
-        case .battle: "배틀"
         case .help: "도움말"
         }
     }

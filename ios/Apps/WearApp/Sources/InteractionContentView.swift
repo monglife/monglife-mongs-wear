@@ -24,6 +24,8 @@ struct InteractionContentView: View {
     let onOpenMapSearch: () -> Void
     /// 훈련 열기
     let onOpenTraining: () -> Void
+    /// 배틀 열기
+    let onOpenBattle: () -> Void
     /// 아직 이식하지 않은 화면 열기 (자리표시자)
     let onNotReady: (NotReadyDestination) -> Void
 
@@ -65,7 +67,8 @@ struct InteractionContentView: View {
             HStack(spacing: 8.ms) {
                 MongsCircleButton(iconName: "btn_icon_activity", borderName: "btn_border_green", iconSize: 34,
                                   isEnabled: canPlay, action: onOpenTraining)
-                MongsCircleButton(iconName: "btn_icon_battle", borderName: "btn_border_pink", iconSize: 30, isEnabled: canPlay) { onNotReady(.battle) }
+                MongsCircleButton(iconName: "btn_icon_battle", borderName: "btn_border_pink", iconSize: 30,
+                                  isEnabled: canPlay, action: onOpenBattle)
             }
         }
         // 원본은 fillMaxSize + Center 다. 명시하지 않으면 콘텐츠가 위로 몰린다.

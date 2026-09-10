@@ -42,6 +42,7 @@ struct MainPagerView: View {
     @State private var collectionKind: CollectionItem.Kind?
     @State private var isMapSearchPresented = false
     @State private var isTrainingPresented = false
+    @State private var isBattlePresented = false
     /// 아직 이식하지 않은 화면. nil 이면 닫힘.
     @State private var notReady: NotReadyDestination?
 
@@ -122,6 +123,14 @@ struct MainPagerView: View {
         .fullScreenCover(item: $collectionKind) { kind in
             if let viewModel = container.makeCollectionViewModel(kind: kind) {
                 CollectionGridView(viewModel: viewModel) { collectionKind = nil }
+            }
+        }
+        .fullScreenCover(isPresented: $isBattlePresented) {
+            if let viewModel = container.makeBattleMenuViewModel() {
+                BattleMenuView(viewModel: viewModel) {
+                    isBattlePresented = false
+                    Task { await slotViewModel?.reload() }
+                }
             }
         }
         .fullScreenCover(isPresented: $isTrainingPresented) {
@@ -276,6 +285,7 @@ struct MainPagerView: View {
                 onOpenCollection: { isCollectionMenuPresented = true },
                 onOpenMapSearch: { isMapSearchPresented = true },
                 onOpenTraining: { isTrainingPresented = true },
+                onOpenBattle: { isBattlePresented = true },
                 onNotReady: { notReady = $0 }
             )
         case .configure:

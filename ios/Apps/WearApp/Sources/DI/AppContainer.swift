@@ -31,6 +31,8 @@ final class AppContainer {
     private let communityService: CommunityService?
     private let collectionService: CollectionService?
     private let trainingService: TrainingService?
+    private let battleService: BattleService?
+    private let deviceIdentifier: DeviceIdentifierStore
     private let locationClient = LocationClient()
 
     init() {
@@ -39,6 +41,8 @@ final class AppContainer {
 
         // Keychain 은 세션과 기기 식별자가 함께 쓴다.
         let secureStore = KeychainStore()
+        let deviceIdentifier = DeviceIdentifierStore(store: secureStore)
+        self.deviceIdentifier = deviceIdentifier
         // installMarker 로 재설치를 감지해 세션을 버린다.
         // Keychain 은 앱 삭제 후에도 남지만, 세션까지 살아남으면 Android 와 동작이 달라진다.
         let tokenStore = TokenStore(store: secureStore, installMarker: UserDefaultsStore())
@@ -67,6 +71,10 @@ final class AppContainer {
             self.pushService = PushService(authService: authService, optionStore: optionStore)
             self.collectionService = CollectionService(api: api, location: locationClient)
             self.trainingService = TrainingService(api: api, mongService: mongService)
+            let broker = MQTTBroker(config: config)
+            self.battleService = BattleService(
+                api: api, broker: broker, deviceIdentifier: deviceIdentifier
+            )
             self.communityService = CommunityService(
                 api: api,
                 identity: Self.clientIdentity(secureStore: secureStore)
@@ -77,12 +85,12 @@ final class AppContainer {
                 playerService: playerService
             )
             self.realtimeService = RealtimeService(
-                broker: MQTTBroker(config: config),
+                broker: broker,
                 mongService: mongService,
                 playerService: playerService,
                 stepService: stepService,
                 tokenStore: tokenStore,
-                deviceIdentifier: DeviceIdentifierStore(store: secureStore)
+                deviceIdentifier: deviceIdentifier
             )
         } else {
             // 설정을 못 읽으면 네트워크 계층을 만들 수 없다. 앱은 오류 화면만 띄운다.
@@ -94,6 +102,7 @@ final class AppContainer {
             self.communityService = nil
             self.collectionService = nil
             self.trainingService = nil
+            self.battleService = nil
             self.realtimeService = nil
         }
     }
@@ -164,6 +173,23 @@ final class AppContainer {
             notificationOptionChanged: { [pushService] in
                 await pushService?.notificationOptionChanged()
             }
+        )
+    }
+
+    func makeBattleMenuViewModel() -> BattleMenuViewModel? {
+        guard let battleService, let mongService else { return nil }
+        return BattleMenuViewModel(service: battleService, mongService: mongService)
+    }
+
+    func makeBattleMatchViewModel(queue: MatchQueue) -> BattleMatchViewModel? {
+        guard let battleService else { return nil }
+        let deviceId = DeviceIdentifierStore.blockingIdentifier(store: KeychainStore())
+        guard let me = queue.me(deviceId: deviceId) else { return nil }
+        return BattleMatchViewModel(
+            matchId: queue.matchId,
+            playerId: me.playerId,
+            deviceId: deviceId,
+            service: battleService
         )
     }
 
