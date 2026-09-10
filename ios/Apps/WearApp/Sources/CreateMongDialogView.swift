@@ -37,7 +37,7 @@ struct CreateMongDialogView: View {
         ZStack {
             Color.black.opacity(0.95).ignoresSafeArea()
 
-            VStack(spacing: 6) {
+            VStack(spacing: 6.ms) {
                 stepIndicator
 
                 Group {
@@ -51,14 +51,14 @@ struct CreateMongDialogView: View {
 
                 footer
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 8.ms)
         }
     }
 
     // MARK: - 단계 표시
 
     private var stepIndicator: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 6.ms) {
             ForEach(Step.allCases, id: \.rawValue) { item in
                 Text(label(for: item))
                     .mongsFont(11)
@@ -78,7 +78,7 @@ struct CreateMongDialogView: View {
     // MARK: - 단계별 입력
 
     private var nameStep: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 4.ms) {
             TextField("이름", text: $name)
                 .mongsFont(16)
                 .multilineTextAlignment(.center)
@@ -95,24 +95,24 @@ struct CreateMongDialogView: View {
     }
 
     private func timeStep(hour: Binding<Int>, minute: Binding<Int>, title: String) -> some View {
-        VStack(spacing: 2) {
+        VStack(spacing: 2.ms) {
             Text("\(title) 시각")
                 .mongsFont(11)
                 .foregroundStyle(MongsColor.lightGray)
 
-            HStack(spacing: 4) {
+            HStack(spacing: 4.ms) {
                 // 크라운으로 돌린다 — Android 의 스크롤 휠 자리다.
                 Picker("", selection: hour) {
                     ForEach(0 ..< 24, id: \.self) { Text(String(format: "%02d", $0)).mongsFont(18) }
                 }
-                .frame(width: 60)
+                .frame(width: 60.ms)
 
                 Text(":").mongsFont(18).foregroundStyle(MongsColor.white)
 
                 Picker("", selection: minute) {
                     ForEach(0 ..< 60, id: \.self) { Text(String(format: "%02d", $0)).mongsFont(18) }
                 }
-                .frame(width: 60)
+                .frame(width: 60.ms)
             }
             .labelsHidden()
         }
@@ -121,7 +121,7 @@ struct CreateMongDialogView: View {
     // MARK: - 이동 / 확정
 
     private var footer: some View {
-        HStack(spacing: 5) {
+        HStack(spacing: 5.ms) {
             MongsButton(title: step == .name ? "닫기" : "이전", style: .blue, width: 58) {
                 if let previous = Step(rawValue: step.rawValue - 1) {
                     step = previous

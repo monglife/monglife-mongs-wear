@@ -57,7 +57,9 @@ extension View {
     /// 폰트를 못 찾으면 SwiftUI 가 시스템 폰트로 조용히 떨어진다 —
     /// 화면이 깨지지는 않지만 분위기가 완전히 달라지므로, 폰트가 안 보이면
     /// `UIAppFonts` 등록과 번들 포함 여부를 먼저 확인한다.
+    /// `size` 는 **기준 화면(46mm) 기준 sp** 다. 화면 배율은 여기서 한 번만 곱한다
+    /// (`MongsMetrics` 참고) — 호출부는 Android 원본 값을 그대로 적는다.
     func mongsFont(_ size: CGFloat) -> some View {
-        font(MongsFont.regular(size))
+        font(MongsFont.regular(size.ms))
     }
 }

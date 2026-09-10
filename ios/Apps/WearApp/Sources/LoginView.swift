@@ -24,7 +24,7 @@ struct LoginView: View {
             // Compose weight 와 같게 — 간격(5)을 뺀 남은 공간에 비율을 건다.
             let available = geometry.size.height - 5
 
-                VStack(spacing: 5) {
+                VStack(spacing: 5.ms) {
                     // 위 60% — 로고를 아래에 붙인다
                     VStack {
                         Spacer(minLength: 0)
@@ -63,7 +63,7 @@ struct LoginView: View {
                                 }
                             }
                             .signInWithAppleButtonStyle(.white)
-                            .frame(width: 160, height: 45)
+                            .frame(width: 160.ms, height: 45.ms)
                             Spacer(minLength: 0)
                         }
                     }

@@ -15,21 +15,21 @@ struct PayPointBox: View {
     var body: some View {
         ZStack {
             AnimatedSprite(sprite: loader.sprite(named: "point_bg"))
-                .frame(width: width, height: height)
+                .frame(width: width.ms, height: height.ms)
 
             HStack(spacing: 0) {
                 AnimatedSprite(sprite: loader.sprite(named: "point_icon_pay"))
-                    .frame(width: 12, height: 12)
-                    .frame(width: (width - 20) * 0.2)
+                    .frame(width: 12.ms, height: 12.ms)
+                    .frame(width: (width - 20).ms * 0.2)
                 Text("\(payPoint)")
                     .mongsFont(14)
                     .foregroundStyle(MongsColor.navy)
                     .lineLimit(1)
-                    .frame(width: (width - 20) * 0.8)
+                    .frame(width: (width - 20).ms * 0.8)
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 10.ms)
         }
-        .frame(width: width, height: height)
+        .frame(width: width.ms, height: height.ms)
     }
 }
 
@@ -50,18 +50,18 @@ struct ConditionGauge: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(MongsColor.white.opacity(0.2), lineWidth: 4)
+                .stroke(MongsColor.white.opacity(0.2), lineWidth: 4.ms)
             Circle()
                 .trim(from: 0, to: min(max(progress, 0), 100) / 100)
-                .stroke(color, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                .stroke(color, style: StrokeStyle(lineWidth: 4.ms, lineCap: .round))
                 // 12시 방향에서 시작한다. SwiftUI 의 trim 은 3시에서 시작하므로 돌려준다.
                 .rotationEffect(.degrees(-90))
 
             AnimatedSprite(sprite: loader.sprite(named: iconName))
-                .frame(width: 25, height: 25)
+                .frame(width: 25.ms, height: 25.ms)
         }
-        .frame(width: size, height: size)
-        .padding(6)
+        .frame(width: size.ms, height: size.ms)
+        .padding(6.ms)
     }
 }
 
@@ -77,11 +77,11 @@ struct PageIndicator: View {
     var spacing: CGFloat = 4
 
     var body: some View {
-        HStack(spacing: spacing) {
+        HStack(spacing: spacing.ms) {
             ForEach(0 ..< pageCount, id: \.self) { index in
                 Circle()
                     .fill(index == currentPage ? MongsColor.navy : MongsColor.white)
-                    .frame(width: indicatorSize, height: indicatorSize)
+                    .frame(width: indicatorSize.ms, height: indicatorSize.ms)
             }
         }
     }
@@ -111,8 +111,8 @@ struct EdgeProgressRing: View {
     var body: some View {
         EdgeRingShape()
             .trim(from: 0, to: min(max(progress, 0), 100) / 100)
-            .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-            .padding(inset + lineWidth / 2)
+            .stroke(color, style: StrokeStyle(lineWidth: lineWidth.ms, lineCap: .round))
+            .padding((inset + lineWidth / 2).ms)
     }
 }
 
@@ -160,7 +160,7 @@ struct LoadingBar: View {
 
     var body: some View {
         AnimatedSprite(sprite: loader.sprite(named: "icon_loading"))
-            .frame(width: size, height: size)
+            .frame(width: size.ms, height: size.ms)
     }
 }
 
@@ -179,21 +179,21 @@ struct StarPointBox: View {
     var body: some View {
         ZStack {
             AnimatedSprite(sprite: loader.sprite(named: "point_bg"))
-                .frame(width: width, height: height)
+                .frame(width: width.ms, height: height.ms)
 
             HStack(spacing: 0) {
                 AnimatedSprite(sprite: loader.sprite(named: "point_icon_star"))
-                    .frame(width: 12, height: 12)
-                    .frame(width: (width - 20) * 0.2)
+                    .frame(width: 12.ms, height: 12.ms)
+                    .frame(width: (width - 20).ms * 0.2)
                 Text("\(starPoint)")
                     .mongsFont(14)
                     .foregroundStyle(MongsColor.darkBrown)
                     .lineLimit(1)
-                    .frame(width: (width - 20) * 0.8)
+                    .frame(width: (width - 20).ms * 0.8)
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 10.ms)
         }
-        .frame(width: width, height: height)
+        .frame(width: width.ms, height: height.ms)
     }
 }
 
@@ -216,7 +216,7 @@ struct SelectButton: View {
             Spacer(minLength: 0)
             arrow("btn_icon_right", isVisible: canGoNext, action: onNext)
         }
-        .padding(.horizontal, 15)
+        .padding(.horizontal, 15.ms)
     }
 
     @ViewBuilder
@@ -225,7 +225,7 @@ struct SelectButton: View {
         // 자리는 유지해야 가운데 내용이 흔들리지 않으므로 크기는 남긴다.
         Button(action: action) {
             AnimatedSprite(sprite: isVisible ? loader.sprite(named: name) : nil)
-                .frame(width: 18, height: 35)
+                .frame(width: 18.ms, height: 35.ms)
         }
         .buttonStyle(.plain)
         .disabled(!isVisible)
@@ -251,6 +251,6 @@ struct MongsLogo: View {
 
     var body: some View {
         AnimatedSprite(sprite: loader.sprite(named: isOpen ? "icon_logo_open" : "icon_logo_not_open"))
-            .frame(width: isOpen ? 75 : 80, height: isOpen ? 90 : 95)
+            .frame(width: isOpen ? 75.ms : 80.ms, height: isOpen ? 90.ms : 95.ms)
     }
 }

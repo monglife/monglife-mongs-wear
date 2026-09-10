@@ -38,18 +38,22 @@ struct MongsButton: View {
 
     @Environment(SpriteLoader.self) private var loader
 
+    // 파라미터는 기준 화면(46mm) 기준 dp 다. 화면 배율은 여기서 한 번만 곱한다.
+    private var w: CGFloat { width.ms }
+    private var h: CGFloat { height.ms }
+
     var body: some View {
         Button(action: { if isEnabled { action() } }) {
             ZStack {
                 AnimatedSprite(sprite: loader.sprite(named: isEnabled ? style.spriteName : "btn_bg_disable"))
-                    .frame(width: width, height: height)
+                    .frame(width: w, height: h)
                 Text(title)
                     .mongsFont(fontSize)
                     .foregroundStyle(style.titleColor)
                     .lineLimit(1)
-                    .padding(.horizontal, 10)
+                    .padding(.horizontal, 10.ms)
             }
-            .frame(width: width, height: height)
+            .frame(width: w, height: h)
         }
         .buttonStyle(.plain)
         .disabled(!isEnabled)
@@ -74,13 +78,15 @@ struct MongsCircleButton: View {
 
     @Environment(SpriteLoader.self) private var loader
 
-    private var resolvedIconSize: CGFloat { iconSize ?? size / 2 }
+    // 파라미터는 기준 화면(46mm) 기준 dp 다. 화면 배율은 여기서 한 번만 곱한다.
+    private var s: CGFloat { size.ms }
+    private var resolvedIconSize: CGFloat { (iconSize ?? size / 2).ms }
 
     var body: some View {
         Button(action: { if isEnabled { action() } }) {
             ZStack {
                 AnimatedSprite(sprite: loader.sprite(named: "btn_bg_circle"))
-                    .frame(width: size, height: size)
+                    .frame(width: s, height: s)
                     .opacity(0.55)
 
                 // 원본은 비활성일 때 아이콘의 zIndex 를 -1 로 내려 **배경 뒤에 숨긴다**
@@ -91,13 +97,13 @@ struct MongsCircleButton: View {
                         .frame(width: resolvedIconSize, height: resolvedIconSize)
                 } else {
                     AnimatedSprite(sprite: loader.sprite(named: "btn_icon_locker"))
-                        .frame(width: size / 2, height: size / 2)
+                        .frame(width: s / 2, height: s / 2)
                 }
 
                 AnimatedSprite(sprite: loader.sprite(named: borderName))
-                    .frame(width: size, height: size)
+                    .frame(width: s, height: s)
             }
-            .frame(width: size, height: size)
+            .frame(width: s, height: s)
         }
         .buttonStyle(.plain)
         .disabled(!isEnabled)
@@ -116,19 +122,21 @@ struct MongsCircleTextButton: View {
 
     @Environment(SpriteLoader.self) private var loader
 
+    private var s: CGFloat { size.ms }
+
     var body: some View {
         Button(action: action) {
             ZStack {
                 AnimatedSprite(sprite: loader.sprite(named: "btn_bg_circle"))
-                    .frame(width: size, height: size)
+                    .frame(width: s, height: s)
                     .opacity(0.6)
                 Text(title)
                     .mongsFont(23)
                     .foregroundStyle(MongsColor.white)
                 AnimatedSprite(sprite: loader.sprite(named: borderName))
-                    .frame(width: size, height: size)
+                    .frame(width: s, height: s)
             }
-            .frame(width: size, height: size)
+            .frame(width: s, height: s)
         }
         .buttonStyle(.plain)
     }

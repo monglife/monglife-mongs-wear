@@ -80,7 +80,7 @@ struct MainPagerView: View {
 
                 PageIndicator(pageCount: pages.count, currentPage: page)
                     .frame(maxHeight: .infinity, alignment: .bottom)
-                    .padding(.bottom, 5)
+                    .padding(.bottom, 5.ms)
             } else {
                 LoadingBar()
             }

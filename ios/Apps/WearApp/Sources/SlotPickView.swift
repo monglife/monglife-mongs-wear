@@ -31,7 +31,7 @@ struct SlotPickView: View {
                 card                                    // z = 1
                 PageIndicator(pageCount: viewModel.slots.count, currentPage: viewModel.index)
                     .frame(maxHeight: .infinity, alignment: .bottom)
-                    .padding(.bottom, 5)
+                    .padding(.bottom, 5.ms)
                 SelectButton(                           // z = 3
                     canGoPrevious: viewModel.canGoPrevious,
                     canGoNext: viewModel.canGoNext,

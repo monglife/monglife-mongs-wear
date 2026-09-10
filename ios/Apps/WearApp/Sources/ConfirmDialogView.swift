@@ -31,15 +31,15 @@ struct ConfirmDialogView: View {
                             .frame(maxHeight: .infinity)
                     }
                 }
-                .frame(height: 150 * 0.65)
+                .frame(height: 150.ms * 0.65)
 
-                HStack(spacing: 5) {
+                HStack(spacing: 5.ms) {
                     MongsButton(title: "닫기", style: .blue, action: onCancel)
                     MongsButton(title: "확인", action: onConfirm)
                 }
-                .frame(height: 150 * 0.35)
+                .frame(height: 150.ms * 0.35)
             }
-            .frame(height: 150)
+            .frame(height: 150.ms)
         }
     }
 }

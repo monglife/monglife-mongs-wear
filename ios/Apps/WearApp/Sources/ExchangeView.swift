@@ -28,7 +28,7 @@ struct ExchangeMenuView: View {
                     ZStack {
                         Rectangle()
                             .fill(Color.white)
-                            .frame(height: 2)
+                            .frame(height: 2.ms)
                     }
                     .frame(height: available * 0.02)
 
@@ -104,7 +104,7 @@ struct ExchangeView: View {
             let available = geometry.size.height - 25
 
             VStack(spacing: 0) {
-                Spacer().frame(height: 15)
+                Spacer().frame(height: 15.ms)
 
                 // 0.2 — 현재 페이포인트
                 ZStack {
@@ -146,7 +146,7 @@ struct ExchangeView: View {
                 }
                 .frame(height: available * 0.3)
 
-                Spacer().frame(height: 10)
+                Spacer().frame(height: 10.ms)
             }
             .frame(maxWidth: .infinity)
         }
@@ -160,8 +160,8 @@ struct ExchangeView: View {
         HStack(spacing: 0) {
             if viewModel.kind == .starPoint {
                 AnimatedSprite(sprite: loader.sprite(named: "point_icon_star"))
-                    .frame(width: 20, height: 20)
-                Spacer().frame(width: 10)
+                    .frame(width: 20.ms, height: 20.ms)
+                Spacer().frame(width: 10.ms)
                 Text("x \(viewModel.remaining)")
                     .mongsFont(16)
                     .foregroundStyle(MongsColor.white)
@@ -189,5 +189,5 @@ struct ExchangeView: View {
         }
     }
 
-    private var payIconSize: CGFloat { viewModel.kind == .step ? 24 : 26 }
+    private var payIconSize: CGFloat { viewModel.kind == .step ? 24.ms : 26.ms }
 }

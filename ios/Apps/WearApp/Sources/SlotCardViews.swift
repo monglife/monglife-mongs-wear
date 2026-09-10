@@ -33,8 +33,8 @@ struct OccupiedSlotView: View {
             content: {
                 if mong.stateCode == .dead {
                     AnimatedSprite(sprite: loader.sprite(named: "mong_rip"))
-                        .frame(width: 130, height: 130)
-                        .padding(.bottom, 25)
+                        .frame(width: 130.ms, height: 130.ms)
+                        .padding(.bottom, 25.ms)
                 } else {
                     // 슬롯에서는 몽을 **정적 이미지**로 작게 그린다 (원본 `isPng = true`, `ratio = 0.65`).
                     MongView(code: mong.resource, bodySize: 120 * 0.65, isAnimated: false)
@@ -42,7 +42,7 @@ struct OccupiedSlotView: View {
                 }
             },
             footer: {
-                HStack(spacing: 5) {
+                HStack(spacing: 5.ms) {
                     if mong.canGraduate {
                         MongsButton(title: "졸업", style: .blue, width: 55, height: 32, action: onGraduate)
                     } else {
@@ -81,7 +81,7 @@ struct EmptySlotView: View {
             content: {
                 ZStack {
                     AnimatedSprite(sprite: loader.sprite(named: "mong_body_blind"))
-                        .frame(width: 79, height: 79)
+                        .frame(width: 79.ms, height: 79.ms)
                     Text("?")
                         .mongsFont(25)
                         .foregroundStyle(MongsColor.white)
@@ -111,12 +111,12 @@ struct PurchasableSlotView: View {
             content: {
                 ZStack {
                     AnimatedSprite(sprite: loader.sprite(named: "mong_shadow"), contentMode: nil)
-                        .frame(width: 80, height: 20)
-                        .offset(y: 23)
+                        .frame(width: 80.ms, height: 20.ms)
+                        .offset(y: 23.ms)
 
-                    HStack(spacing: 6) {
+                    HStack(spacing: 6.ms) {
                         AnimatedSprite(sprite: loader.sprite(named: "point_icon_star"))
-                            .frame(width: 26, height: 26)
+                            .frame(width: 26.ms, height: 26.ms)
                         Text("-")
                         Text("\(Slot.purchasePrice)")
                     }
@@ -151,11 +151,11 @@ private struct SlotCardLayout<Header: View, Content: View, Footer: View>: View {
             let available = geometry.size.height - 20
 
             VStack(spacing: 0) {
-                Spacer().frame(height: 15)
+                Spacer().frame(height: 15.ms)
                 ZStack { header() }.frame(height: available * 0.2)
                 ZStack { content() }.frame(height: available * 0.52)
                 ZStack { footer() }.frame(height: available * 0.28)
-                Spacer().frame(height: 5)
+                Spacer().frame(height: 5.ms)
             }
             .frame(maxWidth: .infinity)
         }

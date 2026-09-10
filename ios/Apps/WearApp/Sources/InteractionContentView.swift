@@ -37,18 +37,18 @@ struct InteractionContentView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 8) {
+            HStack(spacing: 8.ms) {
                 MongsCircleButton(iconName: "btn_icon_collection", borderName: "btn_border_orange", iconSize: 34) {}
                 MongsCircleButton(iconName: "point_icon_pay", borderName: "btn_border_purple_dark",
                                   isEnabled: isAlive, action: onOpenExchange)
             }
-            HStack(spacing: 8) {
+            HStack(spacing: 8.ms) {
                 MongsCircleButton(iconName: "btn_icon_map_search", borderName: "btn_border_blue", iconSize: 34, isEnabled: isAlive) {}
                 MongsCircleButton(iconName: "btn_icon_slot_pick", borderName: "btn_border_red", iconSize: 34,
                                   action: onOpenSlotPick)
                 MongsCircleButton(iconName: "btn_icon_luck_draw", borderName: "btn_border_purple", iconSize: 34, isEnabled: isAlive) {}
             }
-            HStack(spacing: 8) {
+            HStack(spacing: 8.ms) {
                 MongsCircleButton(iconName: "btn_icon_activity", borderName: "btn_border_green", iconSize: 34, isEnabled: canPlay) {}
                 MongsCircleButton(iconName: "btn_icon_battle", borderName: "btn_border_pink", iconSize: 30, isEnabled: canPlay) {}
             }

@@ -29,7 +29,7 @@ struct StepContentView: View {
             let available = geometry.size.height - 15
 
             VStack(spacing: 0) {
-                Spacer().frame(height: 15)
+                Spacer().frame(height: 15.ms)
 
                 // 0.2 — 페이포인트
                 ZStack {

@@ -124,7 +124,7 @@ struct SlotContentView: View {
                 VStack {
                     Spacer(minLength: 0)
                     MongView(code: mong.resource, expression: .smile, bodySize: 120)
-                        .padding(.bottom, 25)
+                        .padding(.bottom, 25.ms)
                 }
                 notice("졸업한 몽입니다\n\n슬롯을 변경해주세요")
                     .onTapGesture(perform: onOpenSlotPick)
@@ -140,12 +140,13 @@ struct SlotContentView: View {
     }
 
     /// 화면 아래에 스프라이트를 붙인다 (원본 `Alignment.BottomCenter` + `padding(bottom = 25.dp)`).
+    /// `size` 는 기준 화면(46mm) 기준 dp 다 — 배율은 여기서 한 번만 곱한다.
     private func bottomSprite(_ name: String, size: CGFloat) -> some View {
         VStack {
             Spacer(minLength: 0)
             AnimatedSprite(sprite: loader.sprite(named: name))
-                .frame(width: size, height: size)
-                .padding(.bottom, 25)
+                .frame(width: size.ms, height: size.ms)
+                .padding(.bottom, 25.ms)
         }
     }
 
@@ -170,7 +171,7 @@ struct SlotContentView: View {
                 bodySize: 120
             )
             .onTapGesture { viewModel.openInteractionDialog() }
-            .padding(.bottom, 22)
+            .padding(.bottom, 22.ms)
         }
     }
 
@@ -282,14 +283,14 @@ struct SlotContentView: View {
             Spacer(minLength: 0)
             ZStack {
                 AnimatedSprite(sprite: loader.sprite(named: "mong_body_blind"))
-                    .frame(width: 100, height: 100)
+                    .frame(width: 100.ms, height: 100.ms)
                 Text("!")
                     .mongsFont(25)
                     .foregroundStyle(MongsColor.white)
             }
             MongsButton(title: "슬롯 선택", style: .blue, width: 90, action: onOpenSlotPick)
-            .padding(.top, 8)
-            Spacer().frame(height: 30)
+            .padding(.top, 8.ms)
+            Spacer().frame(height: 30.ms)
         }
     }
 }

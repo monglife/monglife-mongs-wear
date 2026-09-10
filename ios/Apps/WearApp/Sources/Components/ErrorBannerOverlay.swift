@@ -16,16 +16,16 @@ struct ErrorBannerOverlay: ViewModifier {
             .overlay(alignment: .top) {
                 if let message {
                     Text(message)
-                        .font(.system(size: 12))
+                        .font(.system(size: 12.ms))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
+                        .padding(.horizontal, 10.ms)
+                        .padding(.vertical, 6.ms)
                         .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            RoundedRectangle(cornerRadius: 12.ms, style: .continuous)
                                 .fill(.red.opacity(0.85))
                         )
-                        .padding(.horizontal, 8)
+                        .padding(.horizontal, 8.ms)
                         .transition(.move(edge: .top).combined(with: .opacity))
                 }
             }

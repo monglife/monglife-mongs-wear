@@ -11,11 +11,13 @@ import SwiftUI
 struct InventoryView: View {
 
     /// 원본 상수 (`INVENTORY_*`)
-    private static let boxWidth: CGFloat = 110
-    private static let boxHeight: CGFloat = 130
-    private static let barWidth: CGFloat = 62
-    private static let barHeight: CGFloat = 30
-    private static let corner: CGFloat = 10
+    /// 값은 원본 dp 그대로 적고 **여기서 한 번** 화면 배율을 곱한다 (`MongsMetrics`).
+    /// 쓰는 쪽은 전부 `.frame` / 모서리 반경이라 이미 보정된 값을 그대로 넘기면 된다.
+    private static let boxWidth: CGFloat = 110.ms
+    private static let boxHeight: CGFloat = 130.ms
+    private static let barWidth: CGFloat = 62.ms
+    private static let barHeight: CGFloat = 30.ms
+    private static let corner: CGFloat = 10.ms
     /// Compose 의 `Color.LightGray` — 본체(`MongsLightGray` #F0F0F0)보다 짙다.
     private static let backingGray = Color(hex: 0xCCCCCC)
 
@@ -68,7 +70,7 @@ struct InventoryView: View {
                 VStack {
                     Spacer()
                     PageIndicator(pageCount: viewModel.totalPage, currentPage: viewModel.page - 1)
-                        .padding(.bottom, 5)
+                        .padding(.bottom, 5.ms)
                 }
 
                 SelectButton(
@@ -123,7 +125,7 @@ struct InventoryView: View {
                     )
                     .fill(MongsColor.lightGray)
                 )
-                .offset(y: 4)
+                .offset(y: 4.ms)
         }
         .frame(width: Self.boxWidth, height: Self.boxHeight)
     }
@@ -144,7 +146,7 @@ struct InventoryView: View {
             }
             .frame(maxHeight: .infinity)
         }
-        .padding(6)
+        .padding(6.ms)
     }
 
     /// 한 칸 — 40×40 둥근 회색 바탕에 28×28 아이콘.
@@ -153,23 +155,23 @@ struct InventoryView: View {
     private func slot(_ item: InventoryItem?) -> some View {
         Button(action: { if let item { viewModel.askConfirm(item) } }) {
             ZStack {
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: 10.ms)
                     .fill(Self.backingGray)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 40.ms, height: 40.ms)
 
                 if let name = item.flatMap(FeedResourceCode.pngName(for:)) {
                     AnimatedSprite(sprite: loader.sprite(named: name))
-                        .frame(width: 28, height: 28)
+                        .frame(width: 28.ms, height: 28.ms)
                 } else if item != nil {
                     Text("?")
                         .mongsFont(14)
                         .foregroundStyle(MongsColor.white)
                 }
             }
-            .frame(width: 40, height: 40)
+            .frame(width: 40.ms, height: 40.ms)
         }
         .buttonStyle(.plain)
-        .padding(2)
+        .padding(2.ms)
         .disabled(item == nil)
     }
 }

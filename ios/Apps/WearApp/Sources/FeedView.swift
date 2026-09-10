@@ -25,7 +25,7 @@ struct FeedMenuView: View {
                     ZStack {
                         Rectangle()
                             .fill(Color.white)
-                            .frame(height: 2)
+                            .frame(height: 2.ms)
                     }
                     .frame(height: available * 0.02)
 
@@ -115,7 +115,7 @@ struct FeedView: View {
 
             ZStack {
                 VStack(spacing: 0) {
-                    Spacer().frame(height: 15)
+                    Spacer().frame(height: 15.ms)
 
                     // 0.2 — 현재 페이포인트
                     ZStack { PayPointBox(payPoint: viewModel.payPoint) }
@@ -131,7 +131,7 @@ struct FeedView: View {
 
                         Button(action: viewModel.openDetail) {
                             AnimatedSprite(sprite: loader.sprite(named: iconName))
-                                .frame(width: 50, height: 50)
+                                .frame(width: 50.ms, height: 50.ms)
                         }
                         .buttonStyle(.plain)
                         .frame(height: available * 0.52 * 0.7)
@@ -151,7 +151,7 @@ struct FeedView: View {
                     }
                     .frame(height: available * 0.28)
 
-                    Spacer().frame(height: 5)
+                    Spacer().frame(height: 5.ms)
                 }
                 .frame(maxWidth: .infinity)
 
@@ -160,7 +160,7 @@ struct FeedView: View {
                     VStack {
                         Spacer()
                         PageIndicator(pageCount: viewModel.items.count, currentPage: viewModel.index)
-                            .padding(.bottom, 5)
+                            .padding(.bottom, 5.ms)
                     }
                 }
 
@@ -216,24 +216,24 @@ struct FeedDetailDialogView: View {
                             if let icon = entry.icon {
                                 // 원본이 ContentScale.FillBounds 라 비율을 무시하고 20×20 에 맞춘다.
                                 AnimatedSprite(sprite: loader.sprite(named: icon), contentMode: nil)
-                                    .frame(width: 20, height: 20)
+                                    .frame(width: 20.ms, height: 20.ms)
                             } else {
                                 Text(entry.label)
                                     .mongsFont(18)
                                     .foregroundStyle(MongsColor.white)
                                     .lineLimit(1)
-                                    .frame(width: 20, height: 20)
+                                    .frame(width: 20.ms, height: 20.ms)
                             }
                         }
-                        .frame(width: 100 * 0.2)
+                        .frame(width: 100.ms * 0.2)
 
                         Text("+ \(format(entry.value))")
                             .mongsFont(20)
                             .foregroundStyle(MongsColor.white)
                             .lineLimit(1)
-                            .frame(width: 100 * 0.8)
+                            .frame(width: 100.ms * 0.8)
                     }
-                    .frame(width: 100, height: 34)
+                    .frame(width: 100.ms, height: 34.ms)
                 }
             }
         }

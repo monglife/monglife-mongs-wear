@@ -455,6 +455,43 @@ iOS 는 그게 절반만 된다.
 원본은 Chip 전체와 Switch 양쪽이 같은 콜백을 받으므로,
 행 레이블에 `.contentShape(Rectangle())` 을 줘서 줄 전체를 탭 영역으로 만든다.
 
+### 화면 크기 보정 — `.ms`
+
+Android 원본은 원형 **192~227dp 한 종류**에 맞춰 `.dp` 리터럴 538개를 하드코딩했다.
+중앙 상수 파일이 없어 그 값들을 그대로 옮겼고, **기준이 된 화면은 46mm(208×248pt)** 다.
+
+watchOS 는 폭이 훨씬 넓게 갈린다:
+
+| 기기 | pt | 배율 |
+|---|---|---|
+| SE 3 40mm | 162×197 | 0.78 |
+| SE 3 44mm | 184×224 | 0.88 |
+| Series 11 42mm | 187×223 | 0.90 |
+| **Series 11 46mm (기준)** | **208×248** | **1.00** |
+| Ultra 3 49mm | 211×257 | 1.01 |
+
+40mm 에서는 원형 버튼 3개 줄(54×3 + 8×2 = 178)이 화면(162)을 넘어 **양쪽이 잘려 나갔고**,
+컨디션 게이지 2×2 도 좌우가 잘렸다. `MongsMetrics` + `CGFloat.ms` 가 그걸 보정한다.
+
+**세로는 보정하지 않는다.** 이미 `available * 0.2` 같은 비율로 잡아 뒀고,
+세로까지 따로 곱하면 원본의 세로 비중이 어긋난다. 가로 비율 하나만 쓴다.
+
+#### ⚠️ 두 번 곱하지 않는 규칙
+
+**Android dp 리터럴에서 온 숫자는 SwiftUI 치수가 되는 지점에서 딱 한 번 보정한다.**
+
+| 어디서 | 누가 보정하나 | 호출부는 |
+|---|---|---|
+| `MongsButton` / `MongsCircleButton` / `MongsCircleTextButton` 파라미터 | 컴포넌트 안 | 원본 dp 그대로 (`width: 70`) |
+| `PayPointBox` · `StarPointBox` · `ConditionGauge` · `PageIndicator` · `SelectButton` · `LoadingBar` · `EdgeProgressRing` · `MongsLogo` | 컴포넌트 안 | 원본 dp 그대로 |
+| `MongView(bodySize:)` | 컴포넌트 안 | 원본 dp 그대로 (`bodySize: 120`) |
+| `mongsFont(_:)` | 안에서 | 원본 sp 그대로 (`mongsFont(14)`) |
+| 화면 파일의 `frame` / `padding` / `spacing` / `offset` / `cornerRadius` | **호출부** | `.ms` 를 붙인다 |
+| 화면 파일의 `static let` 치수 상수 | **정의부에서 한 번** | 쓰는 쪽은 그대로 |
+
+두 번 붙이면 40mm 에서 0.61 배가 되어 눈에 띄게 작아진다. 새 화면을 추가할 때
+공용 컴포넌트에 넘기는 값에 `.ms` 를 붙이고 싶어지는데, 그게 바로 이중 보정이다.
+
 ### 페이저 규칙 (Android `MainPagerViewModel` 상수)
 
 - 몽 있음: 걸음 / 컨디션 / 슬롯 / 상호작용 / 설정 — 밝기 `[0.4, 0.4, 0.0, 0.4, 0.4]`

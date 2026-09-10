@@ -23,7 +23,7 @@ struct PoopEffect: View {
             ForEach(0 ..< min(poopCount, Self.placements.count), id: \.self) { index in
                 let placement = Self.placements[index]
                 AnimatedSprite(sprite: loader.sprite(named: "icon_poop"))
-                    .frame(width: 25, height: 25)
+                    .frame(width: 25.ms, height: 25.ms)
                     .offset(x: placement.x, y: -placement.bottom)
             }
         }
@@ -55,8 +55,8 @@ struct SlotBadgeEffect: View {
     var body: some View {
         VStack {
             AnimatedSprite(sprite: loader.sprite(named: kind.spriteName))
-                .frame(width: 17, height: 17)
-                .padding(.top, 25)
+                .frame(width: 17.ms, height: 17.ms)
+                .padding(.top, 25.ms)
             Spacer(minLength: 0)
         }
         .allowsHitTesting(false)
@@ -87,7 +87,8 @@ struct FrameSequenceEffect: View {
         // `ContentScale.FillBounds` 라 비율을 무시하고 늘린다. 그래야 터지는 중심이 화면 가운데 온다.
         AnimatedSprite(sprite: loader.sprite(named: spriteNames[min(index, spriteNames.count - 1)]),
                        contentMode: size == nil ? nil : .fit)
-            .frame(width: size, height: size)
+            // `size` 는 기준 화면(46mm) 기준 dp 다 — 배율은 여기서 한 번만 곱한다.
+            .frame(width: size?.ms, height: size?.ms)
             .task {
                 for step in spriteNames.indices {
                     index = step
@@ -128,8 +129,8 @@ struct EvolutionEffect: View {
                     Spacer(minLength: 0)
                     // 연출 중에는 몸통을 정적으로 둔다 (원본 `isPng = true`).
                     AnimatedSprite(sprite: loader.sprite(named: mongResource.pngName))
-                        .frame(width: 120, height: 120)
-                        .padding(.bottom, 25)
+                        .frame(width: 120.ms, height: 120.ms)
+                        .padding(.bottom, 25.ms)
                 }
                 FrameSequenceEffect(
                     spriteNames: Self.frames,
@@ -141,7 +142,7 @@ struct EvolutionEffect: View {
         } else {
             ZStack {
                 Color.black.opacity(0.6).ignoresSafeArea()
-                VStack(spacing: 20) {
+                VStack(spacing: 20.ms) {
                     Text("진화를 위해")
                     Text("화면을 터치해주세요.")
                 }
@@ -172,7 +173,7 @@ struct GraduationEffect: View {
         )
         // 원본은 화면 정중앙이다. watchOS 는 화면이 세로로 길고 몽이 아래에 붙어 있어서
         // 같은 "정중앙" 이 몽 몸통에 겹쳐 보인다. 몽 머리 위로 오도록 올린다.
-        .offset(y: -30)
+        .offset(y: -30.ms)
     }
 }
 
@@ -186,8 +187,8 @@ struct GraduatedEffect: View {
     var body: some View {
         VStack {
             AnimatedSprite(sprite: loader.sprite(named: "effect_graduate_3"))
-                .frame(width: 35, height: 35)
-                .padding(.top, 25)
+                .frame(width: 35.ms, height: 35.ms)
+                .padding(.top, 25.ms)
             Spacer(minLength: 0)
         }
         .allowsHitTesting(false)
@@ -205,8 +206,8 @@ struct PoopCleanEffect: View {
         VStack {
             Spacer(minLength: 0)
             AnimatedSprite(sprite: loader.sprite(named: "effect_vacuum"))
-                .frame(width: 140, height: 140)
-                .padding(.bottom, 23)
+                .frame(width: 140.ms, height: 140.ms)
+                .padding(.bottom, 23.ms)
         }
         .allowsHitTesting(false)
     }
@@ -222,8 +223,8 @@ struct SlotLoadingEffect: View {
     var body: some View {
         VStack {
             AnimatedSprite(sprite: loader.sprite(named: "icon_loading"))
-                .frame(width: 25, height: 25)
-                .padding(.top, 25)
+                .frame(width: 25.ms, height: 25.ms)
+                .padding(.top, 25.ms)
             Spacer(minLength: 0)
         }
         .allowsHitTesting(false)

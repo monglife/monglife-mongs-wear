@@ -24,7 +24,7 @@ struct MongDetailDialogView: View {
                 .onTapGesture(perform: onClose)
 
             ScrollView {
-                VStack(spacing: 5) {
+                VStack(spacing: 5.ms) {
                     Text(mong.name)
                         .mongsFont(15)
                         .foregroundStyle(MongsColor.white)
@@ -39,7 +39,7 @@ struct MongDetailDialogView: View {
                             .foregroundStyle(MongsColor.pink)
                     }
 
-                    VStack(spacing: 2) {
+                    VStack(spacing: 2.ms) {
                         row("건강", "\(Int(mong.healthyRatio))")
                         row("포만감", "\(Int(mong.satietyRatio))")
                         row("힘", "\(Int(mong.strengthRatio))")
@@ -48,12 +48,12 @@ struct MongDetailDialogView: View {
                         row("페이포인트", "\(mong.payPoint)")
                         row("생일", Self.bornFormatter.string(from: mong.createdAt))
                     }
-                    .padding(.top, 4)
+                    .padding(.top, 4.ms)
 
                     MongsButton(title: "닫기", style: .blue, action: onClose)
-                        .padding(.top, 6)
+                        .padding(.top, 6.ms)
                 }
-                .padding(.vertical, 10)
+                .padding(.vertical, 10.ms)
             }
         }
     }
@@ -67,6 +67,6 @@ struct MongDetailDialogView: View {
                 .foregroundStyle(MongsColor.white)
         }
         .mongsFont(11)
-        .padding(.horizontal, 18)
+        .padding(.horizontal, 18.ms)
     }
 }

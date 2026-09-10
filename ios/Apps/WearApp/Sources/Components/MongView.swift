@@ -21,23 +21,27 @@ struct MongView: View {
 
     @Environment(SpriteLoader.self) private var loader
 
+    /// 화면 배율까지 반영한 실제 몸통 크기.
+    /// `bodySize` 는 기준 화면(46mm) 기준 dp 라 호출부는 Android 원본 값을 그대로 적는다.
+    private var scaledBody: CGFloat { bodySize.ms }
+
     /// Android 원본의 몸통 120 : 표정 35 비율
-    private var expressionSize: CGFloat { bodySize * (35.0 / 120.0) }
+    private var expressionSize: CGFloat { scaledBody * (35.0 / 120.0) }
 
     var body: some View {
         ZStack {
             AnimatedSprite(sprite: loader.sprite(named: isAnimated ? code.animationName : code.pngName))
-                .frame(width: bodySize, height: bodySize)
+                .frame(width: scaledBody, height: scaledBody)
 
             if isAnimated, code.hasExpression {
                 AnimatedSprite(sprite: loader.sprite(named: expression.spriteName))
                     .frame(width: expressionSize, height: expressionSize)
                     .offset(
-                        x: code.expressionOffset.x * bodySize / 120,
-                        y: code.expressionOffset.y * bodySize / 120
+                        x: code.expressionOffset.x * scaledBody / 120,
+                        y: code.expressionOffset.y * scaledBody / 120
                     )
             }
         }
-        .frame(width: bodySize, height: bodySize)
+        .frame(width: scaledBody, height: scaledBody)
     }
 }

@@ -9,16 +9,16 @@ import SwiftUI
 struct NeedUpdateView: View {
     var body: some View {
         ScrollView {
-            VStack(spacing: 8) {
+            VStack(spacing: 8.ms) {
                 Text("업데이트가 필요합니다")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 14.ms, weight: .semibold))
                     .multilineTextAlignment(.center)
                 Text("App Store 에서 Mongs 를 최신 버전으로 업데이트해 주세요.")
-                    .font(.system(size: 11))
+                    .font(.system(size: 11.ms))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
-            .padding(.vertical, 12)
+            .padding(.vertical, 12.ms)
         }
     }
 }
@@ -33,16 +33,16 @@ struct UnreachableView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 10) {
+            VStack(spacing: 10.ms) {
                 Text("서버에 연결할 수 없습니다")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 13.ms, weight: .semibold))
                     .multilineTextAlignment(.center)
                 Button("다시 시도") {
                     Task { await viewModel.start() }
                 }
                 .font(.footnote)
             }
-            .padding(.vertical, 12)
+            .padding(.vertical, 12.ms)
         }
     }
 }
@@ -54,7 +54,7 @@ struct ConfigurationErrorView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 8.ms) {
                 Text("설정 오류")
                     .font(.headline)
                     .foregroundStyle(.red)

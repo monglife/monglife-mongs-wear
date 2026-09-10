@@ -82,7 +82,7 @@ struct SettingView: View {
             .foregroundStyle(MongsColor.white)
             .lineLimit(1)
             .frame(maxWidth: .infinity)
-            .padding(15)
+            .padding(15.ms)
             .listRowBackground(Color.clear)
     }
 }
@@ -101,7 +101,7 @@ struct MongsToggleChip: View {
     var body: some View {
         Button(action: { if isEnabled { onToggle() } }) {
             HStack(spacing: 0) {
-                Spacer().frame(width: 10)
+                Spacer().frame(width: 10.ms)
 
                 Text(label)
                     .mongsFont(16)
@@ -126,7 +126,7 @@ struct MongsToggleChip: View {
     }
 
     private var chipBackground: some View {
-        RoundedRectangle(cornerRadius: 26).fill(Color.black.opacity(0.3))
+        RoundedRectangle(cornerRadius: 26.ms).fill(Color.black.opacity(0.3))
     }
 }
 
@@ -142,9 +142,9 @@ struct MongsChip: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 0) {
-                Spacer().frame(width: 10)
+                Spacer().frame(width: 10.ms)
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 2.ms) {
                     Text(label)
                         .mongsFont(16)
                         .foregroundStyle(MongsColor.white)
@@ -162,6 +162,6 @@ struct MongsChip: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .listRowBackground(RoundedRectangle(cornerRadius: 26).fill(Color.black.opacity(0.3)))
+        .listRowBackground(RoundedRectangle(cornerRadius: 26.ms).fill(Color.black.opacity(0.3)))
     }
 }

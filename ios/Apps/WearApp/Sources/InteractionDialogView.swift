@@ -33,7 +33,7 @@ struct InteractionDialogView: View {
     @ViewBuilder
     private func buttonRow(height: CGFloat, @ViewBuilder content: () -> some View) -> some View {
         VStack(spacing: 0) {
-            HStack(spacing: 8) { content() }
+            HStack(spacing: 8.ms) { content() }
             Spacer(minLength: 0)
         }
         .frame(height: height)
@@ -89,7 +89,7 @@ struct InteractionDialogView: View {
                         )
                     }
 
-                    Spacer().frame(height: 20)
+                    Spacer().frame(height: 20.ms)
                 }
                 .frame(maxWidth: .infinity)
             }

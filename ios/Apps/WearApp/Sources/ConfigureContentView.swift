@@ -17,18 +17,18 @@ struct ConfigureContentView: View {
         VStack(spacing: 0) {
             MongsCircleTextButton(title: "i", borderName: "btn_border_purple_dark") {}
 
-            HStack(spacing: 48) {
+            HStack(spacing: 48.ms) {
                 MongsCircleButton(iconName: "btn_icon_charge", borderName: "btn_border_purple_dark") {}
                 MongsCircleButton(iconName: "btn_icon_notice", borderName: "btn_border_purple_dark") {}
             }
-            .offset(y: -14)
+            .offset(y: -14.ms)
 
-            HStack(spacing: 10) {
+            HStack(spacing: 10.ms) {
                 MongsCircleButton(iconName: "btn_icon_feedback", borderName: "btn_border_purple_dark") {}
                 MongsCircleButton(iconName: "btn_icon_setting", borderName: "btn_border_purple_dark",
                                   action: onOpenSetting)
             }
-            .offset(y: -8)
+            .offset(y: -8.ms)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .task {
