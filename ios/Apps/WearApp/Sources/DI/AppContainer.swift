@@ -30,6 +30,7 @@ final class AppContainer {
     private let storeService: StoreService?
     private let communityService: CommunityService?
     private let collectionService: CollectionService?
+    private let trainingService: TrainingService?
     private let locationClient = LocationClient()
 
     init() {
@@ -65,6 +66,7 @@ final class AppContainer {
             self.playerService = playerService
             self.pushService = PushService(authService: authService, optionStore: optionStore)
             self.collectionService = CollectionService(api: api, location: locationClient)
+            self.trainingService = TrainingService(api: api, mongService: mongService)
             self.communityService = CommunityService(
                 api: api,
                 identity: Self.clientIdentity(secureStore: secureStore)
@@ -91,6 +93,7 @@ final class AppContainer {
             self.storeService = nil
             self.communityService = nil
             self.collectionService = nil
+            self.trainingService = nil
             self.realtimeService = nil
         }
     }
@@ -162,6 +165,17 @@ final class AppContainer {
                 await pushService?.notificationOptionChanged()
             }
         )
+    }
+
+    /// 훈련 목록. 메뉴가 목록을 먼저 받아야 그릴 수 있다.
+    func trainingTypes() async -> [TrainingType] {
+        guard let trainingService else { return [] }
+        return (try? await trainingService.types()) ?? []
+    }
+
+    func makeTrainingViewModel(code: String) -> TrainingViewModel? {
+        guard let trainingService, let mongService else { return nil }
+        return TrainingViewModel(code: code, service: trainingService, mongService: mongService)
     }
 
     func makeCollectionViewModel(kind: CollectionItem.Kind) -> CollectionViewModel? {

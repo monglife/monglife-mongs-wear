@@ -325,6 +325,51 @@ Android 는 `PermissionUtil.verifyActivityPermission()` 으로 직접 확인할 
 (`HealthKitStepServiceTests`), **실제 HealthKit 동작과 백그라운드 전달 빈도는 실기기에서만**
 확인할 수 있다. UI 만 빠르게 보려면 `AppContainer` 에서 `SimulatedStepService()` 로 바꾼다.
 
+## 훈련 (미니게임 3종)
+
+Android `presentation/.../training/*` (4,518 LOC) 이식.
+
+| 만든 것 | Android 원본 |
+|---|---|
+| `MongsModel/RunnerEngine.swift` | `runner/engine/{RunnerEngine,Runner,RunnerPlayer,RunnerHurdle}.kt` |
+| `MongsModel/BasketballEngine.swift` | `basketball/engine/{BasketballEngine,Basketball,Ball,Basket}.kt` |
+| `MongsModel/Training.swift` | `TrainingType` + `Activity*Dto` + 가위바위보 판정 |
+| `MongsService/TrainingService.swift` | `ActivityWebAdapter.kt` |
+| `MongsViewModel/TrainingViewModel.swift` | `Training*ViewModel.kt` 5개의 공통 부분 |
+| `Apps/WearApp/Sources/Training*.swift` | `Training*Content.kt` + 다이얼로그 |
+
+### 엔진은 `MongsModel` 에 둔다
+
+원본은 Presentation 레이어에 있지만 **화면도 서버도 모르는 순수 계산**이다.
+무엇보다 **원본에 테스트가 하나도 없어서**, 시뮬레이터 없이 돌릴 수 있는 곳에 둬야 검증이 된다.
+`RunnerEngineTests` / `BasketballEngineTests` / `RockPaperScissorsTests` 가 규칙을 고정한다.
+
+### 이식하며 알게 된 것 (테스트로 고정)
+
+- **한 틱은 16ms 다.** `1000 / 60` 이 정수 나눗셈이라 16.67 이 아니다 —
+  게임 시계가 벽시계보다 4% 느리고 장애물 생성도 그만큼 늦다.
+  Android 도 `1000L / FRAME` 이라 **동작은 일치한다.** 고치면 난이도가 달라진다.
+- **농구는 끌어당긴 거리가 세기에 영향을 주지 않는다.** 방향 벡터를 정규화하지 않고
+  큰 쪽 성분을 `ballSpeed` 로 고정한 뒤 나머지를 비례로 맞추기 때문이다.
+  1픽셀을 끌든 300픽셀을 끌든 같은 궤적이다.
+- **반발 계수가 1보다 크다** (`tension = 1.18`). 림에 튕기면 더 빨라진다 —
+  물리적으로는 이상하지만 낮추면 공이 림에 붙어버린다.
+- 충돌 판정은 원본이 SAT(분리축 정리)로 풀지만 **두 도형 모두 회전하지 않는 사각형**이라
+  겹침 검사와 결과가 같다. 읽기 쉬운 쪽으로 바꿨고 테스트가 동치를 지킨다.
+
+### 옮기지 않은 것
+
+원본 enum 에는 축구(`TR003`)와 참참참(`TR004`)도 있지만 **화면이 `// TODO: 플레이 섹션` 스텁**이고
+서버 목록에도 없다. `TrainingService.types()` 가 **화면이 없는 종류를 걸러낸다** —
+서버가 나중에 켜도 앱이 빈 화면으로 들어가지 않는다.
+
+### ⚠️ 게임 화면 위쪽 양 모서리는 비워 둔다
+
+왼쪽엔 watchOS 의 닫기(X) 버튼이, 오른쪽엔 시계가 겹친다. Android 에는 둘 다 없어서
+원본은 위쪽 모서리에 점수를 둔다 — 그대로 옮기면 점수가 X 뒤로 숨는다.
+
+---
+
 ## 인앱 결제 (StoreKit 2)
 
 Android `core/billing-core/.../GoogleBillingClient.kt` + `pages/charge/*` 이식.
@@ -553,6 +598,7 @@ iOS 는 그게 절반만 된다.
 | `RandomDrawView` | `pages/randomDraw/RandomDrawView.kt` + 다이얼로그 2개 |
 | `CollectionMenuView` / `CollectionGridView` | `pages/collection/*.kt` |
 | `MapSearchView` | `pages/map/SearchMapView.kt` |
+| `TrainingFlowView` 외 | `pages/training/*.kt` + 다이얼로그 2개 |
 | `NotReadyView` | `mobile-view-presentation/.../pages/common/NotReadyView.kt` |
 | `Theme/MongsButton.swift` | `component/common/button/*.kt` |
 | `Theme/MongsWidgets.swift` | `PayPointBox` · `ConditionSection` · `PageIndicator` · `LoadingBar` · `Logo` |

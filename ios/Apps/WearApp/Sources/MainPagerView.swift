@@ -41,6 +41,7 @@ struct MainPagerView: View {
     /// 도감. nil 이면 닫힘, 값이 있으면 그 종류의 목록이 열린다.
     @State private var collectionKind: CollectionItem.Kind?
     @State private var isMapSearchPresented = false
+    @State private var isTrainingPresented = false
     /// 아직 이식하지 않은 화면. nil 이면 닫힘.
     @State private var notReady: NotReadyDestination?
 
@@ -121,6 +122,13 @@ struct MainPagerView: View {
         .fullScreenCover(item: $collectionKind) { kind in
             if let viewModel = container.makeCollectionViewModel(kind: kind) {
                 CollectionGridView(viewModel: viewModel) { collectionKind = nil }
+            }
+        }
+        .fullScreenCover(isPresented: $isTrainingPresented) {
+            TrainingFlowView {
+                isTrainingPresented = false
+                // 훈련은 스탯과 페이포인트를 바꾼다.
+                Task { await slotViewModel?.reload() }
             }
         }
         .fullScreenCover(isPresented: $isMapSearchPresented) {
@@ -267,6 +275,7 @@ struct MainPagerView: View {
                 onOpenRandomDraw: { isRandomDrawPresented = true },
                 onOpenCollection: { isCollectionMenuPresented = true },
                 onOpenMapSearch: { isMapSearchPresented = true },
+                onOpenTraining: { isTrainingPresented = true },
                 onNotReady: { notReady = $0 }
             )
         case .configure:

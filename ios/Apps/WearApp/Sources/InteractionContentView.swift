@@ -22,6 +22,8 @@ struct InteractionContentView: View {
     let onOpenCollection: () -> Void
     /// 맵 탐색 열기
     let onOpenMapSearch: () -> Void
+    /// 훈련 열기
+    let onOpenTraining: () -> Void
     /// 아직 이식하지 않은 화면 열기 (자리표시자)
     let onNotReady: (NotReadyDestination) -> Void
 
@@ -61,7 +63,8 @@ struct InteractionContentView: View {
                                   isEnabled: isAlive, action: onOpenRandomDraw)
             }
             HStack(spacing: 8.ms) {
-                MongsCircleButton(iconName: "btn_icon_activity", borderName: "btn_border_green", iconSize: 34, isEnabled: canPlay) { onNotReady(.training) }
+                MongsCircleButton(iconName: "btn_icon_activity", borderName: "btn_border_green", iconSize: 34,
+                                  isEnabled: canPlay, action: onOpenTraining)
                 MongsCircleButton(iconName: "btn_icon_battle", borderName: "btn_border_pink", iconSize: 30, isEnabled: canPlay) { onNotReady(.battle) }
             }
         }

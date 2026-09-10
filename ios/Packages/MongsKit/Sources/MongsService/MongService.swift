@@ -212,6 +212,12 @@ public actor MongService {
         return await store(base.applying(response))
     }
 
+    /// 훈련 결과를 캐시에 반영한다.
+    public func apply(trainingResult: TrainingResult) async {
+        guard let current = await cache.mong(), current.mongId == trainingResult.mongId else { return }
+        await store(current.applying(trainingResult))
+    }
+
     // MARK: - 랜덤 뽑기
 
     /// 뽑기권 구매. 페이포인트를 쓴다.
