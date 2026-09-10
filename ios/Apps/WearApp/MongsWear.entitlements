@@ -14,6 +14,15 @@
 	</array>
 
 	<!--
+	  APNs 푸시 알림.
+	  ⚠️ 실기기에서 토큰을 받으려면 유료 Developer Program 이 필요하다.
+	  시뮬레이터는 `xcrun simctl push` 로 표시·탭 경로를 검증할 수 있다.
+	  배포 시에는 빌드 설정에서 `production` 으로 바뀐다.
+	-->
+	<key>aps-environment</key>
+	<string>development</string>
+
+	<!--
 	  HealthKit 걸음 읽기.
 	  ⚠️ 개인 테스트는 무료 계정으로 되지만 **배포에는 유료 Developer Program 이 필요**하다.
 	-->

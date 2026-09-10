@@ -325,6 +325,57 @@ Android 는 `PermissionUtil.verifyActivityPermission()` 으로 직접 확인할 
 (`HealthKitStepServiceTests`), **실제 HealthKit 동작과 백그라운드 전달 빈도는 실기기에서만**
 확인할 수 있다. UI 만 빠르게 보려면 `AppContainer` 에서 `SimulatedStepService()` 로 바꾼다.
 
+## 푸시 알림 (APNs)
+
+Android `app/wear-app/.../service/NotificationService.kt` (FCM) 대응.
+
+| 만든 것 | Android 원본 |
+|---|---|
+| `MongsService/PushService.swift` | `NotificationService.onNewToken` + `SyncUserDeviceUseCase` |
+| `PushNotificationDelegate` (같은 파일) | `NotificationService.onMessageReceived` + `sendNotification` |
+| `Apps/WearApp/Sources/DI/AppDelegate.swift` | FCM 서비스 등록 (`AndroidManifest`) |
+
+Firebase 는 쓰지 않는다 — watchOS 지원이 제한적이고, standalone watch 앱은 APNs 를 직접 받을 수 있다.
+
+### ⚠️ 알림 옵션 게이트가 클라이언트에 있을 수 없다
+
+원본은 **FCM 데이터 메시지**를 받아 앱 코드가 알림을 만든다. 그래서 표시 직전에
+`getNotificationOptionUseCase()` 를 확인하고 꺼져 있으면 안 띄운다.
+
+APNs 의 `alert` 푸시는 **시스템이 먼저 표시**한다. 앱이 끼어들 자리가 없다.
+`UNNotificationServiceExtension` 도 내용을 바꿀 수만 있고 억제하지는 못한다.
+`content-available` 무음 푸시로 흉내낼 수는 있지만 watchOS 는 전달이 보장되지 않아
+"알림이 가끔 안 온다"가 된다.
+
+→ **옵션 판단이 서버로 올라가야 한다.** 서버 작업이 필요하고, 그때까지 설정의 알림 토글은
+로컬 상태만 바꾼다. 백엔드 핸드오프 문서에 기록.
+
+### 권한을 묻는 시점
+
+**로그인 뒤 메인이 뜰 때** 묻는다 (`AppContainer.startPush`).
+로그인 화면에서 묻지 않는 이유는 두 가지다 — 아직 계정이 없어 보낼 알림도 없고,
+**iOS 는 한 번 거부하면 앱이 다시 물을 수 없다**(설정 앱에서만 바꾼다).
+
+### 시뮬레이터로 검증한다
+
+유료 계정도 실기기도 없이 표시·탭 경로를 다 볼 수 있다.
+
+```bash
+cat > push.json <<'JSON'
+{ "Simulator Target Bundle": "com.mongs.wear",
+  "aps": { "alert": { "title": "몽스", "body": "몽이가 배고파해요" }, "sound": "default" } }
+JSON
+xcrun simctl push <UDID> com.mongs.wear push.json
+```
+
+**권한을 먼저 허용해야 한다.** 거부 상태면 조용히 버려진다 —
+`simctl push` 는 그래도 "Notification sent" 를 찍으므로 성공으로 착각하기 쉽다.
+앱을 재설치하면 권한이 초기화된다.
+
+실기기 토큰(`aps-environment`)은 유료 Developer Program 이 필요하다.
+
+---
+
 ## MQTT 실시간 갱신
 
 Android `core/data-core/.../mqtt/client/MqttClient.kt` (381 LOC) + 어댑터 3곳의 구독을 옮겼다.
@@ -522,6 +573,16 @@ watchOS 는 폭이 훨씬 넓게 갈린다:
 - 몽 없음: 컨디션을 뺀 4쪽 — 밝기 `[0.4, 0.0, 0.4, 0.4]`
 - **시작은 언제나 슬롯 쪽**이고, 슬롯만 배경을 어둡게 하지 않는다
 
+### ⚠️ 돌아오지 않는 `.task` 뒤에는 아무것도 붙이지 않는다
+
+`MainSlotViewModel.observe()` 는 끝에 몽 스트림을 도는 `for await` 가 있어 **돌아오지 않는다.**
+그 뒤에 이어 붙인 초기화는 영영 실행되지 않는데, **컴파일도 되고 경고도 없다.**
+
+실제로 MQTT 시작(`startRealtime`)과 푸시 등록(`startPush`)을 거기 붙였다가 **둘 다 죽어 있었다.**
+MQTT 는 별도 하네스로만 검증해서 앱에서 한 번도 안 돌고 있다는 걸 오래 몰랐다.
+
+함께 시작해야 하는 것들은 **별도 `.task` 블록**에 둔다 — 나란히 돌고, 뷰가 사라질 때 같이 취소된다.
+
 ### ⚠️ 페이저에서 겪은 함정 3개
 
 1. **쪽 수가 도중에 바뀌면 선택된 쪽이 어긋난다.** 몽 유무로 쪽 수가 4↔5 로 달라지므로,
@@ -547,6 +608,16 @@ watchOS 는 폭이 훨씬 넓게 갈린다:
 규칙은 지키기 어려워서 구조로 막았다.
 
 `preload` 는 이제 **첫 프레임 깜빡임을 줄이는 최적화**이지 필수가 아니다.
+
+### 앱 아이콘
+
+Android 어댑티브 아이콘(`ic_launcher_{background,foreground}.png`)을 합성해 만들었다.
+
+**어댑티브 아이콘은 108dp 캔버스 중 안쪽 72dp 만 보인다.** 두 장 모두 그 여백을 갖고 있어서
+**둘 다 1.5배(108/72)로 그려야** 런처에서 보이던 그림이 된다.
+전경만 키우면 배경에 검은 테두리가 남는다.
+
+앱 아이콘에는 알파가 허용되지 않는다 — 합성 시 `CGImageAlphaInfo.noneSkipLast` 로 불투명하게 만든다.
 
 ### 에셋 크기
 

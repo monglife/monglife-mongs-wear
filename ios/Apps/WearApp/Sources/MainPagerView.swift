@@ -166,11 +166,21 @@ struct MainPagerView: View {
 
             // ⚠️ 로딩은 페이저가 시작한다. 자식 뷰(SlotContentView)에 맡기면
             // "로딩이 끝나야 자식이 만들어지는데, 자식이 로딩을 시작하는" 순환이 된다.
+            //
+            // ⚠️ `observe()` 는 **돌아오지 않는다** — 끝에 몽 스트림을 도는 for-await 가 있다.
+            // 그래서 뒤에 다른 초기화를 이어 붙이면 그 코드는 영영 실행되지 않는다.
+            // (실제로 MQTT 와 푸시 등록을 여기 뒤에 붙였다가 둘 다 죽어 있었다.)
+            // 함께 시작해야 하는 것들은 아래의 **별도 `.task`** 에 둔다.
             await viewModel?.observe()
-
+        }
+        // 구독 루프와 나란히 도는 초기화. 위 `.task` 는 돌아오지 않으므로 여기 둔다.
+        .task {
             // MQTT 는 로그인 뒤 메인이 뜰 때 붙는다. 계정·기기 토픽이 먼저 열리고,
             // 몽 토픽은 아래 onChange 가 현재 몽을 보고 연다.
             await container.startRealtime()
+
+            // 알림 권한은 로그인 뒤에 묻는다 — iOS 는 한 번 거부하면 다시 못 묻는다.
+            await container.startPush()
         }
         .onChange(of: slotViewModel?.mong?.mongId) { _, mongId in
             Task { await container.observeRealtimeMong(mongId) }

@@ -25,6 +25,8 @@ final class AppContainer {
     /// MQTT 실시간 갱신. 자격증명이나 설정이 없으면 nil 이고, 그래도 앱은 그대로 돈다.
     private let realtimeService: RealtimeService?
     private let optionStore = DeviceOptionStore(store: UserDefaultsStore())
+    /// APNs. 설정을 못 읽으면 인증 서비스가 없어 nil 이다.
+    private(set) var pushService: PushService?
 
     init() {
         let configResult = Result { try AppConfig.load() }
@@ -46,16 +48,18 @@ final class AppContainer {
 
         if let config = try? configResult.get() {
             let api = APIClient(config: config, tokenStore: tokenStore)
-            self.authService = AuthService(
+            let authService = AuthService(
                 api: api,
                 tokenStore: tokenStore,
                 signInClient: AppleSignInClient(),
                 identity: Self.clientIdentity(secureStore: secureStore)
             )
+            self.authService = authService
             let mongService = MongService(api: api, cache: MongCache())
             let playerService = PlayerService(api: api)
             self.mongService = mongService
             self.playerService = playerService
+            self.pushService = PushService(authService: authService, optionStore: optionStore)
             self.realtimeService = RealtimeService(
                 broker: MQTTBroker(config: config),
                 mongService: mongService,
@@ -69,6 +73,7 @@ final class AppContainer {
             self.authService = nil
             self.mongService = nil
             self.playerService = nil
+            self.pushService = nil
             self.realtimeService = nil
         }
     }
@@ -78,6 +83,21 @@ final class AppContainer {
     /// 로그인 뒤 메인이 뜰 때 시작한다.
     func startRealtime() async {
         await realtimeService?.start()
+    }
+
+    // MARK: - 푸시
+
+    /// 로그인 뒤 메인이 뜰 때 알림 권한을 묻고 APNs 에 등록한다.
+    ///
+    /// **로그인 화면에서 묻지 않는다.** 아직 계정이 없어 보낼 알림도 없고,
+    /// iOS 는 한 번 거부하면 앱이 다시 물을 수 없어서 물어보는 시점이 중요하다.
+    func startPush() async {
+        guard let pushService else { return }
+        guard await pushService.requestAuthorization() else { return }
+        // 등록은 메인 스레드에서 부른다. 토큰은 AppDelegate 콜백으로 돌아온다.
+        await MainActor.run { WKApplication.shared().registerForRemoteNotifications() }
+        // 토큰이 이미 와 있으면(재실행) 여기서 바로 올라간다.
+        await pushService.syncIfPossible()
     }
 
     /// 현재 몽이 바뀔 때마다 구독을 갈아끼운다.
@@ -119,7 +139,10 @@ final class AppContainer {
             optionStore: optionStore,
             notification: NotificationPermission(),
             stepService: stepService,
-            signOut: signOut
+            signOut: signOut,
+            notificationOptionChanged: { [pushService] in
+                await pushService?.notificationOptionChanged()
+            }
         )
     }
 

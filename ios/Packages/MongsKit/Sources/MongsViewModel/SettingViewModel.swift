@@ -29,17 +29,22 @@ public final class SettingViewModel: ErrorReportingViewModel {
     private let notification: NotificationPermission
     private let stepService: any StepService
     private let signOutAction: @Sendable () async -> Void
+    /// 알림 옵션이 바뀌면 서버에도 알려야 한다 — APNs 는 표시 여부를 서버가 정한다
+    /// (`PushService` 주석 참고).
+    private let notificationOptionChanged: @Sendable () async -> Void
 
     public init(
         optionStore: DeviceOptionStore,
         notification: NotificationPermission,
         stepService: any StepService,
-        signOut: @escaping @Sendable () async -> Void
+        signOut: @escaping @Sendable () async -> Void,
+        notificationOptionChanged: @escaping @Sendable () async -> Void = {}
     ) {
         self.optionStore = optionStore
         self.notification = notification
         self.stepService = stepService
         self.signOutAction = signOut
+        self.notificationOptionChanged = notificationOptionChanged
     }
 
     public func load() async {
@@ -58,6 +63,7 @@ public final class SettingViewModel: ErrorReportingViewModel {
         let next = !notificationOption
         notificationOption = next
         await optionStore.setNotificationOption(next)
+        await notificationOptionChanged()
     }
 
     /// 알림 권한 요청. 이미 정해진 뒤라면 시스템이 다이얼로그를 띄우지 않으므로
