@@ -212,6 +212,43 @@ public actor MongService {
         return await store(base.applying(response))
     }
 
+    // MARK: - 랜덤 뽑기
+
+    /// 뽑기권 구매. 페이포인트를 쓴다.
+    @discardableResult
+    public func buyRandomDrawTicket() async throws -> Mong? {
+        guard let mong = await cache.mong() else { throw MongError.noMong }
+        let response: MongResponse.RandomDrawTicket = try await api.request(
+            Endpoint(
+                host: .gateway,
+                method: .post,
+                path: "character/interaction/randomDraw/ticket/\(mong.mongId)"
+            )
+        )
+        let base = await cache.mong() ?? mong
+        return await store(base.applying(response))
+    }
+
+    /// 뽑기. 티켓을 하나 쓰고 결과를 돌려준다.
+    ///
+    /// 응답이 몽 상태를 주지 않으므로 **티켓 수는 여기서 직접 깎는다.**
+    /// 서버가 다음 조회에서 정확한 값을 다시 알려준다.
+    public func randomDraw() async throws -> RandomDrawResult {
+        guard let mong = await cache.mong() else { throw MongError.noMong }
+        let result: RandomDrawResult = try await api.request(
+            Endpoint(
+                host: .gateway,
+                method: .post,
+                path: "character/interaction/randomDraw/\(mong.mongId)"
+            )
+        )
+        if var next = await cache.mong(), next.randomDrawTicketCount > 0 {
+            next.randomDrawTicketCount -= 1
+            await store(next)
+        }
+        return result
+    }
+
     /// 졸업. 몽이 떠나므로 캐시를 비운다.
     public func graduate() async throws {
         guard let mong = await cache.mong() else { throw MongError.noMong }

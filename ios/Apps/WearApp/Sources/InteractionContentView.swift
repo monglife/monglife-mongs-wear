@@ -16,6 +16,8 @@ struct InteractionContentView: View {
     let onOpenSlotPick: () -> Void
     /// 환전 메뉴 열기
     let onOpenExchange: () -> Void
+    /// 랜덤 뽑기 열기
+    let onOpenRandomDraw: () -> Void
     /// 아직 이식하지 않은 화면 열기 (자리표시자)
     let onNotReady: (NotReadyDestination) -> Void
 
@@ -49,7 +51,8 @@ struct InteractionContentView: View {
                 MongsCircleButton(iconName: "btn_icon_map_search", borderName: "btn_border_blue", iconSize: 34, isEnabled: isAlive) { onNotReady(.searchMap) }
                 MongsCircleButton(iconName: "btn_icon_slot_pick", borderName: "btn_border_red", iconSize: 34,
                                   action: onOpenSlotPick)
-                MongsCircleButton(iconName: "btn_icon_luck_draw", borderName: "btn_border_purple", iconSize: 34, isEnabled: isAlive) { onNotReady(.randomDraw) }
+                MongsCircleButton(iconName: "btn_icon_luck_draw", borderName: "btn_border_purple", iconSize: 34,
+                                  isEnabled: isAlive, action: onOpenRandomDraw)
             }
             HStack(spacing: 8.ms) {
                 MongsCircleButton(iconName: "btn_icon_activity", borderName: "btn_border_green", iconSize: 34, isEnabled: canPlay) { onNotReady(.training) }

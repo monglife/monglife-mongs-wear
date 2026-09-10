@@ -523,6 +523,10 @@ iOS 는 그게 절반만 된다.
 | `FeedMenuView` / `FeedView` | `pages/feed/FeedMenuView.kt` + `FeedFoodView.kt` + `FeedSnackView.kt` |
 | `InventoryView` | `pages/inventory/InventoryView.kt` + `component/pages/inventory/InventoryItem.kt` |
 | `SettingView` | `pages/setting/SettingView.kt` |
+| `ChargeView` | `pages/charge/ChargeStarPointView.kt` |
+| `NoticeView` 외 | `pages/notice/NoticeView.kt` + `NoticeDetailDialog.kt` |
+| `FeedbackView` | `pages/feedback/FeedbackView.kt` + `CreateFeedbackDialog.kt` |
+| `RandomDrawView` | `pages/randomDraw/RandomDrawView.kt` + 다이얼로그 2개 |
 | `NotReadyView` | `mobile-view-presentation/.../pages/common/NotReadyView.kt` |
 | `Theme/MongsButton.swift` | `component/common/button/*.kt` |
 | `Theme/MongsWidgets.swift` | `PayPointBox` · `ConditionSection` · `PageIndicator` · `LoadingBar` · `Logo` |
@@ -569,6 +573,20 @@ iOS 는 그게 절반만 된다.
 단, `Toggle` 에 `allowsHitTesting(false)` 를 걸어 그리기만 시키면 **그 영역이 죽는다.**
 원본은 Chip 전체와 Switch 양쪽이 같은 콜백을 받으므로,
 행 레이블에 `.contentShape(Rectangle())` 을 줘서 줄 전체를 탭 영역으로 만든다.
+
+### 원본이 둘로 나눠 둔 걸 합친 자리 (2)
+
+- **오류 신고** — 원본은 목록 화면 + 작성 다이얼로그다. 목록에 담을 게 없어서
+  (등록만 하고 조회 API 가 없다) **작성 화면 하나로 합쳤다.** 제목 → 내용 두 단계는 그대로다.
+
+### ⚠️ 랜덤 뽑기는 티켓과 페이포인트 중 **하나만** 있으면 된다
+
+원본 버튼 조건이 `disable = payPoint 부족 && 티켓 없음` 이다 — 둘 다 없어야 잠긴다.
+무엇을 쓸지는 **서버가 정한다.** 클라이언트는 `POST character/interaction/randomDraw/{mongId}`
+하나만 부른다 (뽑기권 구매 API 는 따로 있지만 이 화면은 쓰지 않는다).
+
+기계 회전은 **대기 중 0°**, 뽑는 동안만 ±7° 로 흔들린다.
+흔들림 각도를 그냥 토글하면 가만히 있을 때도 기울어 보인다.
 
 ### 아직 없는 화면은 자리표시자로 보낸다
 

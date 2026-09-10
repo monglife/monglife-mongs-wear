@@ -46,12 +46,9 @@ enum NotReadyDestination: String, Identifiable, CaseIterable {
 
     case collection
     case searchMap
-    case randomDraw
     case training
     case battle
     case help
-    case notice
-    case feedback
 
     var id: String { rawValue }
 
@@ -60,12 +57,9 @@ enum NotReadyDestination: String, Identifiable, CaseIterable {
         switch self {
         case .collection: "도감"
         case .searchMap: "맵 탐색"
-        case .randomDraw: "랜덤 뽑기"
         case .training: "훈련"
         case .battle: "배틀"
         case .help: "도움말"
-        case .notice: "공지사항"
-        case .feedback: "오류 신고"
         }
     }
 }

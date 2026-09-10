@@ -28,6 +28,7 @@ final class AppContainer {
     /// APNs. 설정을 못 읽으면 인증 서비스가 없어 nil 이다.
     private(set) var pushService: PushService?
     private let storeService: StoreService?
+    private let communityService: CommunityService?
 
     init() {
         let configResult = Result { try AppConfig.load() }
@@ -61,6 +62,10 @@ final class AppContainer {
             self.mongService = mongService
             self.playerService = playerService
             self.pushService = PushService(authService: authService, optionStore: optionStore)
+            self.communityService = CommunityService(
+                api: api,
+                identity: Self.clientIdentity(secureStore: secureStore)
+            )
             self.storeService = StoreService(
                 api: api,
                 purchases: PurchaseClient(),
@@ -81,6 +86,7 @@ final class AppContainer {
             self.playerService = nil
             self.pushService = nil
             self.storeService = nil
+            self.communityService = nil
             self.realtimeService = nil
         }
     }
@@ -151,6 +157,18 @@ final class AppContainer {
                 await pushService?.notificationOptionChanged()
             }
         )
+    }
+
+    func makeNoticeViewModel() -> NoticeViewModel? {
+        communityService.map { NoticeViewModel(service: $0) }
+    }
+
+    func makeFeedbackViewModel() -> FeedbackViewModel? {
+        communityService.map { FeedbackViewModel(service: $0) }
+    }
+
+    func makeRandomDrawViewModel() -> RandomDrawViewModel? {
+        mongService.map { RandomDrawViewModel(mongService: $0) }
     }
 
     func makeChargeViewModel() -> ChargeViewModel? {

@@ -34,6 +34,9 @@ struct MainPagerView: View {
     @State private var isInventoryPresented = false
     @State private var isSettingPresented = false
     @State private var isChargePresented = false
+    @State private var isNoticePresented = false
+    @State private var isFeedbackPresented = false
+    @State private var isRandomDrawPresented = false
     /// 아직 이식하지 않은 화면. nil 이면 닫힘.
     @State private var notReady: NotReadyDestination?
 
@@ -101,6 +104,25 @@ struct MainPagerView: View {
             if let viewModel = container.makeExchangeViewModel(kind: kind) {
                 ExchangeView(viewModel: viewModel) {
                     exchangeKind = nil
+                    Task { await slotViewModel?.reload() }
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $isNoticePresented) {
+            if let viewModel = container.makeNoticeViewModel() {
+                NoticeView(viewModel: viewModel) { isNoticePresented = false }
+            }
+        }
+        .fullScreenCover(isPresented: $isFeedbackPresented) {
+            if let viewModel = container.makeFeedbackViewModel() {
+                FeedbackView(viewModel: viewModel) { isFeedbackPresented = false }
+            }
+        }
+        .fullScreenCover(isPresented: $isRandomDrawPresented) {
+            if let viewModel = container.makeRandomDrawViewModel() {
+                RandomDrawView(viewModel: viewModel) {
+                    isRandomDrawPresented = false
+                    // 뽑기로 페이포인트·인벤토리가 바뀐다.
                     Task { await slotViewModel?.reload() }
                 }
             }
@@ -222,12 +244,15 @@ struct MainPagerView: View {
                 mong: viewModel.mong,
                 onOpenSlotPick: { isSlotPickPresented = true },
                 onOpenExchange: { isExchangeMenuPresented = true },
+                onOpenRandomDraw: { isRandomDrawPresented = true },
                 onNotReady: { notReady = $0 }
             )
         case .configure:
             ConfigureContentView(
                 onOpenSetting: { isSettingPresented = true },
                 onOpenCharge: { isChargePresented = true },
+                onOpenNotice: { isNoticePresented = true },
+                onOpenFeedback: { isFeedbackPresented = true },
                 onNotReady: { notReady = $0 }
             )
         }

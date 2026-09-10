@@ -5,14 +5,17 @@ import SwiftUI
 /// Android `.../pages/main/ConfigureContent.kt` 이식.
 /// 3줄(1개 / 2개 / 2개)이고, 아래 두 줄에 음수 오프셋이 걸려 있어 원형으로 모인다.
 ///
-/// 설정과 충전만 실제 화면으로 간다. 도움말·공지·오류 신고는 아직 v1 범위 밖이라
-/// `NotReadyView` 자리표시자로 보낸다.
+/// 도움말만 아직 화면이 없어 `NotReadyView` 자리표시자로 보낸다.
 struct ConfigureContentView: View {
 
     /// 설정 화면 열기
     let onOpenSetting: () -> Void
     /// 충전 화면 열기
     let onOpenCharge: () -> Void
+    /// 공지사항 열기
+    let onOpenNotice: () -> Void
+    /// 오류 신고 열기
+    let onOpenFeedback: () -> Void
     /// 아직 이식하지 않은 화면 열기 (자리표시자)
     let onNotReady: (NotReadyDestination) -> Void
 
@@ -25,12 +28,14 @@ struct ConfigureContentView: View {
             HStack(spacing: 48.ms) {
                 MongsCircleButton(iconName: "btn_icon_charge", borderName: "btn_border_purple_dark",
                                   action: onOpenCharge)
-                MongsCircleButton(iconName: "btn_icon_notice", borderName: "btn_border_purple_dark") { onNotReady(.notice) }
+                MongsCircleButton(iconName: "btn_icon_notice", borderName: "btn_border_purple_dark",
+                                  action: onOpenNotice)
             }
             .offset(y: -14.ms)
 
             HStack(spacing: 10.ms) {
-                MongsCircleButton(iconName: "btn_icon_feedback", borderName: "btn_border_purple_dark") { onNotReady(.feedback) }
+                MongsCircleButton(iconName: "btn_icon_feedback", borderName: "btn_border_purple_dark",
+                                  action: onOpenFeedback)
                 MongsCircleButton(iconName: "btn_icon_setting", borderName: "btn_border_purple_dark",
                                   action: onOpenSetting)
             }
