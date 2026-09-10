@@ -28,18 +28,38 @@ struct MongView: View {
     /// Android 원본의 몸통 120 : 표정 35 비율
     private var expressionSize: CGFloat { scaledBody * (35.0 / 120.0) }
 
+    /// 몸통 위에 표정을 얹는 위치. 원본 오프셋도 120 기준이라 몸통과 같은 비율로 따라간다.
+    private var expressionOffset: CGSize {
+        let ratio = scaledBody / 120
+        return CGSize(
+            width: code.expressionOffset.x * ratio,
+            height: code.expressionOffset.y * ratio
+        )
+    }
+
+    /// 표정 레이어
+    ///
+    /// ⚠️ `body` 안에 인라인으로 두면 **Release 최적화에서 컴파일러가 죽는다**
+    /// (`SimplifyCFG` 패스, Xcode 26.6). 뷰를 따로 빼면 통과한다.
+    /// Debug 는 최적화를 안 돌려서 드러나지 않으니 Release 빌드로 확인해야 한다.
+    @ViewBuilder
+    private var expressionLayer: some View {
+        AnimatedSprite(sprite: loader.sprite(named: expression.spriteName))
+            .frame(width: expressionSize, height: expressionSize)
+            .offset(x: expressionOffset.width, y: expressionOffset.height)
+    }
+
+    private var bodyLayer: some View {
+        AnimatedSprite(sprite: loader.sprite(named: isAnimated ? code.animationName : code.pngName))
+            .frame(width: scaledBody, height: scaledBody)
+    }
+
     var body: some View {
         ZStack {
-            AnimatedSprite(sprite: loader.sprite(named: isAnimated ? code.animationName : code.pngName))
-                .frame(width: scaledBody, height: scaledBody)
+            bodyLayer
 
             if isAnimated, code.hasExpression {
-                AnimatedSprite(sprite: loader.sprite(named: expression.spriteName))
-                    .frame(width: expressionSize, height: expressionSize)
-                    .offset(
-                        x: code.expressionOffset.x * scaledBody / 120,
-                        y: code.expressionOffset.y * scaledBody / 120
-                    )
+                expressionLayer
             }
         }
         .frame(width: scaledBody, height: scaledBody)

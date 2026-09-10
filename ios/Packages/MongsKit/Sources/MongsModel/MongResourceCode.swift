@@ -194,6 +194,11 @@ public enum MongResourceCode: String, Sendable, CaseIterable {
     }
 
     /// 표정 레이어 오프셋 (몸통 기준, 포인트)
+    /// ⚠️ `@inline(never)` 가 없으면 **Release 최적화에서 컴파일러가 죽는다**
+    /// (`SimplifyCFG` 패스, Xcode 26.6). 케이스가 40개 가까운 switch 가 호출부로
+    /// 인라인되면서 만들어지는 CFG 를 옵티마이저가 감당하지 못한다.
+    /// Debug 는 최적화를 안 돌려 드러나지 않으니 **Release 빌드로 확인해야 한다.**
+    @inline(never)
     public var expressionOffset: CGPoint {
         switch self {
 

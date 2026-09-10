@@ -28,6 +28,11 @@ swift test  --package-path Packages/MongsKit
 xcodebuild -project MongsWear.xcodeproj -scheme MongsWear-Dev \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build
 
+# ⚠️ 릴리스도 따로 확인한다. 스킴 기본 설정이 Debug 라 위 명령은 최적화를 돌리지 않는다.
+# 최적화에서만 터지는 컴파일러 크래시가 실제로 있었다 (아래 "함정 모음" 참고).
+xcodebuild -project MongsWear.xcodeproj -scheme MongsWear-Prd -configuration Release-Prd \
+  -destination 'generic/platform=watchOS Simulator' CODE_SIGNING_ALLOWED=NO build
+
 # 시뮬레이터에 설치 후 실행
 xcrun simctl list devices available | grep -i watch      # UDID 확인
 xcrun simctl boot <UDID>
@@ -553,6 +558,11 @@ watchOS 는 폭이 훨씬 넓게 갈린다:
 
 ## 함정 모음
 
+- **Release 최적화에서 컴파일러가 죽는 자리가 있다** (Xcode 26.6, `SimplifyCFG` 패스).
+  `MongResourceCode.expressionOffset` 은 케이스가 40개 가까운 switch 인데, 이게 `MongView`
+  안으로 인라인되면서 만들어지는 CFG 를 옵티마이저가 감당하지 못했다.
+  `@inline(never)` 로 막았고 `MongView` 의 레이어도 각각 프로퍼티로 분리해 뒀다.
+  **Debug 는 최적화를 안 돌려 드러나지 않는다** — 그래서 릴리스 빌드를 따로 확인한다.
 - **standalone watch 앱은 `Info.plist` 에 `WKWatchOnly = true` 가 필수다.** 없으면
   `WKCompanionAppBundleIdentifier` 를 요구하며 시뮬레이터 설치가 거부된다.
 - **Swift 6 strict concurrency**: `@MainActor` 클래스의 `deinit` 은 nonisolated 라
@@ -589,6 +599,15 @@ watchOS 는 폭이 훨씬 넓게 갈린다:
 - **Sign in with Apple 은 유료 Developer Program 이 있어야 실기기에서 된다.**
   `MongsWear.entitlements` 의 capability 가 프로비저닝 프로파일에 없으면 설치가 거부된다.
   시뮬레이터는 영향받지 않는다.
+
+---
+
+## 제품 결정 기록
+
+| 항목 | 결정 | 이유 |
+|---|---|---|
+| 화면 항상 켜기 | **기본 자동 디밍 수용** — `WKExtendedRuntimeSession` 을 쓰지 않는다 | Android 는 `FLAG_KEEP_SCREEN_ON` 이지만 코어 루프(걸음·먹이·환전)는 짧은 상호작용이라 영향이 적다. watchOS 는 세션 종류를 심사에서 검증하고 게임용 허용 카테고리가 제한적이며, 배터리 소모와 세션 만료·중단 처리 코드가 따라온다. **훈련/배틀(Phase 12~13)이 들어올 때 다시 판단한다.** |
+| 실기기 검증 | **Phase 7 에서 빼고 별도 트랙** | Apple Watch 와 유료 Developer Program 이 둘 다 없다. 기기·계정이 준비되면 HealthKit 실제 걸음 / MQTT 백그라운드 / Apple 로그인을 한 번에 검증한다. |
 
 ---
 
