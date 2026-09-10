@@ -33,6 +33,8 @@ struct MainPagerView: View {
     @State private var feedKind: FeedItem.Kind?
     @State private var isInventoryPresented = false
     @State private var isSettingPresented = false
+    /// 아직 이식하지 않은 화면. nil 이면 닫힘.
+    @State private var notReady: NotReadyDestination?
 
     private enum Page {
         case step, condition, slot, interaction, configure
@@ -101,6 +103,9 @@ struct MainPagerView: View {
                     Task { await slotViewModel?.reload() }
                 }
             }
+        }
+        .fullScreenCover(item: $notReady) { destination in
+            NotReadyView(destination: destination) { notReady = nil }
         }
         .fullScreenCover(isPresented: $isSettingPresented) {
             SettingView(
@@ -200,10 +205,14 @@ struct MainPagerView: View {
             InteractionContentView(
                 mong: viewModel.mong,
                 onOpenSlotPick: { isSlotPickPresented = true },
-                onOpenExchange: { isExchangeMenuPresented = true }
+                onOpenExchange: { isExchangeMenuPresented = true },
+                onNotReady: { notReady = $0 }
             )
         case .configure:
-            ConfigureContentView(onOpenSetting: { isSettingPresented = true })
+            ConfigureContentView(
+                onOpenSetting: { isSettingPresented = true },
+                onNotReady: { notReady = $0 }
+            )
         }
     }
 }

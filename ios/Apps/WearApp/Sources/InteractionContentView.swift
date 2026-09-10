@@ -6,8 +6,9 @@ import SwiftUI
 /// Android `.../pages/main/InteractionContent.kt` 이식.
 /// 3줄 배치(2개 / 3개 / 2개)와 테두리 색, 아이콘 크기까지 원본 그대로다.
 ///
-/// 이동할 화면들이 아직 없어서 지금은 눌러도 아무 일도 하지 않는다.
-/// 잠금 조건은 원본과 같게 맞춰 뒀다 — 여기가 v1 이후 라우팅이 붙는 자리다.
+/// 환전과 슬롯 관리만 실제 화면으로 간다. 나머지는 v1 범위 밖이라
+/// `NotReadyView` 자리표시자로 보낸다 — 원본 모바일 앱과 같은 방식이다.
+/// 잠금 조건은 원본과 같게 맞춰 뒀다.
 struct InteractionContentView: View {
 
     let mong: Mong?
@@ -15,6 +16,8 @@ struct InteractionContentView: View {
     let onOpenSlotPick: () -> Void
     /// 환전 메뉴 열기
     let onOpenExchange: () -> Void
+    /// 아직 이식하지 않은 화면 열기 (자리표시자)
+    let onNotReady: (NotReadyDestination) -> Void
 
     @Environment(SpriteLoader.self) private var loader
 
@@ -38,19 +41,19 @@ struct InteractionContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 8.ms) {
-                MongsCircleButton(iconName: "btn_icon_collection", borderName: "btn_border_orange", iconSize: 34) {}
+                MongsCircleButton(iconName: "btn_icon_collection", borderName: "btn_border_orange", iconSize: 34) { onNotReady(.collection) }
                 MongsCircleButton(iconName: "point_icon_pay", borderName: "btn_border_purple_dark",
                                   isEnabled: isAlive, action: onOpenExchange)
             }
             HStack(spacing: 8.ms) {
-                MongsCircleButton(iconName: "btn_icon_map_search", borderName: "btn_border_blue", iconSize: 34, isEnabled: isAlive) {}
+                MongsCircleButton(iconName: "btn_icon_map_search", borderName: "btn_border_blue", iconSize: 34, isEnabled: isAlive) { onNotReady(.searchMap) }
                 MongsCircleButton(iconName: "btn_icon_slot_pick", borderName: "btn_border_red", iconSize: 34,
                                   action: onOpenSlotPick)
-                MongsCircleButton(iconName: "btn_icon_luck_draw", borderName: "btn_border_purple", iconSize: 34, isEnabled: isAlive) {}
+                MongsCircleButton(iconName: "btn_icon_luck_draw", borderName: "btn_border_purple", iconSize: 34, isEnabled: isAlive) { onNotReady(.randomDraw) }
             }
             HStack(spacing: 8.ms) {
-                MongsCircleButton(iconName: "btn_icon_activity", borderName: "btn_border_green", iconSize: 34, isEnabled: canPlay) {}
-                MongsCircleButton(iconName: "btn_icon_battle", borderName: "btn_border_pink", iconSize: 30, isEnabled: canPlay) {}
+                MongsCircleButton(iconName: "btn_icon_activity", borderName: "btn_border_green", iconSize: 34, isEnabled: canPlay) { onNotReady(.training) }
+                MongsCircleButton(iconName: "btn_icon_battle", borderName: "btn_border_pink", iconSize: 30, isEnabled: canPlay) { onNotReady(.battle) }
             }
         }
         // 원본은 fillMaxSize + Center 다. 명시하지 않으면 콘텐츠가 위로 몰린다.

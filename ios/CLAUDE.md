@@ -409,6 +409,7 @@ iOS 는 그게 절반만 된다.
 | `FeedMenuView` / `FeedView` | `pages/feed/FeedMenuView.kt` + `FeedFoodView.kt` + `FeedSnackView.kt` |
 | `InventoryView` | `pages/inventory/InventoryView.kt` + `component/pages/inventory/InventoryItem.kt` |
 | `SettingView` | `pages/setting/SettingView.kt` |
+| `NotReadyView` | `mobile-view-presentation/.../pages/common/NotReadyView.kt` |
 | `Theme/MongsButton.swift` | `component/common/button/*.kt` |
 | `Theme/MongsWidgets.swift` | `PayPointBox` · `ConditionSection` · `PageIndicator` · `LoadingBar` · `Logo` |
 
@@ -454,6 +455,24 @@ iOS 는 그게 절반만 된다.
 단, `Toggle` 에 `allowsHitTesting(false)` 를 걸어 그리기만 시키면 **그 영역이 죽는다.**
 원본은 Chip 전체와 Switch 양쪽이 같은 콜백을 받으므로,
 행 레이블에 `.contentShape(Rectangle())` 을 줘서 줄 전체를 탭 영역으로 만든다.
+
+### 아직 없는 화면은 자리표시자로 보낸다
+
+메인의 상호작용·설정 쪽 버튼 9개는 v1 범위 밖이라 갈 화면이 없다.
+그냥 두면 **눌러도 아무 반응이 없어 고장난 것처럼 보인다.**
+
+Android 모바일 앱이 같은 이유로 `NotReadyView` 를 만들어 뒀고, 문구와 구성을 그대로 옮겼다
+(제목 / "준비 중이에요" / "돌아가기" BlueButton).
+
+| 자리표시자로 가는 버튼 | `NotReadyDestination` |
+|---|---|
+| 도감 · 맵 탐색 · 랜덤 뽑기 · 훈련 · 배틀 | `.collection` `.searchMap` `.randomDraw` `.training` `.battle` |
+| 도움말 · 충전 · 공지사항 · 오류 신고 | `.help` `.charge` `.notice` `.feedback` |
+
+제목 문구는 Android `mobile-view-presentation/.../layout/Router.kt` 의 라우트-제목 목록 그대로다.
+**실제 화면을 이식하면 `NotReadyDestination` 에서 그 케이스만 지우고 버튼을 새 화면에 연결한다.**
+
+잠금 조건(`isAlive` / `canPlay`)은 원본 그대로 두었다 — 죽었거나 자는 몽은 자리표시자에도 못 간다.
 
 ### 화면 크기 보정 — `.ms`
 
