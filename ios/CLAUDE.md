@@ -383,6 +383,30 @@ Android 가 `queryPurchasesAsync` 로 하던 회수 경로가 정확히 그 자�
 
 ---
 
+## 위치 (맵 탐색)
+
+Android `data/member-data/.../collection/web/manager/LocationSensorManager.kt` 대응.
+
+원본은 `FusedLocationProviderClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY)` 로
+**한 번만** 읽는다 — 지속 추적이 아니다. 탐색 버튼을 누른 순간의 좌표만 필요하다.
+
+`LocationClient` 가 `CLLocationUpdate.liveUpdates()` 로 같은 일을 한다.
+스트림이지만 **첫 유효한 값을 받고 빠져나오면** 일회성 조회가 된다 — 델리게이트가 필요 없다.
+
+### 알아 둘 것
+
+- **`Info.plist` 에 `NSLocationWhenInUseUsageDescription` 이 없으면 권한 요청이 안 뜬다.**
+  (HealthKit 은 아예 죽지만 위치는 조용히 실패한다 — 더 찾기 어렵다.)
+- 권한 거부 플래그(`update.authorizationDenied`)는 **watchOS 11+** 에만 있다.
+  10 에서는 스트림이 아무것도 주지 않으므로 15초 타임아웃이 대신 걸리고,
+  빠져나온 뒤 `authorizationStatus` 로 사유를 가른다.
+- 시뮬레이터 좌표는 `xcrun simctl location <UDID> set <lat>,<lng>` 로 넣는다.
+  넣지 않으면 위치가 잡히지 않아 타임아웃까지 간다.
+- **걸음(HealthKit)과 달리 위치는 상태를 읽을 수 있다.** 그래서 설정 화면에서
+  활동 권한은 "다시 요청" 줄이고 위치 권한은 스위치다.
+
+---
+
 ## 푸시 알림 (APNs)
 
 Android `app/wear-app/.../service/NotificationService.kt` (FCM) 대응.
@@ -494,7 +518,7 @@ iOS 는 그게 절반만 된다.
 |---|---|
 | 알림 권한 | `UNUserNotificationCenter` 가 실제 상태를 준다 — 스위치 그대로 |
 | 활동 권한 | HealthKit **읽기** 권한은 언제나 `.notDetermined` 다. 스위치를 그리면 거짓말이라 "다시 요청" 줄로 바꿨다 |
-| 위치 권한 | 맵 탐색이 v1 범위 밖이라 아직 쓰지 않는다. 기능이 붙을 때 같이 넣는다 |
+| 위치 권한 | `CLLocationManager.authorizationStatus` 가 실제 상태를 준다 — 스위치 그대로 |
 
 알림 **옵션**(`DeviceOptionStore`)과 알림 **권한**은 다른 값이다. 권한이 있어도 사용자가
 앱 안에서 끌 수 있다. 원본처럼 권한이 없으면 옵션 스위치를 잠근다.
@@ -527,6 +551,8 @@ iOS 는 그게 절반만 된다.
 | `NoticeView` 외 | `pages/notice/NoticeView.kt` + `NoticeDetailDialog.kt` |
 | `FeedbackView` | `pages/feedback/FeedbackView.kt` + `CreateFeedbackDialog.kt` |
 | `RandomDrawView` | `pages/randomDraw/RandomDrawView.kt` + 다이얼로그 2개 |
+| `CollectionMenuView` / `CollectionGridView` | `pages/collection/*.kt` |
+| `MapSearchView` | `pages/map/SearchMapView.kt` |
 | `NotReadyView` | `mobile-view-presentation/.../pages/common/NotReadyView.kt` |
 | `Theme/MongsButton.swift` | `component/common/button/*.kt` |
 | `Theme/MongsWidgets.swift` | `PayPointBox` · `ConditionSection` · `PageIndicator` · `LoadingBar` · `Logo` |

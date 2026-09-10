@@ -37,6 +37,10 @@ struct MainPagerView: View {
     @State private var isNoticePresented = false
     @State private var isFeedbackPresented = false
     @State private var isRandomDrawPresented = false
+    @State private var isCollectionMenuPresented = false
+    /// 도감. nil 이면 닫힘, 값이 있으면 그 종류의 목록이 열린다.
+    @State private var collectionKind: CollectionItem.Kind?
+    @State private var isMapSearchPresented = false
     /// 아직 이식하지 않은 화면. nil 이면 닫힘.
     @State private var notReady: NotReadyDestination?
 
@@ -106,6 +110,22 @@ struct MainPagerView: View {
                     exchangeKind = nil
                     Task { await slotViewModel?.reload() }
                 }
+            }
+        }
+        .fullScreenCover(isPresented: $isCollectionMenuPresented) {
+            CollectionMenuView { kind in
+                isCollectionMenuPresented = false
+                collectionKind = kind
+            }
+        }
+        .fullScreenCover(item: $collectionKind) { kind in
+            if let viewModel = container.makeCollectionViewModel(kind: kind) {
+                CollectionGridView(viewModel: viewModel) { collectionKind = nil }
+            }
+        }
+        .fullScreenCover(isPresented: $isMapSearchPresented) {
+            if let viewModel = container.makeMapSearchViewModel() {
+                MapSearchView(viewModel: viewModel) { isMapSearchPresented = false }
             }
         }
         .fullScreenCover(isPresented: $isNoticePresented) {
@@ -245,6 +265,8 @@ struct MainPagerView: View {
                 onOpenSlotPick: { isSlotPickPresented = true },
                 onOpenExchange: { isExchangeMenuPresented = true },
                 onOpenRandomDraw: { isRandomDrawPresented = true },
+                onOpenCollection: { isCollectionMenuPresented = true },
+                onOpenMapSearch: { isMapSearchPresented = true },
                 onNotReady: { notReady = $0 }
             )
         case .configure:

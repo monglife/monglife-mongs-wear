@@ -29,6 +29,8 @@ final class AppContainer {
     private(set) var pushService: PushService?
     private let storeService: StoreService?
     private let communityService: CommunityService?
+    private let collectionService: CollectionService?
+    private let locationClient = LocationClient()
 
     init() {
         let configResult = Result { try AppConfig.load() }
@@ -62,6 +64,7 @@ final class AppContainer {
             self.mongService = mongService
             self.playerService = playerService
             self.pushService = PushService(authService: authService, optionStore: optionStore)
+            self.collectionService = CollectionService(api: api, location: locationClient)
             self.communityService = CommunityService(
                 api: api,
                 identity: Self.clientIdentity(secureStore: secureStore)
@@ -87,6 +90,7 @@ final class AppContainer {
             self.pushService = nil
             self.storeService = nil
             self.communityService = nil
+            self.collectionService = nil
             self.realtimeService = nil
         }
     }
@@ -152,11 +156,20 @@ final class AppContainer {
             optionStore: optionStore,
             notification: NotificationPermission(),
             stepService: stepService,
+            location: locationClient,
             signOut: signOut,
             notificationOptionChanged: { [pushService] in
                 await pushService?.notificationOptionChanged()
             }
         )
+    }
+
+    func makeCollectionViewModel(kind: CollectionItem.Kind) -> CollectionViewModel? {
+        collectionService.map { CollectionViewModel(kind: kind, service: $0) }
+    }
+
+    func makeMapSearchViewModel() -> MapSearchViewModel? {
+        collectionService.map { MapSearchViewModel(service: $0, location: locationClient) }
     }
 
     func makeNoticeViewModel() -> NoticeViewModel? {

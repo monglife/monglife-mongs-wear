@@ -18,6 +18,10 @@ struct InteractionContentView: View {
     let onOpenExchange: () -> Void
     /// 랜덤 뽑기 열기
     let onOpenRandomDraw: () -> Void
+    /// 도감 메뉴 열기
+    let onOpenCollection: () -> Void
+    /// 맵 탐색 열기
+    let onOpenMapSearch: () -> Void
     /// 아직 이식하지 않은 화면 열기 (자리표시자)
     let onNotReady: (NotReadyDestination) -> Void
 
@@ -43,12 +47,14 @@ struct InteractionContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 8.ms) {
-                MongsCircleButton(iconName: "btn_icon_collection", borderName: "btn_border_orange", iconSize: 34) { onNotReady(.collection) }
+                MongsCircleButton(iconName: "btn_icon_collection", borderName: "btn_border_orange", iconSize: 34,
+                                  action: onOpenCollection)
                 MongsCircleButton(iconName: "point_icon_pay", borderName: "btn_border_purple_dark",
                                   isEnabled: isAlive, action: onOpenExchange)
             }
             HStack(spacing: 8.ms) {
-                MongsCircleButton(iconName: "btn_icon_map_search", borderName: "btn_border_blue", iconSize: 34, isEnabled: isAlive) { onNotReady(.searchMap) }
+                MongsCircleButton(iconName: "btn_icon_map_search", borderName: "btn_border_blue", iconSize: 34,
+                                  isEnabled: isAlive, action: onOpenMapSearch)
                 MongsCircleButton(iconName: "btn_icon_slot_pick", borderName: "btn_border_red", iconSize: 34,
                                   action: onOpenSlotPick)
                 MongsCircleButton(iconName: "btn_icon_luck_draw", borderName: "btn_border_purple", iconSize: 34,

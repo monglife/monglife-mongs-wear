@@ -72,6 +72,15 @@ struct SettingView: View {
             MongsChip(label: "활동 권한", secondaryLabel: "건강 앱 접근 요청") {
                 Task { await viewModel.requestActivityPermission() }
             }
+
+            // 위치는 알림과 같이 실제 상태를 읽을 수 있어 스위치로 그린다. 맵 탐색이 쓴다.
+            MongsToggleChip(
+                label: "위치 권한",
+                isOn: viewModel.locationPermission,
+                isEnabled: true
+            ) {
+                Task { await viewModel.requestLocationPermission() }
+            }
         }
         .listStyle(.carousel)
     }

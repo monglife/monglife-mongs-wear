@@ -36,6 +36,9 @@
 	  HealthKit 권한 설명. **이 문구가 없으면 권한 요청 순간 앱이 죽는다.**
 	  쓰기는 하지 않으므로 NSHealthUpdateUsageDescription 은 넣지 않는다.
 	-->
+	<!-- 맵 탐색이 현재 위치를 한 번 읽는다. 지속 추적은 하지 않는다. -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>지금 있는 곳의 맵을 찾기 위해 위치를 확인합니다.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>걸음 수를 읽어 몽을 키우는 데 사용합니다.</string>
 
