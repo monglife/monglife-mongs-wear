@@ -19,6 +19,8 @@ public actor SimulatedStepService: StepService {
 
     private let stepsPerTick: Int
     private let tickInterval: Duration
+    /// 환전을 서버에 알린다. 실제 구현과 **같은 경로**를 타야 검증이 의미가 있다.
+    private let exchangeRemotely: (@Sendable (Int) async throws -> Void)?
 
     /// - Parameters:
     ///   - initialWalkingCount: 시작 잔액. 데모에서 환전 버튼을 바로 눌러 볼 수 있도록 기본값을 준다.
@@ -27,8 +29,10 @@ public actor SimulatedStepService: StepService {
     public init(
         initialWalkingCount: Int = 2_450,
         stepsPerTick: Int = 17,
-        tickInterval: Duration = .seconds(1)
+        tickInterval: Duration = .seconds(1),
+        exchangeRemotely: (@Sendable (Int) async throws -> Void)? = nil
     ) {
+        self.exchangeRemotely = exchangeRemotely
         // available 은 false 로 시작한다. 수집 경로가 정해지기 전에는 0 이 아니라 "-" 를 보여야 한다.
         self.step = Step(walkingCount: initialWalkingCount, pendingWalkingCount: 0, available: false)
         self.stepsPerTick = stepsPerTick
@@ -97,6 +101,9 @@ public actor SimulatedStepService: StepService {
             available: step.available
         )
         publish(next)
+
+        // 실제 구현과 같은 순서 — 로컬 차감이 끝난 뒤에 서버에 알린다.
+        try await exchangeRemotely?(walkingCount)
 
         return ExchangeResult(step: next, payPoint: StepExchangeRate.payPoint(units: units))
     }

@@ -319,11 +319,30 @@ Android 는 `PermissionUtil.verifyActivityPermission()` 으로 직접 확인할 
 거부됐을 때 앱이 보는 것은 빈 결과뿐이고 그건 "아직 안 걸었다"와 구별되지 않는다.
 그래서 권한 다이얼로그 대신 걸음이 0일 때 안내 문구만 남긴다.
 
+### ⚠️ 환전은 로컬 차감 + 서버 통보 두 단계다
+
+`StepService.exchange(units:)` 가 **로컬 지갑에서 먼저 깎고**, 그 다음
+`POST user/step/exchange {mongId, walkingCount}` 로 서버에 알린다 (`StepExchangeClient`).
+
+**둘째 단계가 빠지면 걸음만 사라지고 페이포인트를 못 받는다.** 실제로 `exchangeRemotely`
+훅을 만들어만 두고 `AppContainer` 에서 연결하지 않아 그 상태로 한동안 있었다 —
+화면은 멀쩡히 동작해서 서버 값을 확인하기 전까지 드러나지 않는다.
+
+서버가 실패하면 **여기서 되돌리지 않는다.** 서버가 MQTT
+(`{prefix}/device/{deviceId}/step/restore`)로 복구를 밀어 준다. 임의로 되돌리면 이중 적립이다.
+
 ### 검증
 
 시뮬레이터에는 걸음 데이터가 없다. 회계 로직은 `HealthStepReader` 스텁으로 전부 덮여 있고
 (`HealthKitStepServiceTests`), **실제 HealthKit 동작과 백그라운드 전달 빈도는 실기기에서만**
-확인할 수 있다. UI 만 빠르게 보려면 `AppContainer` 에서 `SimulatedStepService()` 로 바꾼다.
+확인할 수 있다. UI 와 환전 왕복을 빠르게 보려면 **Debug 전용 실행 인자**로 시뮬레이션 구현으로 갈아끼운다:
+
+```bash
+xcrun simctl launch <UDID> com.mongs.wear -MongsSimulatedSteps YES
+```
+
+가짜 잔액을 넣는 게 아니라 구현을 통째로 바꾸는 것이라 **차감과 서버 통보가 실제와 같은
+순서로 돈다** (`SimulatedStepService` 도 같은 `exchangeRemotely` 훅을 받는다).
 
 ## 배틀 (실시간 1:1)
 
@@ -700,11 +719,17 @@ iOS 는 그게 절반만 된다.
 - **오류 신고** — 원본은 목록 화면 + 작성 다이얼로그다. 목록에 담을 게 없어서
   (등록만 하고 조회 API 가 없다) **작성 화면 하나로 합쳤다.** 제목 → 내용 두 단계는 그대로다.
 
-### ⚠️ 랜덤 뽑기는 티켓과 페이포인트 중 **하나만** 있으면 된다
+### ⚠️ 랜덤 뽑기 — 원본은 버튼 조건과 서버 요구가 어긋나 있다
 
-원본 버튼 조건이 `disable = payPoint 부족 && 티켓 없음` 이다 — 둘 다 없어야 잠긴다.
-무엇을 쓸지는 **서버가 정한다.** 클라이언트는 `POST character/interaction/randomDraw/{mongId}`
-하나만 부른다 (뽑기권 구매 API 는 따로 있지만 이 화면은 쓰지 않는다).
+화면은 `disable = payPoint 부족 && 티켓 없음` 이라 **둘 중 하나만 있으면 열린다.**
+그런데 `POST character/interaction/randomDraw/{mongId}` 는 **티켓만** 받는다 —
+없으면 `500-101-007 충분한 랜덤 뽑기 티켓이 없습니다`.
+**Android 는 페이포인트가 있어도 티켓이 없으면 그냥 실패한다.**
+
+페이포인트를 쓰는 쪽은 별도 API 인 `POST .../randomDraw/ticket/{mongId}` (한 장에 100P)다.
+
+여기서는 화면이 약속한 대로 동작시킨다 — `RandomDrawViewModel.draw()` 가
+**티켓이 없으면 먼저 한 장 사고** 뽑는다. 원본과 다른 유일한 지점이다.
 
 기계 회전은 **대기 중 0°**, 뽑는 동안만 ±7° 로 흔들린다.
 흔들림 각도를 그냥 토글하면 가만히 있을 때도 기울어 보인다.

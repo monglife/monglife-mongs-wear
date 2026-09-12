@@ -66,8 +66,16 @@ public final class RandomDrawViewModel: ErrorReportingViewModel {
 
     public func cancelConfirm() { phase = .entering }
 
-    /// 뽑기. 티켓과 페이포인트 중 무엇을 쓸지는 **서버가 정한다** —
-    /// 클라이언트는 그냥 요청만 보낸다 (원본도 같다).
+    /// 뽑기.
+    ///
+    /// ⚠️ **원본의 버튼 조건과 서버 요구가 어긋나 있다.**
+    /// 화면은 "티켓 -1 **또는** 페이포인트 -100" 으로 열어 두지만
+    /// `POST character/interaction/randomDraw/{mongId}` 는 **티켓만** 받는다
+    /// (없으면 `500-101-007 충분한 랜덤 뽑기 티켓이 없습니다`).
+    /// Android 는 이 경우 그냥 실패한다 — 페이포인트가 있어도 뽑을 수 없다.
+    ///
+    /// 여기서는 화면이 약속한 대로 동작시킨다: **티켓이 없으면 먼저 한 장 사고** 뽑는다.
+    /// 뽑기권 구매 API 가 페이포인트를 쓰는 쪽이다.
     public func draw() async {
         guard phase == .confirm else { return }
         phase = .drawing
@@ -76,6 +84,9 @@ public final class RandomDrawViewModel: ErrorReportingViewModel {
         try? await Task.sleep(for: Self.drawDelay)
 
         await run {
+            if (await self.mongService.currentMong()?.randomDrawTicketCount ?? 0) <= 0 {
+                try await self.mongService.buyRandomDrawTicket()
+            }
             self.result = try await self.mongService.randomDraw()
             self.mong = await self.mongService.currentMong()
             self.phase = .result

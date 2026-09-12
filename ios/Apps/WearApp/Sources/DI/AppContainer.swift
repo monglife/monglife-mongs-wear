@@ -47,14 +47,6 @@ final class AppContainer {
         // Keychain 은 앱 삭제 후에도 남지만, 세션까지 살아남으면 Android 와 동작이 달라진다.
         let tokenStore = TokenStore(store: secureStore, installMarker: UserDefaultsStore())
 
-        // 시뮬레이터에는 걸음 데이터가 없어 항상 0 이 나온다. 건강 앱에서 직접 넣거나
-        // 실기기로 확인해야 한다. `SimulatedStepService()` 로 바꾸면 UI 만 빠르게 볼 수 있다.
-        let stepService: any StepService = HealthKitStepService(
-            wallet: StepWalletStore(),
-            reader: HealthKitStepReader()
-        )
-        self.stepService = stepService
-
         if let config = try? configResult.get() {
             let api = APIClient(config: config, tokenStore: tokenStore)
             let authService = AuthService(
@@ -68,6 +60,36 @@ final class AppContainer {
             let playerService = PlayerService(api: api)
             self.mongService = mongService
             self.playerService = playerService
+
+            // 환전은 로컬 차감 뒤 서버에 알려야 페이포인트가 지급된다.
+            // 이 훅이 비면 걸음만 사라지고 아무것도 받지 못한다.
+            let exchangeRemotely = StepExchangeClient.make(api: api) {
+                await mongService.currentMong()?.mongId
+            }
+
+            // 시뮬레이터에는 걸음 데이터가 없어 항상 0 이 나온다. 실제 동작은 실기기에서만 본다.
+            #if DEBUG
+            // 걸음 환전을 시뮬레이터에서 눌러 보려면 잔액이 있어야 한다.
+            // 가짜 잔액을 넣는 대신 **시뮬레이션 구현으로 통째로 갈아끼운다** —
+            // 차감과 서버 왕복이 실제와 같은 순서로 돈다.
+            //
+            //   xcrun simctl launch <UDID> com.mongs.wear -MongsSimulatedSteps YES
+            if UserDefaults.standard.bool(forKey: "MongsSimulatedSteps") {
+                self.stepService = SimulatedStepService(exchangeRemotely: exchangeRemotely)
+            } else {
+                self.stepService = HealthKitStepService(
+                    wallet: StepWalletStore(),
+                    reader: HealthKitStepReader(),
+                    exchangeRemotely: exchangeRemotely
+                )
+            }
+            #else
+            self.stepService = HealthKitStepService(
+                wallet: StepWalletStore(),
+                reader: HealthKitStepReader(),
+                exchangeRemotely: exchangeRemotely
+            )
+            #endif
             self.pushService = PushService(authService: authService, optionStore: optionStore)
             self.collectionService = CollectionService(api: api, location: locationClient)
             self.trainingService = TrainingService(api: api, mongService: mongService)
@@ -94,6 +116,10 @@ final class AppContainer {
             )
         } else {
             // 설정을 못 읽으면 네트워크 계층을 만들 수 없다. 앱은 오류 화면만 띄운다.
+            self.stepService = HealthKitStepService(
+                wallet: StepWalletStore(),
+                reader: HealthKitStepReader()
+            )
             self.authService = nil
             self.mongService = nil
             self.playerService = nil
