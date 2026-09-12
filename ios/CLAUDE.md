@@ -943,7 +943,84 @@ Android 어댑티브 아이콘(`ic_launcher_{background,foreground}.png`)을 합
 | 항목 | 결정 | 이유 |
 |---|---|---|
 | 화면 항상 켜기 | **기본 자동 디밍 수용** — `WKExtendedRuntimeSession` 을 쓰지 않는다 | Android 는 `FLAG_KEEP_SCREEN_ON` 이지만 코어 루프(걸음·먹이·환전)는 짧은 상호작용이라 영향이 적다. watchOS 는 세션 종류를 심사에서 검증하고 게임용 허용 카테고리가 제한적이며, 배터리 소모와 세션 만료·중단 처리 코드가 따라온다. **훈련/배틀(Phase 12~13)이 들어올 때 다시 판단한다.** |
-| 실기기 검증 | **Phase 7 에서 빼고 별도 트랙** | Apple Watch 와 유료 Developer Program 이 둘 다 없다. 기기·계정이 준비되면 HealthKit 실제 걸음 / MQTT 백그라운드 / Apple 로그인을 한 번에 검증한다. |
+| 실기기 검증 | **별도 트랙 — 빌드까지는 뚫렸고 연결에서 막혔다** | 아래 절 참고. |
+
+---
+
+## 실기기 검증 — 어디까지 갔나
+
+**빌드와 서명은 끝났다. 다음 시도는 설치부터 시작하면 된다.**
+
+기기: Apple Watch SE (`Watch5,10`), **watchOS 10.6.2**, `arm64_32`.
+계정: 무료 Personal Team (`isFreeProvisioningTeam = 1`).
+
+### ✅ 된 것
+
+```bash
+xcodebuild -project MongsWear.xcodeproj -scheme MongsWear-Local \
+  -configuration Debug-Local -destination 'generic/platform=watchOS' \
+  -allowProvisioningUpdates build
+# ** BUILD SUCCEEDED **  →  Build/Products/Debug-Local-watchos/Mongs.app
+```
+
+**기기를 destination 으로 직접 주면 안 된다** — xcodebuild 가 기기가 준비될 때까지 기다리다
+타임아웃난다. `generic/platform=watchOS` 로 빌드해 두고 설치만 따로 하는 편이 낫다.
+
+### ⚠️ 무료 팀은 capability 두 개를 못 쓴다
+
+```
+error: Personal development teams, including "...", do not support the
+       Sign In with Apple and Push Notifications capabilities.
+```
+
+설치가 아니라 **프로파일 생성**에서 막힌다. `Apps/WearApp/MongsWear-FreeTeam.entitlements`
+(`applesignin` + `aps-environment` 를 뺀 축소판)로 갈아끼우면 통과한다.
+
+`Signing.local.xcconfig` 에서 `MONGS_ENTITLEMENTS` 를 덮어써 켠다.
+**평소엔 꺼 둔다** — 켜 두면 시뮬레이터 빌드에서도 푸시 권한이 조용히 빠진다.
+
+→ 이 경로로는 **Apple 로그인과 푸시를 실기기에서 검증할 수 없다.** 걸음·MQTT 만 본다.
+
+### ❌ 막힌 것 — 기기 연결
+
+```
+ERROR: Control channel connection timed out while in state preparing
+       (com.apple.dt.RemotePairingError error 4)
+
+devicectl:  available (paired) ↔ connecting 만 오가고 connected 로 안 감
+            tunnelState: disconnected
+```
+
+시계가 네트워크에 보이지 않는 게 원인이다:
+
+```bash
+ping AppleWatch.coredevice.local          # cannot resolve
+dns-sd -B _companion-link._tcp local      # 맥만 보이고 시계는 없음
+```
+
+**Apple Watch 는 USB 가 없어 Wi-Fi 로만 붙는다.** 그런데 아이폰이 곁에 있으면 블루투스만 쓰고
+Wi-Fi 를 올리지 않는다. 저전력 모드도 Wi-Fi 를 통째로 끈다.
+
+시도한 것들: 손목 감지 끄기(충전기에 올려도 안 잠기게), 충전기 거치, 개발자 모드 활성 확인,
+재페어링. 전부 `preparing` 을 넘기지 못했다.
+
+### 다음에 다시 할 때
+
+1. 시계 **설정 → Wi-Fi** 에서 맥과 **같은 네트워크에 실제로 붙었는지** 먼저 확인한다.
+   Apple Watch SE 는 **2.4GHz 전용**이다.
+2. 저전력 모드 끄기 · 손목 감지 끄기 · 충전기 거치
+3. 아이폰을 멀리 두거나 비행기 모드 — 시계가 Wi-Fi 를 쓰게 만든다
+4. `devicectl list devices` 가 **`connected`** 로 뜨면 그때:
+
+```bash
+xcrun devicectl device install app --device <UDID> .../Debug-Local-watchos/Mongs.app
+```
+
+### watchOS 10 이라 볼 수 있는 것
+
+이 기기는 watchOS 10.6.2 다. 위치 권한 거부 플래그(`authorizationDenied`)가 **watchOS 11+**
+전용이라 10 에서는 15초 타임아웃 폴백을 타게 해 뒀는데, **그 경로를 실제로 확인할 수 있는
+유일한 기기**다. 다시 붙이면 맵 탐색도 함께 본다.
 
 ---
 
