@@ -8,8 +8,3 @@ MONGS_DISCOVERY_API_URL = http:/$()/127.0.0.1:8010/api/
 MONGS_GATEWAY_API_URL = http:/$()/127.0.0.1:8000/api/
 MONGS_MQTT_URL = tcp:/$()/100.0.0.20:1883
 MONGS_MQTT_TOPIC = mongs-dev
-
-// ⚠️ 임시. 로컬 discovery DB 에 com.mongs.wear 는 2.3.0 까지만 등록돼 있어서
-// 0.1.0 으로는 verify/version 이 400 을 준다(DISCOVERY-DEVICE-100).
-// 서버에 iOS 버전 행이 추가되면 이 줄을 지운다.
-MONGS_BUILD_VERSION = 2.3.0

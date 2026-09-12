@@ -73,7 +73,7 @@ final class AppContainer {
             // 가짜 잔액을 넣는 대신 **시뮬레이션 구현으로 통째로 갈아끼운다** —
             // 차감과 서버 왕복이 실제와 같은 순서로 돈다.
             //
-            //   xcrun simctl launch <UDID> com.mongs.wear -MongsSimulatedSteps YES
+            //   xcrun simctl launch <UDID> com.monglife.mongs.wear.ios -MongsSimulatedSteps YES
             if UserDefaults.standard.bool(forKey: "MongsSimulatedSteps") {
                 self.stepService = SimulatedStepService(exchangeRemotely: exchangeRemotely)
             } else {
@@ -281,7 +281,7 @@ final class AppContainer {
         let bundle = Bundle.main
         return ClientIdentity(
             deviceId: DeviceIdentifierStore.blockingIdentifier(store: secureStore),
-            appPackageName: bundle.bundleIdentifier ?? "com.mongs.wear",
+            appPackageName: bundle.bundleIdentifier ?? "com.monglife.mongs.wear.ios",
             deviceName: WKInterfaceDevice.current().model,
             // 서버 앱 버전 검증에 쓰는 값. 보통 앱의 실제 버전이지만,
             // 개발 서버에 그 버전 행이 없을 때 Configurations/*.xcconfig 에서 덮어쓴다.

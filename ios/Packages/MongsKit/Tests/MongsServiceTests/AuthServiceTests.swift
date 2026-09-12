@@ -51,7 +51,7 @@ struct AuthServiceTests {
             signInClient: signIn,
             identity: ClientIdentity(
                 deviceId: "DEVICE-1",
-                appPackageName: "com.mongs.wear",
+                appPackageName: "com.monglife.mongs.wear.ios",
                 deviceName: "Apple Watch",
                 buildVersion: "0.1.0"
             )
@@ -109,7 +109,7 @@ struct AuthServiceTests {
         #expect(json["socialAccountId"] as? String == "001234.abcdef")
         #expect(json["identityToken"] as? String == StubSignIn.credential.identityToken)
         #expect(json["deviceId"] as? String == "DEVICE-1")
-        #expect(json["appPackageName"] as? String == "com.mongs.wear")
+        #expect(json["appPackageName"] as? String == "com.monglife.mongs.wear.ios")
     }
 
     @Test("가입 요청에는 이메일과 이름이 실린다")
@@ -264,7 +264,7 @@ struct AuthServiceTests {
     func verifiesAppVersion() async throws {
         let transport = StubTransport()
         transport.stub("public/auth/verify/version", [
-            .ok(#"{"result":{"appPackageName":"com.mongs.wear","buildVersion":"0.1.0","mustUpdate":true}}"#),
+            .ok(#"{"result":{"appPackageName":"com.monglife.mongs.wear.ios","buildVersion":"0.1.0","mustUpdate":true}}"#),
         ])
         let (service, _) = makeService(transport: transport)
 
@@ -272,7 +272,7 @@ struct AuthServiceTests {
 
         #expect(check.mustUpdate)
         let url = try #require(transport.requests.first?.url?.absoluteString)
-        #expect(url.contains("appPackageName=com.mongs.wear"))
+        #expect(url.contains("appPackageName=com.monglife.mongs.wear.ios"))
         #expect(url.contains("buildVersion=0.1.0"))
     }
 }

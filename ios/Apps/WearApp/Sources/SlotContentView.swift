@@ -32,7 +32,7 @@ struct SlotContentView: View {
     /// 경험치를 채우려면 실제로 먹이고 훈련시켜야 한다. 화면만 확인할 때 쓴다.
     ///
     /// ```
-    /// xcrun simctl launch <UDID> com.mongs.wear -MongsPreviewEffect evolution
+    /// xcrun simctl launch <UDID> com.monglife.mongs.wear.ios -MongsPreviewEffect evolution
     /// ```
     /// 값: `evolution` / `graduation` / `graduated` / `poopClean` / `loading` / `poop`
     private var previewEffect: String? {

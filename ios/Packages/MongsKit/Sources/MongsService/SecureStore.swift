@@ -24,7 +24,7 @@ public struct KeychainStore: SecureStore {
 
     private let service: String
 
-    public init(service: String = Bundle.main.bundleIdentifier ?? "com.mongs.wear") {
+    public init(service: String = Bundle.main.bundleIdentifier ?? "com.monglife.mongs.wear.ios") {
         self.service = service
     }
 

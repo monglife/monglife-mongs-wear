@@ -6,9 +6,9 @@ import os
 /// Android `Log.i(TAG, ...)` 자리. `OSLog` 는 릴리스에서 알아서 걸러진다.
 enum MongsLog {
 
-    private static let mqttLogger = Logger(subsystem: "com.mongs.wear", category: "MQTT")
+    private static let mqttLogger = Logger(subsystem: "com.monglife.mongs.wear.ios", category: "MQTT")
 
-    private static let pushLogger = Logger(subsystem: "com.mongs.wear", category: "Push")
+    private static let pushLogger = Logger(subsystem: "com.monglife.mongs.wear.ios", category: "Push")
 
     static func mqtt(_ message: String) {
         mqttLogger.debug("MQTT >> \(message, privacy: .public)")

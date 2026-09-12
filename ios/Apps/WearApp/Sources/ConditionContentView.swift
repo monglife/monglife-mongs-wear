@@ -22,7 +22,7 @@ struct ConditionContentView: View {
     /// 맞는지 보려면 값을 직접 넣어야 한다.
     ///
     /// ```
-    /// xcrun simctl launch <UDID> com.mongs.wear -MongsPreviewProgress 100
+    /// xcrun simctl launch <UDID> com.monglife.mongs.wear.ios -MongsPreviewProgress 100
     /// ```
     private var previewProgress: Double? {
         let value = UserDefaults.standard.double(forKey: "MongsPreviewProgress")

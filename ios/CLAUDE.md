@@ -37,7 +37,7 @@ xcodebuild -project MongsWear.xcodeproj -scheme MongsWear-Prd -configuration Rel
 xcrun simctl list devices available | grep -i watch      # UDID 확인
 xcrun simctl boot <UDID>
 xcrun simctl install <UDID> <DerivedData>/Build/Products/Debug-Dev-watchsimulator/Mongs.app
-xcrun simctl launch <UDID> com.mongs.wear
+xcrun simctl launch <UDID> com.monglife.mongs.wear.ios
 xcrun simctl io <UDID> screenshot demo.png
 ```
 
@@ -244,9 +244,11 @@ POST public/userDevice   →   POST public/auth/login
 `GET public/auth/verify/version` 은 서버 DB 에 있는 (패키지, 버전) 조합만 통과시킨다.
 없으면 `DISCOVERY-DEVICE-100` 400 이고, **로그인 자체가 막힌다.**
 
-현재 로컬 서버에는 `com.mongs.wear` 가 `2.3.0` 까지만 있어서,
-`Configurations/Local.xcconfig` 에서 `MONGS_BUILD_VERSION = 2.3.0` 으로 덮어쓰고 있다.
-**서버에 iOS 버전 행이 추가되면 그 줄을 지운다.**
+iOS 는 Android 와 **번들 ID 를 나눠 쓴다** — `com.monglife.mongs.wear.ios`.
+같은 `com.mongs.wear` 를 쓰면 서버가 플랫폼을 구분할 수 없고, 푸시 토큰 종류도 가릴 수 없다.
+버전은 앱의 실제 버전(`MARKETING_VERSION`)을 그대로 보낸다 — 덮어쓰기는 걷어냈다.
+
+**앱 버전을 올릴 때 서버에도 그 행을 먼저 넣어야 한다.** 안 그러면 로그인이 막힌다.
 
 ### 서버 시각 형식
 
@@ -261,7 +263,7 @@ POST public/userDevice   →   POST public/auth/login
 화면 작업을 이어간다. 가짜 세션을 넣지 않으므로 gateway 호출·토큰 재발급까지 실제 경로를 탄다.
 
 ```bash
-xcrun simctl launch <UDID> com.mongs.wear \
+xcrun simctl launch <UDID> com.monglife.mongs.wear.ios \
   -MongsDevLoginEmail ios-dev@monglife.test \
   -MongsDevLoginSocialId ios-dev-000001
 ```
@@ -338,7 +340,7 @@ Android 는 `PermissionUtil.verifyActivityPermission()` 으로 직접 확인할 
 확인할 수 있다. UI 와 환전 왕복을 빠르게 보려면 **Debug 전용 실행 인자**로 시뮬레이션 구현으로 갈아끼운다:
 
 ```bash
-xcrun simctl launch <UDID> com.mongs.wear -MongsSimulatedSteps YES
+xcrun simctl launch <UDID> com.monglife.mongs.wear.ios -MongsSimulatedSteps YES
 ```
 
 가짜 잔액을 넣는 게 아니라 구현을 통째로 바꾸는 것이라 **차감과 서버 통보가 실제와 같은
@@ -556,10 +558,10 @@ APNs 의 `alert` 푸시는 **시스템이 먼저 표시**한다. 앱이 끼어�
 
 ```bash
 cat > push.json <<'JSON'
-{ "Simulator Target Bundle": "com.mongs.wear",
+{ "Simulator Target Bundle": "com.monglife.mongs.wear.ios",
   "aps": { "alert": { "title": "몽스", "body": "몽이가 배고파해요" }, "sound": "default" } }
 JSON
-xcrun simctl push <UDID> com.mongs.wear push.json
+xcrun simctl push <UDID> com.monglife.mongs.wear.ios push.json
 ```
 
 **권한을 먼저 허용해야 한다.** 거부 상태면 조용히 버려진다 —

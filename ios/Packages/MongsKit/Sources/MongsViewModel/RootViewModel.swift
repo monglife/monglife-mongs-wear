@@ -42,7 +42,7 @@ public final class RootViewModel: ErrorReportingViewModel {
     ///
     /// 실행 인자로 준다. 다시 빌드할 필요가 없다:
     /// ```
-    /// xcrun simctl launch <UDID> com.mongs.wear \
+    /// xcrun simctl launch <UDID> com.monglife.mongs.wear.ios \
     ///   -MongsDevLoginEmail ios-dev@monglife.test \
     ///   -MongsDevLoginSocialId ios-dev-000001
     /// ```
@@ -53,7 +53,7 @@ public final class RootViewModel: ErrorReportingViewModel {
     /// 로딩 상태를 보려면 그 전부가 갖춰져야 한다. 화면만 확인할 때 쓴다.
     ///
     /// ```
-    /// xcrun simctl launch <UDID> com.mongs.wear -MongsPreviewSigningIn YES
+    /// xcrun simctl launch <UDID> com.monglife.mongs.wear.ios -MongsPreviewSigningIn YES
     /// ```
     static var isSigningInPreview: Bool {
         UserDefaults.standard.bool(forKey: "MongsPreviewSigningIn")

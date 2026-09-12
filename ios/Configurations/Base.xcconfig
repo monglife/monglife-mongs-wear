@@ -5,7 +5,7 @@
 //    (Android 의 configs/core/data-core/<flavor>/values/config.xml 에 대응하는 자리다.)
 
 PRODUCT_NAME = Mongs
-PRODUCT_BUNDLE_IDENTIFIER = com.mongs.wear
+PRODUCT_BUNDLE_IDENTIFIER = com.monglife.mongs.wear.ios
 CURRENT_PROJECT_VERSION = 1
 MARKETING_VERSION = 0.1.0
 
