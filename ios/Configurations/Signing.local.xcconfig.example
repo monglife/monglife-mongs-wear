@@ -13,3 +13,14 @@ DEVELOPMENT_TEAM = YOUR_TEAM_ID
 // 무료 Personal Team 은 이미 등록된 Bundle ID 를 다시 등록하지 못한다.
 // com.mongs.wear 등록이 거부되면 아래 주석을 풀어 개인용 ID 로 바꿔 테스트한다.
 // PRODUCT_BUNDLE_IDENTIFIER = com.mongs.wear.$(USER)
+
+// ─────────────────────────────────────────────────────────────────────
+// 무료 Personal Team 으로 실기기를 검증할 때
+//
+// Xcode 가 프로파일 생성을 거부한다:
+//   "Personal development teams ... do not support the Sign In with Apple
+//    and Push Notifications capabilities."
+//
+// 그 두 capability 를 뺀 entitlements 로 갈아끼우면 설치는 된다.
+// 대신 **Apple 로그인과 푸시는 실기기에서 검증할 수 없다** (걸음·MQTT 만 본다).
+// MONGS_ENTITLEMENTS = Apps/WearApp/MongsWear-FreeTeam.entitlements

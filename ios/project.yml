@@ -60,7 +60,8 @@ targets:
     settings:
       base:
         INFOPLIST_FILE: Apps/WearApp/Info.plist
-        CODE_SIGN_ENTITLEMENTS: Apps/WearApp/MongsWear.entitlements
+        # 값은 Configurations/Base.xcconfig 가 정한다 (무료 팀 검증용으로 덮어쓸 수 있게).
+        CODE_SIGN_ENTITLEMENTS: $(MONGS_ENTITLEMENTS)
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
         SKIP_INSTALL: NO

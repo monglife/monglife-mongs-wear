@@ -28,6 +28,11 @@ DEAD_CODE_STRIPPING = YES
 CODE_SIGN_STYLE = Automatic
 CODE_SIGNING_ALLOWED = YES
 
+// 무료 Personal Team 은 Sign in with Apple / 푸시 capability 의 프로파일을 못 만든다.
+// 그 계정으로 실기기를 검증할 때만 Signing.local.xcconfig 에서 아래 값을
+// MongsWear-FreeTeam.entitlements 로 덮어쓴다. 기본값은 언제나 정식 entitlements 다.
+MONGS_ENTITLEMENTS = Apps/WearApp/MongsWear.entitlements
+
 // 실기기 빌드에 필요한 DEVELOPMENT_TEAM 은 개발자마다 다르고 저장소에 남길 값이 아니다.
 // Configurations/Signing.local.xcconfig 에 각자 적는다 (gitignore 대상).
 // 파일이 없으면 `#include?` 가 조용히 넘어가므로 시뮬레이터 빌드는 그대로 된다.

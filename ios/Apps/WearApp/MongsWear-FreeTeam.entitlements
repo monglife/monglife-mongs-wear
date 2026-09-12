@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  무료 Personal Team 으로 실기기를 검증할 때만 쓰는 축소판이다.
+
+	  Xcode 가 이렇게 거부한다:
+	    "Personal development teams, including "...", do not support the
+	     Sign In with Apple and Push Notifications capabilities."
+
+	  그래서 `com.apple.developer.applesignin` 과 `aps-environment` 를 뺐다.
+	  나머지(HealthKit)는 무료 계정에서도 된다.
+
+	  ⚠️ 이 파일로 빌드하면 **Apple 로그인과 푸시는 실기기에서 검증할 수 없다.**
+	     걸음 수집과 MQTT 백그라운드 동작만 본다.
+	     쓰는 법은 Configurations/Signing.local.xcconfig.example 참고.
+	-->
+
+	<!-- HealthKit 걸음 읽기. 개인 테스트는 무료 계정으로 된다. -->
+	<key>com.apple.developer.healthkit</key>
+	<true/>
+	<!-- 앱이 잠들어 있어도 걸음이 쌓이면 깨워 달라는 권한. HKObserverQuery 백그라운드 전달에 필요하다. -->
+	<key>com.apple.developer.healthkit.background-delivery</key>
+	<true/>
+</dict>
+</plist>
