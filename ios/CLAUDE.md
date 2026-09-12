@@ -259,8 +259,8 @@ iOS 는 Android 와 **번들 ID 를 나눠 쓴다** — `com.monglife.mongs.wear
 
 ### 개발용 로그인 (Debug 전용)
 
-서버에 Apple 엔드포인트가 나오기 전까지, **기존 legacy 로그인으로 진짜 세션**을 받아
-화면 작업을 이어간다. 가짜 세션을 넣지 않으므로 gateway 호출·토큰 재발급까지 실제 경로를 탄다.
+**기존 legacy 로그인으로 진짜 세션**을 받아 화면 작업을 이어간다.
+가짜 세션을 넣지 않으므로 gateway 호출·토큰 재발급까지 실제 경로를 탄다.
 
 ```bash
 xcrun simctl launch <UDID> com.monglife.mongs.wear.ios \
@@ -268,7 +268,30 @@ xcrun simctl launch <UDID> com.monglife.mongs.wear.ios \
   -MongsDevLoginSocialId ios-dev-000001
 ```
 
-Apple 엔드포인트가 나오면 `AuthService.devSignIn` 과 `RootViewModel.devLoginCredential` 을 지운다.
+### ⚠️ Apple 로그인은 시뮬레이터에서 끝까지 갈 수 없다
+
+서버 엔드포인트 2개(`public/auth/{join,login}/apple`)는 **나왔다.** 클라이언트도 그 경로를 본다.
+그런데 **watchOS 시뮬레이터에서는 왕복을 확인할 수 없다.**
+
+`SignInWithAppleButton` 을 누르면 시스템 시트가 뜨는 데까지는 가고, 거기서 막힌다:
+
+> **계속하려면 암호 생성** — 사용자의 Apple 계정으로 앱에 로그인하려면 이 Apple Watch 의
+> 암호를 생성하십시오.
+
+Sign in with Apple 이 **기기 암호(passcode)를 요구**하는데, **watchOS 시뮬레이터는 암호를
+켤 수 없다** — 설정 → 암호의 "암호 켜기"가 비활성(회색)이다. 시트에 취소 버튼도 없고
+스와이프로도 닫히지 않아서, 크라운으로 앱을 나갔다 다시 띄워야 한다.
+
+**그래서 `devSignIn` / `devLoginCredential` 을 아직 지우지 않는다.** 지우면 시뮬레이터에서
+로그인 자체가 불가능해져 모든 화면 작업이 멈춘다. **실기기 검증 때 함께 지운다.**
+
+서버 쪽이 살아 있다는 것까지는 curl 로 확인해 뒀다 (경로가 있고 ID 토큰을 검증한다):
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/public/auth/login/apple \
+  -H 'Content-Type: application/json' -d '{"socialAccountId":"probe","identityToken":"probe", ...}'
+# {"code":"DISCOVERY-APP-AUTH-102","message":"유효하지 않은 ID 토큰입니다.","httpStatus":400}
+```
 
 ---
 
@@ -908,9 +931,10 @@ Android 어댑티브 아이콘(`ic_launcher_{background,foreground}.png`)을 합
   달라지므로, 픽셀 폰트가 안 보이면 `UIAppFonts` 등록과 번들 포함 여부부터 확인한다.
 - **`NSHealthShareUsageDescription` 이 없으면 권한 요청 순간 앱이 죽는다.** 쓰기는 하지 않으므로
   `NSHealthUpdateUsageDescription` 은 넣지 않는다.
-- **Sign in with Apple 은 유료 Developer Program 이 있어야 실기기에서 된다.**
-  `MongsWear.entitlements` 의 capability 가 프로비저닝 프로파일에 없으면 설치가 거부된다.
-  시뮬레이터는 영향받지 않는다.
+- **Sign in with Apple 은 실기기·시뮬레이터 양쪽에서 막혀 있다 — 사유가 다르다.**
+  실기기는 유료 Developer Program 이 필요하고(`MongsWear.entitlements` 의 capability 가
+  프로비저닝 프로파일에 없으면 설치가 거부된다), 시뮬레이터는 **기기 암호를 켤 수 없어서**
+  시스템 시트가 "암호 생성"에서 멈춘다. 위 인증 절 참고.
 
 ---
 
