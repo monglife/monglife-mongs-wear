@@ -43,6 +43,10 @@ public enum MatchRoundCode: String, Sendable, Codable {
 /// 진행 중인 매치
 ///
 /// Android `MatchEventDto` + `MatchVo` 이식. MQTT 로 라운드마다 통째로 밀려 들어온다.
+///
+/// ⚠️ **원본 DTO 에는 `mongId` 가 있지만 서버는 보내지 않는다.**
+/// DTO 만 보고 옮겼다가 디코딩이 통째로 실패해 라운드가 한 번도 도착하지 않았다
+/// (화면은 "입장 중"에서 조용히 멈춘다). 실제 페이로드로 맞춘 형태가 이것이다.
 public struct Match: Decodable, Sendable, Equatable {
 
     public struct Player: Decodable, Sendable, Equatable, Identifiable {
@@ -50,7 +54,6 @@ public struct Match: Decodable, Sendable, Equatable {
 
         public let playerId: String
         public let deviceId: String
-        public let mongId: Int64
         public let mongCode: String
         public let mongName: String
         public let name: String

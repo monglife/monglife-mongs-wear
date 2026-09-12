@@ -119,11 +119,17 @@ public actor BattleService {
 
         let task = Task { [decoder] in
             for await payload in payloads {
-                guard let envelope = try? decoder.decode(APIResponse<T>.self, from: payload) else {
-                    MongsLog.mqtt("배틀 페이로드 해석 실패: \(topic)")
-                    continue
+                do {
+                    let envelope = try decoder.decode(APIResponse<T>.self, from: payload)
+                    continuation.yield(envelope.result)
+                } catch {
+                    // 해석 실패는 **원인을 알아야 고칠 수 있다.** 모델과 서버 페이로드가
+                    // 어긋나면 화면이 조용히 멈추기만 해서(라운드가 안 와서) 찾기 어렵다.
+                    MongsLog.mqtt("배틀 페이로드 해석 실패: \(topic) — \(error)")
+                    #if DEBUG
+                    MongsLog.mqtt("원문: \(String(decoding: payload, as: UTF8.self))")
+                    #endif
                 }
-                continuation.yield(envelope.result)
             }
             continuation.finish()
         }
