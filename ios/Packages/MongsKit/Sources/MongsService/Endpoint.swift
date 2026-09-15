@@ -9,8 +9,9 @@ public struct Endpoint: Sendable {
 
     /// 어느 서버로 보낼지
     ///
-    /// Android 는 Retrofit 인스턴스를 두 개 두고 `@Named` 로 구분한다:
-    /// - discovery: 인증 전용. 토큰을 붙이지 않는다.
+    /// Android 는 Retrofit 인스턴스를 셋 두고 `@Named` 로 구분한다:
+    /// - discovery: 인증(로그인·재발급·기기 등록)은 토큰 없이, 오류 신고(`feedback`)는 토큰을 붙여 부른다.
+    ///   여기서는 `requiresAuthorization` 으로 가른다.
     /// - gateway: 그 외 전부. `Authorization: Bearer` 가 필요하다.
     public enum Host: Sendable {
         case discovery

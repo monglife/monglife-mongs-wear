@@ -28,6 +28,7 @@ object WebClientModule {
     @Provides
     @Singleton
     fun provideFeedbackWebClient(
-        @Named("monglife-mongs") retrofit: Retrofit
+        // 오류 신고는 monglife-mongs(user-service) 에서 discovery common-api 로 옮겨졌다
+        @Named("monglife-discovery-authorization") retrofit: Retrofit
     ): FeedbackWebClient = retrofit.create(FeedbackWebClient::class.java)
 }

@@ -30,7 +30,10 @@ public actor CommunityService {
 
     /// 오류 신고 등록.
     ///
+    /// discovery common-api 의 `POST /api/feedback` (monglife-mongs 의 `user/feedback` 에서 옮겨졌다).
+    /// 토큰이 필요한 discovery 호출이라 `requiresAuthorization` 기본값(true) 을 그대로 둔다.
     /// `deviceName` 은 서버가 재현 환경을 알 수 있게 함께 보낸다 (Android 도 같다).
+    /// 앱 패키지·버전은 서버가 액세스 토큰에서 채운다.
     public func submitFeedback(title: String, content: String) async throws {
         struct Request: Encodable {
             let deviceName: String
@@ -38,9 +41,9 @@ public actor CommunityService {
             let content: String
         }
         try await api.send(try Endpoint.json(
-            host: .gateway,
+            host: .discovery,
             method: .post,
-            path: "user/feedback",
+            path: "feedback",
             body: Request(deviceName: identity.deviceName, title: title, content: content)
         ))
     }

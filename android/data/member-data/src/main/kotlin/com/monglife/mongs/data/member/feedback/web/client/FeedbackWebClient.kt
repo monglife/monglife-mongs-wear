@@ -10,7 +10,8 @@ interface FeedbackWebClient {
 
     /**
      * 오류 신고 등록 API 호출
+     * discovery common-api 의 POST /api/feedback. 앱 패키지·버전은 서버가 토큰에서 채운다.
      */
-    @POST("user/feedback")
+    @POST("feedback")
     suspend fun createFeedback(@Body createFeedbackRequestDto: CreateFeedbackRequestDto): Response<ResponseDto<Void>>
 }

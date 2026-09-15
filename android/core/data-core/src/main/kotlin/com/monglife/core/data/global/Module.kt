@@ -150,6 +150,24 @@ object RetrofitModule {
         .build()
 
     /**
+     * Discovery Common Retrofit (인증 필요)
+     * 오류 신고처럼 common-api 가 직접 받는 로그인 이후 API 용. 게이트웨이를 타지 않으므로
+     * 게이트웨이 Retrofit 과 베이스 URL 이 다르고, 토큰이 필요하므로 no-authorization 과도 다르다.
+     */
+    @Provides
+    @Singleton
+    @Named("monglife-discovery-authorization")
+    fun provideDiscoveryRetrofitWithAuthorization(
+        @ApplicationContext context: Context,
+        gson: Gson,
+        @Named("authorization") okHttpClient: OkHttpClient,
+    ): Retrofit = Retrofit.Builder()
+        .baseUrl(context.getString(R.string.discovery_common_api_url))
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .client(okHttpClient)
+        .build()
+
+    /**
      * Mongs Retrofit
      */
     @Provides
