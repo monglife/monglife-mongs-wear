@@ -79,6 +79,7 @@ internal fun SlotPickView(
                         if (uiState.value.detailDialogOpen) {
                             SlotDetailDialog(
                                 mongId = it.mongId,
+                                name = it.name,
                                 statusCode = it.statusCode,
                                 stateCode = it.stateCode,
                                 isSleep = it.isSleep,
@@ -179,6 +180,7 @@ private fun SlotPickContent(
                         Slot(
                             modifier = Modifier.zIndex(1f),
                             currentMongId = currentMongVo.value?.mongId,
+                            slotNumber = slotIndex.value + 1,
                             mongVo = it,
                             detailDialogOpen = slotPickViewModel::detailDialogOpen,
                             graduateDialogOpen = slotPickViewModel::graduateConfirmDialogOpen,

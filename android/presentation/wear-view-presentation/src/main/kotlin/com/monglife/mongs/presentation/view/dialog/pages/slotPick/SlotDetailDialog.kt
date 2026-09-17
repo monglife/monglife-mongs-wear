@@ -54,6 +54,7 @@ internal fun SlotDetailDialog(
     modifier: Modifier = Modifier,
     initTabIndex: Int = 0,
     mongId: Long = 0L,
+    name: String = "",
     statusCode: MongStatusCode,
     stateCode: MongStateCode,
     isSleep: Boolean,
@@ -80,6 +81,17 @@ internal fun SlotDetailDialog(
                 onClick = onClick,
             )
     ) {
+        // 페이 포인트는 탭과 무관하게 항상 보여야 해서 카드 밖 화면 상단에 둔다.
+        // 240dp 원형 화면에서 카드 윗변이 y=55 라 18dp 자리는 잘리지 않는다.
+        PayPointBox(
+            width = 110,
+            payPoint = payPoint,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 18.dp)
+                .zIndex(1f),
+        )
+
         Box {
             Box(
                 modifier = Modifier
@@ -135,7 +147,7 @@ internal fun SlotDetailDialog(
                     0 -> InfoTabContent(
                         modifier = Modifier.matchParentSize(),
                         mongId = mongId,
-                        payPoint = payPoint,
+                        name = name,
                         born = born,
                         weight = weight,
                     )
@@ -162,7 +174,7 @@ internal fun SlotDetailDialog(
 private fun InfoTabContent(
     modifier: Modifier = Modifier,
     mongId: Long,
-    payPoint: Int,
+    name: String,
     born: LocalDateTime,
     weight: Double,
 ) {
@@ -190,9 +202,14 @@ private fun InfoTabContent(
                 .width(SLOT_DETAIL_WIDTH.dp)
                 .weight(0.2f)
         ) {
-            PayPointBox(
-                width = 110,
-                payPoint = payPoint,
+            Text(
+                text = name,
+                textAlign = TextAlign.Center,
+                fontFamily = DAL_MU_RI,
+                fontWeight = FontWeight.Light,
+                fontSize = 14.sp,
+                maxLines = 1,
+                color = Color.Black,
             )
         }
         Row (
