@@ -38,6 +38,7 @@ import com.monglife.mongs.presentation.view.component.common.button.SelectButton
 import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
 import com.monglife.mongs.presentation.view.dialog.common.ConfirmAndCancelDialog
 import com.monglife.mongs.presentation.view.dialog.common.PermissionDialog
+import com.monglife.mongs.presentation.view.utils.NumberUtil
 import com.monglife.mongs.presentation.viewmodel.pages.exchange.ExchangeStepViewModel
 import com.mongs.presentation.view.wear.R
 
@@ -164,7 +165,7 @@ private fun ExchangeStepContent(
                                 .weight(0.5f)
                         ) {
                             Text(
-                                text = "${remainingWalkingCount.value} 걸음",
+                                text = "${NumberUtil.formatAsCurrency(remainingWalkingCount.value)} 걸음",
                                 textAlign = TextAlign.Center,
                                 fontFamily = DAL_MU_RI,
                                 fontWeight = FontWeight.Light,

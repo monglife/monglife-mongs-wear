@@ -31,6 +31,7 @@ import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.button.BlueButton
 import com.monglife.mongs.presentation.view.component.common.textbox.PayPointBox
 import com.monglife.mongs.presentation.view.dialog.common.PermissionDialog
+import com.monglife.mongs.presentation.view.utils.NumberUtil
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainPagerViewModel
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainStepViewModel
 
@@ -82,7 +83,8 @@ internal fun StepContent(
                         .weight(0.5f),
                 ) {
                     Text(
-                        text = if (!stepVo.value.available) "-" else "${stepVo.value.walkingCount} 걸음",
+                        text = if (!stepVo.value.available) "-"
+                        else "${NumberUtil.formatAsCurrency(stepVo.value.walkingCount)} 걸음",
                         textAlign = TextAlign.Center,
                         fontFamily = DAL_MU_RI,
                         fontWeight = FontWeight.Light,
