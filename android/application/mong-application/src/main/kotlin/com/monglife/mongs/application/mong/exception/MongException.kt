@@ -123,3 +123,19 @@ class InvalidGraduateMongException(
     override val code: ErrorCode = MongErrorCode.INVALID_GRADUATE_MONG,
     override val message: String = code.getMessage()
 ) : ErrorException(code = code, message = message)
+
+/**
+ * 미션 조회 실패 예외
+ */
+class NotFoundMissionException(
+    override val code: ErrorCode = MongErrorCode.NOT_FOUND_MISSION,
+    override val message: String = code.getMessage()
+) : ErrorException(code = code, message = message)
+
+/**
+ * 미션 보상 수령 실패 예외
+ */
+class InvalidClaimMissionRewardException(
+    override val code: ErrorCode = MongErrorCode.INVALID_CLAIM_MISSION_REWARD,
+    override val message: String = code.getMessage()
+) : ErrorException(code = code, message = message)

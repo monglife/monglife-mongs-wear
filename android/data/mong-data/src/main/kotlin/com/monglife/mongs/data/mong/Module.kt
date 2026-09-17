@@ -4,13 +4,16 @@ import com.monglife.mongs.application.mong.port.persistence.ManagementPersistenc
 import com.monglife.mongs.application.mong.port.web.ActivityWebPort
 import com.monglife.mongs.application.mong.port.web.InteractionWebPort
 import com.monglife.mongs.application.mong.port.web.ManagementWebPort
+import com.monglife.mongs.application.mong.port.web.MissionWebPort
 import com.monglife.mongs.data.mong.persistence.adapter.ManagementPersistenceAdapter
 import com.monglife.mongs.data.mong.web.adapter.ActivityWebAdapter
 import com.monglife.mongs.data.mong.web.adapter.InteractionWebAdapter
 import com.monglife.mongs.data.mong.web.adapter.ManagementWebAdapter
+import com.monglife.mongs.data.mong.web.adapter.MissionWebAdapter
 import com.monglife.mongs.data.mong.web.client.ActivityWebClient
 import com.monglife.mongs.data.mong.web.client.InteractionWebClient
 import com.monglife.mongs.data.mong.web.client.ManagementWebClient
+import com.monglife.mongs.data.mong.web.client.MissionWebClient
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -39,6 +42,10 @@ abstract class AdapterModule {
     @Binds
     @Singleton
     abstract fun bindManagementWebPort(adapter: ManagementWebAdapter): ManagementWebPort
+
+    @Binds
+    @Singleton
+    abstract fun bindMissionWebPort(adapter: MissionWebAdapter): MissionWebPort
 }
 
 @Module
@@ -59,4 +66,9 @@ object WebClientModule {
     @Singleton
     fun provideManagementWebClient(@Named("monglife-mongs") retrofit: Retrofit): ManagementWebClient =
         retrofit.create(ManagementWebClient::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMissionWebClient(@Named("monglife-mongs") retrofit: Retrofit): MissionWebClient =
+        retrofit.create(MissionWebClient::class.java)
 }

@@ -48,6 +48,12 @@ sealed class RouterPath(
     // Main
     data object Main: RouterPath("main")
 
+    // Mission
+    data object MissionNested: RouterPath("mission")
+    data object MissionMenu: RouterPath("mission/menu")
+    data object MissionList: RouterPath("mission/list")
+    data object MissionDetail: RouterPath("mission/detail")
+
     // Notice
     data object Notice: RouterPath("notice")
 

@@ -74,15 +74,16 @@ internal fun InteractionContent(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    /**
+                     * 미션은 몽 상태로 막지 않는다. 진행도가 계정 단위로 쌓여 몽이 없어도 볼 것이 있고,
+                     * 몽이 필요한 것은 보상 수령뿐이라 상세 화면의 받기 버튼에서만 막는다.
+                     */
                     CircleImageButton(
-                        icon = R.drawable.btn_icon_map_search,
-                        border = R.drawable.btn_border_blue,
+                        icon = R.drawable.btn_icon_mission,
+                        border = R.drawable.btn_border_yellow,
                         iconSize = 34f,
-                        disable = currentMongVo.value?.let {
-                            it.stateCode == MongStateCode.DEAD || it.stateCode == MongStateCode.DELETE
-                        } ?: true,
                     ) {
-                        navController.navigate(RouterPath.SearchMap.route)
+                        navController.navigate(RouterPath.MissionNested.route)
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))

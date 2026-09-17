@@ -22,6 +22,8 @@ enum class MongErrorCode(
     INVALID_POOP_CLEAN_MONG("청소 실패", true),
     INVALID_EVOLUTION_MONG("진화 실패", true),
     INVALID_GRADUATE_MONG("졸업 실패", true),
+    NOT_FOUND_MISSION("미션 조회 실패", false),
+    INVALID_CLAIM_MISSION_REWARD("보상 수령 실패", true),
     ;
 
     override fun getMessage(): String {

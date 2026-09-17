@@ -23,6 +23,9 @@ import com.monglife.mongs.presentation.view.pages.feedback.FeedbackView
 import com.monglife.mongs.presentation.view.pages.help.HelpView
 import com.monglife.mongs.presentation.view.pages.inventory.InventoryView
 import com.monglife.mongs.presentation.view.pages.main.MainView
+import com.monglife.mongs.presentation.view.pages.mission.MissionDetailView
+import com.monglife.mongs.presentation.view.pages.mission.MissionListView
+import com.monglife.mongs.presentation.view.pages.mission.MissionMenuView
 import com.monglife.mongs.presentation.view.pages.notice.NoticeView
 import com.monglife.mongs.presentation.view.pages.randomDraw.RandomDrawView
 import com.monglife.mongs.presentation.view.pages.searchMap.SearchMapView
@@ -134,6 +137,27 @@ internal fun Router(
         composable(route = RouterPath.Main.route) {
             AlwaysOnScreen {
                 MainView(navController = navController)
+            }
+        }
+        // 미션
+        navigation(
+            startDestination = RouterPath.MissionMenu.route,
+            route = RouterPath.MissionNested.route,
+        ) {
+            composable(route = RouterPath.MissionMenu.route) {
+                MissionMenuView(navController = navController)
+            }
+            composable(route = "${RouterPath.MissionList.route}/{cycleCode}") { backStackEntry ->
+                MissionListView(
+                    navController = navController,
+                    cycleCode = backStackEntry.arguments?.getString("cycleCode"),
+                )
+            }
+            composable(route = "${RouterPath.MissionDetail.route}/{accountMissionId}") { backStackEntry ->
+                MissionDetailView(
+                    navController = navController,
+                    accountMissionId = backStackEntry.arguments?.getString("accountMissionId")?.toLong(),
+                )
             }
         }
         // 공지사항
