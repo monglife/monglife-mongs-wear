@@ -30,7 +30,6 @@ import com.monglife.mongs.presentation.view.component.pages.main.slot.section.De
 import com.monglife.mongs.presentation.view.component.pages.main.slot.section.EmptySection
 import com.monglife.mongs.presentation.view.component.pages.main.slot.section.GraduatedSection
 import com.monglife.mongs.presentation.view.component.pages.main.slot.section.NormalSection
-import com.monglife.mongs.presentation.view.dialog.pages.main.InitNotificationDialog
 import com.monglife.mongs.presentation.view.dialog.pages.main.InteractionDialog
 import com.monglife.mongs.presentation.view.utils.Timer
 import com.monglife.mongs.presentation.viewmodel.pages.main.MainPagerViewModel
@@ -166,11 +165,6 @@ internal fun SlotContent(
                             onStrokeClick = { mainSlotViewModel.strokeMong(mongId = it.mongId) },
                             onCloseClick = mainSlotViewModel::interactionDialogClose,
                         )
-                    } else if (uiState.value.initNotificationDialogOpen) {
-                        InitNotificationDialog(
-                            onCloseClick = mainSlotViewModel::initDialogClose,
-                            onCloseForeverClick = mainSlotViewModel::initDialogCloseForever
-                        )
                     }
                 }
             }
@@ -180,9 +174,6 @@ internal fun SlotContent(
     LaunchedEffect(isPagerChange.value) {
         if (isPagerChange.value && uiState.value.interactionDialogOpen) {
             mainSlotViewModel.interactionDialogClose()
-        }
-        if (isPagerChange.value && uiState.value.initNotificationDialogOpen) {
-            mainSlotViewModel.initDialogClose()
         }
     }
 }

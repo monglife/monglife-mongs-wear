@@ -5,7 +5,7 @@ class DeviceOption(
     backgroundMapCode: String?,
     notificationOption: Boolean,
     soundVolume: Float,
-    initNotificationDialogOpen: Boolean,
+    initGuideOpen: Boolean,
 ) {
     var currentMongId: Long? = currentMongId
         private set
@@ -15,7 +15,7 @@ class DeviceOption(
         private set
     var soundVolume: Float = soundVolume
         private set
-    var initNotificationDialogOpen: Boolean = initNotificationDialogOpen
+    var initGuideOpen: Boolean = initGuideOpen
         private set
 
     /**
@@ -47,9 +47,9 @@ class DeviceOption(
     }
 
     /**
-     * 초기 알림 다이얼로그 오픈 여부 수정
+     * 최초 가이드 표시 여부 수정
      */
-    fun updateInitNotificationDialogOpen(initNotificationDialogOpen: Boolean) {
-        this.initNotificationDialogOpen = initNotificationDialogOpen
+    fun updateInitGuideOpen(initGuideOpen: Boolean) {
+        this.initGuideOpen = initGuideOpen
     }
 }

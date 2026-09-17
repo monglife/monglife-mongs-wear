@@ -7,15 +7,15 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * 몽 상호작용 다이얼로그 오픈 여부 조회 UseCase
+ * 최초 가이드 표시 여부 조회 UseCase
  */
-class GetInitNotificationDialogOpenOptionUseCase @Inject constructor(
+class GetInitGuideOpenOptionUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,
 ) : BaseNoParamUseCase<Boolean>() {
 
     override suspend fun execute(): Boolean {
         return withContext(Dispatchers.IO) {
-            devicePersistencePort.getDeviceOption().initNotificationDialogOpen
+            devicePersistencePort.getDeviceOption().initGuideOpen
         }
     }
 }

@@ -85,7 +85,7 @@ class DevicePersistenceAdapter @Inject constructor(
                     backgroundMapCode = deviceOptionEntity.backgroundMapCode,
                     notificationOption = deviceOptionEntity.notificationOption,
                     soundVolume = deviceOptionEntity.soundVolume,
-                    initNotificationDialogOpen = deviceOptionEntity.initNotificationDialogOpen,
+                    initGuideOpen = deviceOptionEntity.initGuideOpen,
                 )
             )
         }
@@ -104,7 +104,7 @@ class DevicePersistenceAdapter @Inject constructor(
                     backgroundMapCode = deviceOptionEntity.backgroundMapCode,
                     notificationOption = deviceOptionEntity.notificationOption,
                     soundVolume = deviceOptionEntity.soundVolume,
-                    initNotificationDialogOpen = deviceOptionEntity.initNotificationDialogOpen,
+                    initGuideOpen = deviceOptionEntity.initGuideOpen,
                 )
             )
         }
@@ -232,7 +232,7 @@ class DevicePersistenceAdapter @Inject constructor(
                 backgroundMapCode = null,
                 notificationOption = false,
                 soundVolume = 1f,
-                initNotificationDialogOpen = true,
+                initGuideOpen = true,
             )
         )
 
@@ -250,7 +250,7 @@ class DevicePersistenceAdapter @Inject constructor(
                     backgroundMapCode = null,
                     notificationOption = false,
                     soundVolume = 1f,
-                    initNotificationDialogOpen = true,
+                    initGuideOpen = true,
                 )
             )
         }
@@ -261,7 +261,7 @@ class DevicePersistenceAdapter @Inject constructor(
                 backgroundMapCode = it?.backgroundMapCode,
                 notificationOption = it?.notificationOption ?: false,
                 soundVolume = it?.soundVolume ?: 1f,
-                initNotificationDialogOpen = it?.initNotificationDialogOpen ?: true,
+                initGuideOpen = it?.initGuideOpen ?: true,
             )
         }
     }
@@ -276,7 +276,7 @@ class DevicePersistenceAdapter @Inject constructor(
                 backgroundMapCode = deviceOption.backgroundMapCode,
                 notificationOption = deviceOption.notificationOption,
                 soundVolume = deviceOption.soundVolume,
-                initNotificationDialogOpen = deviceOption.initNotificationDialogOpen,
+                initGuideOpen = deviceOption.initGuideOpen,
             )
         ).toDomain()
 

@@ -61,7 +61,14 @@ class DeviceDataStore @Inject constructor(
         private val BACKGROUND_MAP_CODE = stringPreferencesKey("backgroundMapCode")
         private val NOTIFICATION_OPTION = booleanPreferencesKey("notificationOption")
         private val SOUND_VOLUME = floatPreferencesKey("soundVolume")
-        private val INIT_NOTIFICATION_DIALOG_OPEN = booleanPreferencesKey("initNotificationDialogOpen")
+        /**
+         * 최초 가이드 표시 여부.
+         *
+         * 저장 키 문자열은 예전 이름 그대로 둔다. 키를 바꾸면 기존 설치에서
+         * getDeviceOption() 이 null 을 돌려주고, 그 순간 어댑터가 DeviceOption 전체를
+         * 기본값으로 덮어써 선택된 몽/배경/사운드 설정까지 날아간다.
+         */
+        private val INIT_GUIDE_OPEN = booleanPreferencesKey("initNotificationDialogOpen")
     }
 
     /**
@@ -207,14 +214,14 @@ class DeviceDataStore @Inject constructor(
             it.contains(BACKGROUND_MAP_CODE) &&
             it.contains(NOTIFICATION_OPTION) &&
             it.contains(SOUND_VOLUME) &&
-            it.contains(INIT_NOTIFICATION_DIALOG_OPEN)
+            it.contains(INIT_GUIDE_OPEN)
         ) {
             DeviceOptionEntity(
                 currentMongId = if (it[CURRENT_MONG_ID]!! == -1L) null else it[CURRENT_MONG_ID]!!,
                 backgroundMapCode = it[BACKGROUND_MAP_CODE]!!.ifBlank { null },
                 notificationOption = it[NOTIFICATION_OPTION]!!,
                 soundVolume = it[SOUND_VOLUME]!!,
-                initNotificationDialogOpen = it[INIT_NOTIFICATION_DIALOG_OPEN]!!,
+                initGuideOpen = it[INIT_GUIDE_OPEN]!!,
             )
         } else {
             null
@@ -230,14 +237,14 @@ class DeviceDataStore @Inject constructor(
             it.contains(BACKGROUND_MAP_CODE) &&
             it.contains(NOTIFICATION_OPTION) &&
             it.contains(SOUND_VOLUME) &&
-            it.contains(INIT_NOTIFICATION_DIALOG_OPEN)
+            it.contains(INIT_GUIDE_OPEN)
         ) {
             DeviceOptionEntity(
                 currentMongId = if (it[CURRENT_MONG_ID]!! == -1L) null else it[CURRENT_MONG_ID]!!,
                 backgroundMapCode = it[BACKGROUND_MAP_CODE]!!.ifBlank { null },
                 notificationOption = it[NOTIFICATION_OPTION]!!,
                 soundVolume = it[SOUND_VOLUME]!!,
-                initNotificationDialogOpen = it[INIT_NOTIFICATION_DIALOG_OPEN]!!,
+                initGuideOpen = it[INIT_GUIDE_OPEN]!!,
             )
         } else {
             null
@@ -257,7 +264,7 @@ class DeviceDataStore @Inject constructor(
                 ?:run { preferences[BACKGROUND_MAP_CODE] = "" }
             preferences[NOTIFICATION_OPTION] = deviceOptionEntity.notificationOption
             preferences[SOUND_VOLUME] = deviceOptionEntity.soundVolume
-            preferences[INIT_NOTIFICATION_DIALOG_OPEN] = deviceOptionEntity.initNotificationDialogOpen
+            preferences[INIT_GUIDE_OPEN] = deviceOptionEntity.initGuideOpen
         }
 
         store.data.map {
@@ -266,7 +273,7 @@ class DeviceDataStore @Inject constructor(
                 backgroundMapCode = it[BACKGROUND_MAP_CODE]!!.ifBlank { null },
                 notificationOption = it[NOTIFICATION_OPTION]!!,
                 soundVolume = it[SOUND_VOLUME]!!,
-                initNotificationDialogOpen = it[INIT_NOTIFICATION_DIALOG_OPEN]!!,
+                initGuideOpen = it[INIT_GUIDE_OPEN]!!,
             )
         }.first()
     }

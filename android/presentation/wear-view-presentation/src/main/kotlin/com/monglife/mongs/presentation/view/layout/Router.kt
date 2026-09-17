@@ -1,6 +1,8 @@
 package com.monglife.mongs.presentation.view.layout
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.navigation.navigation
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
@@ -20,6 +22,8 @@ import com.monglife.mongs.presentation.view.pages.feed.FeedFoodView
 import com.monglife.mongs.presentation.view.pages.feed.FeedMenuView
 import com.monglife.mongs.presentation.view.pages.feed.FeedSnackView
 import com.monglife.mongs.presentation.view.pages.feedback.FeedbackView
+import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
+import com.monglife.mongs.presentation.view.pages.guide.GuideView
 import com.monglife.mongs.presentation.view.pages.help.HelpView
 import com.monglife.mongs.presentation.view.pages.inventory.InventoryView
 import com.monglife.mongs.presentation.view.pages.main.MainView
@@ -34,16 +38,32 @@ import com.monglife.mongs.presentation.view.pages.slotPick.SlotPickView
 import com.monglife.mongs.presentation.view.pages.training.TrainingMenuView
 import com.monglife.mongs.presentation.view.pages.training.TrainingPlayView
 import com.monglife.mongs.presentation.view.utils.AlwaysOnScreen
+import com.monglife.mongs.presentation.viewmodel.pages.guide.GuideViewModel
 
 @Composable
 internal fun Router(
     modifier: Modifier = Modifier,
+    guideViewModel: GuideViewModel = hiltViewModel(),
 ) {
     val navController = rememberSwipeDismissableNavController()
 
+    /**
+     * 최초 가이드 여부를 알기 전에는 NavHost 를 세우지 않는다.
+     * startDestination 은 한 번 정해지면 바꿀 수 없어, 메인을 먼저 띄웠다가
+     * 가이드로 밀어내면 메인이 한 번 번쩍이고 백스택에도 남는다.
+     */
+    val initGuideOpen = guideViewModel.initGuideOpen.collectAsStateWithLifecycle()
+
+    val startDestination = initGuideOpen.value?.let { guideOpen ->
+        if (guideOpen) RouterPath.Guide.route else RouterPath.Main.route
+    } ?: run {
+        LoadingBar()
+        return
+    }
+
     SwipeDismissableNavHost(
         navController = navController,
-        startDestination = RouterPath.Main.route,
+        startDestination = startDestination,
         modifier = modifier,
         route = RouterPath.Root.route
     ) {
@@ -125,9 +145,13 @@ internal fun Router(
         composable(route = RouterPath.Feedback.route) {
             FeedbackView()
         }
+        // 최초 진입 가이드
+        composable(route = RouterPath.Guide.route) {
+            GuideView(navController = navController)
+        }
         // 도움말
         composable(route = RouterPath.Help.route) {
-            HelpView()
+            HelpView(navController = navController)
         }
         // 인벤토리
         composable(route = RouterPath.Inventory.route) {

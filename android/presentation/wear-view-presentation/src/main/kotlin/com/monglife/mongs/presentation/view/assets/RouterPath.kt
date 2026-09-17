@@ -39,6 +39,9 @@ sealed class RouterPath(
     // Feedback
     data object Feedback: RouterPath("feedback")
 
+    // Guide
+    data object Guide: RouterPath("guide")
+
     // Help
     data object Help: RouterPath("help")
 

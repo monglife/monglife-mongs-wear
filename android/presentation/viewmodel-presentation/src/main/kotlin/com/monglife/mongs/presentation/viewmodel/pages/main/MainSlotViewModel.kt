@@ -1,8 +1,6 @@
 package com.monglife.mongs.presentation.viewmodel.pages.main
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
-import com.monglife.mongs.application.device.usecase.GetInitNotificationDialogOpenOptionUseCase
-import com.monglife.mongs.application.device.usecase.SetInitNotificationDialogOpenOptionUseCase
 import com.monglife.mongs.application.mong.usecase.management.EvolutionMongUseCase
 import com.monglife.mongs.application.mong.usecase.management.GraduateCheckingUseCase
 import com.monglife.mongs.application.mong.usecase.management.ObserveCurrentMongUseCase
@@ -23,8 +21,6 @@ import javax.inject.Inject
 @HiltViewModel
 class MainSlotViewModel @Inject constructor(
     private val observeCurrentMongUseCase: ObserveCurrentMongUseCase,
-    private val getInitNotificationDialogOpenOptionUseCase: GetInitNotificationDialogOpenOptionUseCase,
-    private val setInitNotificationDialogOpenOptionUseCase: SetInitNotificationDialogOpenOptionUseCase,
     private val strokeMongUseCase: StrokeMongUseCase,
     private val evolutionMongUseCase: EvolutionMongUseCase,
     private val graduateCheckingUseCase: GraduateCheckingUseCase,
@@ -42,7 +38,6 @@ class MainSlotViewModel @Inject constructor(
     sealed class UiState(
         val loadingBar: Boolean = false,
         val effectLoadingBar: Boolean = false,
-        val initNotificationDialogOpen: Boolean = false,
         val interactionDialogOpen: Boolean = false,
         val isHappy: Boolean = false,
         val isEating: Boolean = false,
@@ -52,7 +47,6 @@ class MainSlotViewModel @Inject constructor(
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
         data object EffectLoading : UiState(effectLoadingBar = true)
-        data object InitNotification : UiState(initNotificationDialogOpen = true)
         data object Interaction : UiState(interactionDialogOpen = true)
         data object Happy : UiState(isHappy = true)
         data object Eating : UiState(isEating = true)
@@ -76,36 +70,8 @@ class MainSlotViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             _uiState.value = UiState.Loading
 
-            val initNotificationDialogOpen = withContext(Dispatchers.IO) {
-                observeForever(observeCurrentMongUseCase(), _currentMongVo)
-                getInitNotificationDialogOpenOptionUseCase()
-            }
-
-            _uiState.value =
-                if (initNotificationDialogOpen) UiState.InitNotification else UiState.Idle
-        }
-    }
-
-    /**
-     * 초기 다이얼로그 닫기
-     */
-    fun initDialogClose() {
-        viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiState.value = UiState.Idle
-        }
-    }
-
-    /**
-     * 초기 다이얼로그 다시 보지 않기 옵션 설정 및 닫기
-     */
-    fun initDialogCloseForever() {
-        viewModelScopeWithHandler.launch(Dispatchers.Main) {
             withContext(Dispatchers.IO) {
-                setInitNotificationDialogOpenOptionUseCase(
-                    command = SetInitNotificationDialogOpenOptionUseCase.Command(
-                        isOpen = false
-                    )
-                )
+                observeForever(observeCurrentMongUseCase(), _currentMongVo)
             }
 
             _uiState.value = UiState.Idle
@@ -267,9 +233,7 @@ class MainSlotViewModel @Inject constructor(
      */
     override fun initialize() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            if (_uiState.value != UiState.InitNotification) {
-                _uiState.value = UiState.Idle
-            }
+            _uiState.value = UiState.Idle
         }
     }
 

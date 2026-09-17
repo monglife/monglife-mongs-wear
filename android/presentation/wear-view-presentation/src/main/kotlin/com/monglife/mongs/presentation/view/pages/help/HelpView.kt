@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.PositionIndicator
@@ -23,6 +24,7 @@ import androidx.wear.compose.material.Text
 import com.monglife.mongs.presentation.view.assets.DAL_MU_RI
 import com.monglife.mongs.presentation.view.assets.HelpResourceCode
 import com.monglife.mongs.presentation.view.assets.MongsWhite
+import com.monglife.mongs.presentation.view.assets.RouterPath
 import com.monglife.mongs.presentation.view.component.common.background.DefaultBackground
 import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
 import com.monglife.mongs.presentation.view.component.common.chip.Chip
@@ -31,6 +33,7 @@ import com.monglife.mongs.presentation.viewmodel.pages.help.HelpViewModel
 
 @Composable
 internal fun HelpView(
+    navController: NavController,
     helpViewModel: HelpViewModel = hiltViewModel(),
 ) {
     val uiState = helpViewModel.uiState.collectAsStateWithLifecycle()
@@ -43,7 +46,10 @@ internal fun HelpView(
              LoadingBar()
         } else {
             Box(modifier = Modifier.zIndex(1f)) {
-                HelpContent(helpViewModel = helpViewModel)
+                HelpContent(
+                    helpViewModel = helpViewModel,
+                    onGuideClick = { navController.navigate(RouterPath.Guide.route) },
+                )
             }
 
             Box(modifier = Modifier.zIndex(2f)) {
@@ -65,6 +71,7 @@ internal fun HelpView(
 private fun HelpContent(
     modifier: Modifier = Modifier,
     helpViewModel: HelpViewModel,
+    onGuideClick: () -> Unit,
 ) {
     val helpVos = helpViewModel.helpVos.collectAsStateWithLifecycle()
     val listState = rememberScalingLazyListState(initialCenterItemIndex = 1)
@@ -97,6 +104,20 @@ private fun HelpContent(
                         maxLines = 1,
                     )
                 }
+            }
+
+            /**
+             * 가이드는 다이얼로그가 아니라 별도 화면이라 목록의 다른 항목과 동작이 다르다.
+             * 처음 한 번은 자동으로 뜨지만, 그때 넘겨 버린 사람을 위해 입구를 남겨 둔다.
+             */
+            item {
+                Chip(
+                    fontColor = Color.White,
+                    backgroundColor = Color.Black,
+                    label = "가이드 다시 보기",
+                    secondaryLabel = "처음 안내를 다시 봐요",
+                    onClick = onGuideClick,
+                )
             }
 
             for (helpVo in helpVos.value) {

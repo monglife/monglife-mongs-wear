@@ -7,7 +7,7 @@ data class DeviceOptionEntity(
     val backgroundMapCode: String?,
     val notificationOption: Boolean,
     val soundVolume: Float,
-    val initNotificationDialogOpen: Boolean,
+    val initGuideOpen: Boolean,
 ) {
     /**
      * 엔티티 도메인 변환
@@ -17,6 +17,6 @@ data class DeviceOptionEntity(
         backgroundMapCode = this.backgroundMapCode,
         notificationOption = this.notificationOption,
         soundVolume = this.soundVolume,
-        initNotificationDialogOpen = this.initNotificationDialogOpen,
+        initGuideOpen = this.initGuideOpen,
     )
 }

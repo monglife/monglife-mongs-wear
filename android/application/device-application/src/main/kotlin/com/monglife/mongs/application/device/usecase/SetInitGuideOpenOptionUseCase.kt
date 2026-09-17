@@ -7,17 +7,17 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * 초기 알림 다이얼로그 오픈 여부 설정 UseCase
+ * 최초 가이드 표시 여부 설정 UseCase
  */
-class SetInitNotificationDialogOpenOptionUseCase @Inject constructor(
+class SetInitGuideOpenOptionUseCase @Inject constructor(
     private val devicePersistencePort: DevicePersistencePort,
-) : BaseParamUseCase<SetInitNotificationDialogOpenOptionUseCase.Command, Unit>() {
+) : BaseParamUseCase<SetInitGuideOpenOptionUseCase.Command, Unit>() {
 
     override suspend fun execute(command: Command) {
         withContext(Dispatchers.IO) {
             devicePersistencePort.getDeviceOption().let {
-                // DeviceOption mongInteractionDialogOpen 변경
-                it.updateInitNotificationDialogOpen(initNotificationDialogOpen = command.isOpen)
+                // DeviceOption initGuideOpen 변경
+                it.updateInitGuideOpen(initGuideOpen = command.isOpen)
 
                 // DeviceOption 로컬 등록
                 devicePersistencePort.saveDeviceOption(deviceOption = it)
