@@ -8,7 +8,6 @@ Mongs is a Wear OS + Android app for a "growing a pet with your step count" serv
 repo (`monglife-mongs-wear`) contains two installable apps that share almost all business logic:
 
 - `app/wear-app` — the original Wear OS app (published on Play Store).
-- `app/mobile-app` — a companion phone app added more recently (see `feat: 모바일 앱 개발 초기 설정`).
 
 Backend lives in a separate repo: https://github.com/MongLife/monglife-mongs
 
@@ -21,7 +20,6 @@ build tasks carry the environment in their name (`assembleDevDebug`, not `assemb
 
 ```bash
 ./gradlew :app:wear-app:assembleDevDebug      # build the wear app against dev
-./gradlew :app:mobile-app:assembleDevDebug    # build the mobile app against dev
 ./gradlew :app:wear-app:installDevDebug       # install wear app on connected device/emulator
 ./gradlew :app:wear-app:assemblePrdRelease    # signed, R8-minified production build
 ./gradlew testDevDebugUnitTest                # run all unit tests (plain `test` runs all 3 flavors)
@@ -64,7 +62,7 @@ How each one is wired:
   inside `afterEvaluate` (earlier than that and the plugin's own default overwrites it). Re-verify this
   wiring when bumping `[versions] gms` in `gradle/libs.versions.toml`.
 - **`applicationIdSuffix` must stay off.** Each `google-services.json` holds a single client
-  (`com.mongs.wear` / `com.mongs.mobile`) matched exactly by package name; a suffix fails the build.
+  (`com.mongs.wear`) matched exactly by package name; a suffix fails the build.
   Use `versionNameSuffix` if you need to tell builds apart.
 - **Cleartext HTTP** — `app/*/src/{dev,stg}/res/xml/network_security_config.xml` permit it, `src/main`
   blocks it. Split by flavor rather than build type, because the environment is what decides it.
@@ -77,10 +75,9 @@ Each business area ("vertical slice") has its own module in every layer: `auth`,
 `member`, `mong`.
 
 ```
-app/wear-app, app/mobile-app          (Android apps, Hilt entry points)
+app/wear-app                          (Android app, Hilt entry point)
         │
 presentation/wear-view-presentation   (Compose UI, wear-specific widgets)
-presentation/mobile-view-presentation (Compose UI, mobile-specific widgets)
         │  both depend on:
 presentation/viewmodel-presentation   (ViewModels shared by both apps — one module, no per-app duplication)
         │
@@ -108,7 +105,7 @@ Key wiring facts (see `settings.gradle` and per-module `build.gradle` for the fu
 - `presentation:viewmodel-presentation` is the one place that wires everything together: it `api`-exposes
   every `application/*` module (so ViewModels can call use cases) and `implementation`-depends on every
   `data/*` module (so Hilt has adapters to bind at runtime), plus `core:billing-core`.
-- `app/wear-app` and `app/mobile-app` only depend on `core:data-core` + their respective
+- `app/wear-app` only depends on `core:data-core` + its
   `presentation:*-view-presentation` module — they contain almost no business logic themselves (just
   `MainActivity`, `MainApplication`, notification service/module).
 
@@ -156,7 +153,7 @@ templates for scaffolding a new use case / view model in this style — check th
 ### Notifications / FCM
 
 Both apps have their own `NotificationModule.kt` / `NotificationService.kt` under
-`app/{wear,mobile}-app/.../module` and `.../service` — these are per-app (not shared through
+`app/wear-app/.../module` and `.../service` — these are per-app (not shared through
 `core:data-core`), since FCM handling differs between the watch and phone.
 
 ### Kotlin/Android versions

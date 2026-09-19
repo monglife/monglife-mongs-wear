@@ -54,7 +54,7 @@ subprojects {
     //
     // flavor 를 여기서 선언한 순서가 IDE 기본 배리언트를 정한다(devDebug).
     // applicationIdSuffix 는 붙이지 마라 - google-services.json 의 package_name 이
-    // com.mongs.wear / com.mongs.mobile 단일이라 processXGoogleServices 가 실패한다.
+    // com.mongs.wear 단일이라 processXGoogleServices 가 실패한다.
     plugins.withId("com.android.base") {
         android {
             compileSdk = rootProject.ext.androidCompileSdk

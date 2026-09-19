@@ -709,7 +709,7 @@ iOS 는 그게 절반만 된다.
 | `MapSearchView` | `pages/map/SearchMapView.kt` |
 | `TrainingFlowView` 외 | `pages/training/*.kt` + 다이얼로그 2개 |
 | `BattleMenuView` / `BattleMatchView` | `pages/battle/*.kt` + 다이얼로그 2개 |
-| `NotReadyView` | `mobile-view-presentation/.../pages/common/NotReadyView.kt` |
+| `NotReadyView` | (원본이던 Android mobile-view-presentation 은 삭제됨 — iOS 쪽이 유일본) |
 | `Theme/MongsButton.swift` | `component/common/button/*.kt` |
 | `Theme/MongsWidgets.swift` | `PayPointBox` · `ConditionSection` · `PageIndicator` · `LoadingBar` · `Logo` |
 
@@ -789,7 +789,8 @@ Android 모바일 앱이 같은 이유로 `NotReadyView` 를 만들어 뒀고, �
 | 도감 · 맵 탐색 · 랜덤 뽑기 · 훈련 · 배틀 | `.collection` `.searchMap` `.randomDraw` `.training` `.battle` |
 | 도움말 · 충전 · 공지사항 · 오류 신고 | `.help` `.charge` `.notice` `.feedback` |
 
-제목 문구는 Android `mobile-view-presentation/.../layout/Router.kt` 의 라우트-제목 목록 그대로다.
+제목 문구는 Android mobile-view-presentation 의 라우트-제목 목록에서 가져온 것이다.
+그 모듈은 모바일 앱과 함께 삭제됐으므로 지금은 이 파일이 유일한 출처다.
 **실제 화면을 이식하면 `NotReadyDestination` 에서 그 케이스만 지우고 버튼을 새 화면에 연결한다.**
 
 잠금 조건(`isAlive` / `canPlay`)은 원본 그대로 두었다 — 죽었거나 자는 몽은 자리표시자에도 못 간다.
