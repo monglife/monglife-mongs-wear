@@ -6,6 +6,7 @@ import androidx.health.services.client.HealthServices
 import androidx.health.services.client.clearPassiveListenerService
 import androidx.health.services.client.data.DataType
 import androidx.health.services.client.data.PassiveListenerConfig
+import androidx.health.services.client.flush
 import androidx.health.services.client.getCapabilities
 import androidx.health.services.client.setPassiveListenerService
 import com.monglife.mongs.data.device.persistence.service.StepPassiveListenerService
@@ -102,6 +103,33 @@ class HealthServicesStepManager @Inject constructor(
             Log.w(TAG, "passive 등록 실패", e)
             false
         }
+    }
+
+    /**
+     * 대기 중인 배치 즉시 전달 요청
+     *
+     * 앱이 꺼진 동안 Health Services 가 모아 둔 걸음은 다음 배치 주기까지 내려오지 않는다.
+     * 실측으로 걷는 중에는 60~80초, 걷기를 멈추거나 앱이 죽어 있으면 3~4분이 걸렸다.
+     * 그래서 걷고 나서 곧바로 앱을 열면 방금 걸은 게 지갑에 없다. 진입 직후 한 번 flush 해
+     * 지금 바로 리스너 서비스로 밀어 넣게 한다.
+     *
+     * - 등록된 리스너가 없으면 no-op 이므로 반드시 [register] 뒤에 부른다.
+     * - 공식 KDoc 이 "used sparingly" 라고 못박은 스로틀 대상이다. 앱 진입 경로에서만 부르고
+     *   15분 워커/부팅 경로에서는 부르지 않는다.
+     * - 전달을 앞당기는 힌트일 뿐이라 실패해도 수집에는 영향이 없다. 던지지 않고 결과만 돌려준다.
+     */
+    suspend fun flush(): Boolean = if (!isInstalled()) {
+        false
+    } else try {
+        withTimeout(CAPABILITY_TIMEOUT_MILLIS) { passiveMonitoringClient.flush() }
+        true
+    } catch (e: TimeoutCancellationException) {
+        false
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Log.w(TAG, "passive flush 실패", e)
+        false
     }
 
     /**

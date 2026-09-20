@@ -45,9 +45,13 @@ class StepCollectionCoordinator @Inject constructor(
     private val mutex = Mutex()
 
     /**
-     * 수집 경로 해석 → 등록 → 폴백 폴링 → 주기 워커 예약
+     * 수집 경로 해석 → 등록 → (앱 진입이면 flush) → 폴백 폴링 → 주기 워커 예약
+     *
+     * @param flush 앱 진입 경로만 true 다. Health Services 가 모아 둔 배치를 즉시 받아 화면에
+     *        방금 걸은 걸음이 바로 보이게 한다. 스로틀 대상이라 15분 워커와 부팅 경로는 부르지
+     *        않는다 — 그쪽은 급히 보여 줄 화면이 없다.
      */
-    suspend fun synchronize() = mutex.withLock {
+    suspend fun synchronize(flush: Boolean = false) = mutex.withLock {
         deviceDataStore.migrateStepSchema()
 
         val source = resolveSource(current = deviceDataStore.getStepState().source)
@@ -59,7 +63,13 @@ class StepCollectionCoordinator @Inject constructor(
         if (source.isHealthServices()) {
             // 재등록은 이전 등록을 대체하므로 매번 불러도 중복되지 않는다.
             // 재부팅/앱 교체 후 등록이 사라졌더라도 이 한 줄로 복구된다.
-            Log.i(TAG, "passive register=${healthServicesStepManager.register(source)}")
+            val registered = healthServicesStepManager.register(source)
+            Log.i(TAG, "passive register=$registered")
+
+            if (flush && registered) {
+                // 앱이 꺼진 동안 쌓인 배치를 지금 받는다. 등록이 살아 있을 때만 의미가 있다.
+                Log.i(TAG, "passive flush=${healthServicesStepManager.flush()}")
+            }
         } else {
             healthServicesStepManager.unregister()
         }

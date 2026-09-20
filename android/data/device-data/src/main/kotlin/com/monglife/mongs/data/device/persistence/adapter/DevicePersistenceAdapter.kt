@@ -111,9 +111,12 @@ class DevicePersistenceAdapter @Inject constructor(
     }
 
     /**
-     * 걸음 수 수집 시작
+     * 걸음 수 수집 시작 (앱 진입 경로)
+     *
+     * 이 포트를 부르는 곳은 전부 화면 진입이다. 워커/부팅 경로와 달리 flush 까지 요청해
+     * 앱이 꺼진 동안 Health Services 에 쌓인 걸음을 곧바로 지갑에 반영한다.
      */
-    override suspend fun startStepCollection() = stepCollectionCoordinator.synchronize()
+    override suspend fun startStepCollection() = stepCollectionCoordinator.synchronize(flush = true)
 
     /**
      * 걸음 수 조회
