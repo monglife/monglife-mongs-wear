@@ -63,14 +63,24 @@ class MainViewModel @Inject constructor(
             _uiState.value = UiState.Loading
 
             withContext(Dispatchers.IO) {
+                // 걸음 수 수집 시작 (경로 해석 + 등록 + flush, 멱등)
+                //
+                // 서버 동기화와 같은 runCatching 에 두면 안 된다. 수집 시작은 DataStore 와
+                // Health Services 만 건드리는 로컬 동작인데, 앞의 네트워크 호출이 던지는 순간
+                // 여기까지 오지 못해 오프라인에서는 걸음이 아예 안 쌓인다.
+                // 먼저 부르는 이유는 flush 가 앱 꺼진 동안의 걸음을 당겨 오기 때문이다. 빠를수록 좋다.
+                runCatching {
+                    startStepCollectionUseCase()
+                }.onFailure {
+                    Log.w(this::class.simpleName, "걸음 수집 시작 실패", it)
+                }
+
                 // 동기화가 실패해도 화면은 떠야 하므로 삼키되, 조용히 사라지지는 않게 남긴다.
                 runCatching {
                     // 플레이어 정보 동기화
                     syncRemotePlayerUseCase()
                     // 몽 목록 정보 동기화
                     syncRemoteMongsUseCase()
-                    // 걸음 수 수집 시작 (경로 해석 + 등록, 멱등)
-                    startStepCollectionUseCase()
                 }.onFailure {
                     Log.w(this::class.simpleName, "메인 진입 동기화 실패", it)
                 }
