@@ -3,6 +3,7 @@ package com.monglife.core.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.monglife.core.common.error.CrashReporter
 import com.monglife.core.common.exception.ErrorException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -71,6 +72,17 @@ abstract class BaseViewModel : ViewModel() {
             out.append("  - exception     => ${exception.stackTraceToString()}")
 
             Log.e(this@BaseViewModel::class.simpleName ?: "Anonymous", "EXCEPTION >> $out")
+
+            /**
+             * 여기서 삼킨 예외는 앱을 죽이지 않으므로 Crashlytics 가 자동으로 잡지 못한다.
+             * 릴리스에서는 이 Log.e 를 볼 방법이 기기에 붙는 것뿐이라 명시적으로 올린다.
+             *
+             * ErrorException 은 뺀다. 서버가 코드로 알려 주는 정상적인 거절(잔액 부족,
+             * 쿨다운 등)이라 버그가 아니고, 그대로 올리면 수집기가 그 소음에 묻힌다.
+             */
+            if (exception !is ErrorException) {
+                CrashReporter.record(exception)
+            }
 
             delay(NAVIGATE_DELAY)
 

@@ -4,6 +4,7 @@ apply plugin: "com.android.application"
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "dagger.hilt.android.plugin"
 apply plugin: "com.google.gms.google-services"
+apply plugin: "com.google.firebase.crashlytics"
 apply plugin: "org.jetbrains.kotlin.plugin.compose"
 
 // configs 서브모듈에서 이 앱이 쓰는 파일들의 위치. 복사하지 않고 여기서 직접 참조한다.
@@ -27,7 +28,7 @@ android {
     }
 
     defaultConfig {
-        versionCode     33
+        versionCode     34
         versionName     "2.3.1"
         vectorDrawables {
             useSupportLibrary true
@@ -107,6 +108,12 @@ dependencies {
     // fcm
     implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseVersion}")
     implementation "com.google.firebase:firebase-messaging-ktx:${rootProject.ext.fcmVersion}"
+
+    // 크래시 수집. 버전은 BOM 이 정한다.
+    //
+    // 릴리스는 Log.i 를 지우고 Log.w/e 만 남기는데, 그마저도 기기에 adb 로 붙어야 볼 수 있다.
+    // 스토어 배포 뒤에는 사실상 진단 수단이 없어 이걸 붙인다.
+    implementation "com.google.firebase:firebase-crashlytics"
 }
 
 // google-services 플러그인은 sourceSets 를 따르지 않고 모듈 디렉토리 기준으로만 json 후보 경로를

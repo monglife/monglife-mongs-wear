@@ -16,6 +16,9 @@ kotlin = "2.4.10"
 ksp    = "2.3.11"
 hilt   = "2.60.1"
 gms    = "4.4.2"
+# Crashlytics Gradle 플러그인. 릴리스 빌드의 R8 매핑을 자동으로 올려
+# 난독화된 스택트레이스를 콘솔에서 원래 이름으로 읽게 해 준다.
+crashlytics = "3.0.6"
 
 [plugins]
 android-library     = { id = "com.android.library",                 version.ref = "agp" }
@@ -25,3 +28,4 @@ kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose", version.ref 
 ksp                 = { id = "com.google.devtools.ksp",             version.ref = "ksp" }
 hilt-android        = { id = "com.google.dagger.hilt.android",      version.ref = "hilt" }
 google-services     = { id = "com.google.gms.google-services",      version.ref = "gms" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics",   version.ref = "crashlytics" }

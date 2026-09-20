@@ -35,6 +35,7 @@ plugins {
     alias(libs.plugins.ksp)                 apply false
     alias(libs.plugins.hilt.android)        apply false
     alias(libs.plugins.google.services)     apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
 }
 
 // hilt 만 플러그인 ID 와 라이브러리 좌표를 함께 쓴다. 버전 리터럴을 두 곳에 두지 않도록

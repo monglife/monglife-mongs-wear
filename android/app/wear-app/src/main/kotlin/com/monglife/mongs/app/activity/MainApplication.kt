@@ -3,6 +3,8 @@ package com.monglife.mongs.app.activity
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.monglife.core.common.error.CrashReporter
 import dagger.hilt.EntryPoint
 import dagger.hilt.EntryPoints
 import dagger.hilt.InstallIn
@@ -16,6 +18,25 @@ class MainApplication : Application(), Configuration.Provider {
     @InstallIn(SingletonComponent::class)
     interface HiltWorkerFactoryEntryPoint {
         fun workerFactory(): HiltWorkerFactory
+    }
+
+    /**
+     * 처리된 예외를 Crashlytics 로 올리는 통로를 꽂는다.
+     *
+     * Crashlytics 는 앱을 죽이는 예외만 알아서 모은다. 그런데 이 앱의 예외는 거의 전부
+     * [com.monglife.core.presentation.viewmodel.BaseViewModel] 의 핸들러가 삼켜 화면만
+     * 되돌리므로 수집기에 닿지 않는다.
+     *
+     * 훅을 core 에 두고 구현만 여기 두는 이유는 core:presentation-core 가 wear/mobile
+     * 공용이라 플랫폼 라이브러리를 몰라야 하기 때문이다.
+     *
+     * Hilt 그래프를 건드리지 않으므로 아래 workManagerConfiguration 주석이 경계하는
+     * "생성자에서 컴포넌트가 먼저 만들어지는" 문제와는 무관하다.
+     */
+    override fun onCreate() {
+        super.onCreate()
+
+        CrashReporter.install { FirebaseCrashlytics.getInstance().recordException(it) }
     }
 
     // getter 다. 초기화식(`= Configuration.Builder()...`)으로 두면 이 값이 **생성자에서** 평가되고,
