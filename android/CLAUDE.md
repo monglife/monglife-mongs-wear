@@ -182,5 +182,93 @@ Versions live in three places, split by kind:
   property), so it cannot go in the shared hook. Do not put SDK literals back into module build files:
   one module drifting out of sync breaks manifest merging / AAR metadata checks.
   `minSdk 33` is deliberate — it is Wear OS 4, and the Galaxy Watch 4 (the intended support floor) sits
-  above it since its final update is Wear OS 5 / API 34. `compileSdk 37` needs `platforms;android-37`
+  above it: the test unit (SM-R875N, Watch4 Classic 46mm LTE) is on **Android 16 / API 36** (Wear OS 6,
+  One UI 8 Watch), not the API 34 this note used to claim. `compileSdk 37` needs `platforms;android-37`
   installed locally (API 37.0/37.1 are stable; 37.2 is still beta).
+
+## Step collection — what the device taught us (2026-09-20)
+
+Reference device: **Galaxy Watch 4 Classic 46mm LTE (SM-R875N)**, Android 16 / API 36 (Wear OS 6),
+Health Services `0.88.25.934069675`. Verified against `stg` over wireless debugging.
+
+### ⚠️ R8 silently disabled Health Services in every release build
+
+The single most expensive thing to rediscover. `androidx.health.services.client.proto.DataProto$*`
+extends **unshaded** `com.google.protobuf.GeneratedMessageLite`, and protobuf-lite resolves fields
+**by name** from the `dynamicMethod` schema string. R8 renamed `packageName_` to `e`, so every
+capability query threw:
+
+```
+W/StepCollection: capability 조회 실패
+java.lang.RuntimeException: Field packageName_ for b13 not found.
+  Known fields are [public java.lang.String b13.e, ...]
+```
+
+`health-services-client:1.0.0` ships **no `proguard.txt`**, so nothing protects it. With the query
+failing, `resolveSupportedSource()` returns null and the path falls through to `SENSOR` — meaning
+`StepPassiveListenerService`, `StepBootReceiver` and the re-registration logic were **dead code in
+production**, and nothing pushed steps while the app was dead. `data/device-data/consumer-rules.pro`
+now keeps those fields; `android/.gitignore` needs the `!` exception or the file is never committed.
+
+**Debug builds cannot catch this** (`minifyEnabled false`). Any change touching a reflection-based
+library must be checked on a *release* build on a real device.
+
+### Release vs debug: you are half blind in release
+
+`proguard/mongs-release.pro` strips `Log.i` via `-assumenosideeffects`, and `run-as` is unavailable.
+In a release build the only surviving step signals are three `Log.w` lines — `capability 조회 실패`,
+`passive 등록 실패`, `활동 권한 상실`. Their **absence on a path you know executed** is the proof;
+there is no success log. Force a known path by revoking and re-granting `ACTIVITY_RECOGNITION`
+(`NONE` is the one state `resolveSource` re-resolves). Use a debug build whenever you need numbers.
+
+### Reproducing "app was dead, then I walked"
+
+- `adb shell am kill <pkg>` — **not `force-stop`**. Force-stop puts the package in the stopped state,
+  which suppresses broadcasts (including `MY_PACKAGE_REPLACED`) and invalidates the test. `am kill`
+  is what the OS reclaim actually does.
+- Granting the permission with `adb shell pm grant` is **not equivalent to the user tapping allow**.
+  It leaves `USER_SET` off the permission flags and Health Services then refuses delivery with
+  `PassiveListenerServiceDispatcher: Notified client of missing permissions`. Grant through the app.
+- The process rarely stays dead: `info.mqtt.android.service.MqttService` restarts it within ~1 s.
+  With the process alive Health Services binds into it, so no `Start proc … for service …` line
+  appears — you lose your only release-visible evidence.
+
+### Measured behaviour
+
+| | |
+|---|---|
+| Resolved path | `HEALTH_STEPS` (`DataType.STEPS` delta is supported; the daily fallback is unused) |
+| Batch cadence, walking, app foreground | 60–80 s |
+| Batch cadence, walking stopped or app dead | 3–4 min |
+| First batch after `flush()` on app entry | **~250 ms** |
+| Cold start, `am start -W`, stg **debug** | 4698 / 5822 / 5930 ms |
+| Cold start, `am start -W`, stg **release** | 1021–1704 ms (p50 ≈ 1.1 s) |
+| Service bind, release | 360 ms (Health Services allows 5 s, then drops the registration for good) |
+
+The 5 s bind budget is real — `WHS_PassiveListenerServ: Permanent failure after 1 attempts.
+Signalling dispatcher removal.` was observed on the **debug** build and cost 104 steps — but release
+has a wide margin, so it is a debug-build artifact, not a production risk. Don't re-derive this by
+timing debug builds.
+
+`pendingWalkingCount` was confirmed exact: at every batch the wallet lands on the last sensor total
+(105 / 167 / 219 / 226), so the display never jumps or double-counts. Health Services and
+`TYPE_STEP_COUNTER` independently agreed on 226.
+
+### Two traps in the accounting
+
+- **The resolved path is sticky.** `resolveSource` returns `current` whenever `isCollecting()`, and
+  `SENSOR` qualifies. Fixing the R8 bug alone would have left every existing user stuck on `SENSOR`
+  forever. `DeviceDataStore.migrateStepSchema()` v1 → v2 resets the path to `UNRESOLVED` once.
+  Keep migrations staged: v0 → v1 wipes the balance, v1 → v2 must **not**.
+- **Samsung's `TYPE_STEP_COUNTER` is not a since-boot total here.** It read 0 five hours after boot.
+  Harmless while `HEALTH_STEPS` is active (the source gate discards it), but a device that genuinely
+  falls back to `SENSOR` can lose the interval before each reset.
+
+### Still open
+
+- `prdRelease` was never exercised on device. It shares the R8 config with `stgRelease`, so it should
+  behave identically — unverified.
+- The step-restore MQTT path (`{prefix}/device/{deviceId}/step/restore`) needs backend cooperation to
+  trigger and was not tested.
+- `flush()` is wired to `MainViewModel.init`, i.e. ViewModel creation. Returning to a still-live
+  Activity does not flush. Rare on Wear OS; revisit with an `ON_START` hook if it shows up.
