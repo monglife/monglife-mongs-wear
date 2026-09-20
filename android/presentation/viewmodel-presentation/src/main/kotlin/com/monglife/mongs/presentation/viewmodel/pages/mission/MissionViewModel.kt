@@ -60,6 +60,19 @@ class MissionViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    /**
+     * UI 이벤트 변수
+     *
+     * 다른 ViewModel 은 전부 Channel 로 바꿨지만 <b>여기만 SharedFlow 를 유지한다.</b>
+     * 미션은 메뉴·목록·상세 세 화면이 {@code hiltViewModel(parentEntry)} 로 이 ViewModel 을
+     * 공유하고, 그중 메뉴와 상세 둘이 이 이벤트를 수집한다. Channel 은 수집자가 여럿이면
+     * 브로드캐스트가 아니라 분배라, 화면 전환 중 둘이 잠깐 겹칠 때 <b>떠나는 화면</b>이
+     * 집어가면 이벤트가 그대로 사라진다.
+     *
+     * SharedFlow 의 유실 위험은 남지만 실제로 밟기 어렵다. 여기 이벤트는 배틀의 매칭 알림
+     * 같은 외부 푸시가 아니라, 사용자가 받기 버튼을 누른 직후이거나 예외 뒤 500ms 지연
+     * 뒤에 나간다. 둘 다 그 화면이 이미 떠서 수집 중인 시점이다.
+     */
     private val _uiEvent = MutableSharedFlow<UiEvent>()
     val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
 

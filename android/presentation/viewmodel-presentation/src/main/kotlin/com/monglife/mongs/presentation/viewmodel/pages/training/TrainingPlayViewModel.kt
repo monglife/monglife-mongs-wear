@@ -3,12 +3,12 @@ package com.monglife.mongs.presentation.viewmodel.pages.training
 import com.monglife.core.presentation.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -49,8 +49,8 @@ class TrainingPlayViewModel @Inject constructor(
     /**
      * UI 이벤트 변수
      */
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    val uiEvent: Flow<UiEvent> = _uiEvent.receiveAsFlow()
 
     /**
      * UI 상태 변수
@@ -79,7 +79,7 @@ class TrainingPlayViewModel @Inject constructor(
                     else -> UiState.Idle
                 }
             } ?: run {
-                _uiEvent.emit(UiEvent.NavMenu("훈련 입장 실패"))
+                _uiEvent.send(UiEvent.NavMenu("훈련 입장 실패"))
             }
         }
     }

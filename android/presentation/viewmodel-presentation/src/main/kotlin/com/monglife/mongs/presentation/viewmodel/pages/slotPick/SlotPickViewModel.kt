@@ -18,12 +18,12 @@ import com.monglife.mongs.application.mong.vo.MongVo
 import com.monglife.mongs.presentation.viewmodel.pages.slotPick.vo.SlotVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -83,8 +83,8 @@ class SlotPickViewModel @Inject constructor(
     /**
      * UI 이벤트 변수
      */
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    val uiEvent: Flow<UiEvent> = _uiEvent.receiveAsFlow()
 
     /**
      * 변수
@@ -341,7 +341,7 @@ class SlotPickViewModel @Inject constructor(
 
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
-            is NotFoundPlayerException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            is NotFoundPlayerException -> _uiEvent.send(UiEvent.NavMain("잠시후 다시 시도"))
             is InvalidCreateMongException -> _uiState.value = UiState.Create
             is InvalidDeleteMongException -> _uiState.value = UiState.Idle
             is InvalidGraduateMongException -> _uiState.value = UiState.Idle

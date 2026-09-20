@@ -16,12 +16,12 @@ import com.monglife.mongs.presentation.viewmodel.pages.training.rockPaperScissor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -69,8 +69,8 @@ class TrainingRockPaperScissorsViewModel @Inject constructor(
     /**
      * UI 이벤트 변수
      */
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    val uiEvent: Flow<UiEvent> = _uiEvent.receiveAsFlow()
 
     /**
      * UI 상태 변수
@@ -110,7 +110,7 @@ class TrainingRockPaperScissorsViewModel @Inject constructor(
                 getCurrentMongUseCase()?.let {
                     _currentMongVo.value = it
                 } ?: run {
-                    _uiEvent.emit(UiEvent.NavMenu("선택된 몽이 없음"))
+                    _uiEvent.send(UiEvent.NavMenu("선택된 몽이 없음"))
                     return@withContext
                 }
 
@@ -126,7 +126,7 @@ class TrainingRockPaperScissorsViewModel @Inject constructor(
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
 
             if (trainingCode == null) {
-                _uiEvent.emit(UiEvent.NavMenu("훈련 입장 실패"))
+                _uiEvent.send(UiEvent.NavMenu("훈련 입장 실패"))
                 return@launch
             }
 
@@ -264,7 +264,7 @@ class TrainingRockPaperScissorsViewModel @Inject constructor(
      */
     fun exit() {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
-            _uiEvent.emit(UiEvent.NavMenu())
+            _uiEvent.send(UiEvent.NavMenu())
         }
     }
 
@@ -279,8 +279,8 @@ class TrainingRockPaperScissorsViewModel @Inject constructor(
 
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
-            is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
-            is NotFoundTrainingException -> _uiEvent.emit(UiEvent.NavMenu("잠시후 다시 시도"))
+            is NotFoundMongException -> _uiEvent.send(UiEvent.NavMenu("잠시후 다시 시도"))
+            is NotFoundTrainingException -> _uiEvent.send(UiEvent.NavMenu("잠시후 다시 시도"))
             is InvalidTrainingException -> _uiState.value = UiState.Entering
             else -> initialize()
         }

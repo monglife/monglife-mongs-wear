@@ -14,12 +14,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -75,8 +75,8 @@ class ChargeStarPointViewModel @Inject constructor(
     /**
      * UI 이벤트 변수
      */
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    val uiEvent: Flow<UiEvent> = _uiEvent.receiveAsFlow()
 
     /**
      * 변수
@@ -112,7 +112,7 @@ class ChargeStarPointViewModel @Inject constructor(
                             _productVos.value = it
                         } else {
                             delay(NAVIGATE_DELAY)
-                            _uiEvent.emit(UiEvent.NavMain("인앱 상품 없음"))
+                            _uiEvent.send(UiEvent.NavMain("인앱 상품 없음"))
                         }
                     }
 
@@ -151,7 +151,7 @@ class ChargeStarPointViewModel @Inject constructor(
                     _productVos.value = getProductsUseCase()
 
                     if (consumed) {
-                        _uiEvent.emit(UiEvent.Buy("충전 완료"))
+                        _uiEvent.send(UiEvent.Buy("충전 완료"))
                     }
                 }
             } finally {
@@ -186,7 +186,7 @@ class ChargeStarPointViewModel @Inject constructor(
                     )
 
                     _productVos.value = getProductsUseCase()
-                    _uiEvent.emit(UiEvent.Consume("소비 완료"))
+                    _uiEvent.send(UiEvent.Consume("소비 완료"))
                 }
             } finally {
                 _uiState.value = UiState.Idle
@@ -297,7 +297,7 @@ class ChargeStarPointViewModel @Inject constructor(
         if (!consumedAny) return
 
         _productVos.value = getProductsUseCase()
-        _uiEvent.emit(UiEvent.Buy("충전 완료"))
+        _uiEvent.send(UiEvent.Buy("충전 완료"))
     }
 
     /**
@@ -319,8 +319,8 @@ class ChargeStarPointViewModel @Inject constructor(
 
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
-            is NotFoundPlayerException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
-            is BillingNotSupportException -> _uiEvent.emit(UiEvent.NavMain("결제 미지원 기기"))
+            is NotFoundPlayerException -> _uiEvent.send(UiEvent.NavMain("잠시후 다시 시도"))
+            is BillingNotSupportException -> _uiEvent.send(UiEvent.NavMain("결제 미지원 기기"))
             else -> initialize()
         }
     }

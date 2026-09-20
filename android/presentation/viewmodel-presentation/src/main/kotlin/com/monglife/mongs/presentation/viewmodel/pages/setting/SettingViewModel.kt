@@ -7,12 +7,12 @@ import com.monglife.mongs.application.device.usecase.ObserveNotificationOptionUs
 import com.monglife.mongs.application.device.usecase.SetNotificationOptionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -54,8 +54,8 @@ class SettingViewModel @Inject constructor(
     /**
      * UI 이벤트 변수
      */
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    val uiEvent: Flow<UiEvent> = _uiEvent.receiveAsFlow()
 
     /**
      * 변수
@@ -142,7 +142,7 @@ class SettingViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 permissionUtil.verifyNotificationPermission()
             }.let { permissions ->
-                _uiEvent.emit(UiEvent.RequestPermission(permissions = permissions))
+                _uiEvent.send(UiEvent.RequestPermission(permissions = permissions))
             }
         }
     }
@@ -155,7 +155,7 @@ class SettingViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 permissionUtil.verifyActivityPermission()
             }.let { permissions ->
-                _uiEvent.emit(UiEvent.RequestPermission(permissions = permissions))
+                _uiEvent.send(UiEvent.RequestPermission(permissions = permissions))
             }
         }
     }
@@ -168,7 +168,7 @@ class SettingViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 permissionUtil.verifyLocationPermission()
             } .let { permissions ->
-                _uiEvent.emit(UiEvent.RequestPermission(permissions = permissions))
+                _uiEvent.send(UiEvent.RequestPermission(permissions = permissions))
             }
         }
     }

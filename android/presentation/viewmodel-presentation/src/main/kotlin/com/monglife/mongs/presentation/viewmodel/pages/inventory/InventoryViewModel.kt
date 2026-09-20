@@ -13,12 +13,12 @@ import com.monglife.mongs.application.mong.vo.InventoryVo
 import com.monglife.mongs.application.mong.vo.MongVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -78,8 +78,8 @@ class InventoryViewModel @Inject constructor(
     /**
      * UI 이벤트 변수
      */
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    val uiEvent: Flow<UiEvent> = _uiEvent.receiveAsFlow()
 
     /**
      * 변수
@@ -119,7 +119,7 @@ class InventoryViewModel @Inject constructor(
 
                     this@InventoryViewModel.syncCurrentInventoryVo()
                 } ?: run {
-                    _uiEvent.emit(UiEvent.NavMain("선택된 몽이 없음"))
+                    _uiEvent.send(UiEvent.NavMain("선택된 몽이 없음"))
                     return@withContext
                 }
 
@@ -167,7 +167,7 @@ class InventoryViewModel @Inject constructor(
                     )
                 )
 
-                _uiEvent.emit(UiEvent.Consume)
+                _uiEvent.send(UiEvent.Consume)
             }
 
             _uiState.value = UiState.Idle
@@ -289,7 +289,7 @@ class InventoryViewModel @Inject constructor(
 
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
-            is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            is NotFoundMongException -> _uiEvent.send(UiEvent.NavMain("잠시후 다시 시도"))
             is InvalidConsumeInventoryException -> _uiState.value = UiState.Idle
             else -> initialize()
         }

@@ -10,12 +10,12 @@ import com.monglife.mongs.application.mong.usecase.management.GetCurrentMongUseC
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -65,8 +65,8 @@ class SearchMapViewModel @Inject constructor(
     /**
      * UI 이벤트 변수
      */
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    val uiEvent: Flow<UiEvent> = _uiEvent.receiveAsFlow()
 
     /**
      * 변수
@@ -85,7 +85,7 @@ class SearchMapViewModel @Inject constructor(
                 _permission.value = permissionUtil.verifyLocationPermission().isEmpty()
 
                 getCurrentMongUseCase() ?: run {
-                    _uiEvent.emit(UiEvent.NavMain("선택된 몽이 없음"))
+                    _uiEvent.send(UiEvent.NavMain("선택된 몽이 없음"))
                     return@withContext
                 }
             }
@@ -112,7 +112,7 @@ class SearchMapViewModel @Inject constructor(
             _collectionMapVo.value?.let {
                 _uiState.value = UiState.Detail
             } ?: run {
-                _uiEvent.emit(UiEvent.NotFound("탐색된 맵이 없음"))
+                _uiEvent.send(UiEvent.NotFound("탐색된 맵이 없음"))
                 _uiState.value = UiState.Idle
             }
         }
@@ -166,7 +166,7 @@ class SearchMapViewModel @Inject constructor(
 
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
-            is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            is NotFoundMongException -> _uiEvent.send(UiEvent.NavMain("잠시후 다시 시도"))
             is InvalidSearchCollectionMapException -> _uiState.value = UiState.Idle
             else -> initialize()
         }

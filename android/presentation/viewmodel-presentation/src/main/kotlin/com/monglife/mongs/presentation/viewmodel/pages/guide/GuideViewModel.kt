@@ -5,12 +5,12 @@ import com.monglife.mongs.application.device.usecase.GetInitGuideOpenOptionUseCa
 import com.monglife.mongs.application.device.usecase.SetInitGuideOpenOptionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -82,8 +82,8 @@ class GuideViewModel @Inject constructor(
     /**
      * UI 이벤트 변수
      */
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    val uiEvent: Flow<UiEvent> = _uiEvent.receiveAsFlow()
 
     /**
      * 변수
@@ -140,7 +140,7 @@ class GuideViewModel @Inject constructor(
                 )
             }
 
-            _uiEvent.emit(UiEvent.Finish)
+            _uiEvent.send(UiEvent.Finish)
         }
     }
 
@@ -156,6 +156,6 @@ class GuideViewModel @Inject constructor(
 
     override suspend fun exceptionHandler(exception: Throwable) {
         // 가이드가 막히면 앱 자체를 못 쓰게 되므로, 실패해도 메인으로는 보내 준다.
-        _uiEvent.emit(UiEvent.Finish)
+        _uiEvent.send(UiEvent.Finish)
     }
 }

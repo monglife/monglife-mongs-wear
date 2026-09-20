@@ -9,11 +9,11 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -24,12 +24,18 @@ abstract class BaseViewModel : ViewModel() {
         // 예외 표출 딜레이
         const val NAVIGATE_DELAY = 500L
 
-        // 오류 메시지 표출 이벤트 (Toast)
-        private val _errorEvent = MutableSharedFlow<String>()
-        val errorEvent = _errorEvent.asSharedFlow()
+        /**
+         * 오류 메시지 표출 이벤트 (Toast)
+         *
+         * SharedFlow 가 아니라 Channel 이다. SharedFlow 는 replay 가 0 이면 구독자가 없는 순간
+         * emit 한 값을 그냥 버린다. 수집자는 LayoutView 한 곳인데, 앱 기동 중 그 화면이 붙기
+         * 전에 난 오류는 그렇게 소리 없이 사라졌다.
+         */
+        private val _errorEvent = Channel<String>(Channel.BUFFERED)
+        val errorEvent = _errorEvent.receiveAsFlow()
 
         suspend fun errorToast(message: String) {
-            _errorEvent.emit(message)
+            _errorEvent.send(message)
         }
     }
 

@@ -6,12 +6,12 @@ import com.monglife.mongs.application.member.notice.vo.NoticeVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -49,8 +49,8 @@ class NoticeViewModel @Inject constructor(
     /**
      * UI 이벤트 변수
      */
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    val uiEvent: Flow<UiEvent> = _uiEvent.receiveAsFlow()
 
     /**
      * UI 이벤트 정의
@@ -144,7 +144,7 @@ class NoticeViewModel @Inject constructor(
                 _noticeVos.value += noticeVosPage.result
             } else {
                 delay(NAVIGATE_DELAY)
-                _uiEvent.emit(UiEvent.NavMain("공지사항 없음"))
+                _uiEvent.send(UiEvent.NavMain("공지사항 없음"))
             }
         }
     }
