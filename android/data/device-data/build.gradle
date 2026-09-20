@@ -1,5 +1,10 @@
 android {
     namespace "${rootProject.ext.namespace}.data.device"
+
+    defaultConfig {
+        // R8 이 Health Services 의 protobuf 필드까지 난독화하지 않도록 앱 모듈로 전파되는 keep 룰
+        consumerProguardFiles "consumer-rules.pro"
+    }
 }
 
 dependencies {
