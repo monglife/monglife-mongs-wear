@@ -2,6 +2,7 @@ package com.monglife.core.billing.client
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.BillingClient.ProductType
@@ -38,6 +39,19 @@ import kotlin.coroutines.resumeWithException
 class GoogleBillingClient @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
+    companion object {
+        /**
+         * 결제 경로 추적 태그
+         *
+         * 돈이 걸린 경로인데 실패해도 아무 흔적이 없었다. 워치 결제는 폰으로 인계되면서
+         * 앱이 백그라운드로 내려가 재현이 어려우므로, 콜백이 언제 무엇을 들고 오는지를
+         * 남겨 두지 않으면 사후에 재구성할 방법이 없다.
+         *
+         * Log.i 는 릴리스에서 R8 이 지운다(proguard/mongs-release.pro). 프로덕션 비용은 0 이다.
+         * 흐름을 끝내는 실패만 Log.w 로 남겨 릴리스에서도 보이게 한다.
+         */
+        private const val TAG = "Billing"
+    }
 
     /**
      * 구글 주문 흐름 시작
@@ -45,6 +59,9 @@ class GoogleBillingClient @Inject constructor(
     fun billing(activity: Activity, productId: String): Flow<GoogleOrderVo> = callbackFlow {
         val billingClient =
             getBillingClient(listener = { billingResult: BillingResult, purchases: MutableList<Purchase>? ->
+                // 폰 인계 시점에 이 콜백이 오는지, 온다면 무엇을 들고 오는지가 진단의 핵심이다.
+                Log.i(TAG, "onPurchasesUpdated code=${billingResult.responseCode} purchases=${purchases?.size ?: -1} ${purchases.orEmpty().joinToString { "[state=${it.purchaseState} orderId=${it.orderId?.let { _ -> "있음" } ?: "없음"} products=${it.products}]" }}")
+
                 when (billingResult.responseCode) {
                     BillingResponseCode.OK -> {
                         /**
@@ -58,16 +75,22 @@ class GoogleBillingClient @Inject constructor(
                         val googleOrderVos = purchaseList.mapNotNull { it.toGoogleOrderVoOrNull() }
 
                         if (googleOrderVos.isEmpty()) {
-                            close(
-                                // 구매는 있는데 소비 가능한 것이 없다 = 전부 승인 대기중
+                            // 구매는 있는데 소비 가능한 것이 없다 = 전부 승인 대기중
+                            val reason =
                                 if (purchaseList.isEmpty()) InvalidBillingException()
                                 else PendingPurchaseException()
-                            )
+
+                            Log.w(TAG, "흐름 종료 - 소비 가능한 구매 없음 (${reason::class.simpleName})")
+                            close(reason)
                         } else {
+                            Log.i(TAG, "구매 emit ${googleOrderVos.size}건")
                             googleOrderVos.forEach { trySend(it) }
                         }
                     }
-                    else -> close(billingResult.toBillingException())
+                    else -> {
+                        Log.w(TAG, "흐름 종료 - 응답 코드 ${billingResult.responseCode} ${billingResult.debugMessage}")
+                        close(billingResult.toBillingException())
+                    }
                 }
             })
 
@@ -102,15 +125,21 @@ class GoogleBillingClient @Inject constructor(
              */
             val launchResult = billingClient.launchBillingFlow(activity, billingFlowParams)
 
+            Log.i(TAG, "launchBillingFlow code=${launchResult.responseCode} ${launchResult.debugMessage}")
+
             if (launchResult.responseCode != BillingResponseCode.OK) {
                 close(launchResult.toBillingException())
             }
 
         } ?: run {
+            Log.w(TAG, "흐름 종료 - 상품 정보 없음 productId=$productId")
             close(InvalidBillingException())
         }
 
         awaitClose {
+            // 여기가 불리면 결제 세션이 끊긴다. Play 결제 화면이 아직 떠 있는 동안
+            // 불리고 있지 않은지가 "화면이 안 꺼진다" 의 판정 지점이다.
+            Log.i(TAG, "awaitClose - endConnection")
             billingClient.endConnection()
         }
     }
@@ -221,6 +250,9 @@ class GoogleBillingClient @Inject constructor(
          */
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
+                // 자동 재연결마다 다시 불린다. 두 번째부터는 무시되는 것이 정상이다.
+                Log.i(TAG, "onBillingSetupFinished code=${billingResult.responseCode} active=${cont.isActive}")
+
                 if (!cont.isActive) return
 
                 if (billingResult.responseCode == BillingResponseCode.OK) {
@@ -230,7 +262,11 @@ class GoogleBillingClient @Inject constructor(
                 }
             }
 
-            override fun onBillingServiceDisconnected() {}
+            override fun onBillingServiceDisconnected() {
+                // 폰 인계로 앱이 백그라운드에 내려가면 흔히 끊긴다.
+                // enableAutoServiceReconnection 이 다시 붙여 주는지 뒤따르는 로그로 확인한다.
+                Log.i(TAG, "onBillingServiceDisconnected")
+            }
         })
 
         // 연결을 기다리는 동안 취소되면 클라이언트가 그대로 남으므로 여기서 정리한다.
