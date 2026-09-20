@@ -21,6 +21,9 @@ import java.io.BufferedReader
  * `proguard/mongs-release.pro` 가 `Log.i/d/v` 를 지우므로 성공 경로는 비어 있고
  * **`Log.w`(17곳)·`Log.e`(3곳)만 남는다.** 즉 이 로그는 사실상 "실패 기록"이다.
  * 신고할 만한 상황이면 그게 남아 있다.
+ *
+ * 아무 문제 없이 쓴 직후에 신고하면 몇 줄뿐이거나 비어 있을 수 있다. 그게 정상이다 -
+ * 남길 실패가 없었다는 뜻이다.
  */
 object DiagnosticLog {
 
@@ -32,6 +35,34 @@ object DiagnosticLog {
 
     /** logcat 이 응답하지 않을 때 신고 자체를 막지 않는다. */
     private const val TIMEOUT_MILLIS = 2_000L
+
+    /**
+     * logcat 필터. **이게 없으면 이 기능은 사실상 동작하지 않는다.**
+     *
+     * 처음에는 필터 없이 마지막 300줄을 그대로 보냈는데, 실기기에서 받아 보니 60줄이
+     * 전부 `VRI[MainActivity]`(터치 이벤트)·`ImeTracker`·`InputMethodManager` 였다.
+     * **신고를 쓰려고 키보드를 두드리는 행위 자체가** IME 로그를 쏟아내서, 정작 원인이었을
+     * `Log.w`/`Log.e` 를 상한 밖으로 밀어낸다. 우리 태그는 한 줄도 남지 않았다.
+     *
+     * `*:W` 로 경고 이상만 받는다. BaseViewModel 의 미처리 예외 로그는 태그가 ViewModel
+     * 클래스명이라 고정 태그로 못 거는데, 그게 `Log.e` 라 이 필터에 그대로 걸린다.
+     *
+     * 그래도 남는 잡음 넷은 태그를 침묵(`:S`)시킨다. `HWUI`(이미지 디코딩 경고)와
+     * `ComponentDiscovery`(Firebase ktx 레지스트라 탐색)가 특히 많아, 실측에서 60줄 중
+     * 49줄을 이 둘이 차지했다.
+     *
+     * 부수 효과가 하나 있다. `HttpLogInterceptor` 의 토큰 줄은 `Log.i` 라 이제 아예
+     * 안 들어온다 - 디버그 빌드에서도 그렇다. 아래 마스킹은 그래서 1차 방어가 아니라
+     * 마지막 보루가 됐다. 둘 다 둔다.
+     */
+    private val LOGCAT_ARGS = listOf(
+        "logcat", "-d", "-v", "time",
+        "HWUI:S",
+        "ComponentDiscovery:S",
+        "RemoteInputConnectionImpl:S",
+        "InteractionJankMonitor:S",
+        "*:W",
+    )
 
     /**
      * 가려야 하는 것들.
@@ -51,8 +82,9 @@ object DiagnosticLog {
      * 실패하면 null 을 준다. 진단 로그를 못 모았다고 신고가 막히면 안 된다.
      */
     fun collect(): String? = runCatching {
+        // --pid 는 태그 필터보다 앞에 와야 한다. 뒤에 붙이면 logcat 이 필터 표현식으로 읽는다.
         val process = ProcessBuilder(
-            "logcat", "-d", "-v", "time", "--pid=${Process.myPid()}",
+            LOGCAT_ARGS.toMutableList().apply { add(4, "--pid=${Process.myPid()}") },
         ).redirectErrorStream(true).start()
 
         val raw = try {
