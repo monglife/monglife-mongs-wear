@@ -18,7 +18,10 @@ import com.monglife.mongs.presentation.view.assets.MongsPurple
  * 미션 진행도 바.
  *
  * 공용 ProgressIndicator 는 화면 테두리를 도는 원형이라 목록/상세 안에는 맞지 않는다.
- * 배틀의 HpBar 와 같은 선형 모양을 쓴다.
+ *
+ * 배틀의 HpBar 와는 모양이 다르다. 그쪽은 칸을 나눈 도트 바인데 여기는 연속으로 채운다 -
+ * 미션은 목표치가 제각각이라(3번, 500점, 20일) 칸으로 끊으면 한 칸이 뜻하는 양이
+ * 미션마다 달라진다.
  */
 /**
  * @param showTrack 빈 트랙을 그릴지. 목록에서는 끈다 - 진행도 0 인 항목이 줄줄이 있으면
