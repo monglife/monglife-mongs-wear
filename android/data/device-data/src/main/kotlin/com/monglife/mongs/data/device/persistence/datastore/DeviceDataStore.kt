@@ -31,8 +31,14 @@ class DeviceDataStore @Inject constructor(
     private val Context.store by preferencesDataStore(name = "DEVICE")
 
     companion object {
-        /** 걸음 수 스키마 버전. 0(부재) = 서버가 잔액을 계산하던 구 스키마. */
-        private const val STEP_SCHEMA_CURRENT = 1
+        /**
+         * 걸음 수 스키마 버전
+         *
+         * 0(부재) = 서버가 잔액을 계산하던 구 스키마
+         * 1 = 로컬 지갑 도입
+         * 2 = 수집 경로 강제 재해석 (R8 이 Health Services 를 막고 있던 기간의 잔재 정리)
+         */
+        private const val STEP_SCHEMA_CURRENT = 2
 
         private val STEP_SCHEMA_VERSION = intPreferencesKey("stepSchemaVersion")
         private val STEP_BALANCE = intPreferencesKey("stepBalance")
@@ -166,19 +172,39 @@ class DeviceDataStore @Inject constructor(
     /**
      * 걸음 수 스키마 마이그레이션
      *
-     * 구 스키마의 walkingCount/consumeWalkingCount 는 서버가 계산해 내려 주던 값이라
+     * 이행마다 하는 일이 달라 단계별로 나눈다. 아래로 내려오면서 누적 적용된다.
+     *
+     * **v0 → v1** 구 스키마의 walkingCount/consumeWalkingCount 는 서버가 계산해 내려 주던 값이라
      * 로컬만으로는 잔액을 복원할 수 없다. 잔액 소실을 허용하기로 했으므로 0 에서 시작한다.
+     *
+     * **v1 → v2** 수집 경로만 다시 해석하게 한다. **잔액은 건드리지 않는다.**
+     * 2.3.1 이전 릴리스는 R8 이 Health Services 의 protobuf 필드를 난독화해
+     * `resolveSupportedSource()` 가 항상 예외를 냈고(`Field packageName_ not found`),
+     * 그 결과 모든 사용자가 조용히 SENSOR 로 떨어져 있었다. keep 룰로 원인은 막았지만
+     * (`data/device-data/consumer-rules.pro`), [StepCollectionCoordinator] 의 경로 해석은
+     * 한 번 정해진 값을 다시 묻지 않는다 — SENSOR 도 `isCollecting()` 이라 그대로 굳는다.
+     * 그래서 기존 사용자는 고친 빌드를 받아도 영원히 Health Services 로 못 올라온다.
+     * 여기서 한 번 UNRESOLVED 로 되돌려 재해석을 강제한다.
      */
     suspend fun migrateStepSchema() {
         context.store.edit { preferences ->
-            if ((preferences[STEP_SCHEMA_VERSION] ?: 0) >= STEP_SCHEMA_CURRENT) return@edit
+            val version = preferences[STEP_SCHEMA_VERSION] ?: 0
+            if (version >= STEP_SCHEMA_CURRENT) return@edit
 
-            preferences[STEP_BALANCE] = 0
+            if (version < 1) {
+                preferences[STEP_BALANCE] = 0
+                preferences.remove(STEP_RESTORE_APPLIED_EVENT_IDS)
+                preferences.remove(LEGACY_WALKING_COUNT)
+                preferences.remove(LEGACY_CONSUME_WALKING_COUNT)
+            }
+
+            // 두 이행 모두 경로를 다시 해석해야 한다. 커서도 함께 비운다 — 커서 칸은 경로마다
+            // 의미가 달라, 남겨 두면 경로가 바뀌었을 때 첫 배치에서 엉뚱한 차분이 나온다.
+            // (비워도 과거가 쏟아지지 않는다. delta 는 등록 이후 구간만 오고, 센서는 첫 관측이
+            //  기준선만 잡는다.)
             preferences[STEP_SOURCE] = StepSource.UNRESOLVED.name
             preferences.writeCursor(StepCursor.EMPTY)
-            preferences.remove(STEP_RESTORE_APPLIED_EVENT_IDS)
-            preferences.remove(LEGACY_WALKING_COUNT)
-            preferences.remove(LEGACY_CONSUME_WALKING_COUNT)
+
             preferences[STEP_SCHEMA_VERSION] = STEP_SCHEMA_CURRENT
         }
     }
