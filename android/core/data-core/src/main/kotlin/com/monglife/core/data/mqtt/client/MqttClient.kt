@@ -83,6 +83,17 @@ class MqttClient @Inject constructor(
     private val retrySubscribeJobMap = ConcurrentHashMap<String, Job>()
 
     /**
+     * 연결 해제 세대.
+     *
+     * [disconnect] 가 돌 때마다 오른다. 구독은 connect → subscribe → callbackMap 등록의 세 단계라
+     * 중간에 연결 해제가 끼어들 수 있는데, 그때 마지막 등록이 그대로 실행되면 <b>실제로는 구독돼
+     * 있지 않은 토픽이 map 에만 남는다.</b> 그 유령 항목 때문에 이후 [subscribe] 가 중복으로 보고
+     * 조용히 return 해서, 그 토픽은 앱을 다시 띄우기 전까지 영영 되살아나지 않는다.
+     */
+    @Volatile
+    private var teardownGeneration = 0L
+
+    /**
      * 구독 재시도 전용 스코프
      * 재시도 코루틴을 여기에 묶어 두어야 disconnect 시 일괄 취소할 수 있다.
      */
@@ -162,7 +173,17 @@ class MqttClient @Inject constructor(
         onReceive: suspend (ResponseDto<T>) -> Unit
     ) {
         // 이미 구독 중이거나 재시도 중인 토픽은 중복 등록하지 않는다.
-        if (callbackMap.containsKey(topic) || retrySubscribeJobMap.containsKey(topic)) return
+        // 말없이 빠져나가면 "구독을 요청했는데 아무 일도 안 일어난" 것처럼 보여 원인을 못 찾는다.
+        // 실제로 배틀 고착을 조사할 때 이 경로가 후보였는데 로그가 없어 가릴 수 없었다.
+        if (callbackMap.containsKey(topic)) {
+            Log.d(TAG, "MQTT >> 이미 구독 중, 건너뜀\n  - topic         => $topic")
+            return
+        }
+
+        if (retrySubscribeJobMap.containsKey(topic)) {
+            Log.d(TAG, "MQTT >> 구독 재시도 진행 중, 건너뜀\n  - topic         => $topic")
+            return
+        }
 
         val callback = MqttConsumer(
             topic = topic,
@@ -228,6 +249,9 @@ class MqttClient @Inject constructor(
             .coerceAtMost(SUBSCRIBE_RETRY_MAX_DELAY)
 
     private suspend fun subscribeInternal(topic: String, callback: MqttCallback) {
+        // 연결 해제가 끼어들었는지 보려고 시작 시점의 세대를 들고 간다.
+        val generation = teardownGeneration
+
         val mqttAndroidClient = connect()
 
         mqttAndroidClient.addCallback(callback = callback)
@@ -237,6 +261,16 @@ class MqttClient @Inject constructor(
             userContext = MqttUserContext.Subscribe(topic = topic),
             callback = null
         ).await()
+
+        // 구독하는 사이에 연결이 끊겼다면 이 구독은 이미 무효다. 여기서 map 에 넣으면
+        // 구독돼 있지 않은 토픽이 구독된 것처럼 남아 이후 재구독이 통째로 막힌다.
+        if (teardownGeneration != generation) {
+            mqttAndroidClient.removeCallback(callback = callback)
+
+            Log.w(TAG, "MQTT >> 구독 도중 연결이 해제됨, 등록하지 않는다\n  - topic         => $topic")
+
+            throw InvalidSubscribeException()
+        }
 
         callbackMap[topic] = callback
     }
@@ -278,29 +312,51 @@ class MqttClient @Inject constructor(
 
     /**
      * Mqtt 연결 해제
+     *
+     * <p><b>{@link #connect} 와 같은 뮤텍스를 잡는다.</b> 예전에는 잡지 않아서 연결·구독과
+     * 뒤엉켰다. 액티비티가 죽으며 띄운 해제가 도는 동안 새 화면이 {@code isConnected} 를
+     * true 로 읽고 그대로 통과한 뒤, 곧 끊길 커넥션 위에서 구독·발행을 시도하는 식이다.
+     * 배틀에서 매칭은 됐는데 입장 이벤트가 나가지 않고 "매치입장중" 에서 멈추던 증상의
+     * 유력한 경로였다.
      */
     suspend fun disconnect() {
         withContext(NonCancellable) {
-            retrySubscribeJobMap.values.forEach { it.cancel() }
-            retrySubscribeJobMap.clear()
+            mutex.withLock {
+                // 이 시점 이후로 완료되는 구독은 무효다. callbackMap 에 등록되지 않는다.
+                teardownGeneration++
 
-            // 라이브러리 내부 callbacksList 에서도 제거해야 소비자가 남지 않는다.
-            callbackMap.values.forEach { mqttAndroidClient.removeCallback(callback = it) }
-            callbackMap.clear()
+                retrySubscribeJobMap.values.forEach { it.cancel() }
+                retrySubscribeJobMap.clear()
 
-            runCatching {
-                if (mqttAndroidClient.isConnected) {
-                    withTimeout(CLEAN_UP_TIMEOUT) {
-                        mqttAndroidClient.disconnect(
-                            userContext = MqttUserContext.Disconnect,
-                            callback = null
-                        ).await()
+                // 라이브러리 내부 callbacksList 에서도 제거해야 소비자가 남지 않는다.
+                callbackMap.values.forEach { mqttAndroidClient.removeCallback(callback = it) }
+                callbackMap.clear()
+
+                runCatching {
+                    if (mqttAndroidClient.isConnected) {
+                        withTimeout(CLEAN_UP_TIMEOUT) {
+                            mqttAndroidClient.disconnect(
+                                userContext = MqttUserContext.Disconnect,
+                                callback = null
+                            ).await()
+                        }
                     }
+                }.onFailure {
+                    Log.w(TAG, "MQTT >> 연결 해제 실패", it)
                 }
-            }.onFailure {
-                Log.w(TAG, "MQTT >> 연결 해제 실패", it)
             }
         }
+    }
+
+    /**
+     * 화면이 끝나며 부르는 연결 해제.
+     *
+     * <p>액티비티가 {@code onDestroy} 에서 스코프를 직접 만들어 띄우던 것을 여기로 옮겼다.
+     * 해제는 내부 스코프에서 돌고 [disconnect] 가 뮤텍스를 잡으므로, 곧바로 새 화면이 떠서
+     * 연결하더라도 둘이 겹치지 않고 순서대로 처리된다.
+     */
+    fun disconnectAsync() {
+        retryScope.launch { disconnect() }
     }
 
     private suspend fun IMqttToken.await() = suspendCancellableCoroutine { cont ->
