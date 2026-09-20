@@ -235,9 +235,14 @@ private fun MissionDetailContent(
                         .fillMaxWidth()
                         .padding(top = 14.dp)
                 ) {
+                    val isClaimed = missionVo.stateCode == MissionStateCode.CLAIMED
+
                     BlueButton(
-                        text = if (missionVo.stateCode == MissionStateCode.CLAIMED) "수령 완료" else "받기",
-                        width = 70,
+                        text = if (isClaimed) "수령 완료" else "받기",
+                        // 글자 수에 맞춰 넓힌다. BlueButton 은 좌우 10dp 를 먹고 maxLines 가 1 이라
+                        // 좁으면 말줄임 없이 잘린다 - 70dp 에서는 "수령 완" 까지만 나왔다.
+                        // 90dp 는 같은 모양(2글자+공백+2글자)인 "슬롯 선택" 버튼과 맞춘 값이다.
+                        width = if (isClaimed) 90 else 70,
                         disable = !canClaim,
                         onClick = onClaimClick,
                     )

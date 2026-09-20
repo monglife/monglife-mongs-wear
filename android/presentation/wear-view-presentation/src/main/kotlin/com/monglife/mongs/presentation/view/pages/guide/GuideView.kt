@@ -17,6 +17,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -98,6 +100,15 @@ internal fun GuideView(
     }
 }
 
+/**
+ * 달무리 폰트는 하강부가 깊어 Compose 기본값(includeFontPadding = false)으로는
+ * <b>마지막 줄의 글자 아랫부분이 잘린다.</b> 두 줄짜리 설명에서 둘째 줄만 잘려 보였다.
+ * 폰트 여백을 되살려 글리프가 자기 경계 안에 들어오게 한다.
+ */
+private val TEXT_WITH_FONT_PADDING = TextStyle(
+    platformStyle = PlatformTextStyle(includeFontPadding = true),
+)
+
 /** 흐려진 몽의 투명도. 자리는 지키되 시선은 아래 줄로 가게 하는 정도. */
 private const val MONG_DIMMED_ALPHA = 0.4f
 
@@ -138,7 +149,9 @@ private fun GuideContent(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxHeight()
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
+            // 무대 높이(STAGE_HEIGHT)는 못 줄인다 - 마지막 단계의 몽 + 두 줄이 딱 맞게 들어간다.
+            // 글자가 쓸 세로 여유는 위아래 여백에서 낸다.
+            Spacer(modifier = Modifier.height(4.dp))
 
             GuideStage(
                 target = step.target,
@@ -162,11 +175,13 @@ private fun GuideContent(
                         fontFamily = DAL_MU_RI,
                         fontWeight = FontWeight.Light,
                         fontSize = 16.sp,
+                        lineHeight = 22.sp,
+                        style = TEXT_WITH_FONT_PADDING,
                         color = MongsYellow,
                         maxLines = 1,
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
                         text = step.description,
@@ -174,6 +189,8 @@ private fun GuideContent(
                         fontFamily = DAL_MU_RI,
                         fontWeight = FontWeight.Light,
                         fontSize = 12.sp,
+                        lineHeight = 17.sp,
+                        style = TEXT_WITH_FONT_PADDING,
                         color = MongsWhite,
                         maxLines = 2,
                     )
@@ -191,7 +208,7 @@ private fun GuideContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
         }
     }
 }
