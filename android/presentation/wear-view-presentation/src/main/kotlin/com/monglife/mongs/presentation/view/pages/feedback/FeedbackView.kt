@@ -62,7 +62,8 @@ internal fun FeedbackView(
             Box(modifier = Modifier.zIndex(3f)) {
                 if (uiState.value.confirmDialogOpen) {
                     ConfirmAndCancelDialog(
-                        text = "${title.value} 오류를\n전송 하시겠습니까?",
+                        // 진단 기록이 함께 간다는 걸 보내기 전에 알린다. 몰래 붙이지 않는다.
+                        text = "${title.value} 오류를\n전송 하시겠습니까?\n진단 기록이 함께\n전송됩니다.",
                         cancel = feedbackViewModel::createFeedbackConfirmDialogClose,
                         confirm = {
                             feedbackViewModel.createFeedback(
