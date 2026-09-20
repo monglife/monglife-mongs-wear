@@ -81,16 +81,9 @@ internal fun BattleMenuView(
         }
     }
 
-    LaunchedEffect(matchQueueVo.value) {
-        matchQueueVo.value?.let {
-            battleMenuViewModel.matching(
-                matchId = it.matchId,
-                playerId = it.playerId,
-            )
-        }
-    }
-
-    // UI 이벤트 소비
+    // UI 이벤트 소비.
+    // 매칭 감지보다 **먼저** 선언해야 한다 - LaunchedEffect 는 선언 순서대로 뜨는데,
+    // 발행이 먼저 서면 수집자가 아직 없는 사이에 나간 이벤트를 놓칠 수 있다.
     LaunchedEffect(Unit) {
         battleMenuViewModel.uiEvent.collect { event ->
             when (event) {
@@ -111,6 +104,15 @@ internal fun BattleMenuView(
 
                 else -> {}
             }
+        }
+    }
+
+    LaunchedEffect(matchQueueVo.value) {
+        matchQueueVo.value?.let {
+            battleMenuViewModel.matching(
+                matchId = it.matchId,
+                playerId = it.playerId,
+            )
         }
     }
 }

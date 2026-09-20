@@ -14,12 +14,12 @@ import com.monglife.mongs.application.mong.vo.MongVo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -65,9 +65,17 @@ class BattleMenuViewModel @Inject constructor(
 
     /**
      * UI 이벤트 변수
+     *
+     * SharedFlow 가 아니라 Channel 이다. SharedFlow 는 replay 가 0 이면 <b>구독자가 없는 순간
+     * emit 한 값을 그냥 버린다</b> - 예외도 로그도 없다. 매칭 성공(NavMatch)이 그렇게 사라지면
+     * 화면이 대기열에 그대로 머물고, 서버에는 매치가 만들어져 있어 참가비만 나간다.
+     *
+     * replay 를 주는 것으로는 못 고친다. 일회성 이동 이벤트라 새 구독자가 붙을 때마다 지난
+     * 이동이 다시 재생돼 엉뚱한 화면으로 튄다. Channel 은 구독자가 없으면 버퍼에 담아 두고
+     * 붙는 순간 정확히 한 번 넘겨준다.
      */
-    private val _uiEvent = MutableSharedFlow<UiEvent>()
-    val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    val uiEvent: Flow<UiEvent> = _uiEvent.receiveAsFlow()
 
     /**
      * 변수
@@ -150,11 +158,11 @@ class BattleMenuViewModel @Inject constructor(
     fun matching(matchId: Long, playerId: String) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
             if (playerId.isBlank()) {
-                _uiEvent.emit(UiEvent.MatchingError("매칭 정보 오류"))
+                _uiEvent.send(UiEvent.MatchingError("매칭 정보 오류"))
             } else {
                 _uiState.value = UiState.Loading
 
-                _uiEvent.emit(UiEvent.NavMatch(matchId, playerId))
+                _uiEvent.send(UiEvent.NavMatch(matchId, playerId))
 
                 _matchQueueVo.value = null
 
@@ -207,8 +215,8 @@ class BattleMenuViewModel @Inject constructor(
 
     override suspend fun exceptionHandler(exception: Throwable) {
         when (exception) {
-            is NotFoundMongException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
-            is NotFoundMatchRewardException -> _uiEvent.emit(UiEvent.NavMain("잠시후 다시 시도"))
+            is NotFoundMongException -> _uiEvent.send(UiEvent.NavMain("잠시후 다시 시도"))
+            is NotFoundMatchRewardException -> _uiEvent.send(UiEvent.NavMain("잠시후 다시 시도"))
             else -> initialize()
         }
     }
