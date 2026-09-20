@@ -1,7 +1,8 @@
 package com.monglife.mongs.presentation.viewmodel.layout
 
 import com.monglife.core.presentation.viewmodel.BaseViewModel
-import com.monglife.mongs.application.auth.usecase.GetMustUpdateAppUseCase
+import com.monglife.mongs.application.auth.usecase.AppEntryState
+import com.monglife.mongs.application.auth.usecase.GetAppEntryStateUseCase
 import com.monglife.mongs.application.auth.usecase.ObserveIsLoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LayoutViewModel @Inject constructor(
-    private val getMustUpdateAppUseCase: GetMustUpdateAppUseCase,
+    private val getAppEntryStateUseCase: GetAppEntryStateUseCase,
     private val observeIsLoginUseCase: ObserveIsLoginUseCase,
 ) : BaseViewModel() {
 
@@ -24,10 +25,18 @@ class LayoutViewModel @Inject constructor(
     sealed class UiState(
         val loadingBar: Boolean = false,
         val mustUpdateApp: Boolean = false,
+        val underMaintenance: Boolean = false,
+        val maintenanceMessage: String? = null,
+        val maintenanceEndAt: String? = null,
     ) {
         data object Idle : UiState()
         data object Loading : UiState(loadingBar = true)
         data object NeedUpdate : UiState(mustUpdateApp = true)
+        data class Maintenance(val message: String?, val endAt: String?) : UiState(
+            underMaintenance = true,
+            maintenanceMessage = message,
+            maintenanceEndAt = endAt,
+        )
     }
 
     /**
@@ -51,9 +60,13 @@ class LayoutViewModel @Inject constructor(
                 observeForever(observeIsLoginUseCase(), _isLogin)
             }
 
-            // 앱 업데이트 체크
+            // 앱 진입 체크 (강제 업데이트 · 서버 점검)
             _uiState.value = withContext(Dispatchers.IO) {
-                if (getMustUpdateAppUseCase()) UiState.NeedUpdate else UiState.Idle
+                when (val state = getAppEntryStateUseCase()) {
+                    is AppEntryState.NeedUpdate -> UiState.NeedUpdate
+                    is AppEntryState.Maintenance -> UiState.Maintenance(message = state.message, endAt = state.endAt)
+                    is AppEntryState.Normal -> UiState.Idle
+                }
             }
         }
     }

@@ -150,6 +150,24 @@ templates for scaffolding a new use case / view model in this style — check th
   `ManagementPersistenceAdapter.getMongFlow` for the subscribe/shareIn/unsubscribe pattern used whenever a
   persistence adapter needs to reflect server push updates into a local `Flow`.
 
+### App entry gate (force-update / server maintenance)
+
+`LayoutViewModel` runs `GetAppEntryStateUseCase` once on start; `LayoutView` branches on the resulting
+`UiState` before it shows login or the router. The use case makes **one** call to discovery's
+`GET public/auth/verify/version`, which returns both `mustUpdate` and `underMaintenance` — do not add a
+second use case for maintenance, it would double the request on every cold start.
+
+- Force-update wins over maintenance: it deletes the local session and sends the user to the Play Store
+  (`NeedUpdateContent`). Maintenance leaves the session alone (`MaintenanceContent`) — the server does not
+  block login, so the user resumes once the window ends.
+- Every maintenance field on `VerifyAppVersionResponseDto` is nullable **on purpose**. Gson ignores Kotlin
+  default values and writes `null` into absent fields, so a non-null type would NPE against a server that
+  predates them.
+- Maintenance timestamps are wall-clock strings without a zone (`2026-09-21T04:00:00`). Slice them, do not
+  parse them into a `Date` — that would drag the device timezone in and shift the displayed time.
+- If the version check throws, `BaseViewModel`'s handler falls through to `UiState.Idle`: a failed gate
+  never locks the user out of the app.
+
 ### Notifications / FCM
 
 Both apps have their own `NotificationModule.kt` / `NotificationService.kt` under

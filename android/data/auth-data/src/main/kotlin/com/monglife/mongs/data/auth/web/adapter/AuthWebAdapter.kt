@@ -56,7 +56,12 @@ class AuthWebAdapter @Inject constructor(
         VerifyAppVersionResponse(
             appPackageName = body.result.appPackageName,
             buildVersion = body.result.buildVersion,
-            mustUpdate = body.result.mustUpdate
+            mustUpdate = body.result.mustUpdate,
+            // 점검 필드를 모르는 구 서버에 붙으면 null 이 온다. 점검이 아닌 것으로 본다
+            underMaintenance = body.result.underMaintenance == true,
+            maintenanceMessage = body.result.maintenanceMessage,
+            maintenanceStartAt = body.result.maintenanceStartAt,
+            maintenanceEndAt = body.result.maintenanceEndAt
         )
     }
 

@@ -28,6 +28,11 @@ fun LayoutView (
             LoadingBar()
         } else if (uiState.value.mustUpdateApp) {
             NeedUpdateContent()
+        } else if (uiState.value.underMaintenance) {
+            MaintenanceContent(
+                message = uiState.value.maintenanceMessage,
+                endAt = uiState.value.maintenanceEndAt,
+            )
         } else {
             isLogin.value?.let {
                 if (!it) {
