@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
@@ -139,6 +140,18 @@ internal fun BattleMatchView(
                 battleMatchViewModel.nextRound()
             }
         }
+    }
+
+    /**
+     * 화면을 떠나면 매치 퇴장을 알린다.
+     *
+     * ViewModel 의 onCleared 에 걸면 안 된다 - SwipeDismissableNavHost 는 pop 한 엔트리의
+     * ViewModelStore 를 정리하지 않아 onCleared 가 오지 않는다. 그 탓에 뒤로가기로 빠져나간
+     * 매치가 서버에 PROCESS 로 남고 상대는 끝까지 기다린다.
+     * 정상 종료인지 여부는 ViewModel 이 가린다.
+     */
+    DisposableEffect(Unit) {
+        onDispose { battleMatchViewModel.leaveMatch() }
     }
 
     // UI 이벤트 소비

@@ -154,9 +154,18 @@ class BattleMenuViewModel @Inject constructor(
 
     /**
      * 매칭 성공
+     *
+     * 대기 중일 때만 받는다. 대기열에 있지도 않은데 도착한 매칭 이벤트로 매치 화면에
+     * 들어가면, 정작 새로 만들어진 매치에는 아무도 입장하지 않아 서버가 CANCELED 로
+     * 마감한다 (옛 matchId 가 replay 되던 결함에서 실제로 밟았다).
+     * 취소 확인 다이얼로그가 떠 있는 동안에도 아직 대기열에 남아 있으므로 함께 받는다.
      */
     fun matching(matchId: Long, playerId: String) {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
+            if (_uiState.value != UiState.Matching && _uiState.value != UiState.DeleteQueueConfirm) {
+                return@launch
+            }
+
             if (playerId.isBlank()) {
                 _uiEvent.send(UiEvent.MatchingError("매칭 정보 오류"))
             } else {

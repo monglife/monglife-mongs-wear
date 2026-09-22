@@ -1,5 +1,6 @@
 package com.monglife.mongs.presentation.viewmodel.pages.battle
 
+import android.util.Log
 import com.monglife.core.presentation.viewmodel.BaseViewModel
 import com.monglife.mongs.application.battle.exception.InvalidPublishMatchEnterException
 import com.monglife.mongs.application.battle.exception.InvalidPublishMatchPickException
@@ -14,6 +15,7 @@ import com.monglife.mongs.domain.battle.enums.MatchPickCode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +26,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,9 +39,28 @@ class BattleMatchViewModel @Inject constructor(
 ): BaseViewModel() {
 
     companion object {
+        private const val TAG = "BattleMatch"
         private const val MAX_SECONDS = 30
         private const val EFFECT_DELAY = 2000L
         private const val MAX_ROUND = 10
+
+        /**
+         * 매치 퇴장 발행 상한.
+         *
+         * MQTT 발행은 브로커 응답까지 suspend 한다. 화면을 떠나는 길목이라 응답이 늦으면
+         * 아무 말 없이 영영 매달려 있게 되는데, 그러면 서버는 이탈을 모른 채 매치를
+         * PROCESS 로 남기고 상대는 끝까지 기다린다. 실기기에서 실제로 이 모양이었다.
+         */
+        private const val EXIT_TIMEOUT = 5000L
+
+        /**
+         * 퇴장 발행 전용 스코프.
+         *
+         * viewModelScope 는 onCleared 시점에 이미 취소돼 쓸 수 없다. 예전에는 여기서
+         * CoroutineScope(Dispatchers.IO) 를 매번 새로 만들었는데, SupervisorJob 이 없어
+         * 발행이 던지면 처리되지 않은 예외로 올라갔다.
+         */
+        private val exitScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     }
 
     /**
@@ -106,6 +128,17 @@ class BattleMatchViewModel @Inject constructor(
     private val _maxSeconds = MutableStateFlow(MAX_SECONDS)
     val maxSeconds: StateFlow<Int> = _maxSeconds.asStateFlow()
 
+    /** 퇴장을 이미 처리했는지. dispose 와 onCleared 가 겹쳐도 한 번만 보낸다. */
+    private var exitPublished = false
+
+    /**
+     * 화면 진입 인자. 퇴장 발행의 최후 수단이다.
+     *
+     * 매치 정보(_matchVo)는 첫 MQTT 메시지가 와야 채워지는데, 그 전에 이탈하는 구간
+     * ("매치입장중")이 실제로 제일 잦다. 그때 퇴장을 못 보내면 서버는 PROCESS 로 남긴다.
+     */
+    private var enteredMatchId: Long? = null
+    private var enteredPlayerId: String? = null
 
     init {
         viewModelScopeWithHandler.launch(Dispatchers.Main) {
@@ -123,6 +156,9 @@ class BattleMatchViewModel @Inject constructor(
                 _uiEvent.send(UiEvent.NavMenu("매칭 실패"))
                 return@launch
             }
+
+            enteredMatchId = matchId
+            enteredPlayerId = playerId
 
             withContext(Dispatchers.IO) {
                 observeMatchUseCase(
@@ -239,20 +275,63 @@ class BattleMatchViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 화면을 떠날 때 매치 퇴장을 알린다.
+     *
+     * 안 보내면 서버는 플레이어가 나간 걸 모른 채 매치를 PROCESS 로 남기고, 상대는 끝까지
+     * 기다린다. 입장 기한 초과 스위퍼는 ENTERING 만 걷어가므로 이 상태는 아무도 치우지 않는다.
+     *
+     * <b>onCleared 가 아니라 화면 dispose 에서 부른다.</b> SwipeDismissableNavHost 는 pop 한
+     * 엔트리의 ViewModelStore 를 정리하지 않아 onCleared 가 오지 않는다 - 실기기에서 뒤로가기
+     * 뒤 72초를 기다려도 불리지 않았고, 그렇게 빠져나간 매치 3건이 PROCESS 로 남았다.
+     *
+     * 한 번만 보낸다. dispose 와 onCleared 가 모두 오는 경우가 있어도 중복 발행하지 않는다.
+     */
+    fun leaveMatch() {
+
+        if (exitPublished) return
+
+        exitPublished = true
+
+        publishExitIfAbandoned()
+    }
+
     override fun onCleared() {
-        CoroutineScope(Dispatchers.IO).launch {
-            _matchVo.value?.let { matchVo ->
-                if (_uiState.value != UiState.End && !matchVo.isLastRound) {
-                    // 매치 퇴장
-                    matchVo.matchPlayers.find { it.isMe }?.let { matchPlayer ->
-                        exitMatchUseCase(
-                            command = ExitMatchUseCase.Command(
-                                matchId = matchVo.matchId,
-                                playerId = matchPlayer.playerId,
-                            )
+        leaveMatch()
+        super.onCleared()
+    }
+
+    /**
+     * 상태 읽기는 여기서(=취소 전) 끝내고 발행만 별도 스코프에 넘긴다.
+     * 코루틴 안에서 읽으면 ViewModel 이 정리된 뒤의 값을 볼 수 있다.
+     */
+    private fun publishExitIfAbandoned() {
+        val matchVo = _matchVo.value
+
+        // 정상 종료다. 보낼 필요가 없다.
+        if (_uiState.value == UiState.End || matchVo?.isLastRound == true) return
+
+        // 매치 정보가 아직 없어도 보낸다 - 진입 인자로 폴백한다.
+        val matchId = matchVo?.matchId ?: enteredMatchId
+        val playerId = matchVo?.matchPlayers?.find { it.isMe }?.playerId ?: enteredPlayerId
+
+        if (matchId == null || playerId == null) {
+            Log.w(TAG, "매치 퇴장 건너뜀 - 매치를 특정할 수 없다 matchId=$matchId")
+            return
+        }
+
+        exitScope.launch {
+            runCatching {
+                withTimeout(EXIT_TIMEOUT) {
+                    exitMatchUseCase(
+                        command = ExitMatchUseCase.Command(
+                            matchId = matchId,
+                            playerId = playerId,
                         )
-                    }
+                    )
                 }
+            }.onFailure {
+                Log.w(TAG, "매치 퇴장 발행 실패 matchId=$matchId", it)
             }
         }
     }
