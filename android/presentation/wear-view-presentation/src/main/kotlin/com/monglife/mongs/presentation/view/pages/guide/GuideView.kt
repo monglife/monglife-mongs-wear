@@ -1,8 +1,10 @@
 package com.monglife.mongs.presentation.view.pages.guide
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,10 +19,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -112,26 +116,20 @@ private val TEXT_WITH_FONT_PADDING = TextStyle(
 /** 흐려진 몽의 투명도. 자리는 지키되 시선은 아래 줄로 가게 하는 정도. */
 private const val MONG_DIMMED_ALPHA = 0.4f
 
-/**
- * 240dp 원형 화면에서 몽 + 줄 두 개가 모두 들어가는 높이.
- * 단계가 바뀌어도 몽이 위아래로 움직이지 않도록 높이를 고정한다.
- */
-private const val STAGE_HEIGHT = 124
+/** Mong 이 ratio = 1f 에서 그리는 크기. 무대에서 잰 dp 를 ratio 로 되돌릴 때 쓴다. */
+private val MONG_BASE_SIZE = 120.dp
 
 /**
- * 몽만 나오는 첫 단계. 아래가 비어 있으니 크게 쓴다.
- * 더 키우면 원형 화면 위쪽 가장자리에 잘린다.
+ * 이 높이 밑은 "좁은 화면" 으로 본다. Wear OS Small Round 가 192dp 라 여기에 걸리고,
+ * Large(227dp)·XL(240dp) 은 걸리지 않는다.
  */
-private const val MONG_RATIO_LARGE = 0.6f
+private val COMPACT_HEIGHT = 210.dp
 
-/** 아래 줄이 올라온 뒤. 자리를 내주고 작아진다. */
-private const val MONG_RATIO_SMALL = 0.38f
+/** 무대에서 몽과 줄, 줄과 줄 사이 간격. */
+private val STAGE_ROW_GAP = 4.dp
 
-/** 한 줄만 보일 때. 실기기는 에뮬레이터보다 작아 이 정도는 되어야 아이콘이 읽힌다. */
-private const val BUTTON_SIZE_SINGLE = 46
-
-/** 마지막 단계에서 두 줄을 한꺼번에 보여 줄 때. */
-private const val BUTTON_SIZE_ALL = 28
+/** 몽이 원형 화면 위 가장자리에 닿지 않게 남겨 두는 여백. */
+private val MONG_MARGIN = 6.dp
 
 @Composable
 private fun GuideContent(
@@ -140,75 +138,70 @@ private fun GuideContent(
     isLastStep: Boolean,
     onNextClick: () -> Unit,
 ) {
-    Box(
+    BoxWithConstraints(
         contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize()
     ) {
+        /**
+         * 무대 높이를 고정값으로 잡으면 기기마다 어긋난다. 240dp 화면에 맞춰 둔 124dp 는
+         * 192dp 화면에서 화면의 3분의 2를 먹어, 설명 둘째 줄이 '다음' 버튼에 깔렸다.
+         * 순서를 뒤집어 글자와 버튼이 자기 높이만 쓰고 남는 세로를 전부 무대에 준다.
+         */
+        val compact = maxHeight < COMPACT_HEIGHT
+
+        val titleSize = if (compact) 14 else 16
+        val descriptionSize = if (compact) 11 else 12
+        val blockGap = if (compact) 4.dp else 8.dp
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = if (compact) 6.dp else 10.dp)
         ) {
-            // 무대 높이(STAGE_HEIGHT)는 못 줄인다 - 마지막 단계의 몽 + 두 줄이 딱 맞게 들어간다.
-            // 글자가 쓸 세로 여유는 위아래 여백에서 낸다.
-            Spacer(modifier = Modifier.height(4.dp))
-
             GuideStage(
                 target = step.target,
-                modifier = Modifier.height(STAGE_HEIGHT.dp),
-            )
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Text(
-                        text = step.title,
-                        textAlign = TextAlign.Center,
-                        fontFamily = DAL_MU_RI,
-                        fontWeight = FontWeight.Light,
-                        fontSize = 16.sp,
-                        lineHeight = 22.sp,
-                        style = TEXT_WITH_FONT_PADDING,
-                        color = MongsYellow,
-                        maxLines = 1,
-                    )
+                    .weight(1f),
+            )
 
-                    Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(blockGap))
 
-                    Text(
-                        text = step.description,
-                        textAlign = TextAlign.Center,
-                        fontFamily = DAL_MU_RI,
-                        fontWeight = FontWeight.Light,
-                        fontSize = 12.sp,
-                        lineHeight = 17.sp,
-                        style = TEXT_WITH_FONT_PADDING,
-                        color = MongsWhite,
-                        maxLines = 2,
-                    )
-                }
-            }
+            Text(
+                text = step.title,
+                textAlign = TextAlign.Center,
+                fontFamily = DAL_MU_RI,
+                fontWeight = FontWeight.Light,
+                fontSize = titleSize.sp,
+                lineHeight = (titleSize + 6).sp,
+                style = TEXT_WITH_FONT_PADDING,
+                color = MongsYellow,
+                maxLines = 1,
+            )
 
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                BlueButton(
-                    text = if (isLastStep) "시작하기" else "다음",
-                    width = 78,
-                    onClick = onNextClick,
-                )
-            }
+            Spacer(modifier = Modifier.height(if (compact) 4.dp else 6.dp))
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = step.description,
+                textAlign = TextAlign.Center,
+                fontFamily = DAL_MU_RI,
+                fontWeight = FontWeight.Light,
+                fontSize = descriptionSize.sp,
+                lineHeight = (descriptionSize + 5).sp,
+                style = TEXT_WITH_FONT_PADDING,
+                color = MongsWhite,
+                maxLines = 2,
+            )
+
+            Spacer(modifier = Modifier.height(blockGap))
+
+            BlueButton(
+                text = if (isLastStep) "시작하기" else "다음",
+                width = 78,
+                height = if (compact) 28 else 30,
+                onClick = onNextClick,
+            )
         }
     }
 }
@@ -218,6 +211,9 @@ private fun GuideContent(
  *
  * 처음부터 전부 깔면 한 화면에 세 덩이가 들어가느라 아이콘이 읽기 힘들 만큼 작아진다.
  * 대신 마지막 '준비 끝' 에서만 두 줄을 작게 같이 보여 줘 전체 그림을 남긴다.
+ *
+ * 크기는 받은 높이에서 나눠 쓴다. 줄이 먼저 자기 몫을 가져가고 나머지를 몽이 전부 쓰므로,
+ * 어떤 화면에서도 무대가 받은 높이를 넘지 않는다.
  */
 @Composable
 private fun GuideStage(
@@ -227,41 +223,58 @@ private fun GuideStage(
     val isAllStep = target == GuideViewModel.GuideTarget.NONE
     val showCare = target == GuideViewModel.GuideTarget.CARE || isAllStep
     val showMenu = target == GuideViewModel.GuideTarget.MENU || isAllStep
-    val buttonSize = if (isAllStep) BUTTON_SIZE_ALL else BUTTON_SIZE_SINGLE
+    val rowCount = (if (showCare) 1 else 0) + (if (showMenu) 1 else 0)
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
-    ) {
-        GuideMong(
-            isDimmed = !isAllStep && (showCare || showMenu),
-            isAlone = !showCare && !showMenu,
-        )
+    BoxWithConstraints(modifier = modifier) {
+        /**
+         * 한 줄만 보이는 단계는 아이콘이 읽혀야 하니 크게, 두 줄을 같이 보여 주는 마지막
+         * 단계는 몽까지 세 덩이가 들어가야 하니 작게 잡는다.
+         * 가로로도 세 개가 들어가야 해서 너비로 한 번 더 깎는다.
+         */
+        val buttonSize = when {
+            rowCount == 0 -> 0.dp
+            isAllStep -> (maxHeight * 0.22f).coerceIn(22.dp, 30.dp)
+            else -> (maxHeight * 0.34f).coerceIn(26.dp, 46.dp)
+        }.coerceAtMost((maxWidth - STAGE_ROW_GAP * 2) / 3)
 
-        if (showCare) {
-            Spacer(modifier = Modifier.height(6.dp))
+        val mongSize = (maxHeight - (buttonSize + STAGE_ROW_GAP) * rowCount - MONG_MARGIN)
+            .coerceAtLeast(24.dp)
 
-            GuideButtonRow(
-                size = buttonSize,
-                icons = listOf(
-                    R.drawable.btn_icon_feed to R.drawable.btn_border_yellow,
-                    R.drawable.btn_icon_stroke to R.drawable.btn_border_pink,
-                    R.drawable.btn_icon_sleep to R.drawable.btn_border_blue,
-                ),
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxHeight(),
+        ) {
+            GuideMong(
+                size = mongSize,
+                isDimmed = !isAllStep && rowCount > 0,
+                modifier = Modifier.weight(1f),
             )
-        }
 
-        if (showMenu) {
-            Spacer(modifier = Modifier.height(if (showCare) 4.dp else 6.dp))
+            if (showCare) {
+                Spacer(modifier = Modifier.height(STAGE_ROW_GAP))
 
-            GuideButtonRow(
-                size = buttonSize,
-                icons = listOf(
-                    R.drawable.btn_icon_mission to R.drawable.btn_border_yellow,
-                    R.drawable.btn_icon_slot_pick to R.drawable.btn_border_red,
-                    R.drawable.btn_icon_collection to R.drawable.btn_border_orange,
-                ),
-            )
+                GuideButtonRow(
+                    size = buttonSize,
+                    icons = listOf(
+                        R.drawable.btn_icon_feed to R.drawable.btn_border_yellow,
+                        R.drawable.btn_icon_stroke to R.drawable.btn_border_pink,
+                        R.drawable.btn_icon_sleep to R.drawable.btn_border_blue,
+                    ),
+                )
+            }
+
+            if (showMenu) {
+                Spacer(modifier = Modifier.height(STAGE_ROW_GAP))
+
+                GuideButtonRow(
+                    size = buttonSize,
+                    icons = listOf(
+                        R.drawable.btn_icon_mission to R.drawable.btn_border_yellow,
+                        R.drawable.btn_icon_slot_pick to R.drawable.btn_border_red,
+                        R.drawable.btn_icon_collection to R.drawable.btn_border_orange,
+                    ),
+                )
+            }
         }
     }
 }
@@ -269,12 +282,15 @@ private fun GuideStage(
 /**
  * 테두리로 가리키지 않는다. 각 단계에서 그 대상만 또렷하게 남고 나머지는 흐려지므로
  * 어디를 말하는지는 이미 드러나고, 작은 화면에서는 테두리가 자리만 잡아먹는다.
+ *
+ * 자리(Box)는 무대가 정해 준 대로 고정이고 그림만 커졌다 작아진다. 줄어드는 애니메이션이
+ * 끝나기 전에 줄이 올라와도 글자를 덮지 않도록 자리 밖은 잘라 낸다.
  */
 @Composable
 private fun GuideMong(
     modifier: Modifier = Modifier,
+    size: Dp,
     isDimmed: Boolean,
-    isAlone: Boolean,
 ) {
     val alpha = animateFloatAsState(
         targetValue = if (isDimmed) MONG_DIMMED_ALPHA else 1f,
@@ -282,21 +298,22 @@ private fun GuideMong(
     )
 
     // 줄이 올라오는 것과 같이 움직이도록 크기도 애니메이션으로 준다.
-    val ratio = animateFloatAsState(
-        targetValue = if (isAlone) MONG_RATIO_LARGE else MONG_RATIO_SMALL,
-        label = "guideMongRatio",
+    val mongSize = animateDpAsState(
+        targetValue = size,
+        label = "guideMongSize",
     )
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
+            .fillMaxWidth()
+            .clipToBounds()
             .alpha(alpha.value)
-            .padding(5.dp)
     ) {
         Mong(
             isPng = true,
             mong = MongResourceCode.CH100,
-            ratio = ratio.value,
+            ratio = mongSize.value / MONG_BASE_SIZE,
         )
     }
 }
@@ -304,7 +321,7 @@ private fun GuideMong(
 @Composable
 private fun GuideButtonRow(
     modifier: Modifier = Modifier,
-    size: Int,
+    size: Dp,
     icons: List<Pair<Int, Int>>,
 ) {
     Row(
@@ -314,14 +331,14 @@ private fun GuideButtonRow(
     ) {
         icons.forEachIndexed { index, (icon, border) ->
             if (index > 0) {
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(STAGE_ROW_GAP))
             }
 
             // 가이드용 그림이라 눌러도 아무 일도 하지 않는다.
             CircleImageButton(
                 icon = icon,
                 border = border,
-                size = size,
+                size = size.value.toInt(),
                 onClick = {},
             )
         }

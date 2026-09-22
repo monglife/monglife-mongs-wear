@@ -27,6 +27,9 @@ internal fun PayPointBox(
     modifier: Modifier = Modifier,
     height: Int = 30,
     width: Int = 80,
+    fontSize: Int = 14,
+    iconSize: Int = 12,
+    horizontalPadding: Int = 10,
     payPoint: Int = 0,
 ) {
     Box(
@@ -47,7 +50,7 @@ internal fun PayPointBox(
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.zIndex(1.2f).padding(start = 10.dp, end = 10.dp)
+            modifier = Modifier.zIndex(1.2f).padding(start = horizontalPadding.dp, end = horizontalPadding.dp)
         ) {
             Box(
                 contentAlignment = Alignment.Center,
@@ -57,8 +60,8 @@ internal fun PayPointBox(
                     painter = painterResource(R.drawable.point_icon_pay),
                     contentDescription = null,
                     modifier = Modifier
-                        .height(12.dp)
-                        .width(12.dp),
+                        .height(iconSize.dp)
+                        .width(iconSize.dp),
                     contentScale = ContentScale.FillBounds,
                 )
             }
@@ -68,7 +71,7 @@ internal fun PayPointBox(
                 textAlign = TextAlign.Center,
                 fontFamily = DAL_MU_RI,
                 fontWeight = FontWeight.Light,
-                fontSize = 14.sp,
+                fontSize = fontSize.sp,
                 color = MongsNavy,
                 maxLines = 1,
                 modifier = Modifier.weight(0.8f)

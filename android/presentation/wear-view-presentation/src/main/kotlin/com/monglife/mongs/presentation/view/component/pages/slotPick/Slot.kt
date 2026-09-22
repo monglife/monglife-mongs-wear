@@ -36,7 +36,6 @@ import com.mongs.presentation.view.wear.R
 internal fun Slot(
     modifier: Modifier = Modifier,
     currentMongId: Long?,
-    slotNumber: Int,
     mongVo: MongVo,
     detailDialogOpen: () -> Unit,
     graduateDialogOpen: () -> Unit,
@@ -56,9 +55,8 @@ internal fun Slot(
                 .fillMaxWidth()
                 .weight(0.2f)
         ) {
-            // 이름은 상세 모달의 '정보' 탭으로 옮겼다. 여기는 몇 번째 슬롯인지만 알려 준다.
             Text(
-                text = "${slotNumber}번 슬롯",
+                text = mongVo.name,
                 textAlign = TextAlign.Center,
                 fontFamily = DAL_MU_RI,
                 fontWeight = FontWeight.Light,

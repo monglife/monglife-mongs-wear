@@ -54,7 +54,6 @@ internal fun SlotDetailDialog(
     modifier: Modifier = Modifier,
     initTabIndex: Int = 0,
     mongId: Long = 0L,
-    name: String = "",
     statusCode: MongStatusCode,
     stateCode: MongStateCode,
     isSleep: Boolean,
@@ -81,17 +80,6 @@ internal fun SlotDetailDialog(
                 onClick = onClick,
             )
     ) {
-        // 페이 포인트는 탭과 무관하게 항상 보여야 해서 카드 밖 화면 상단에 둔다.
-        // 240dp 원형 화면에서 카드 윗변이 y=55 라 18dp 자리는 잘리지 않는다.
-        PayPointBox(
-            width = 110,
-            payPoint = payPoint,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 18.dp)
-                .zIndex(1f),
-        )
-
         Box {
             Box(
                 modifier = Modifier
@@ -147,9 +135,9 @@ internal fun SlotDetailDialog(
                     0 -> InfoTabContent(
                         modifier = Modifier.matchParentSize(),
                         mongId = mongId,
-                        name = name,
                         born = born,
                         weight = weight,
+                        payPoint = payPoint,
                     )
                     1 -> StatusTabContent(
                         modifier = Modifier.matchParentSize(),
@@ -174,9 +162,9 @@ internal fun SlotDetailDialog(
 private fun InfoTabContent(
     modifier: Modifier = Modifier,
     mongId: Long,
-    name: String,
     born: LocalDateTime,
     weight: Double,
+    payPoint: Int,
 ) {
     val age = remember { mutableStateOf("00시간 00분 00초") }
     LaunchedEffect(mongId) {
@@ -195,6 +183,7 @@ private fun InfoTabContent(
         verticalArrangement = Arrangement.Center,
         modifier = modifier.padding(8.dp)
     ) {
+        // 이름은 슬롯 목록에 다시 나오므로 여기서는 빼고, 그 자리를 페이 포인트가 쓴다.
         Row (
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
@@ -202,14 +191,13 @@ private fun InfoTabContent(
                 .width(SLOT_DETAIL_WIDTH.dp)
                 .weight(0.2f)
         ) {
-            Text(
-                text = name,
-                textAlign = TextAlign.Center,
-                fontFamily = DAL_MU_RI,
-                fontWeight = FontWeight.Light,
-                fontSize = 14.sp,
-                maxLines = 1,
-                color = Color.Black,
+            PayPointBox(
+                width = 80,
+                height = 22,
+                fontSize = 13,
+                iconSize = 11,
+                horizontalPadding = 8,
+                payPoint = payPoint,
             )
         }
         Row (
