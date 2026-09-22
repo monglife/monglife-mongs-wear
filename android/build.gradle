@@ -1,0 +1,86 @@
+buildscript {
+    ext {
+        namespace               = "com.mongs"
+        javaVersion             = JavaVersion.VERSION_17
+
+        // SDK 레벨의 단일 원본. 모듈별 build.gradle 에 리터럴을 다시 쓰지 마라 -
+        // 라이브러리와 앱의 compileSdk 가 어긋나면 매니페스트 병합에서 깨진다.
+        // minSdk 33 = Wear OS 4. 갤럭시 워치 4 는 최종 업데이트가 Wear OS 5(API 34) 라
+        // 하한 안에 들어오고, 그보다 오래된 Wear OS 3 기기만 제외된다.
+        androidCompileSdk       = 37
+        androidMinSdk           = 33
+        androidTargetSdk        = 37
+        hiltWorkerVersion       = "1.4.0"
+        workerVersion           = "2.10.3"
+        healthServicesVersion   = "1.0.0"
+        lifecycleVersion        = "2.9.2"
+        firebaseVersion         = "33.8.0"
+        fcmVersion              = "24.1.2"
+        gmsLocationVersion      = "21.3.0"
+        jupiterVersion          = "4.13.2"
+        mockitoVersion          = "5.19.0"
+        mockitoKotlinVersion    = "6.0.0"
+    }
+}
+
+// 플러그인 버전은 gradle/libs.versions.toml 이 단일 원본이다.
+// 여기에 id "..." version "${someExtKey}" 형태를 다시 쓰지 마라 - lint 의 GroovyGradleVisitor 가
+// 소스 문자열을 그대로 잘라 읽어 보간을 해석하지 못하고, 버전이 7.1.0 미만이라며
+// GradlePluginVersion(ERROR) 을 오검출한다.
+plugins {
+    alias(libs.plugins.android.library)     apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.jvm)          apply false
+    alias(libs.plugins.kotlin.compose)      apply false
+    alias(libs.plugins.ksp)                 apply false
+    alias(libs.plugins.hilt.android)        apply false
+    alias(libs.plugins.google.services)     apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
+}
+
+// hilt 만 플러그인 ID 와 라이브러리 좌표를 함께 쓴다. 버전 리터럴을 두 곳에 두지 않도록
+// 카탈로그에서 읽어 ext 에 심는다. 하위 모듈은 루트 스크립트 평가 이후에 구성되므로
+// 기존 rootProject.ext.hiltVersion 참조(core/*, data/*, presentation/*, app/*)는 그대로 동작한다.
+ext.hiltVersion = libs.versions.hilt.get()
+
+subprojects {
+    // 모든 Android 모듈에 공통으로 걸리는 설정 - SDK 레벨과 환경 프로파일(flavor).
+    //
+    // core:data-core 가 flavor 를 가지면 이를 의존하는 data/*, presentation/*, app/* 도
+    // 같은 dimension 을 선언해야 variant resolution 이 성립한다. Android 플러그인 적용
+    // 지점이 app/*(각 모듈), data/* 와 presentation/*(각 그룹의 subprojects), core/*(각 모듈)
+    // 로 흩어져 있어 여기서 plugins.withId 로 한 번에 거는 게 유일하게 중복 없는 방법이다.
+    // compileSdk/minSdk 도 같은 이유로 여기서 건다 - 모듈마다 리터럴을 두면 하나만
+    // 어긋나도 매니페스트 병합/AAR 메타데이터 검사에서 깨진다.
+    //
+    // flavor 를 여기서 선언한 순서가 IDE 기본 배리언트를 정한다(devDebug).
+    // applicationIdSuffix 는 붙이지 마라 - google-services.json 의 package_name 이
+    // com.mongs.wear 단일이라 processXGoogleServices 가 실패한다.
+    plugins.withId("com.android.base") {
+        android {
+            compileSdk = rootProject.ext.androidCompileSdk
+
+            defaultConfig {
+                minSdk = rootProject.ext.androidMinSdk
+            }
+
+            flavorDimensions = ["profile"]
+            productFlavors {
+                dev { dimension "profile" }
+                stg { dimension "profile" }
+                prd { dimension "profile" }
+            }
+        }
+    }
+
+    // targetSdk 는 애플리케이션 모듈 전용 DSL 이다. AGP 8+ 라이브러리의 defaultConfig 에는
+    // targetSdk 가 없으므로(테스트용 testOptions.targetSdk 만 있다) 위의 com.android.base
+    // 훅에 같이 넣으면 data/*, presentation/*, core/* 에서 실패한다.
+    plugins.withId("com.android.application") {
+        android {
+            defaultConfig {
+                targetSdk = rootProject.ext.androidTargetSdk
+            }
+        }
+    }
+}

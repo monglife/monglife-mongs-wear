@@ -1,0 +1,61 @@
+{
+  "identifier": "CF39A758-9192-4F52-93C7-F113150A9222",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "500",
+      "familyShareable": false,
+      "internalID": "EF87F4BA-D8E9-4C2A-814D-9C238A73F17C",
+      "localizations": [
+        {
+          "description": "별가루 5개",
+          "displayName": "스타포인트 x 5",
+          "locale": "ko_KR"
+        }
+      ],
+      "productID": "PRDT000",
+      "referenceName": "스타포인트 x 5",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "1000",
+      "familyShareable": false,
+      "internalID": "986C03A9-F4C2-41F9-9AE6-AC0D4750C83D",
+      "localizations": [
+        {
+          "description": "별가루 10개",
+          "displayName": "스타포인트 x 10",
+          "locale": "ko_KR"
+        }
+      ],
+      "productID": "PRDT001",
+      "referenceName": "스타포인트 x 10",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "1900",
+      "familyShareable": false,
+      "internalID": "EF743A82-ED1F-411B-9C45-1DF0E3396582",
+      "localizations": [
+        {
+          "description": "별가루 20개",
+          "displayName": "스타포인트 x 20",
+          "locale": "ko_KR"
+        }
+      ],
+      "productID": "PRDT002",
+      "referenceName": "스타포인트 x 20",
+      "type": "Consumable"
+    }
+  ],
+  "settings": {
+    "_applicationInternalID": "0",
+    "_developerTeamID": "",
+    "_lastSynchronizedDate": 0
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 4,
+    "minor": 0
+  }
+}

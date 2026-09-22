@@ -1,0 +1,40 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+buildscript {
+    ext {
+        billingClientVersion = "9.1.0"
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: "dagger.hilt.android.plugin"
+
+android {
+    namespace "${rootProject.ext.namespace}.billing.core"
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.javaVersion
+        targetCompatibility rootProject.ext.javaVersion
+    }
+
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget(rootProject.ext.javaVersion.toString())
+    }
+}
+
+dependencies {
+    // core layer
+    api project(":core:common-core")
+
+    // dagger-hilt
+    implementation group: "javax.inject", name: "javax.inject", version: "1"
+    implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
+    ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
+
+    // billing
+    implementation "com.android.billingclient:billing:${this.ext.billingClientVersion}"
+}

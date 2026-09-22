@@ -1,0 +1,229 @@
+package com.monglife.mongs.presentation.view.layout
+
+import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.Modifier
+import androidx.navigation.navigation
+import androidx.wear.compose.navigation.SwipeDismissableNavHost
+import androidx.wear.compose.navigation.composable
+import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import com.monglife.mongs.presentation.view.assets.RouterPath
+import com.monglife.mongs.presentation.view.pages.battle.BattleMatchView
+import com.monglife.mongs.presentation.view.pages.battle.BattleMenuView
+import com.monglife.mongs.presentation.view.pages.charge.ChargeStarPointView
+import com.monglife.mongs.presentation.view.pages.collection.CollectionMapView
+import com.monglife.mongs.presentation.view.pages.collection.CollectionMenuView
+import com.monglife.mongs.presentation.view.pages.collection.CollectionMongView
+import com.monglife.mongs.presentation.view.pages.exchange.ExchangeMenuView
+import com.monglife.mongs.presentation.view.pages.exchange.ExchangeStarPointView
+import com.monglife.mongs.presentation.view.pages.exchange.ExchangeStepView
+import com.monglife.mongs.presentation.view.pages.feed.FeedFoodView
+import com.monglife.mongs.presentation.view.pages.feed.FeedMenuView
+import com.monglife.mongs.presentation.view.pages.feed.FeedSnackView
+import com.monglife.mongs.presentation.view.pages.feedback.FeedbackView
+import com.monglife.mongs.presentation.view.component.common.bar.LoadingBar
+import com.monglife.mongs.presentation.view.pages.guide.GuideView
+import com.monglife.mongs.presentation.view.pages.help.HelpView
+import com.monglife.mongs.presentation.view.pages.inventory.InventoryView
+import com.monglife.mongs.presentation.view.pages.main.MainView
+import com.monglife.mongs.presentation.view.pages.mission.MissionDetailView
+import com.monglife.mongs.presentation.view.pages.mission.MissionListView
+import com.monglife.mongs.presentation.view.pages.mission.MissionMenuView
+import com.monglife.mongs.presentation.view.pages.notice.NoticeView
+import com.monglife.mongs.presentation.view.pages.randomDraw.RandomDrawView
+import com.monglife.mongs.presentation.view.pages.searchMap.SearchMapView
+import com.monglife.mongs.presentation.view.pages.setting.SettingView
+import com.monglife.mongs.presentation.view.pages.slotPick.SlotPickView
+import com.monglife.mongs.presentation.view.pages.training.TrainingMenuView
+import com.monglife.mongs.presentation.view.pages.training.TrainingPlayView
+import com.monglife.mongs.presentation.view.utils.AlwaysOnScreen
+import com.monglife.mongs.presentation.viewmodel.pages.guide.GuideViewModel
+
+@Composable
+internal fun Router(
+    modifier: Modifier = Modifier,
+    guideViewModel: GuideViewModel = hiltViewModel(),
+) {
+    val navController = rememberSwipeDismissableNavController()
+
+    /**
+     * 최초 가이드 여부를 알기 전에는 NavHost 를 세우지 않는다.
+     * startDestination 은 한 번 정해지면 바꿀 수 없어, 메인을 먼저 띄웠다가
+     * 가이드로 밀어내면 메인이 한 번 번쩍이고 백스택에도 남는다.
+     */
+    val initGuideOpen = guideViewModel.initGuideOpen.collectAsStateWithLifecycle()
+
+    val startDestination = initGuideOpen.value?.let { guideOpen ->
+        if (guideOpen) RouterPath.Guide.route else RouterPath.Main.route
+    } ?: run {
+        LoadingBar()
+        return
+    }
+
+    SwipeDismissableNavHost(
+        navController = navController,
+        startDestination = startDestination,
+        modifier = modifier,
+        route = RouterPath.Root.route
+    ) {
+        // 배틀
+        navigation(
+            startDestination = RouterPath.BattleMenu.route,
+            route = RouterPath.BattleNested.route
+        ) {
+            composable(route = RouterPath.BattleMenu.route) {
+                AlwaysOnScreen {
+                    BattleMenuView(navController = navController)
+                }
+            }
+            composable(route = "${RouterPath.BattleMatch.route}/{matchId}/{playerId}") { backStackEntry ->
+                AlwaysOnScreen {
+                    BattleMatchView(
+                        navController = navController,
+                        matchId = backStackEntry.arguments?.getString("matchId")?.toLong(),
+                        playerId = backStackEntry.arguments?.getString("playerId"),
+                    )
+                }
+            }
+        }
+        // 충전
+        navigation(
+            startDestination = RouterPath.ChargeStarPoint.route,
+            route = RouterPath.ChargeNested.route
+        ) {
+            composable(route = RouterPath.ChargeStarPoint.route) {
+                ChargeStarPointView(navController = navController)
+            }
+        }
+        // 컬렉션
+        navigation(
+            startDestination = RouterPath.CollectionMenu.route,
+            route = RouterPath.CollectionNested.route,
+        ) {
+            composable(route = RouterPath.CollectionMenu.route) {
+                CollectionMenuView(navController = navController)
+            }
+            composable(route = RouterPath.CollectionMap.route) {
+                CollectionMapView(navController = navController)
+            }
+            composable(route = RouterPath.CollectionMong.route) {
+                CollectionMongView(navController = navController)
+            }
+        }
+        // 환전
+        navigation(
+            startDestination = RouterPath.ExchangeMenu.route,
+            route = RouterPath.ExchangeNested.route,
+        ) {
+            composable(route = RouterPath.ExchangeMenu.route) {
+                ExchangeMenuView(navController = navController)
+            }
+            composable(route = RouterPath.ExchangeStep.route) {
+                ExchangeStepView(navController = navController)
+            }
+            composable(route = RouterPath.ExchangeStarPoint.route) {
+                ExchangeStarPointView(navController = navController)
+            }
+        }
+        // 취식
+        navigation(
+            startDestination = RouterPath.FeedMenu.route,
+            route = RouterPath.FeedNested.route,
+        ) {
+            composable(route = RouterPath.FeedMenu.route) {
+                FeedMenuView(navController = navController)
+            }
+            composable(route = RouterPath.FeedFood.route) {
+                FeedFoodView(navController = navController)
+            }
+            composable(route = RouterPath.FeedSnack.route) {
+                FeedSnackView(navController = navController)
+            }
+        }
+        // 오류 신고
+        composable(route = RouterPath.Feedback.route) {
+            FeedbackView()
+        }
+        // 최초 진입 가이드
+        composable(route = RouterPath.Guide.route) {
+            GuideView(navController = navController)
+        }
+        // 도움말
+        composable(route = RouterPath.Help.route) {
+            HelpView(navController = navController)
+        }
+        // 인벤토리
+        composable(route = RouterPath.Inventory.route) {
+            InventoryView(navController = navController)
+        }
+        // 메인 페이지
+        composable(route = RouterPath.Main.route) {
+            AlwaysOnScreen {
+                MainView(navController = navController)
+            }
+        }
+        // 미션
+        navigation(
+            startDestination = RouterPath.MissionMenu.route,
+            route = RouterPath.MissionNested.route,
+        ) {
+            composable(route = RouterPath.MissionMenu.route) {
+                MissionMenuView(navController = navController)
+            }
+            composable(route = "${RouterPath.MissionList.route}/{cycleCode}") { backStackEntry ->
+                MissionListView(
+                    navController = navController,
+                    cycleCode = backStackEntry.arguments?.getString("cycleCode"),
+                )
+            }
+            composable(route = "${RouterPath.MissionDetail.route}/{accountMissionId}") { backStackEntry ->
+                MissionDetailView(
+                    navController = navController,
+                    accountMissionId = backStackEntry.arguments?.getString("accountMissionId")?.toLong(),
+                )
+            }
+        }
+        // 공지사항
+        composable(route = RouterPath.Notice.route) {
+            NoticeView(navController = navController)
+        }
+        // 랜덤 뽑기
+        composable(route = RouterPath.RandomDraw.route) {
+            AlwaysOnScreen {
+                RandomDrawView(navController = navController)
+            }
+        }
+        // 맵 탐색
+        composable(route = RouterPath.SearchMap.route) {
+            AlwaysOnScreen {
+                SearchMapView(navController = navController)
+            }
+        }
+        // 환경 설정
+        composable(route = RouterPath.Setting.route) {
+            SettingView()
+        }
+        // 슬롯 선택
+        composable(route = RouterPath.SlotPick.route) {
+            SlotPickView(navController = navController)
+        }
+        // 훈련
+        navigation(
+            startDestination = RouterPath.TrainingMenu.route,
+            route = RouterPath.TrainingNested.route,
+        ) {
+            composable(route = RouterPath.TrainingMenu.route) {
+                TrainingMenuView(navController = navController)
+            }
+            composable(route = "${RouterPath.TrainingPlay.route}/{trainingCode}") { backStackEntry ->
+                AlwaysOnScreen {
+                    TrainingPlayView(
+                        navController = navController,
+                        trainingCode = backStackEntry.arguments?.getString("trainingCode"),
+                    )
+                }
+            }
+        }
+    }
+}

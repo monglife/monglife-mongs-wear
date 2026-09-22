@@ -1,0 +1,7 @@
+#include "Base.xcconfig"
+
+MONGS_PROFILE = prd
+MONGS_DISCOVERY_API_URL = https:/$()/product.common.monglife.cloud/api/
+MONGS_GATEWAY_API_URL = https:/$()/product.gateway.monglife.cloud/api/
+MONGS_MQTT_URL = tcp:/$()/product.mqtt.monglife.cloud:1883
+MONGS_MQTT_TOPIC = mongs-prd

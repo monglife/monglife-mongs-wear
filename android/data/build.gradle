@@ -1,0 +1,64 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+buildscript {
+    ext {
+        retrofitVersion   = "3.0.0"
+        dataStoreVersion  = "1.1.2"
+        roomVersion       = "2.8.4"
+    }
+}
+
+subprojects {
+    apply plugin: "com.android.library"
+    apply plugin: 'com.google.devtools.ksp'
+    apply plugin: "dagger.hilt.android.plugin"
+
+    android {
+        defaultConfig {
+            testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        }
+
+        compileOptions {
+            sourceCompatibility rootProject.ext.javaVersion
+            targetCompatibility rootProject.ext.javaVersion
+        }
+
+        testOptions {
+            // data/* 는 android.util.Log 를 직접 쓴다. 기본 android.jar 스텁은 호출마다
+            // RuntimeException("Stub!") 을 던져 JVM 단위 테스트가 아예 못 돈다.
+            // Robolectric 을 들이는 대신 스텁이 기본값(0/null/false)을 돌려주게 한다.
+            //
+            // 대가: 테스트에서 스텁 Android 호출이 조용히 기본값으로 지나간다. 단언은
+            // 프레임워크 호출이 아니라 우리 협력 객체(목)의 상호작용으로 세운다.
+            unitTests.returnDefaultValues = true
+        }
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.fromTarget(rootProject.ext.javaVersion.toString())
+        }
+    }
+
+    dependencies {
+        // core layer
+        implementation project(":core:data-core")
+
+        // dagger-hilt
+        implementation group: "javax.inject", name: "javax.inject", version: "1"
+        implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
+        ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
+
+        // livedata
+        implementation "androidx.lifecycle:lifecycle-runtime-ktx:${rootProject.ext.lifecycleVersion}"
+        implementation "androidx.lifecycle:lifecycle-livedata-ktx:${rootProject.ext.lifecycleVersion}"
+
+        // test
+        testImplementation "androidx.test:core:1.7.0"
+        testImplementation "junit:junit:${rootProject.ext.jupiterVersion}"
+        testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
+        testImplementation "org.mockito.kotlin:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
+        testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2"
+        testImplementation "com.squareup.okhttp3:mockwebserver:5.1.0"
+    }
+}

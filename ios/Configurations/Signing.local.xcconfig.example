@@ -1,0 +1,26 @@
+// 실기기 빌드용 개인 설정. 아래처럼 복사해서 쓴다:
+//
+//   cp Configurations/Signing.local.xcconfig.example Configurations/Signing.local.xcconfig
+//
+// 이 파일(.example)은 커밋하고, 복사본(Signing.local.xcconfig)은 gitignore 된다.
+
+// Xcode → Settings → Accounts 에서 Apple ID 로그인 후 팀 ID 를 확인해 채운다.
+// 터미널로도 확인 가능:  security find-identity -v -p codesigning
+// ("Apple Development: 이름 (XXXXXXXXXX)" 의 괄호 앞 10자리가 아니라,
+//  Xcode 의 팀 목록에 표시되는 Team ID 다. 무료 계정이면 Personal Team 의 ID.)
+DEVELOPMENT_TEAM = YOUR_TEAM_ID
+
+// 무료 Personal Team 은 이미 등록된 Bundle ID 를 다시 등록하지 못한다.
+// com.mongs.wear 등록이 거부되면 아래 주석을 풀어 개인용 ID 로 바꿔 테스트한다.
+// PRODUCT_BUNDLE_IDENTIFIER = com.mongs.wear.$(USER)
+
+// ─────────────────────────────────────────────────────────────────────
+// 무료 Personal Team 으로 실기기를 검증할 때
+//
+// Xcode 가 프로파일 생성을 거부한다:
+//   "Personal development teams ... do not support the Sign In with Apple
+//    and Push Notifications capabilities."
+//
+// 그 두 capability 를 뺀 entitlements 로 갈아끼우면 설치는 된다.
+// 대신 **Apple 로그인과 푸시는 실기기에서 검증할 수 없다** (걸음·MQTT 만 본다).
+// MONGS_ENTITLEMENTS = Apps/WearApp/MongsWear-FreeTeam.entitlements

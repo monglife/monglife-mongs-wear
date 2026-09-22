@@ -1,0 +1,78 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+buildscript {
+    ext {
+        retrofitVersion   = "2.9.0"
+        dataStoreVersion  = "1.1.2"
+        mqttVersion       = "4.4.1"
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: "dagger.hilt.android.plugin"
+
+android {
+    namespace "${rootProject.ext.namespace}.data.core"
+
+    defaultConfig {
+        // R8 이 Gson/Retrofit/MQTT 리플렉션 대상까지 지우지 않도록 앱 모듈로 전파되는 keep 룰
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.javaVersion
+        targetCompatibility rootProject.ext.javaVersion
+    }
+
+    // 환경별 설정은 configs 서브모듈에서 flavor 소스셋으로 직접 읽는다. 복사하지 않는다.
+    // flavor 선언과 SDK 레벨은 루트 build.gradle 의 subprojects 블록이 담당한다.
+    // 세 파일의 키 집합은 반드시 같아야 한다 - R 클래스가 배리언트별로 생성되므로
+    // 한 환경에만 있는 키는 다른 환경에서 unresolved reference 가 된다.
+    sourceSets {
+        dev.res.srcDir "$rootDir/configs/core/data-core/dev"
+        stg.res.srcDir "$rootDir/configs/core/data-core/stg"
+        prd.res.srcDir "$rootDir/configs/core/data-core/prd"
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget(rootProject.ext.javaVersion.toString())
+    }
+}
+
+dependencies {
+    // core layer
+    api project(":core:common-core")
+
+    // domain layer
+    implementation project(":domain:auth-domain")
+
+    // gson
+    api 'com.google.code.gson:gson:2.13.1'
+
+    // retrofit2 & coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
+    implementation 'com.squareup.okio:okio:3.16.0'
+    implementation "com.squareup.retrofit2:retrofit:${this.ext.retrofitVersion}"
+    implementation "com.squareup.retrofit2:converter-gson:${this.ext.retrofitVersion}"
+
+    implementation "androidx.datastore:datastore-preferences:${this.ext.dataStoreVersion}"
+    api "androidx.datastore:datastore-preferences-core:${this.ext.dataStoreVersion}"
+
+    // mqtt
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    api "com.github.hannesa2:paho.mqtt.android:${this.ext.mqttVersion}"
+
+    // dagger-hilt
+    implementation group: "javax.inject", name: "javax.inject", version: "1"
+    implementation "com.google.dagger:hilt-android:${rootProject.ext.hiltVersion}"
+    ksp "com.google.dagger:hilt-compiler:${rootProject.ext.hiltVersion}"
+
+    // test
+    testImplementation "junit:junit:${rootProject.ext.jupiterVersion}"
+    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2"
+}

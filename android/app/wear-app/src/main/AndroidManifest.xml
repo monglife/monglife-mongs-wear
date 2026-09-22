@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <application
+        android:enableOnBackInvokedCallback="true"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:name="com.monglife.mongs.app.activity.MainApplication"
+        android:theme="@android:style/Theme.DeviceDefault"
+        android:networkSecurityConfig="@xml/network_security_config">
+        <uses-library android:name="com.google.android.wearable" android:required="true" />
+        <meta-data android:name="com.google.android.wearable.standalone" android:value="true" />
+
+        <activity
+            android:name="com.monglife.mongs.app.activity.MainActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.DeviceDefault"
+            android:taskAffinity="">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+            <!--
+              emoji2 는 androidx.credentials → appcompat 으로 딸려 들어올 뿐 이 앱이 쓰지 않는다.
+              MainActivity 는 ComponentActivity 이고 EmojiCompat 직접 호출도 없으며, Compose 텍스트는
+              EmojiCompat.isConfigured() 를 먼저 확인한다. 그런데 초기화는 프로세스가 뜰 때마다 돈다.
+
+              StepPassiveListenerService 바인드는 Health Services 가 준 5초 안에 끝나야 하고,
+              넘기면 등록이 영구 제거되어 걸음이 통째로 유실된다. 그 예산에서 폰트 로딩을 뺀다.
+            -->
+            <meta-data
+                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
+        <service
+            android:name="com.monglife.mongs.app.service.NotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+</manifest>
